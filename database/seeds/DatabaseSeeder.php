@@ -7,7 +7,7 @@ use App\Section;
 use App\Allergen;
 use App\Product;
 use Illuminate\Support\Facades\Hash;
-//use DB;
+use Illuminate\Support\Facades\Schema;
 
 class DatabaseSeeder extends Seeder
 {
@@ -18,7 +18,7 @@ class DatabaseSeeder extends Seeder
      */
     public function run()
     {
-        DB::statement('SET FOREIGN_KEY_CHECKS = 0');
+        Schema::disableForeignKeyConstraints();
 
         DB::table('users')->delete();
         $users = array(
@@ -50,20 +50,20 @@ class DatabaseSeeder extends Seeder
 
         DB::table('allergens')->delete();
         $allergens = array(
-            ['name' => 'Gluten', 'image' => 'alergenos/gluten.png'],
-            ['name' => 'Frutos secos', 'image' => 'alergenos/frutos-secos.png'],
-            ['name' => 'Crustáceos', 'image' => 'alergenos/crustaceos.png'],
-            ['name' => 'Pescados', 'image' => 'alergenos/pescados.png'],
-            ['name' => 'Lácteos', 'image' => 'alergenos/lacteos.png'],
-            ['name' => 'Moluscos', 'image' => 'alergenos/moluscos.png'],
-            ['name' => 'Huevos', 'image' => 'alergenos/huevos.png'],
-            ['name' => 'Cacahuetes', 'image' => 'alergenos/cacahuetes.png'],
-            ['name' => 'Soja', 'image' => 'alergenos/soja.png'],
-            ['name' => 'Apio', 'image' => 'alergenos/apio.png'],
-            ['name' => 'Mostaza', 'image' => 'alergenos/mostaza.png'],
-            ['name' => 'Sésamo', 'image' => 'alergenos/sesamo.png'],
-            ['name' => 'Altramuz', 'image' => 'alergenos/altramuz.png'],
-            ['name' => 'Sulfitos', 'image' => 'alergenos/sulfitos.png'],
+            ['name' => 'Gluten', 'image' => 'alergenos/gluten.svg'],
+            ['name' => 'Frutos secos', 'image' => 'alergenos/frutos-secos.svg'],
+            ['name' => 'Crustáceos', 'image' => 'alergenos/crustaceos.svg'],
+            ['name' => 'Pescados', 'image' => 'alergenos/pescados.svg'],
+            ['name' => 'Lácteos', 'image' => 'alergenos/lacteos.svg'],
+            ['name' => 'Moluscos', 'image' => 'alergenos/moluscos.svg'],
+            ['name' => 'Huevos', 'image' => 'alergenos/huevos.svg'],
+            ['name' => 'Cacahuetes', 'image' => 'alergenos/cacahuetes.svg'],
+            ['name' => 'Soja', 'image' => 'alergenos/soja.svg'],
+            ['name' => 'Apio', 'image' => 'alergenos/apio.svg'],
+            ['name' => 'Mostaza', 'image' => 'alergenos/mostaza.svg'],
+            ['name' => 'Sésamo', 'image' => 'alergenos/sesamo.svg'],
+            ['name' => 'Altramuz', 'image' => 'alergenos/altramuz.svg'],
+            ['name' => 'Sulfitos', 'image' => 'alergenos/sulfitos.svg'],
         );
         foreach ($allergens as $allergen) {
             Allergen::create($allergen);
@@ -80,5 +80,7 @@ class DatabaseSeeder extends Seeder
         foreach ($products as $product) {
             Product::create($product);
         }
+
+        Schema::enableForeignKeyConstraints();
     }
 }

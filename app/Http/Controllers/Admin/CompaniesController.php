@@ -23,7 +23,28 @@ class CompaniesController extends Controller
     {
         $this->authorize('view', $company);
 
-        return view('admin.companies.edit', compact('company'));
+        $templates = config('company_templates.templates', []);
+        $colorKeys = config('company_templates.color_keys', []);
+        $themeSettings = $company->resolvedThemeSettings();
+        $themePresets = config('company_templates.presets', []);
+        $previewUrl = route('see_menu', [
+            'companySlug' => $company->slug,
+            'studio_preview' => 1,
+        ]);
+
+        $templateLabels = collect($templates)->mapWithKeys(function ($meta, $key) {
+            return [$key => $meta['label'] ?? $key];
+        })->all();
+
+        return view('admin.companies.edit', compact(
+            'company',
+            'templates',
+            'colorKeys',
+            'themeSettings',
+            'themePresets',
+            'previewUrl',
+            'templateLabels'
+        ));
     }
 
     public function store(Request $request)
@@ -43,6 +64,7 @@ class CompaniesController extends Controller
         $company = Company::create([
             'name' => $request->get('name'),
             'slug' => $slug,
+            'template' => 'lumiere',
             'menu_type' => 1,
             'enabled' => true,
             'user_id' => $userId,
@@ -81,12 +103,20 @@ class CompaniesController extends Controller
             'instagram' => $request->get('instagram'),
             'comments' => $request->get('comments'),
             'schedule' => $request->get('schedule'),
-            'template' => $request->get('template'),
+            'template' => $request->get('template', $company->template ?: 'basic'),
+            'theme_settings' => $this->normalizeThemeSettings($request),
             'enabled' => $request->get('enabled') != null,
         ]);
         $company->save();
 
-        return redirect()->route('admin.companies.index')->with('flash', 'Negocio actualizado correctamente');
+        $step = $request->get('studio_step', 'identity');
+        if (!in_array($step, ['identity', 'contact', 'design', 'publish'], true)) {
+            $step = 'identity';
+        }
+
+        return redirect()
+            ->route('admin.companies.edit', ['company' => $company, 'step' => $step])
+            ->with('flash', 'Negocio actualizado correctamente');
     }
 
     public function delete(Request $request)
@@ -184,5 +214,20 @@ class CompaniesController extends Controller
         Cookie::queue(Cookie::forever('selected_company', $company->id));
 
         return redirect()->route('admin.dashboard');
+    }
+
+    protected function normalizeThemeSettings(Request $request): array
+    {
+        $keys = array_keys(config('company_templates.color_keys', []));
+        $normalized = [];
+
+        foreach ($keys as $key) {
+            $value = $request->input('theme_' . $key);
+            if ($value && preg_match('/^#[0-9A-Fa-f]{6}$/', $value)) {
+                $normalized[$key] = strtolower($value);
+            }
+        }
+
+        return $normalized;
     }
 }

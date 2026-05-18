@@ -17,6 +17,11 @@ yarn-error.log
 /webnu.es/
 /webnu.es.zip
 /_materio-temp/
+.php-runtime/
+.php-runtime74/
+composer.phar
+.vscode/
+/database/database.sqlite
 
 # Laravel storage & cache
 /storage/framework/cache/data/*

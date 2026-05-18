@@ -16,9 +16,10 @@
                         <li><a class="nav-link active" href="#home">Inicio</a></li>
                         <li><a class="nav-link" href="#feature">¿Qué es?</a></li>
                         <li><a class="nav-link" href="#screenshot">Ventajas</a></li>
+                        <li><a class="nav-link" href="#tvpik">TVPik</a></li>
                         <li><a class="nav-link" href="#pricing">Precios</a></li>
                         <li><a class="appao-btn" href="{{ route('login') }}">Mi cuenta</a></li>
-                        <li><a href="tel:681250275"><i class="fa fa-phone"></i> 681 250 275</a></li>
+                        <li><a class="nav-link" href="#contact"><i class="fa fa-phone"></i> Te llamamos</a></li>
                         <li><a target="_blank" rel="nofollow" href="https://www.instagram.com/webnucartadigital/"><i class="fab fa-instagram"></i></a></li>
                     </ul>
                 </div>

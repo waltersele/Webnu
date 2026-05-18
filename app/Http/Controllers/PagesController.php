@@ -6,6 +6,7 @@ use App\Company;
 use App\Services\MenuService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Validator;
 
 class PagesController extends Controller
 {
@@ -23,6 +24,7 @@ class PagesController extends Controller
         }
 
         if ($company->menu_type == 1) {
+            $company = $menuService->applyStudioPreview($company, request());
             $sections = $menuService->sectionsForCompany($company);
             $viewName = $menuService->themeViewName($company);
 
@@ -34,11 +36,20 @@ class PagesController extends Controller
 
     public function te_llamamos(Request $request)
     {
-        $data = $request->validate([
+        $validator = Validator::make($request->all(), [
             'email' => 'required|email',
             'name' => 'required|string|max:255',
             'phone' => 'required|string|max:50',
         ]);
+
+        if ($validator->fails()) {
+            return redirect()
+                ->to(url('/#contact'))
+                ->withErrors($validator)
+                ->withInput();
+        }
+
+        $data = $validator->validated();
 
         try {
             Mail::send('emails.message', $data, function ($message) use ($data) {
@@ -50,10 +61,14 @@ class PagesController extends Controller
         } catch (\Exception $e) {
             report($e);
 
-            return back()->with('te-llamamos-failure', 'Se ha producido un error al enviar el mensaje');
+            return redirect()
+                ->to(url('/#contact'))
+                ->with('te-llamamos-failure', 'Se ha producido un error al enviar el mensaje');
         }
 
-        return back()->with('te-llamamos-ok', 'El mensaje ha sido enviado correctamente.');
+        return redirect()
+            ->to(url('/#contact'))
+            ->with('te-llamamos-ok', 'El mensaje ha sido enviado correctamente. Te llamaremos en breve.');
     }
 
     public function table_reservation(Request $request)

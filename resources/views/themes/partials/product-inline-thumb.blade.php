@@ -1,14 +1,16 @@
+@php
+    $imagePath = $product->display_image ?? $product->image;
+@endphp
+
 @if ($product->video)
-    <a href="#" class="product-video-play-link" data-toggle="modal" data-target="#dishDetails{{ $product->id }}" title="Ver vídeo">
-        @if ($product->image)
-            <img class="img-responsive" src="{{ URL::to('/') . '/img/' . $product->image }}" alt="{{ $product->name }}">
-            <i class="fas fa-play-circle"></i>
+    <a href="#" class="product-video-play-link wn-card-media-link" data-toggle="modal" data-target="#wnDish{{ $product->id }}" title="Ver plato">
+        @if ($imagePath)
+            <img class="img-responsive" src="{{ asset('img/' . $imagePath) }}" alt="{{ $product->name }}">
+            <span class="wn-card-media-play"><i class="fas fa-play"></i></span>
         @else
-            <div class="product-video-placeholder">
-                <i class="fas fa-play-circle fa-3x"></i>
-            </div>
+            <span class="wn-modern-card__placeholder wn-modern-card__placeholder--featured"><i class="fas fa-play"></i></span>
         @endif
     </a>
-@elseif ($product->image)
-    <img class="img-responsive" src="{{ URL::to('/') . '/img/' . $product->image }}" alt="{{ $product->name }}">
+@elseif ($imagePath)
+    <img class="img-responsive" src="{{ asset('img/' . $imagePath) }}" alt="{{ $product->name }}">
 @endif

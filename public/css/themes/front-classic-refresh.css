@@ -1,0 +1,235 @@
+/**
+ * Plantillas clásicas renovadas (basic, pasión, oriental, visual)
+ */
+
+body.wn-classic-menu,
+body.wn-classic-menu * {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
+  letter-spacing: normal !important;
+}
+
+body.wn-classic-menu {
+  background: var(--wn-bg, #f4f6f9) !important;
+  color: var(--wn-text, #1e293b);
+  padding-bottom: 5.5rem;
+}
+
+/* Cabecera */
+.menu-header {
+  background-size: cover !important;
+  background-position: center !important;
+}
+
+.menu-header .menu-overlay-header {
+  background: linear-gradient(
+    180deg,
+    rgba(0, 0, 0, 0.35) 0%,
+    rgba(0, 0, 0, 0.72) 100%
+  ) !important;
+}
+
+.menu-logo-box {
+  padding: 1.25rem 1rem 0.5rem !important;
+}
+
+.menu-logo-img,
+.menu-header .menu-logo-img {
+  max-height: 72px !important;
+  width: auto !important;
+  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.35));
+}
+
+.menu-header-info .btn-warning,
+.menu-header-info .linkToInfo {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.14) !important;
+  border: 1px solid rgba(255, 255, 255, 0.45) !important;
+  color: #fff !important;
+  font-size: 0.8125rem !important;
+  font-weight: 600 !important;
+  border-radius: 999px !important;
+  padding: 0.55rem 1.15rem !important;
+  margin-bottom: 1rem !important;
+  box-shadow: none !important;
+}
+
+.menu-header-info .chef {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  opacity: 0.85;
+}
+
+/* Navegación — sin Slick roto */
+#sticker {
+  background: var(--wn-surface, #fff) !important;
+  padding: 0.5rem 0 !important;
+  z-index: 100;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+}
+
+.menu-sections,
+.menu-sections.slick-slider {
+  display: flex !important;
+  flex-wrap: nowrap !important;
+  overflow-x: auto !important;
+  margin: 0 !important;
+  padding: 0.35rem 0.75rem !important;
+  width: 100% !important;
+  gap: 0.45rem;
+  -webkit-overflow-scrolling: touch;
+}
+
+.menu-sections .slick-list,
+.menu-sections .slick-track {
+  display: flex !important;
+  width: auto !important;
+  transform: none !important;
+}
+
+.menu-sections-item,
+.menu-sections .slick-slide {
+  width: auto !important;
+  float: none !important;
+  height: auto !important;
+}
+
+.menu-sections-item {
+  flex: 0 0 auto !important;
+  min-width: 0 !important;
+  background: var(--wn-bg, #f1f5f9) !important;
+  border: 1px solid transparent !important;
+  border-radius: 999px !important;
+  padding: 0.45rem 0.95rem !important;
+  margin: 0 !important;
+  box-shadow: none !important;
+}
+
+.menu-sections-item-content {
+  font-size: 0.8125rem !important;
+  font-weight: 600 !important;
+  color: var(--wn-text-muted, #64748b) !important;
+  margin: 0 !important;
+  white-space: nowrap;
+  max-width: 9rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.menu-sections-item a {
+  text-decoration: none !important;
+}
+
+/* Contenido */
+.main-menu {
+  padding: 0.75rem 0.85rem 1rem;
+}
+
+.menu-dishes-section {
+  margin-bottom: 1.5rem;
+}
+
+.menu-dishes-title {
+  font-size: 1.125rem !important;
+  font-weight: 700 !important;
+  color: var(--wn-text, #0f172a) !important;
+  text-align: left !important;
+  margin: 0 0 0.75rem 0.15rem !important;
+  text-transform: none !important;
+}
+
+.menu-dishes-block {
+  background: var(--wn-surface, #fff) !important;
+  border-radius: 14px !important;
+  overflow: hidden;
+  box-shadow: 0 2px 16px rgba(15, 23, 42, 0.06);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.menu-dishes-item {
+  padding: 0.9rem 1rem !important;
+  margin: 0 !important;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06) !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+}
+
+.menu-dishes-item:last-child {
+  border-bottom: none !important;
+}
+
+.menu-dishes-item h3 {
+  font-size: 1rem !important;
+  font-weight: 600 !important;
+  margin: 0 0 0.2rem !important;
+  color: var(--wn-text, #0f172a) !important;
+}
+
+.menu-dishes-item-desc p {
+  font-size: 0.8125rem !important;
+  color: var(--wn-text-muted, #64748b) !important;
+  margin: 0 !important;
+  text-transform: none !important;
+  line-height: 1.45;
+}
+
+.menu-dishes-item-price,
+.menu-dishes-item-price span {
+  font-size: 0.875rem !important;
+  font-weight: 700 !important;
+  color: var(--wn-primary, #0074d9) !important;
+}
+
+.menu-dishes-item .webnu-product-badge {
+  font-size: 0.6rem;
+  vertical-align: middle;
+}
+
+#moreDetails,
+.details-dish {
+  display: none !important;
+}
+
+.menu-dishes-item hr.divider {
+  display: none;
+}
+
+/* Footer */
+.footer {
+  background: var(--wn-surface, #fff);
+  padding: 1.5rem 1rem 1rem;
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.footer img {
+  max-height: 48px !important;
+}
+
+/* Barra inferior */
+body.wn-classic-menu .fixed-bottom-bar {
+  background: rgba(255, 255, 255, 0.97) !important;
+  box-shadow: 0 -6px 24px rgba(0, 0, 0, 0.1) !important;
+  border-top: 1px solid rgba(0, 0, 0, 0.06) !important;
+  padding: 0.65rem 0.75rem !important;
+}
+
+body.wn-classic-menu .fixed-bottom-bar .btn {
+  font-size: 0.875rem !important;
+  font-weight: 600 !important;
+  border-radius: 12px !important;
+  padding: 0.65rem !important;
+  border: none !important;
+}
+
+body.wn-classic-menu .fixed-bottom-bar .btn:not(.whatsapp-btn) {
+  background: var(--wn-primary, #0074d9) !important;
+  color: #fff !important;
+}
+
+body.wn-classic-menu .whatsapp-btn {
+  background: #25d366 !important;
+  color: #fff !important;
+}

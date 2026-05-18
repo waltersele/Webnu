@@ -1,6 +1,8 @@
 @php
-    $imgUrl = $product->image ? URL::to('/') . '/img/' . $product->image : null;
-    $videoUrl = $product->video ? URL::to('/') . '/img/' . $product->video : null;
+    $imagePath = $product->display_image ?? $product->image;
+    $imgUrl = $imagePath ? URL::to('/') . '/img/' . $imagePath : null;
+    $videoPath = $product->display_video ?? $product->video;
+    $videoUrl = $videoPath ? URL::to('/') . '/img/' . $videoPath : null;
 @endphp
 
 @if ($imgUrl || $videoUrl)

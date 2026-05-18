@@ -30,32 +30,34 @@
   border: 1px solid #90caf9;
 }
 
-/*Generic Styles*/
-body{
+/* Generic layout */
+body {
     max-width: 600px;
     width: 100%;
-    margin:0 auto !important;
-
-}
-/*Fixed Bottom Bar*/
-
-.fixed-bottom-bar{
-    position:fixed;
-    bottom:0;
-    width:100%;
-    max-width: 600px;
-    padding:.5em;
-    background: white;
-    box-shadow: 0 0 2px black;
+    margin: 0 auto !important;
 }
 
-.fixed-bottom-bar a{
-    background: var(--mainback);
-    color:white !important;
+/* Barra inferior desactivada: contacto en el pie de carta */
+.fixed-bottom-bar {
+    display: none !important;
 }
 
-.whatsapp-btn{
-    background:#00E675 !important;
+.fixed-bottom-bar .btn {
+    font-family: 'Inter', sans-serif !important;
+    font-weight: 600 !important;
+    border-radius: 12px !important;
+}
+
+.fixed-bottom-bar a.btn:not(.whatsapp-btn) {
+    background: var(--wn-primary, #0074d9) !important;
+    border-color: var(--wn-primary, #0074d9) !important;
+    color: #fff !important;
+}
+
+.whatsapp-btn {
+    background: #25d366 !important;
+    border-color: #25d366 !important;
+    color: #fff !important;
 }
 
 /*Reservations modal*/

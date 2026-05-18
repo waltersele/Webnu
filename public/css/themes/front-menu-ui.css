@@ -1,0 +1,657 @@
+/**
+ * Webnu — UI carta: navegación fija, fichas, modal, alérgenos
+ */
+
+/* Sin barra inferior fija */
+.fixed-bottom-bar {
+  display: none !important;
+}
+
+.wn-menu-shell {
+  min-height: 100vh;
+  min-height: 100dvh;
+  padding-bottom: calc(1.25rem + env(safe-area-inset-bottom, 0px));
+}
+
+.wn-menu-main {
+  width: 100%;
+  max-width: 100%;
+  margin: 0 auto;
+  padding-left: max(1rem, env(safe-area-inset-left, 0px));
+  padding-right: max(1rem, env(safe-area-inset-right, 0px));
+  padding-bottom: 1.5rem;
+  box-sizing: border-box;
+  background: var(--wn-bg);
+  color: var(--wn-text);
+}
+
+/* Sin barra superior cuando hay hero (L'Essence, Bistro, etc.) */
+.wn-menu-shell--no-topbar {
+  --wn-header-height: 0px;
+}
+
+.wn-menu-shell--no-topbar .wn-menu-nav {
+  top: 0;
+  padding-top: max(0.5rem, env(safe-area-inset-top, 0px));
+}
+
+/* Cabecera compacta (solo si no hay hero) */
+.wn-modern-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  min-height: 52px;
+  padding: 0.5rem max(1rem, env(safe-area-inset-right, 0px)) 0.5rem max(1rem, env(safe-area-inset-left, 0px));
+  padding-top: max(0.5rem, env(safe-area-inset-top, 0px));
+  position: sticky;
+  top: 0;
+  z-index: 200;
+  background: var(--wn-surface);
+  border-bottom: 1px solid rgba(128, 128, 128, 0.12);
+}
+
+body.wn-theme-lumiere .wn-modern-header,
+body.wn-theme-oriental .wn-modern-header {
+  background: rgba(13, 17, 23, 0.96);
+  border-bottom-color: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+body.wn-theme-bistro .wn-modern-header,
+body.wn-theme-basic .wn-modern-header,
+body.wn-theme-visual .wn-modern-header {
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.wn-modern-header__brand {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  min-width: 0;
+  flex: 1;
+}
+
+.wn-modern-header__logo {
+  max-height: 36px;
+  width: auto;
+  display: block;
+}
+
+.wn-modern-header__name {
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--wn-text);
+  line-height: 1.25;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.wn-modern-header__info,
+.wn-floating-info {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 50%;
+  font-size: 1.125rem;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.1s;
+  background: var(--wn-bg);
+  color: var(--wn-primary);
+}
+
+body.wn-theme-lumiere .wn-modern-header__info,
+body.wn-theme-oriental .wn-modern-header__info,
+body.wn-theme-lumiere .wn-floating-info,
+body.wn-theme-oriental .wn-floating-info {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--wn-accent);
+}
+
+.wn-floating-info {
+  position: fixed;
+  top: max(0.75rem, env(safe-area-inset-top, 0px));
+  right: max(1rem, env(safe-area-inset-right, 0px));
+  z-index: 210;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+
+body.wn-theme-bistro .wn-floating-info,
+body.wn-theme-basic .wn-floating-info,
+body.wn-theme-visual .wn-floating-info {
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.12);
+}
+
+.wn-modern-header__info:active,
+.wn-floating-info:active {
+  transform: scale(0.94);
+}
+
+/* Navegación de categorías siempre visible al hacer scroll */
+.wn-menu-nav {
+  position: sticky;
+  top: var(--wn-header-height, 52px);
+  z-index: 180;
+  margin: 0;
+  padding: 0.5rem 0 0.65rem;
+  transition: box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.wn-menu-nav.is-pinned {
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+}
+
+.wn-theme-lumiere .wn-menu-nav.is-pinned,
+.wn-theme-oriental .wn-menu-nav.is-pinned {
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.35);
+}
+
+.wn-menu-nav__track {
+  display: flex;
+  gap: 0.45rem;
+  overflow-x: auto;
+  padding: 0 1rem 0.2rem;
+  scroll-snap-type: x proximity;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.wn-menu-nav__track::-webkit-scrollbar {
+  display: none;
+}
+
+.wn-menu-chip {
+  scroll-snap-align: start;
+}
+
+/* Tarjetas interactivas */
+.wn-modern-card--interactive {
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.wn-modern-card--interactive:active {
+  transform: scale(0.985);
+}
+
+.wn-modern-card__head {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+.wn-modern-card__head .wn-modern-card__title {
+  flex: 1;
+  margin: 0 0 0.25rem;
+  min-width: 0;
+}
+
+.wn-modern-card__detail-btn {
+  flex-shrink: 0;
+  width: 34px;
+  height: 34px;
+  border: none;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--wn-bg);
+  color: var(--wn-primary);
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.wn-theme-lumiere .wn-modern-card__detail-btn,
+.wn-theme-oriental .wn-modern-card__detail-btn {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--wn-accent);
+}
+
+.wn-card-media-link {
+  display: block;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  position: relative;
+}
+
+.wn-card-media-link img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.wn-card-media-play {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.25);
+  color: #fff;
+  font-size: 1.75rem;
+  pointer-events: none;
+}
+
+/* Alérgenos visibles */
+.wn-allergens {
+  list-style: none;
+  margin: 0.55rem 0 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.wn-allergens__item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.2rem 0.5rem 0.2rem 0.35rem;
+  border-radius: 999px;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  line-height: 1.2;
+  background: rgba(0, 0, 0, 0.05);
+  color: var(--wn-text-muted);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.wn-theme-lumiere .wn-allergens__item,
+.wn-theme-oriental .wn-allergens__item {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.12);
+  color: var(--wn-text-muted);
+}
+
+.wn-allergens__item img {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+/* Modal detalle plato */
+.wn-dish-modal .modal-dialog {
+  max-width: min(420px, calc(100vw - 1.5rem));
+  margin: 0.75rem auto;
+}
+
+.wn-dish-modal__content {
+  position: relative;
+  border: none;
+  border-radius: 20px;
+  overflow: hidden;
+  background: var(--wn-surface);
+  color: var(--wn-text);
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.28);
+}
+
+.wn-dish-modal__close {
+  position: absolute;
+  top: 0.65rem;
+  right: 0.65rem;
+  z-index: 6;
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.wn-dish-modal__hero {
+  position: relative;
+  min-height: 200px;
+  max-height: min(48vh, 320px);
+  background: #0f172a;
+  overflow: hidden;
+}
+
+.wn-dish-modal__hero img,
+.wn-dish-modal__hero .product-modal-video,
+.wn-dish-modal__hero .product-modal-media img {
+  width: 100%;
+  height: min(48vh, 320px);
+  object-fit: cover;
+  display: block;
+}
+
+.wn-dish-modal__hero .product-modal-media {
+  margin: 0;
+}
+
+.wn-dish-modal__hero-shade {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(0, 0, 0, 0.05) 0%,
+    rgba(0, 0, 0, 0.35) 45%,
+    rgba(0, 0, 0, 0.88) 100%
+  );
+  pointer-events: none;
+}
+
+.wn-dish-modal__hero-text {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 2;
+  padding: 1rem 1.1rem 1.05rem;
+  color: #fff;
+}
+
+.wn-dish-modal__hero-text .wn-dish-modal__title {
+  margin: 0 0 0.35rem;
+  font-size: 1.35rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  color: #fff !important;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.45);
+}
+
+.wn-theme-lumiere .wn-dish-modal__hero-text .wn-dish-modal__title,
+.wn-theme-pasion .wn-dish-modal__hero-text .wn-dish-modal__title {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-weight: 600;
+}
+
+.wn-dish-modal__hero-text .webnu-product-badge {
+  margin: 0;
+}
+
+.wn-dish-modal__body {
+  padding: 1.1rem 1.15rem 1.25rem;
+  background: var(--wn-surface);
+  color: var(--wn-text);
+}
+
+.wn-dish-modal__body--solo {
+  padding-top: 2.75rem;
+}
+
+.wn-dish-modal__title--solo {
+  margin: 0 0 0.5rem;
+  padding-right: 2rem;
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--wn-text);
+}
+
+.wn-dish-modal__desc {
+  margin: 0 0 0.75rem;
+  font-size: 0.9rem;
+  line-height: 1.55;
+  color: var(--wn-text-muted);
+}
+
+.wn-dish-modal__desc--muted {
+  font-style: italic;
+  opacity: 0.85;
+}
+
+.wn-dish-modal .wn-prices {
+  margin-bottom: 0.35rem;
+}
+
+.wn-dish-modal .wn-price-item {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--wn-accent);
+}
+
+.wn-theme-bistro .wn-dish-modal .wn-price-item,
+.wn-theme-basic .wn-dish-modal .wn-price-item,
+.wn-theme-visual .wn-dish-modal .wn-price-item {
+  color: var(--wn-primary);
+}
+
+.wn-dish-modal .wn-allergens__item {
+  background: var(--wn-bg);
+  border-color: rgba(128, 128, 128, 0.15);
+  color: var(--wn-text-muted);
+}
+
+body.wn-theme-lumiere .wn-dish-modal .wn-allergens__item,
+body.wn-theme-oriental .wn-dish-modal .wn-allergens__item {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+.modal-backdrop.show {
+  opacity: 0.65;
+}
+
+/* L'Essence — optimizado móvil (tarjetas horizontales como Bistro) */
+@media (max-width: 640px) {
+  .wn-theme-lumiere .wn-modern-card--stacked {
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+  }
+
+  .wn-theme-lumiere .wn-modern-card--stacked .wn-modern-card__media {
+    width: 34%;
+    min-width: 112px;
+    max-width: 140px;
+    aspect-ratio: 1;
+    flex-shrink: 0;
+  }
+
+  .wn-theme-lumiere .wn-modern-card--stacked .wn-modern-card__body {
+    flex: 1;
+    min-width: 0;
+    padding: 0.85rem 0.9rem;
+  }
+
+  .wn-theme-lumiere .wn-modern-card--stacked .wn-modern-card__desc {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .wn-theme-lumiere .wn-menu-hero {
+    min-height: 160px;
+    margin-left: max(1rem, env(safe-area-inset-left, 0px));
+    margin-right: max(1rem, env(safe-area-inset-right, 0px));
+  }
+
+  .wn-theme-lumiere .wn-menu-hero__overlay {
+    min-height: 160px;
+    padding: 1.25rem 1rem 1rem;
+  }
+
+  .wn-theme-lumiere .wn-menu-hero__title {
+    font-size: clamp(1.35rem, 5vw, 1.75rem);
+  }
+
+  .wn-theme-pasion .wn-modern-card--stacked .wn-modern-card__media {
+    aspect-ratio: 16 / 11;
+    max-height: 200px;
+  }
+}
+
+/* Footer acciones (sin barra fija) */
+.wn-modern-footer__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: center;
+  margin-bottom: 1rem;
+}
+
+.wn-footer-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.55rem 1rem;
+  border-radius: 999px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  background: var(--wn-bg);
+  color: var(--wn-text);
+  text-decoration: none !important;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.1s;
+}
+
+.wn-footer-action--whatsapp {
+  background: #25d366;
+  border-color: #25d366;
+  color: #fff !important;
+}
+
+.wn-theme-lumiere .wn-footer-action:not(.wn-footer-action--whatsapp),
+.wn-theme-oriental .wn-footer-action:not(.wn-footer-action--whatsapp) {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.12);
+  color: var(--wn-text);
+}
+
+.wn-modern-footer__about {
+  max-width: 36ch;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.wn-menu-alert {
+  border-radius: 12px;
+  font-size: 0.875rem;
+}
+
+/* Hero y spotlight alineados al viewport */
+.wn-menu-hero,
+.wn-menu-spotlight {
+  margin-left: max(1rem, env(safe-area-inset-left, 0px));
+  margin-right: max(1rem, env(safe-area-inset-right, 0px));
+}
+
+.wn-menu-spotlight__media img {
+  width: 100%;
+  height: min(240px, 42vw);
+  object-fit: cover;
+}
+
+/* Títulos de sección — legibles en todos los temas */
+.wn-menu-section__title {
+  color: var(--wn-text) !important;
+  opacity: 1 !important;
+}
+
+body.wn-theme-lumiere .wn-menu-section__title,
+body.wn-theme-oriental .wn-menu-section__title {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
+  font-weight: 700 !important;
+  font-size: 1.125rem !important;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--wn-text) !important;
+  margin: 1rem 0 0.75rem !important;
+  padding: 0 0.15rem 0.5rem;
+  border-bottom: 2px solid var(--wn-primary);
+}
+
+body.wn-theme-lumiere .wn-menu-nav,
+body.wn-theme-oriental .wn-menu-nav {
+  background: var(--wn-bg);
+}
+
+/* Reel en tarjeta (vídeo en bucle) */
+.wn-card-reel {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 100%;
+  background: #0a0a0a;
+  overflow: hidden;
+}
+
+.wn-modern-card--stacked .wn-card-reel {
+  aspect-ratio: 4 / 5;
+  min-height: 220px;
+}
+
+.wn-modern-card--horizontal .wn-card-reel {
+  min-height: 108px;
+}
+
+.wn-card-reel__video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  vertical-align: top;
+}
+
+.wn-card-reel__badge {
+  position: absolute;
+  top: 0.55rem;
+  left: 0.55rem;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.625rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
+  pointer-events: none;
+}
+
+.wn-card-reel__open {
+  position: absolute;
+  right: 0.55rem;
+  bottom: 0.55rem;
+  z-index: 3;
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
+  font-size: 0.85rem;
+  cursor: pointer;
+  backdrop-filter: blur(4px);
+}
+
+.wn-card-reel__open:active {
+  transform: scale(0.94);
+}
+
+/* Modal: vídeo reel a pantalla completa en detalle */
+.wn-dish-modal__hero .product-modal-video {
+  width: 100%;
+  max-height: min(55vh, 400px);
+  object-fit: cover;
+  background: #000;
+}

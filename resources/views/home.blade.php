@@ -3,17 +3,6 @@
 @section('content')
 <section class="hero-area" id="home">
     <div class="container">
-        @if($errors->any())
-            <div class="form-group">
-                @foreach($errors->all() as $error)
-                    <div class="alert alert-danger">
-                        <ul>
-                            <li> {{ $error }} </li>
-                        </ul>
-                    </div>
-                @endforeach
-            </div>
-        @endif
         <div class="row">
             <div class="col-lg-7">
                 <div class="hero-area-content">
@@ -91,6 +80,38 @@
 </div>
 </div>
 </section><!-- showcase section end -->
+
+<section class="tvpik-area ptb-90" id="tvpik">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="sec-title">
+                    <h2>Tu carta en pantalla con TVPik<span class="sec-title-border"><span></span><span></span><span></span></span></h2>
+                    <p>Proyecta tu carta digital en Smart TV y monitores del local. Se actualiza sola cuando editas en Webnu.</p>
+                </div>
+            </div>
+        </div>
+        <div class="row flexbox-center align-items-center">
+            <div class="col-lg-5">
+                <div class="tvpik-copy">
+                    <span class="tvpik-badge">Integración TVPik</span>
+                    <h4>Digital signage conectado a tu carta</h4>
+                    <p>Sincroniza Webnu con TVPik y muestra platos, precios y promociones en las pantallas de tu restaurante sin volver a diseñar nada.</p>
+                    <ul class="tvpik-features">
+                        <li><i class="icofont icofont-check-circled"></i> Actualización automática al editar la carta</li>
+                        <li><i class="icofont icofont-check-circled"></i> Ideal para barras, salones y terrazas</li>
+                        <li><i class="icofont icofont-check-circled"></i> Misma carta que escanean tus clientes con QR</li>
+                    </ul>
+                    <a href="https://webnu.es/carta/webnu-test" target="_blank" rel="noopener" class="appao-btn appao-btn2">Ver carta de ejemplo</a>
+                </div>
+            </div>
+            <div class="col-lg-7">
+                @include('partials.tvpik-tv-mockup')
+            </div>
+        </div>
+    </div>
+</section>
+
 <section class="feature-area ptb-90" id="feature">
     <div class="container">
         <div class="row flexbox-center">
@@ -640,6 +661,225 @@
 <!-- <div class="google-map"></div> -->
 <!-- google map area end -->
 @endsection
+
+@push('styles')
+<style>
+.tvpik-area {
+    background: linear-gradient(180deg, #f4f8fc 0%, #fff 100%);
+}
+.tvpik-badge {
+    display: inline-block;
+    background: #0074da;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    padding: 6px 12px;
+    border-radius: 20px;
+    margin-bottom: 16px;
+}
+.tvpik-copy h4 {
+    margin-bottom: 14px;
+}
+.tvpik-features {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 24px;
+}
+.tvpik-features li {
+    margin-bottom: 10px;
+    color: #444;
+}
+.tvpik-features li i {
+    color: #0074da;
+    margin-right: 8px;
+}
+.tvpik-bar-scene {
+    position: relative;
+    max-width: 640px;
+    margin: 0 auto;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 28px 56px rgba(15, 23, 42, 0.28);
+    aspect-ratio: 16 / 10;
+    background: #1a120c;
+}
+.tvpik-bar-scene__bg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center 40%;
+}
+.tvpik-bar-scene__shade {
+    position: absolute;
+    inset: 0;
+    background:
+        linear-gradient(105deg, rgba(0, 0, 0, 0.55) 0%, rgba(0, 0, 0, 0.15) 45%, rgba(0, 0, 0, 0.35) 100%),
+        linear-gradient(180deg, rgba(0, 0, 0, 0.1) 0%, rgba(0, 0, 0, 0.45) 100%);
+    pointer-events: none;
+}
+.tvpik-bar-wall-tv {
+    position: absolute;
+    top: 14%;
+    right: 10%;
+    width: 52%;
+    transform: perspective(900px) rotateY(-8deg) rotateX(2deg);
+    transform-origin: center right;
+    z-index: 2;
+}
+.tvpik-bar-wall-tv__mount {
+    width: 42%;
+    height: 8px;
+    margin: 0 auto 0;
+    background: linear-gradient(180deg, #3d3d3d, #1a1a1a);
+    border-radius: 2px 2px 0 0;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+    position: relative;
+}
+.tvpik-bar-wall-tv__mount::before,
+.tvpik-bar-wall-tv__mount::after {
+    content: '';
+    position: absolute;
+    bottom: -6px;
+    width: 6px;
+    height: 10px;
+    background: #2a2a2a;
+    border-radius: 1px;
+}
+.tvpik-bar-wall-tv__mount::before { left: 18%; }
+.tvpik-bar-wall-tv__mount::after { right: 18%; }
+.tvpik-bar-wall-tv__unit {
+    filter: drop-shadow(0 18px 28px rgba(0, 0, 0, 0.55));
+}
+.tvpik-bar-wall-tv__bezel {
+    background: linear-gradient(180deg, #2b2b2b 0%, #0f0f0f 100%);
+    padding: 7px 7px 9px;
+    border-radius: 4px;
+    border: 1px solid #000;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.12),
+        0 0 0 1px rgba(255, 255, 255, 0.04);
+}
+.tvpik-bar-wall-tv__screen {
+    position: relative;
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    background: #000;
+    border-radius: 2px;
+    box-shadow: inset 0 0 24px rgba(0, 0, 0, 0.6);
+}
+.tvpik-bar-wall-tv__screen::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.14) 0%, transparent 42%);
+    pointer-events: none;
+    z-index: 3;
+}
+.tvpik-bar-wall-tv__photo {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    display: block;
+}
+.tvpik-bar-wall-tv__overlay {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 2;
+    padding: 22px 12px 10px;
+    background: linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.82) 100%);
+    text-align: left;
+    color: #fff;
+}
+.tvpik-bar-wall-tv__tag {
+    display: inline-block;
+    background: #0074da;
+    color: #fff;
+    font-size: 8px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 3px 7px;
+    border-radius: 2px;
+    margin-bottom: 4px;
+}
+.tvpik-bar-wall-tv__title {
+    margin: 0 0 2px;
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1.2;
+    text-shadow: 0 1px 6px rgba(0, 0, 0, 0.5);
+}
+.tvpik-bar-wall-tv__price {
+    margin: 0;
+    font-size: 11px;
+    font-weight: 600;
+    color: #9fd4ff;
+}
+.tvpik-bar-wall-tv__brand {
+    position: absolute;
+    top: 8px;
+    right: 10px;
+    z-index: 2;
+    font-size: 8px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.55);
+}
+.tvpik-bar-wall-tv__glow {
+    position: absolute;
+    left: 50%;
+    top: 55%;
+    width: 90%;
+    height: 45%;
+    transform: translateX(-50%);
+    background: radial-gradient(ellipse at center, rgba(80, 160, 255, 0.35) 0%, transparent 70%);
+    filter: blur(12px);
+    z-index: 1;
+    pointer-events: none;
+}
+@media (max-width: 991px) {
+    .tvpik-bar-wall-tv {
+        top: 12%;
+        right: 6%;
+        width: 58%;
+        transform: perspective(700px) rotateY(-6deg);
+    }
+}
+@media (max-width: 575px) {
+    .tvpik-bar-scene {
+        aspect-ratio: 4 / 5;
+    }
+    .tvpik-bar-wall-tv {
+        top: auto;
+        bottom: 8%;
+        left: 50%;
+        right: auto;
+        width: 78%;
+        transform: translateX(-50%) perspective(700px) rotateX(4deg);
+    }
+}
+.te-llamamos-form .form-group {
+    margin-bottom: 12px;
+}
+@media (max-width: 991px) {
+    .tvpik-copy {
+        margin-bottom: 36px;
+        text-align: center;
+    }
+    .tvpik-features {
+        text-align: left;
+    }
+}
+</style>
+@endpush
 
 @push('scripts')
 
