@@ -1,0 +1,127 @@
+/**
+ * Webnu × Materio — navy corporativo
+ */
+:root,
+[data-bs-theme="light"] {
+  --bs-primary: #0074d9;
+  --bs-primary-rgb: 0, 116, 217;
+  --bs-primary-text-emphasis: #002055;
+  --bs-primary-bg-subtle: #e8f4fd;
+  --bs-primary-border-subtle: #b3d9f5;
+
+  --bs-link-color: #0074d9;
+  --bs-link-hover-color: #005db5;
+
+  /* Sidebar navy */
+  --bs-menu-bg: #000529;
+  --bs-menu-bg-rgb: 0, 5, 41;
+  --bs-menu-color: rgba(255, 255, 255, 0.82);
+  --bs-menu-color-rgb: 255, 255, 255;
+  --bs-menu-hover-bg: rgba(0, 116, 217, 0.22);
+  --bs-menu-hover-color: #ffffff;
+  --bs-menu-active-bg: #0074d9;
+  --bs-menu-active-color: #ffffff;
+  --bs-menu-sub-active-bg: rgba(0, 116, 217, 0.15);
+  --bs-menu-sub-active-color: #ffffff;
+  --bs-menu-item-icon-color: rgba(255, 255, 255, 0.65);
+  --bs-menu-header-color: rgba(255, 255, 255, 0.45);
+
+  --bs-body-bg: #f4f6f9;
+}
+
+.layout-menu.bg-menu-theme {
+  background-color: #000529 !important;
+}
+
+.layout-menu .menu-header-text {
+  color: rgba(255, 255, 255, 0.45) !important;
+}
+
+.layout-menu .app-brand-text {
+  color: #fff !important;
+}
+
+.webnu-menu-footer .webnu-menu-company {
+  padding: 0;
+  margin-bottom: 1rem;
+}
+
+.webnu-menu-company label {
+  display: block;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: rgba(255, 255, 255, 0.5);
+  margin-bottom: 0.35rem;
+}
+
+.webnu-menu-company .form-select {
+  font-size: 0.875rem;
+  background-color: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.15);
+  color: #fff;
+}
+
+.webnu-menu-company .form-select:focus {
+  border-color: #0074d9;
+  box-shadow: 0 0 0 0.2rem rgba(0, 116, 217, 0.25);
+}
+
+.webnu-menu-footer {
+  margin-top: auto;
+  padding: 1rem 1.25rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.8125rem;
+}
+
+.webnu-menu-footer .btn-logout {
+  color: rgba(255, 255, 255, 0.85);
+  padding: 0.5rem 0;
+  width: 100%;
+  text-align: left;
+  background: transparent;
+  border: none;
+}
+
+.webnu-menu-footer .btn-logout:hover {
+  color: #fff;
+}
+
+.buy-now,
+.btn-buy-now {
+  display: none !important;
+}
+
+#layout-menu.layout-menu {
+  display: flex;
+  flex-direction: column;
+}
+
+#layout-menu .menu-inner {
+  flex: 1 1 auto;
+  overflow-y: auto;
+}
+
+.app-brand-logo img {
+  max-height: 28px;
+  width: auto;
+}
+
+/* Compat clases legacy Webnu */
+.webnu-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+}
+
+/* Ocultar barra inferior legacy si quedara en caché */
+.webnu-bottomnav,
+.webnu-panel__frame {
+  display: none !important;
+}
+
+.layout-wrapper .webnu-bottomnav {
+  display: none !important;
+}

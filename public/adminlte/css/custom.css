@@ -1,0 +1,134 @@
+a:hover{
+    color:white;
+}
+
+div.dz-image > img{
+    height: 100%;
+}
+.current-company-label{
+    color:#fff;
+    font-weight:500 !important;
+}
+.nav-item .form-group{
+    padding: .5rem 1rem .8rem;
+    margin-bottom: 5px;
+    border-bottom: 1px solid #4f5962;
+    background: #4f5962;
+}
+.product-add{
+    margin-left: 0;
+    margin-top: 20px;
+}
+.hidden{
+    display: none;
+}
+.select2-container--default .select2-selection--multiple .select2-selection__choice{
+    background-color: var(--webnu-blue, #0074d9) !important;
+    border-color: var(--webnu-blue-mid, #005db5) !important;
+    color: #fff !important;
+}
+.select2-container--default .select2-selection--multiple .select2-selection__choice__remove{
+    color: #fff !important;
+}
+
+/* Login-Page */
+
+.login-page{
+    background: url('/adminlte/img/fondo-login.jpg') !important;
+    background-size:cover !important;
+}
+.login-page .card{
+    background: rgba(255,255,255,0.8) !important;
+    border-radius: 4px;
+}
+.login-card-body{
+    background: transparent !important;
+}
+
+/*Buttons*/
+
+.appao-btn2 {
+    border-radius: 4px;
+    background: #000529;
+    background-image: -moz-linear-gradient(left, #000529 1%, #002055 24%, #005db5 67%, #0074d9 100%);
+    background-image: -webkit-linear-gradient(left, #000529 1%,#002055 24%,#005db5 67%,#0074d9 100%);
+    background-image: linear-gradient(to right, #000529 1%,#002055 24%,#005db5 67%,#0074d9 100%);
+    color:white;
+    text-align: center;
+    padding:.5em;
+}
+
+.appao-btn2-outline {
+    border-radius: 4px;
+    background-color:white;
+    border: 2px solid #002055;
+    color:white;
+    text-align: center;
+    padding:.5em;
+    color: #002055;
+}
+.appao-btn2-outline:hover {
+    border-radius: 4px;
+    background-color:white;
+    border: 2px solid #002055;
+    color:white;
+    text-align: center;
+    padding:.5em;
+    color: #002055;
+}
+
+/* Sidebar */
+
+.brand-link{
+    display: block;
+    text-align: center;
+    width: 100%;
+}
+
+.brand-img{
+    width: 60%;
+    margin:0 auto;
+
+}
+
+.sidebar{
+    padding-left: 0;
+    padding-right: 0;
+}
+
+.main-sidebar{
+    background: url('/img/back/webnu-sidebar-back.jpg')
+}
+
+.nav-item .form-group{
+    background:transparent;
+}
+
+/*Forms inputs*/
+
+.form-control,.dropzone{
+    border:0 !important;
+    border-bottom: 1px solid #002055 !important;
+    border-radius:0 !important;
+
+}
+
+.delete-section-btn, .modify-section-btn{
+    cursor:pointer;
+    background:transparent;
+}
+
+/*Table*/
+
+.table-sm td{
+    padding: 1rem;
+}
+
+
+/* Hide Mobile */
+
+@media (max-width:540px){
+    .hide-mobile{
+        display:none !important;
+    }
+}

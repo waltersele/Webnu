@@ -1,0 +1,633 @@
+/**
+ * Webnu Admin App Shell — design system (TVPik-inspired + corporate navy/blue)
+ */
+:root {
+    --webnu-navy: #000529;
+    --webnu-blue-dark: #002055;
+    --webnu-blue-mid: #005db5;
+    --webnu-blue: #0074d9;
+    --webnu-gradient: linear-gradient(90deg, #000529 0%, #002055 35%, #005db5 70%, #0074d9 100%);
+    --webnu-surface: #ffffff;
+    --webnu-bg: #f4f6f9;
+    --webnu-border: #e8ecf1;
+    --webnu-text: #0f172a;
+    --webnu-text-muted: #64748b;
+    --webnu-sidebar-width: 16rem;
+    --webnu-radius: 0.75rem;
+    --webnu-shadow: 0 1px 3px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04);
+    --webnu-shadow-md: 0 4px 12px rgba(15, 23, 42, 0.08);
+}
+
+/* Reset AdminLTE layout when using webnu-app */
+.webnu-app {
+    font-family: "DM Sans", system-ui, -apple-system, sans-serif;
+    background: var(--webnu-bg);
+    color: var(--webnu-text);
+    margin: 0;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+}
+
+.webnu-app .wrapper {
+    display: flex;
+    min-height: 100vh;
+    overflow: hidden;
+}
+
+.webnu-app .main-header,
+.webnu-app .main-sidebar,
+.webnu-app .main-footer,
+.webnu-app .content-wrapper {
+    display: none !important;
+}
+
+/* Shell layout */
+.webnu-shell {
+    display: flex;
+    min-height: 100vh;
+    width: 100%;
+}
+
+.webnu-sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1040;
+    display: flex;
+    flex-direction: column;
+    width: var(--webnu-sidebar-width);
+    height: 100vh;
+    background: var(--webnu-navy);
+    color: #e2e8f0;
+    border-right: 1px solid rgba(255, 255, 255, 0.06);
+    transform: translateX(0);
+    transition: transform 0.25s ease;
+}
+
+.webnu-sidebar.is-closed {
+    transform: translateX(-100%);
+}
+
+.webnu-sidebar__brand {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1.25rem 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    text-decoration: none;
+    color: #fff;
+}
+
+.webnu-sidebar__brand img {
+    height: 36px;
+    width: auto;
+}
+
+.webnu-sidebar__brand-text {
+    display: flex;
+    flex-direction: column;
+}
+
+.webnu-sidebar__brand-name {
+    font-size: 1.125rem;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+.webnu-sidebar__brand-sub {
+    font-size: 0.7rem;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.webnu-sidebar__nav {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0.75rem;
+}
+
+.webnu-sidebar__group {
+    margin-bottom: 1.25rem;
+}
+
+.webnu-sidebar__group-label {
+    display: block;
+    padding: 0 0.75rem 0.5rem;
+    font-size: 0.65rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #64748b;
+}
+
+.webnu-nav-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.65rem 0.75rem;
+    margin-bottom: 0.25rem;
+    border-radius: var(--webnu-radius);
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #cbd5e1;
+    text-decoration: none;
+    transition: background 0.15s, color 0.15s;
+    border-left: 3px solid transparent;
+}
+
+.webnu-nav-item:hover {
+    background: rgba(0, 116, 217, 0.2);
+    color: #fff;
+    text-decoration: none;
+}
+
+.webnu-nav-item.is-active {
+    background: rgba(0, 116, 217, 0.35);
+    color: #fff;
+    border-left-color: var(--webnu-blue);
+}
+
+.webnu-nav-item i {
+    width: 1.25rem;
+    text-align: center;
+    opacity: 0.9;
+}
+
+.webnu-sidebar__company {
+    padding: 0.75rem;
+    margin-bottom: 0.5rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: var(--webnu-radius);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.webnu-sidebar__company label {
+    display: block;
+    font-size: 0.7rem;
+    color: #94a3b8;
+    margin-bottom: 0.35rem;
+}
+
+.webnu-sidebar__company select {
+    width: 100%;
+    padding: 0.45rem 0.6rem;
+    font-size: 0.85rem;
+    border-radius: 0.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    background: rgba(0, 0, 0, 0.25);
+    color: #fff;
+}
+
+.webnu-sidebar__footer {
+    padding: 1rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    font-size: 0.8rem;
+    color: #94a3b8;
+}
+
+.webnu-sidebar__footer .webnu-nav-item {
+    margin-bottom: 0;
+}
+
+.webnu-main {
+    flex: 1;
+    margin-left: var(--webnu-sidebar-width);
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    min-height: 100vh;
+}
+
+.webnu-header {
+    position: sticky;
+    top: 0;
+    z-index: 1030;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.875rem 1.5rem;
+    background: var(--webnu-surface);
+    border-bottom: 1px solid var(--webnu-border);
+    box-shadow: var(--webnu-shadow);
+}
+
+.webnu-header__left {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    min-width: 0;
+}
+
+.webnu-header__menu-btn {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    padding: 0;
+    border: none;
+    border-radius: 0.5rem;
+    background: transparent;
+    color: var(--webnu-text-muted);
+    cursor: pointer;
+}
+
+.webnu-header__menu-btn:hover {
+    background: var(--webnu-bg);
+}
+
+.webnu-header__title {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--webnu-text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.webnu-header__actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.webnu-header__user {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.webnu-header__user-name {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--webnu-text);
+}
+
+.webnu-content {
+    flex: 1;
+    padding: 1.5rem;
+}
+
+.webnu-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 1035;
+    background: rgba(0, 0, 0, 0.35);
+}
+
+.webnu-overlay.is-visible {
+    display: block;
+}
+
+/* Flash */
+.webnu-flash {
+    margin-bottom: 1rem;
+}
+
+.webnu-flash .alert {
+    border-radius: var(--webnu-radius);
+    border: none;
+    box-shadow: var(--webnu-shadow);
+}
+
+/* Cards */
+.webnu-card {
+    background: var(--webnu-surface);
+    border: 1px solid var(--webnu-border);
+    border-radius: var(--webnu-radius);
+    box-shadow: var(--webnu-shadow);
+    margin-bottom: 1.25rem;
+    overflow: hidden;
+}
+
+.webnu-card__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid var(--webnu-border);
+    background: #fafbfc;
+}
+
+.webnu-card__title {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--webnu-text);
+}
+
+.webnu-card__body {
+    padding: 1.25rem;
+}
+
+.webnu-card__body--flush {
+    padding: 0;
+}
+
+/* Buttons */
+.webnu-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    line-height: 1.4;
+    border-radius: 0.5rem;
+    border: 1px solid transparent;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background 0.15s, border-color 0.15s, color 0.15s;
+    white-space: nowrap;
+}
+
+.webnu-btn:hover {
+    text-decoration: none;
+}
+
+.webnu-btn--primary {
+    background: var(--webnu-navy);
+    background-image: var(--webnu-gradient);
+    color: #fff;
+    border: none;
+}
+
+.webnu-btn--primary:hover {
+    color: #fff;
+    opacity: 0.92;
+}
+
+.webnu-btn--secondary {
+    background: var(--webnu-surface);
+    color: var(--webnu-blue);
+    border-color: var(--webnu-blue);
+}
+
+.webnu-btn--secondary:hover {
+    background: rgba(0, 116, 217, 0.08);
+    color: var(--webnu-blue-dark);
+}
+
+.webnu-btn--ghost {
+    background: transparent;
+    color: var(--webnu-text-muted);
+    border-color: var(--webnu-border);
+}
+
+.webnu-btn--ghost:hover {
+    background: var(--webnu-bg);
+    color: var(--webnu-text);
+}
+
+.webnu-btn--danger {
+    background: #fff;
+    color: #dc3545;
+    border-color: #f5c2c7;
+}
+
+.webnu-btn--sm {
+    padding: 0.35rem 0.75rem;
+    font-size: 0.8rem;
+}
+
+.webnu-btn--block {
+    display: flex;
+    width: 100%;
+}
+
+/* Dashboard grid */
+.webnu-dash-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 1.25rem;
+}
+
+.webnu-dash-card {
+    text-align: center;
+    padding: 1.75rem 1.25rem;
+}
+
+.webnu-dash-card__icon {
+    font-size: 2.25rem;
+    color: var(--webnu-blue);
+    margin-bottom: 0.75rem;
+}
+
+.webnu-dash-card h3 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.webnu-dash-card p {
+    font-size: 0.875rem;
+    color: var(--webnu-text-muted);
+    margin-bottom: 1rem;
+}
+
+/* Breadcrumb minimal */
+.webnu-breadcrumb {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    padding: 0;
+    margin: 0 0 1rem;
+    list-style: none;
+    font-size: 0.8rem;
+    color: var(--webnu-text-muted);
+}
+
+.webnu-breadcrumb a {
+    color: var(--webnu-blue);
+}
+
+/* Legacy button compat inside webnu-app */
+.webnu-app .appao-btn2 {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    border-radius: 0.5rem;
+    background: var(--webnu-navy);
+    background-image: var(--webnu-gradient);
+    color: #fff !important;
+    border: none;
+    text-decoration: none;
+}
+
+.webnu-app .appao-btn2-outline {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.45rem 0.9rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    border-radius: 0.5rem;
+    background: #fff;
+    border: 1px solid var(--webnu-blue-dark);
+    color: var(--webnu-blue-dark) !important;
+    text-decoration: none;
+}
+
+/* Forms inside shell */
+.webnu-app .form-control:focus {
+    border-color: var(--webnu-blue);
+    box-shadow: 0 0 0 0.2rem rgba(0, 116, 217, 0.15);
+}
+
+.webnu-app .card {
+    border-radius: var(--webnu-radius);
+    border-color: var(--webnu-border);
+    box-shadow: var(--webnu-shadow);
+}
+
+.webnu-app .card-header.appao-btn2 {
+    background: var(--webnu-navy) !important;
+    background-image: var(--webnu-gradient) !important;
+    color: #fff;
+    border: none;
+}
+
+/* Select2 */
+.webnu-app .select2-container--default .select2-selection--multiple .select2-selection__choice {
+    background-color: var(--webnu-blue) !important;
+    border-color: var(--webnu-blue-mid) !important;
+}
+
+/* Sections / menu editor */
+.webnu-menu-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.webnu-section-card .card-header,
+#custom-menu > .card > .card-header,
+#custom-menu .card.webnu-section-card > .card-header {
+    background: #fafbfc;
+    border-bottom: 1px solid var(--webnu-border);
+}
+
+#custom-menu .card {
+    border-radius: var(--webnu-radius);
+    border: 1px solid var(--webnu-border);
+    box-shadow: var(--webnu-shadow);
+    margin-bottom: 1rem;
+}
+
+#menu-type-selector .card,
+#pdf-menu .card {
+    border-radius: var(--webnu-radius);
+    border: 1px solid var(--webnu-border);
+    box-shadow: var(--webnu-shadow);
+}
+
+/* Legacy AdminLTE page wrappers */
+.webnu-app .content > .container-fluid {
+    padding: 0;
+    max-width: none;
+}
+
+.webnu-app .content-header {
+    display: none !important;
+}
+
+.webnu-app .modal-header {
+    background: #fafbfc;
+    border-bottom: 1px solid var(--webnu-border);
+}
+
+.webnu-app .modal-footer {
+    border-top: 1px solid var(--webnu-border);
+}
+
+.webnu-app .webnu-nav-item:focus-visible,
+.webnu-app .webnu-btn:focus-visible,
+.webnu-app a:focus-visible {
+    outline: 2px solid var(--webnu-blue);
+    outline-offset: 2px;
+}
+
+#custom-menu .webnu-section-card > .card-header {
+    cursor: pointer;
+}
+
+#menu-type-selector .webnu-card__body,
+#pdf-menu .card-body,
+#custom-menu .webnu-card__body {
+    padding: 1.25rem;
+}
+
+.webnu-page-intro {
+    color: var(--webnu-text-muted);
+    font-size: 0.9rem;
+    margin: -0.5rem 0 1.25rem;
+}
+
+.webnu-api-pre {
+    background: #f1f5f9;
+    border-radius: 0.5rem;
+    padding: 1rem;
+    font-size: 0.8rem;
+    overflow-x: auto;
+    max-height: 280px;
+}
+
+.webnu-card--muted {
+    opacity: 0.85;
+    background: #f8fafc;
+}
+
+.hide-mobile {
+    display: inline;
+}
+
+.webnu-flash .alert.is-hiding {
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+@media (max-width: 991.98px) {
+    .webnu-sidebar {
+        transform: translateX(-100%);
+    }
+
+    .webnu-sidebar.is-open {
+        transform: translateX(0);
+    }
+
+    .webnu-main {
+        margin-left: 0;
+    }
+
+    .webnu-header__menu-btn {
+        display: flex;
+    }
+
+    .hide-mobile {
+        display: none;
+    }
+
+    .webnu-header {
+        padding: 0.75rem 1rem;
+    }
+
+    .webnu-content {
+        padding: 1rem;
+    }
+
+    .webnu-header__actions {
+        width: 100%;
+        justify-content: flex-start;
+    }
+}

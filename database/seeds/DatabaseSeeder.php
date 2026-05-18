@@ -1,0 +1,84 @@
+<?php
+
+use Illuminate\Database\Seeder;
+use App\User;
+use App\Company;
+use App\Section;
+use App\Allergen;
+use App\Product;
+use Illuminate\Support\Facades\Hash;
+//use DB;
+
+class DatabaseSeeder extends Seeder
+{
+    /**
+     * Seed the application's database.
+     *
+     * @return void
+     */
+    public function run()
+    {
+        DB::statement('SET FOREIGN_KEY_CHECKS = 0');
+
+        DB::table('users')->delete();
+        $users = array(
+            ['name' => 'Webnu', 'email' => 'info@webnu.es', 'password' => Hash::make('123456')],
+        );
+        foreach ($users as $user) {
+            User::create($user);
+        }
+
+        DB::table('companies')->delete();
+        $companies = array(
+            ['name' => 'Los casanueva', 'chef_name' => 'Dani', 'slug' => 'los-casanueva', 'address' => 'Avda. L\'almassera', 'postal_code' => '03690', 'city' => 'San Vicente del Raspeig', 'province' => 'Alicante', 'country' => 'España', 'phone' => '966307664', 'mobile_phone' => '627797373', 'email' => 'ruben@winamic.es', 'web' => 'https://www.mesonloscasanueva.com/', 'whatsapp' => '627797373', 'menu_type' => 1, 'enabled' => true, 'user_id' => 1, 'reservation' => true],
+        );
+        foreach ($companies as $company) {
+            Company::create($company);
+        }
+
+        DB::table('sections')->delete();
+        $sections = array(
+            ['name' => 'Entrantes', 'order' => 0, 'enabled' => 1, 'company_id' => 1],
+            ['name' => 'Para compartir', 'order' => 1, 'enabled' => 1, 'company_id' => 1],
+            ['name' => 'Carnes', 'order' => 2, 'enabled' => 1, 'company_id' => 1],
+            ['name' => 'Pescados', 'order' => 3, 'enabled' => 1, 'company_id' => 1],
+            ['name' => 'Postres', 'order' => 4, 'enabled' => 1, 'company_id' => 1],
+        );
+        foreach ($sections as $section) {
+            Section::create($section);
+        }
+
+        DB::table('allergens')->delete();
+        $allergens = array(
+            ['name' => 'Gluten', 'image' => 'alergenos/gluten.png'],
+            ['name' => 'Frutos secos', 'image' => 'alergenos/frutos-secos.png'],
+            ['name' => 'Crustáceos', 'image' => 'alergenos/crustaceos.png'],
+            ['name' => 'Pescados', 'image' => 'alergenos/pescados.png'],
+            ['name' => 'Lácteos', 'image' => 'alergenos/lacteos.png'],
+            ['name' => 'Moluscos', 'image' => 'alergenos/moluscos.png'],
+            ['name' => 'Huevos', 'image' => 'alergenos/huevos.png'],
+            ['name' => 'Cacahuetes', 'image' => 'alergenos/cacahuetes.png'],
+            ['name' => 'Soja', 'image' => 'alergenos/soja.png'],
+            ['name' => 'Apio', 'image' => 'alergenos/apio.png'],
+            ['name' => 'Mostaza', 'image' => 'alergenos/mostaza.png'],
+            ['name' => 'Sésamo', 'image' => 'alergenos/sesamo.png'],
+            ['name' => 'Altramuz', 'image' => 'alergenos/altramuz.png'],
+            ['name' => 'Sulfitos', 'image' => 'alergenos/sulfitos.png'],
+        );
+        foreach ($allergens as $allergen) {
+            Allergen::create($allergen);
+        }
+
+        DB::table('products')->delete();
+        $products = array(
+            ['name' => 'Ensalada de la casa', 'description' => '', 'price_unit' => '4.50', 'individual_sale' => 1, 'image' => '', 'section_id' => 1, 'order' => 0, 'enabled' => 1],
+            ['name' => 'Ensalada de pepino', 'description' => '', 'price_unit' => '3.70', 'individual_sale' => 1, 'image' => '', 'section_id' => 1, 'order' => 1, 'enabled' => 1],
+            ['name' => 'Croquetas', 'description' => '', 'price_unit' => '1.20', 'individual_sale' => 1, 'image' => '', 'section_id' => 1, 'order' => 2, 'enabled' => 1],
+            ['name' => 'Arroz con pulpo', 'description' => 'Arroz meloso con nuestro toque especial', 'price_unit' => '8.00', 'individual_sale' => 0, 'image' => '', 'section_id' => 2, 'order' => 3, 'enabled' => 1],
+            ['name' => 'Solomillo de cerdo', 'description' => '', 'price_unit' => '10.00', 'individual_sale' => 0, 'image' => '', 'section_id' => 2, 'order' => 4, 'enabled' => 1],
+        );
+        foreach ($products as $product) {
+            Product::create($product);
+        }
+    }
+}

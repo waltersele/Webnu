@@ -1,0 +1,69 @@
+/* Etiquetas promocionales de plato */
+.webnu-product-badge {
+  display: inline-block;
+  padding: 0.15rem 0.45rem;
+  border-radius: 999px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  vertical-align: middle;
+  margin-left: 0.35rem;
+}
+
+.webnu-product-badge--featured {
+  background: #fff3e0;
+  color: #e65100;
+  border: 1px solid #ffcc80;
+}
+
+.webnu-product-badge--new {
+  background: #e8f5e9;
+  color: #2e7d32;
+  border: 1px solid #a5d6a7;
+}
+
+.webnu-product-badge--bestseller {
+  background: #e3f2fd;
+  color: #1565c0;
+  border: 1px solid #90caf9;
+}
+
+/*Generic Styles*/
+body{
+    max-width: 600px;
+    width: 100%;
+    margin:0 auto !important;
+
+}
+/*Fixed Bottom Bar*/
+
+.fixed-bottom-bar{
+    position:fixed;
+    bottom:0;
+    width:100%;
+    max-width: 600px;
+    padding:.5em;
+    background: white;
+    box-shadow: 0 0 2px black;
+}
+
+.fixed-bottom-bar a{
+    background: var(--mainback);
+    color:white !important;
+}
+
+.whatsapp-btn{
+    background:#00E675 !important;
+}
+
+/*Reservations modal*/
+
+.reservation-send-btn{
+    background: var(--mainback)!important;
+    color:var(--mainchar) !important;
+}
+header .logo, footer .logo{
+    max-height: 120px;
+}

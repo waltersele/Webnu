@@ -1,0 +1,43 @@
+.product-modal-media {
+    width: 100%;
+    text-align: center;
+}
+
+.product-modal-video {
+    width: 100%;
+    max-height: 70vh;
+    background: #000;
+    border-radius: 4px;
+}
+
+.product-modal-media .modal-img {
+    max-width: 100%;
+    max-height: 50vh;
+    object-fit: contain;
+}
+
+.product-img .product-video-play-link {
+    position: relative;
+    display: block;
+}
+
+.product-img .product-video-play-link .fa-play-circle {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 3rem;
+    color: rgba(255, 255, 255, 0.9);
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+    pointer-events: none;
+}
+
+.product-video-placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 120px;
+    background: #1a1a2e;
+    border-radius: 4px;
+    color: #0074d9;
+}

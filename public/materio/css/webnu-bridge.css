@@ -1,0 +1,145 @@
+/**
+ * Puente: vistas Webnu legacy → Materio / BS5
+ */
+.webnu-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  padding: 0.5rem 1rem;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  line-height: 1.5;
+  border-radius: var(--bs-border-radius);
+  cursor: pointer;
+  text-decoration: none;
+  border: 1px solid transparent;
+}
+
+.webnu-btn--primary {
+  background: linear-gradient(90deg, #000529 0%, #002055 35%, #005db5 70%, #0074d9 100%);
+  border: none;
+  color: #fff;
+}
+
+.webnu-btn--primary:hover {
+  opacity: 0.92;
+  color: #fff;
+}
+
+.webnu-btn--secondary {
+  background: var(--bs-body-bg);
+  border: 1px solid var(--bs-primary);
+  color: var(--bs-primary);
+}
+
+.webnu-btn--ghost,
+.webnu-btn--dashed {
+  background: transparent;
+  border: 1px solid var(--bs-border-color);
+  color: var(--bs-body-color);
+}
+
+.webnu-btn--dashed {
+  border-style: dashed;
+  color: var(--bs-primary);
+}
+
+.webnu-btn--sm {
+  padding: 0.35rem 0.75rem;
+  font-size: 0.8125rem;
+}
+
+.webnu-btn--block {
+  display: flex;
+  width: 100%;
+}
+
+.webnu-card {
+  background: var(--bs-body-bg);
+  border: 1px solid var(--bs-border-color);
+  border-radius: var(--bs-border-radius-lg);
+  box-shadow: var(--bs-box-shadow-sm);
+  margin-bottom: 1.25rem;
+}
+
+.webnu-card__header {
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--bs-border-color);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.webnu-card__title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.webnu-card__body {
+  padding: 1.25rem;
+}
+
+.webnu-dash-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 1.25rem;
+}
+
+.webnu-dash-card {
+  text-align: center;
+  padding: 1.75rem 1.25rem;
+}
+
+.webnu-dash-card__icon {
+  font-size: 2.25rem;
+  color: var(--bs-primary);
+  margin-bottom: 0.75rem;
+}
+
+.webnu-breadcrumb {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  list-style: none;
+  padding: 0;
+  margin: 0 0 1rem;
+  font-size: 0.875rem;
+  color: var(--bs-secondary-color);
+}
+
+.webnu-breadcrumb a {
+  color: var(--bs-primary);
+}
+
+/* Modales producto: scroll BS5 correcto */
+.webnu-product-modal .modal-content {
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100vh - 2rem);
+}
+
+.webnu-product-modal form {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.webnu-product-modal .modal-body {
+  overflow-y: auto;
+  flex: 1 1 auto;
+}
+
+.hide-mobile {
+  display: inline;
+}
+
+@media (max-width: 767.98px) {
+  .hide-mobile {
+    display: none !important;
+  }
+}

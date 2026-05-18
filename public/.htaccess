@@ -1,0 +1,36 @@
+redirect 301 /cerveceria-el-parque-san-vicente-del-raspeig/ 	https://webnu.es/carta/cerveceria-el-parque
+redirect 301 /hejiahuan-l-g-j-sl-2/	https://webnu.es/carta/bar-and-sushi
+redirect 301 /hejiahuan-l-g-j-sl/	https://webnu.es/carta/bar-and-sushi
+redirect 301 /hela2-jose-luis-gisbert-s-l/	https://webnu.es/carta/la-ibense
+redirect 301 /los-casanueva/	https://webnu.es/carta/los-casanueva
+redirect 301 /wanyuan/	https://webnu.es/carta/restaurante-wan-yuan
+redirect 301 /wanyuan-2/	https://webnu.es/carta/restaurante-wan-yuan
+redirect 301 /xiaohe-xu/ https://webnu.es/carta/restaurante-abc
+redirect 301 /pasionxlacarne    https://webnu.es/carta/pasionxlacarne
+
+RewriteEngine On 
+RewriteCond %{HTTP_HOST} ^webnu\.es [NC]
+RewriteCond %{SERVER_PORT} 80 
+RewriteRule ^(.*)$ https://webnu.es/$1 [R,L]
+
+<IfModule mod_rewrite.c>
+    <IfModule mod_negotiation.c>
+        Options -MultiViews -Indexes
+    </IfModule>
+
+    RewriteEngine On
+
+    # Handle Authorization Header
+    RewriteCond %{HTTP:Authorization} .
+    RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+
+    # Redirect Trailing Slashes If Not A Folder...
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{REQUEST_URI} (.+)/$
+    RewriteRule ^ %1 [L,R=301]
+
+    # Send Requests To Front Controller...
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteRule ^ index.php [L]
+</IfModule>
