@@ -16,7 +16,7 @@ Webnu.code-workspace
 - Extensiones sugeridas: Intelephense, Laravel Blade.
 - Contexto del agente: [.cursor/README.md](.cursor/README.md) y [docs/HISTORIAL-CURSOR-WEBNU.md](docs/HISTORIAL-CURSOR-WEBNU.md).
 
-Las conversaciones de Cursor **no** se suben a GitHub (solo código). Ver `.gitignore` → `.cursor/conversations/`.
+Las conversaciones de Cursor se versionan en **`.cursor/conversations/`** para conservar contexto. Antes de cada push ejecuta `.\scripts\sync-cursor-conversations.ps1`.
 
 ## Requisitos
 
@@ -83,7 +83,8 @@ Límites en `config/plans.php` y `App\Services\UserPlanService`.
 | [docs/PLATFORM-BILLING.md](docs/PLATFORM-BILLING.md) | Stripe, webhooks, panel plataforma |
 | [docs/CREDENCIALES-DEMO-LOCAL.md](docs/CREDENCIALES-DEMO-LOCAL.md) | Usuarios `demo123` para pruebas |
 | [docs/HISTORIAL-CURSOR-WEBNU.md](docs/HISTORIAL-CURSOR-WEBNU.md) | Resumen del desarrollo con Cursor |
-| [.cursor/README.md](.cursor/README.md) | Workspace Cursor e historial importado |
+| [.cursor/README.md](.cursor/README.md) | Workspace Cursor |
+| [.cursor/conversations/](.cursor/conversations/) | Transcripts JSONL del chat (contexto versionado) |
 
 ## Migraciones recientes
 

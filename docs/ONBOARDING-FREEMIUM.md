@@ -91,6 +91,10 @@ UPDATE users SET onboarding_completed_at = NULL, onboarding_step = 1, plan = 'fr
 
 4. Borrar cookies de sesión o usar ventana privada.
 
+## Contexto Cursor en Git
+
+Los transcripts del chat viven en `.cursor/conversations/`. Sincroniza con `.\scripts\sync-cursor-conversations.ps1` antes de hacer push.
+
 ## Carta demo en landing
 
 `/carta/demo?tpl=lumiere|bistro|nocturne|temporada|catalogo` — solo slug `demo`, ver `PagesController@see_menu`.

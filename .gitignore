@@ -21,7 +21,6 @@ yarn-error.log
 .php-runtime74/
 composer.phar
 .vscode/
-.cursor/conversations/
 /database/database.sqlite
 
 # Laravel storage & cache

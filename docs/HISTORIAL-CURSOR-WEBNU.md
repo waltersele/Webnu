@@ -4,6 +4,8 @@
 **Workspace original:** c:\webproject\Webnu
 **Importado:** 2026-05-19 10:31
 
+> **Transcripts en Git:** las conversaciones nuevas se guardan en [`.cursor/conversations/`](../.cursor/conversations/). Ejecuta `.\scripts\sync-cursor-conversations.ps1` antes de cada push. Conversación reciente: `ddd8802e-2026-05-19.jsonl` (onboarding, freemium, landing).
+
 ---
 
 ## 1. Usuario

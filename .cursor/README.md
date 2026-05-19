@@ -10,35 +10,40 @@
 
 | Qué se sube | Qué no |
 |-------------|--------|
-| Código, docs, `Webnu.code-workspace`, este README | `.cursor/conversations/` (historial local) |
-| `docs/HISTORIAL-CURSOR-WEBNU.md` (resumen legible) | `.env`, `vendor/`, `node_modules/` |
+| Código, docs, `Webnu.code-workspace`, este README | `.env`, `vendor/`, `node_modules/` |
+| **`.cursor/conversations/*.jsonl`** — historial del chat (contexto) | — |
+| `docs/HISTORIAL-CURSOR-WEBNU.md` — resumen legible en Markdown | — |
 
-Tras `git pull`:
+### Conservar conversaciones (siempre)
 
-```bash
-composer install
-php artisan migrate
-npm install
+```powershell
+.\scripts\sync-cursor-conversations.ps1
+git add .cursor/conversations/
+git commit -m "Actualizar conversaciones Cursor"
+git push
 ```
+
+Detalle: [.cursor/conversations/README.md](conversations/README.md)
+
+Tras `git pull` en otro equipo, el agente puede leer el último `.jsonl` o el resumen en `docs/HISTORIAL-CURSOR-WEBNU.md`.
 
 ## Contexto para el agente
 
 - **README principal:** [../README.md](../README.md)
 - **Últimas features:** [../docs/ONBOARDING-FREEMIUM.md](../docs/ONBOARDING-FREEMIUM.md)
-- **Historial desarrollo:** [../docs/HISTORIAL-CURSOR-WEBNU.md](../docs/HISTORIAL-CURSOR-WEBNU.md)
+- **Transcripts:** [conversations/](conversations/)
+- **Historial resumido:** [../docs/HISTORIAL-CURSOR-WEBNU.md](../docs/HISTORIAL-CURSOR-WEBNU.md)
 
-Si el chat no tiene contexto previo, indica por ejemplo:
+Ejemplo de prompt:
 
-> Continúa Webnu: onboarding freemium, landing en `/`, límites en `UserPlanService`. Lee `docs/ONBOARDING-FREEMIUM.md`.
+> Continúa Webnu según `.cursor/conversations/` (último JSONL) y `docs/ONBOARDING-FREEMIUM.md`.
 
-## Historial importado (workspace anterior)
+## IDs de conversación
 
-| Archivo | Descripción |
-|---------|-------------|
-| `conversations/` (gitignored) | Transcripts JSONL locales de Cursor |
-| `../docs/HISTORIAL-CURSOR-WEBNU.md` | Resumen en Markdown |
-
-**ID conversación original:** `2502c06f-0e81-4866-a184-aacb72fa4ba5`
+| ID | Archivo en repo |
+|----|-----------------|
+| `2502c06f-…` | Resumen en `docs/HISTORIAL-CURSOR-WEBNU.md` (importación anterior) |
+| `ddd8802e-…` | `conversations/ddd8802e-2026-05-19.jsonl` (onboarding, landing, freemium) |
 
 ## Estado del repo (mayo 2026)
 
