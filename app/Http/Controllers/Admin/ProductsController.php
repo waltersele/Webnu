@@ -7,6 +7,7 @@ use App\Allergen;
 use App\Product;
 use App\Section;
 use App\Services\AllergenCatalogService;
+use App\Services\UserPlanService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Facades\Storage;
@@ -28,8 +29,12 @@ class ProductsController extends Controller
         return view('admin.products.edit', compact('product', 'allergens'));
     }
 
-    public function store(Request $request)
+    public function store(Request $request, UserPlanService $plans)
     {
+        if ($request->hasFile('product_add_video')) {
+            $plans->assertCanUseVideos($request->user());
+        }
+
         $rules = [
             'product_add_name' => 'required',
             'product_add_price_unit' => 'required',
@@ -75,8 +80,12 @@ class ProductsController extends Controller
             ->with('flash', 'Producto añadido correctamente');
     }
 
-    public function update(Request $request)
+    public function update(Request $request, UserPlanService $plans)
     {
+        if ($request->hasFile('product_modify_video')) {
+            $plans->assertCanUseVideos($request->user());
+        }
+
         $rules = [
             'product_modify_name' => 'required',
             'product_modify_price_unit' => 'required',

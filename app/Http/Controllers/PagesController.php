@@ -12,45 +12,15 @@ class PagesController extends Controller
 {
     public function index()
     {
-        return view('home');
+        return view('landing-preview');
     }
 
     public function landingPreview()
     {
-        return view('landing-preview', [
-            'landingPayload' => [
-                'csrfToken' => csrf_token(),
-                'routes' => [
-                    'home' => route('home'),
-                    'login' => route('login'),
-                    'subscribe' => route('process_subscription'),
-                    'teLlamamos' => route('te_llamamos'),
-                ],
-                'assets' => [
-                    'logo' => asset('img/front/logo.png'),
-                    'clients' => asset('img/front/actual-clients.jpg'),
-                    'mockVideo' => asset('img/front/mockup-xd.mp4'),
-                    'mock1' => asset('img/front/mock-1.png'),
-                    'mockMenu' => asset('img/front/mock-menu-front.png'),
-                    'tvpikBar' => asset('img/front/tvpik-bar.jpg'),
-                    'tvpikDish' => asset('img/front/tvpik-dish.jpg'),
-                    'screenshots' => [
-                        asset('img/front/screenshot/screenshot1.jpg'),
-                        asset('img/front/screenshot/screenshot2.jpg'),
-                        asset('img/front/screenshot/screenshot3.jpg'),
-                        asset('img/front/screenshot/screenshot4.jpg'),
-                        asset('img/front/screenshot/screenshot5.jpg'),
-                    ],
-                ],
-                'demos' => [
-                    ['label' => 'Ver carta digital', 'url' => 'https://webnu.es/carta/webnu-test'],
-                    ['label' => 'Ver carta digital PDF', 'url' => 'https://webnu.es/carta/la-ibense'],
-                ],
-            ],
-        ]);
+        return redirect()->route('home', [], 301);
     }
 
-    public function see_menu($companySlug, MenuService $menuService)
+    public function see_menu($companySlug, MenuService $menuService, Request $request)
     {
         $company = Company::where('slug', $companySlug)->first();
 
@@ -58,7 +28,15 @@ class PagesController extends Controller
             abort(404);
         }
 
-        $this->recordMenuView($company, request());
+        if ($companySlug === 'demo' && $request->filled('tpl')) {
+            $allowed = array_keys(config('company_templates.templates', []));
+            $tpl = $request->get('tpl');
+            if (in_array($tpl, $allowed, true)) {
+                $company->template = $tpl;
+            }
+        }
+
+        $this->recordMenuView($company, $request);
 
         if ($company->menu_type == 1) {
             $company = $menuService->applyStudioPreview($company, request());
@@ -90,7 +68,7 @@ class PagesController extends Controller
 
         if ($validator->fails()) {
             return redirect()
-                ->to(url('/#contact'))
+                ->to(url('/#contacto'))
                 ->withErrors($validator)
                 ->withInput();
         }
@@ -108,12 +86,12 @@ class PagesController extends Controller
             report($e);
 
             return redirect()
-                ->to(url('/#contact'))
+                ->to(url('/#contacto'))
                 ->with('te-llamamos-failure', 'Se ha producido un error al enviar el mensaje');
         }
 
         return redirect()
-            ->to(url('/#contact'))
+            ->to(url('/#contacto'))
             ->with('te-llamamos-ok', 'El mensaje ha sido enviado correctamente. Te llamaremos en breve.');
     }
 

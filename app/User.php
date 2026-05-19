@@ -2,6 +2,7 @@
 
 namespace App;
 
+use App\Services\UserPlanService;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -19,7 +20,8 @@ class User extends Authenticatable
      * @var array
      */
     protected $fillable = [
-        'name', 'email', 'password', 'api_token', 'stripe_id', 'card_brand', 'card_last_four', 'trial_ends_at',
+        'name', 'email', 'password', 'plan', 'onboarding_step', 'onboarding_completed_at',
+        'api_token', 'stripe_id', 'card_brand', 'card_last_four', 'trial_ends_at',
     ];
 
     /**
@@ -39,6 +41,7 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
         'trial_ends_at' => 'datetime',
+        'onboarding_completed_at' => 'datetime',
     ];
 
     //Sobrescribimos el metodo de envio de email para que coja formato a nuestro gusto
@@ -99,5 +102,20 @@ class User extends Authenticatable
     public function scopeWithBillingSummary($query)
     {
         return $query->withCount('companies')->with('subscriptions');
+    }
+
+    public function hasCompletedOnboarding(): bool
+    {
+        return $this->onboarding_completed_at !== null;
+    }
+
+    public function planService(): UserPlanService
+    {
+        return app(UserPlanService::class);
+    }
+
+    public function planKey(): string
+    {
+        return $this->planService()->planKey($this);
     }
 }

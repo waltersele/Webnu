@@ -57,7 +57,8 @@ Para PDF multipágina en fallback se usa **Imagick** (extensión PHP `imagick`) 
 
 - Máx. 10 archivos por escaneo
 - 8 MB por archivo (ajusta `upload_max_filesize` en `php-local.ini` si hace falta)
-- 5 escaneos por hora por usuario
+- **Plan Gratis:** 5 escaneos IA por cuenta (vitalicios, ver `UserPlanService` y [ONBOARDING-FREEMIUM.md](ONBOARDING-FREEMIUM.md))
+- **Plus / Ilimitado:** sin tope vitalicio; 5 escaneos por hora por usuario (anti-abuso, `config/menu_scan.php`)
 
 ## Error 429 (cuota de Gemini agotada)
 

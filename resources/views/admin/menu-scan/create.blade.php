@@ -60,16 +60,28 @@
             </div>
         @endif
 
+        @if ($scanLimit !== null)
+            <div class="alert {{ ($canScan ?? true) ? 'alert-info' : 'alert-warning' }} mb-3">
+                <strong>Plan Gratis:</strong>
+                @if (($scansRemaining ?? 0) > 0)
+                    Te quedan <strong>{{ $scansRemaining }}</strong> de {{ $scanLimit }} escaneos IA (has usado {{ $scansUsed }}).
+                @else
+                    Has usado tus {{ $scanLimit }} escaneos IA incluidos.
+                    <a href="{{ $billingUrl }}" class="alert-link">Pásate a Plus</a> para escaneos ilimitados.
+                @endif
+            </div>
+        @endif
+
         <form method="POST" action="{{ route('admin.menu-scan.store') }}" enctype="multipart/form-data" id="menu-scan-upload-form">
             @csrf
             <input type="file" name="files[]" id="menu-scan-files" accept="image/jpeg,image/png,image/webp,application/pdf" multiple class="d-none">
             <input type="file" id="menu-scan-camera-native" accept="image/*" capture="environment" class="d-none">
 
             <div class="d-grid gap-2 d-sm-flex mb-3">
-                <button type="button" class="btn btn-primary btn-lg flex-sm-fill" id="menu-scan-open-camera" @if(! $scanConfigured) disabled @endif>
+                <button type="button" class="btn btn-primary btn-lg flex-sm-fill" id="menu-scan-open-camera" @if(! $scanConfigured || ! ($canScan ?? true)) disabled @endif>
                     <i class="ri-camera-line me-1"></i> Hacer foto
                 </button>
-                <button type="button" class="btn btn-outline-primary btn-lg flex-sm-fill" id="menu-scan-pick-files" @if(! $scanConfigured) disabled @endif>
+                <button type="button" class="btn btn-outline-primary btn-lg flex-sm-fill" id="menu-scan-pick-files" @if(! $scanConfigured || ! ($canScan ?? true)) disabled @endif>
                     <i class="ri-image-add-line me-1"></i> Galería / archivos
                 </button>
             </div>
@@ -95,7 +107,7 @@
 
             <div class="d-flex justify-content-end gap-2 mt-4">
                 <a href="{{ route('admin.sections.index') }}" class="btn btn-label-secondary">Cancelar</a>
-                <button type="submit" class="btn btn-primary" id="menu-scan-submit" disabled @if(! $scanConfigured) disabled @endif>
+                <button type="submit" class="btn btn-primary" id="menu-scan-submit" disabled @if(! $scanConfigured || ! ($canScan ?? true)) disabled @endif>
                     <span class="spinner-border spinner-border-sm d-none me-1" id="menu-scan-spinner" role="status"></span>
                     Analizar carta
                 </button>

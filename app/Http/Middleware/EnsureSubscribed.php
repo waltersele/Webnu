@@ -14,12 +14,8 @@ class EnsureSubscribed
             return redirect()->route('login');
         }
 
-        if ($user->isSuperAdmin() || $user->hasActiveSubscription()) {
-            return $next($request);
-        }
-
-        return redirect()
-            ->route('admin.billing')
-            ->with('flash_warning', 'Tu suscripción no está activa. Actualiza el pago para continuar.');
+        // Freemium: el plan Gratis puede usar el panel con límites (ver UserPlanService).
+        // Freemium: usuarios sin suscripción de pago usan el plan Gratis con límites.
+        return $next($request);
     }
 }

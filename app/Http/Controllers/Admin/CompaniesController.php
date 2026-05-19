@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Company;
 use App\Http\Controllers\Controller;
+use App\Services\UserPlanService;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Cookie;
@@ -53,8 +54,10 @@ class CompaniesController extends Controller
         ));
     }
 
-    public function store(Request $request)
+    public function store(Request $request, UserPlanService $plans)
     {
+        $plans->assertCanCreateCompany($request->user());
+
         $this->validate($request, [
             'name' => 'required',
         ]);
@@ -73,6 +76,7 @@ class CompaniesController extends Controller
             'template' => 'lumiere',
             'menu_type' => 1,
             'enabled' => true,
+            'reservation' => false,
             'user_id' => $userId,
         ]);
 

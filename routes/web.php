@@ -17,7 +17,11 @@ Route::post(
 
 Route::get('carta/{companySlug}', 'PagesController@see_menu')->name('see_menu');
 
-Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['auth']], function () {
+Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['auth', 'subscribed']], function () {
+    Route::get('onboarding', 'OnboardingController@show')->name('admin.onboarding');
+    Route::post('onboarding', 'OnboardingController@update')->name('admin.onboarding.update');
+    Route::post('onboarding/skip', 'OnboardingController@skip')->name('admin.onboarding.skip');
+
     Route::get('billing', 'BillingController@index')->name('admin.billing');
     Route::post('billing/portal', 'BillingController@portal')->name('admin.billing.portal');
 
@@ -40,7 +44,7 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['aut
     });
 });
 
-Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['auth', 'subscribed', 'selected.company']], function () {
+Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['auth', 'subscribed', 'onboarding.complete', 'selected.company']], function () {
     Route::get('/', 'AdminController@index')->name('admin.dashboard');
     Route::get('companies', 'CompaniesController@index')->name('admin.companies.index');
     Route::post('companies', 'CompaniesController@store')->name('admin.companies.store');

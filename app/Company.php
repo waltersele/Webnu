@@ -10,6 +10,10 @@ class Company extends Model
 {
     protected $fillable = ['name', 'chef_name', 'slug', 'logo', 'background_header', 'address', 'postal_code', 'city', 'province', 'country', 'phone', 'mobile_phone', 'email', 'web', 'whatsapp', 'facebook', 'instagram', 'comments', 'schedule', 'template', 'theme_settings', 'menu_type', 'menu_type_2_pdf', 'enabled', 'reservation', 'user_id', 'created_at', 'updated_at'];
 
+    protected $attributes = [
+        'reservation' => false,
+    ];
+
     protected $casts = [
         'theme_settings' => 'array',
         'enabled' => 'boolean',

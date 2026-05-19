@@ -68,5 +68,6 @@ class Kernel extends HttpKernel
         'digital.signage' => \App\Http\Middleware\VerifyDigitalSignageApp::class,
         'super.admin' => \App\Http\Middleware\EnsureSuperAdmin::class,
         'subscribed' => \App\Http\Middleware\EnsureSubscribed::class,
+        'onboarding.complete' => \App\Http\Middleware\EnsureOnboardingComplete::class,
     ];
 }

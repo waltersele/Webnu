@@ -9,6 +9,7 @@ use App\Services\MenuImportService;
 use App\Services\MenuScan\MenuScanResult;
 use App\Services\MenuScanService;
 use App\Services\Platform\PlatformSettingsService;
+use App\Services\UserPlanService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Facades\Cache;
@@ -16,19 +17,25 @@ use Illuminate\Support\Facades\Storage;
 
 class MenuScanController extends Controller
 {
-    public function create(PlatformSettingsService $platformSettings)
+    public function create(PlatformSettingsService $platformSettings, UserPlanService $plans)
     {
         $company = $this->selectedCompanyOrFail();
         $this->authorize('update', $company);
+        $user = auth()->user();
 
         return view('admin.menu-scan.create', [
             'company' => $company,
             'scanConfigured' => $platformSettings->hasGeminiApiKey(),
-            'isSuperAdmin' => auth()->user()->isSuperAdmin(),
+            'isSuperAdmin' => $user->isSuperAdmin(),
+            'scansRemaining' => $plans->menuScansRemaining($user),
+            'scansUsed' => $plans->menuScansUsed($user),
+            'scanLimit' => $plans->menuScanLimit($user),
+            'canScan' => $plans->canUseMenuScan($user),
+            'billingUrl' => route('admin.billing'),
         ]);
     }
 
-    public function store(Request $request, MenuScanService $scanService)
+    public function store(Request $request, MenuScanService $scanService, UserPlanService $plans)
     {
         $scanTimeout = (int) config('menu_scan.gemini.timeout', 90);
         $retries = (int) config('menu_scan.gemini.max_retries', 3);
@@ -46,14 +53,19 @@ class MenuScanController extends Controller
         ]);
 
         $user = auth()->user();
-        $rateKey = 'menu-scan:' . $user->id;
-        $maxScans = (int) config('menu_scan.limits.scans_per_hour', 5);
-        if ($maxScans > 0 && ! $user->isSuperAdmin()) {
-            $attempts = (int) Cache::get($rateKey, 0);
-            if ($attempts >= $maxScans) {
-                return back()->withErrors([
-                    'files' => 'Has alcanzado el límite de escaneos por hora (' . $maxScans . '). Inténtalo más tarde.',
-                ]);
+        $plans->assertCanUseMenuScan($user);
+
+        $lifetimeLimit = $plans->menuScanLimit($user);
+        if ($lifetimeLimit === null && ! $user->isSuperAdmin()) {
+            $rateKey = 'menu-scan:' . $user->id;
+            $maxScans = (int) config('menu_scan.limits.scans_per_hour', 5);
+            if ($maxScans > 0) {
+                $attempts = (int) Cache::get($rateKey, 0);
+                if ($attempts >= $maxScans) {
+                    return back()->withErrors([
+                        'files' => 'Has alcanzado el límite de escaneos por hora (' . $maxScans . '). Inténtalo más tarde.',
+                    ]);
+                }
             }
         }
 
@@ -80,8 +92,12 @@ class MenuScanController extends Controller
         $result = $scanService->scan($absolutePaths);
 
         if ($result->isSuccess()) {
-            if ($maxScans > 0 && ! $user->isSuperAdmin()) {
-                Cache::put($rateKey, (int) Cache::get($rateKey, 0) + 1, now()->addHour());
+            if ($lifetimeLimit === null && ! $user->isSuperAdmin()) {
+                $rateKey = 'menu-scan:' . $user->id;
+                $maxScansPerHour = (int) config('menu_scan.limits.scans_per_hour', 5);
+                if ($maxScansPerHour > 0) {
+                    Cache::put($rateKey, (int) Cache::get($rateKey, 0) + 1, now()->addHour());
+                }
             }
 
             $job->status = MenuScanJob::STATUS_REVIEW;

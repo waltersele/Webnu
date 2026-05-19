@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { buildLandingContent } from './data';
+import TemplateShowcase from './TemplateShowcase';
+import FeaturesHub from './FeaturesHub';
 import {
     fadeUp,
     scaleIn,
@@ -10,7 +12,6 @@ import {
     MotionH1,
     MotionH3,
     MotionP,
-    MotionUl,
     MotionArticle,
     Reveal,
     RevealChild,
@@ -23,12 +24,6 @@ function Icon({ name }) {
     const paths = {
         brush: 'M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01',
         devices: 'M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z',
-        docs: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z',
-        support: 'M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z',
-        updates: 'M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15',
-        pdf: 'M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z',
-        save: 'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8V7m0 10v1m0-13a9 9 0 110 18 9 9 0 010-18z',
-        print: 'M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z',
         check: 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z',
         qr: 'M3 3h4v4H3V3zm14 0h4v4h-4V3zM3 17h4v4H3v-4zm8 0h2v2h-2v-2zm4 0h4v4h-4v-4z',
     };
@@ -108,6 +103,7 @@ function TvpikScene({ content }) {
 
 export default function LandingApp({ config }) {
     const content = buildLandingContent(config);
+    const demoBase = config.routes?.demoMenu || '/carta/demo';
     const [navScrolled, setNavScrolled] = useState(false);
     const [scrollProgress, setScrollProgress] = useState(0);
 
@@ -172,7 +168,11 @@ export default function LandingApp({ config }) {
             </motion.header>
 
             <MotionSection id="inicio" className="wn-hero">
-                <div className="wn-hero__glow wn-hero__glow--1" />
+                <motion.div
+                    className="wn-hero__glow wn-hero__glow--1"
+                    animate={{ scale: [1, 1.12, 1], opacity: [0.2, 0.28, 0.2] }}
+                    transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}
+                />
                 <motion.div
                     className="wn-hero__glow wn-hero__glow--2"
                     animate={{ x: [0, 24, 0], y: [0, -16, 0] }}
@@ -181,18 +181,34 @@ export default function LandingApp({ config }) {
                 <motion.div className="wn-container wn-hero__grid">
                     <MotionDiv className="wn-hero__copy" variants={stagger} initial="hidden" animate="visible">
                         <MotionP className="wn-eyebrow" variants={fadeUp} custom={0}>
-                            Carta digital para restaurantes
+                            {content.hero.eyebrow}
                         </MotionP>
                         <MotionH1 className="wn-hero__title" variants={fadeUp} custom={0.05}>
                             {content.hero.title}{' '}
-                            <span>{content.hero.titleHighlight}</span> Pruébalo.
+                            <span>{content.hero.titleHighlight}</span>
                         </MotionH1>
                         <MotionP className="wn-hero__subtitle" variants={fadeUp} custom={0.12}>
                             {content.hero.subtitle}
                         </MotionP>
+                        <MotionDiv className="wn-hero__perks" variants={fadeUp} custom={0.16}>
+                            <ul>
+                                {content.hero.perks.map((perk) => (
+                                    <li key={perk}>
+                                        <Icon name="check" /> {perk}
+                                    </li>
+                                ))}
+                            </ul>
+                        </MotionDiv>
                         <MotionDiv variants={fadeUp} custom={0.2}>
-                            <a href="#precios" className="wn-btn wn-btn--ghost" onClick={(e) => { e.preventDefault(); scrollTo('precios'); }}>
-                                Ver planes
+                            <a
+                                href="#plantillas"
+                                className="wn-btn wn-btn--ghost"
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    scrollTo('plantillas');
+                                }}
+                            >
+                                Ver plantillas
                             </a>
                         </MotionDiv>
                     </MotionDiv>
@@ -201,47 +217,72 @@ export default function LandingApp({ config }) {
                         <p className="wn-hero__card-title">
                             <Icon name="qr" /> {content.hero.formTitle}
                         </p>
-                        <form id="subscription-form" action={config.routes.subscribe} method="POST" className="wn-form">
+                        <form action={config.routes.register} method="POST" className="wn-form wn-form--quick">
                             <input type="hidden" name="_token" value={config.csrfToken} />
-                            <input type="hidden" name="payment_method" id="payment_method" />
+                            <label>
+                                Nombre del restaurante
+                                <input
+                                    type="text"
+                                    name="business_name"
+                                    required
+                                    placeholder="Ej. La Brasa de Juan"
+                                    autoComplete="organization"
+                                />
+                            </label>
+                            <label>
+                                Tu nombre
+                                <input type="text" name="name" required placeholder="Nombre y apellidos" autoComplete="name" />
+                            </label>
                             <label>
                                 Email
-                                <input type="email" name="email" required placeholder="tu@email.com" />
+                                <input type="email" name="email" required placeholder="tu@email.com" autoComplete="email" />
                             </label>
                             <label>
                                 Contraseña
-                                <input type="password" name="password" required minLength={8} placeholder="Mínimo 8 caracteres" />
+                                <input
+                                    type="password"
+                                    name="password"
+                                    required
+                                    minLength={8}
+                                    placeholder="Mínimo 8 caracteres"
+                                    autoComplete="new-password"
+                                    onChange={(e) => {
+                                        const hidden = document.getElementById('landing-pwd-confirm');
+                                        if (hidden) {
+                                            hidden.value = e.target.value;
+                                        }
+                                    }}
+                                />
                             </label>
-                            <label>
-                                Confirmar contraseña
-                                <input type="password" name="password_confirmation" required minLength={8} />
-                            </label>
-                            <label>
-                                Suscripción
-                                <select name="subscription" required defaultValue="1">
-                                    <option value="1">Mensual 10€ / Mes</option>
-                                    <option value="2">Anual 100€ / Año</option>
-                                </select>
-                            </label>
-                            <label>
-                                Datos de la tarjeta
-                                <div id="card-element" className="wn-card-element" />
-                                <div id="card-errors" className="wn-form-error" role="alert" />
-                            </label>
+                            <input type="hidden" name="password_confirmation" id="landing-pwd-confirm" value="" />
                             <label className="wn-checkbox">
-                                <input type="checkbox" name="privacy_policy" value="1" id="privacy-check" />
+                                <input type="checkbox" name="privacy_policy" value="1" required />
                                 Acepto la política de privacidad
                             </label>
-                            <div className="wn-form-error" id="privacy-check-not-checked" style={{ display: 'none' }}>
-                                Debe aceptar la política de privacidad
-                            </div>
-                            <motion.button type="submit" className="wn-btn wn-btn--primary wn-btn--block" whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                                Contratar | 30 días GRATIS
+                            <p className="wn-form-note">{content.hero.formNote}</p>
+                            <motion.button
+                                type="submit"
+                                className="wn-btn wn-btn--primary wn-btn--block"
+                                whileHover={{ scale: 1.02 }}
+                                whileTap={{ scale: 0.98 }}
+                                onClick={() => {
+                                    const pwd = document.querySelector('.wn-form--quick input[name="password"]');
+                                    const hidden = document.getElementById('landing-pwd-confirm');
+                                    if (pwd && hidden) {
+                                        hidden.value = pwd.value;
+                                    }
+                                }}
+                            >
+                                Crear mi carta gratis
                             </motion.button>
                         </form>
                     </MotionDiv>
                 </motion.div>
             </MotionSection>
+
+            <TemplateShowcase content={content} demoBase={demoBase} />
+
+            <FeaturesHub content={content} demoUrl={demoBase} />
 
             <MotionSection id="exito" className="wn-section">
                 <motion.div className="wn-container">
@@ -253,7 +294,6 @@ export default function LandingApp({ config }) {
                         <RevealChild as={MotionDiv} className="wn-split__text" variants={fadeUp}>
                             <MotionH3>{content.success.blocks[0].title}</MotionH3>
                             <p>{content.success.blocks[0].text}</p>
-                            <img src={content.success.blocks[0].image} alt="Clientes Webnu" className="wn-rounded-img" />
                             <motion.div className="wn-btn-row">
                                 {content.success.blocks[0].demos.map((d) => (
                                     <a key={d.url} href={d.url} target="_blank" rel="noopener noreferrer" className="wn-btn wn-btn--outline">
@@ -263,14 +303,24 @@ export default function LandingApp({ config }) {
                             </motion.div>
                         </RevealChild>
                         <RevealChild as={MotionDiv} className="wn-split__media" variants={scaleIn}>
-                            <video autoPlay muted loop playsInline className="wn-phone-video">
-                                <source src={content.success.video} type="video/mp4" />
-                            </video>
+                            <motion.div
+                                className="wn-mini-phone"
+                                animate={{ y: [0, -10, 0] }}
+                                transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut' }}
+                            >
+                                <iframe title="Demo carta" src={`${demoBase}?tpl=bistro`} loading="lazy" />
+                            </motion.div>
                         </RevealChild>
                     </Reveal>
                     <Reveal className="wn-split wn-split--reverse" variants={stagger}>
-                        <RevealChild as={MotionDiv} className="wn-split__media" variants={scaleIn}>
-                            <img src={content.success.blocks[1].image} alt="" className="wn-rounded-img" />
+                        <RevealChild as={MotionDiv} className="wn-split__media wn-split__media--list" variants={scaleIn}>
+                            <ul className="wn-check-list wn-check-list--card">
+                                {content.success.blocks[1].bullets.map((b) => (
+                                    <li key={b}>
+                                        <Icon name="check" /> {b}
+                                    </li>
+                                ))}
+                            </ul>
                         </RevealChild>
                         <RevealChild as={MotionDiv} className="wn-split__text" variants={fadeUp}>
                             <MotionH3>{content.success.blocks[1].title}</MotionH3>
@@ -288,9 +338,22 @@ export default function LandingApp({ config }) {
                         <p>{content.ia.text}</p>
                         <ul>
                             {content.ia.points.map((pt) => (
-                                <li key={pt}><Icon name="check" /> {pt}</li>
+                                <li key={pt}>
+                                    <Icon name="check" /> {pt}
+                                </li>
                             ))}
                         </ul>
+                        <motion.a
+                            href="#inicio"
+                            className="wn-btn wn-btn--ghost wn-btn--on-dark"
+                            onClick={(e) => {
+                                e.preventDefault();
+                                scrollTo('inicio');
+                            }}
+                            whileHover={{ scale: 1.03 }}
+                        >
+                            Probar escaneo IA gratis
+                        </motion.a>
                     </motion.div>
                 </Reveal>
             </MotionSection>
@@ -308,7 +371,9 @@ export default function LandingApp({ config }) {
                             <p>{content.tvpik.text}</p>
                             <ul className="wn-check-list">
                                 {content.tvpik.features.map((f) => (
-                                    <li key={f}><Icon name="check" /> {f}</li>
+                                    <li key={f}>
+                                        <Icon name="check" /> {f}
+                                    </li>
                                 ))}
                             </ul>
                             <a href={content.tvpik.demoUrl} target="_blank" rel="noopener noreferrer" className="wn-btn wn-btn--outline">
@@ -317,77 +382,6 @@ export default function LandingApp({ config }) {
                         </Reveal>
                         <TvpikScene content={content} />
                     </motion.div>
-                </motion.div>
-            </MotionSection>
-
-            <MotionSection id="feature" className="wn-section">
-                <motion.div className="wn-container">
-                    <Reveal className="wn-section-head" variants={fadeUp}>
-                        <h2>{content.features.title}</h2>
-                    </Reveal>
-                    <Reveal className="wn-features" variants={stagger}>
-                        <RevealChild as={MotionDiv} className="wn-features__col" variants={fadeUp}>
-                            {content.features.left.map((f) => (
-                                <motion.div key={f.title} className="wn-feature-item">
-                                    <Icon name={f.icon} />
-                                    <motion.div>
-                                        <h4>{f.title}</h4>
-                                        <p>{f.text}</p>
-                                    </motion.div>
-                                </motion.div>
-                            ))}
-                        </RevealChild>
-                        <RevealChild as={MotionDiv} className="wn-features__center" variants={scaleIn}>
-                            <motion.img
-                                src={content.features.centerImage}
-                                alt="Carta Webnu"
-                                whileHover={{ scale: 1.03, rotate: 1 }}
-                                transition={{ type: 'spring', stiffness: 260, damping: 18 }}
-                            />
-                        </RevealChild>
-                        <RevealChild as={MotionDiv} className="wn-features__col" variants={fadeUp}>
-                            {content.features.right.map((f) => (
-                                <motion.div key={f.title} className="wn-feature-item">
-                                    <Icon name={f.icon} />
-                                    <motion.div>
-                                        <h4>{f.title}</h4>
-                                        <p>{f.text}</p>
-                                    </motion.div>
-                                </motion.div>
-                            ))}
-                        </RevealChild>
-                    </Reveal>
-                </motion.div>
-            </MotionSection>
-
-            <MotionSection id="ventajas" className="wn-section wn-section--muted">
-                <motion.div className="wn-container">
-                    <Reveal className="wn-section-head" variants={fadeUp}>
-                        <h2>{content.advantages.title}</h2>
-                    </Reveal>
-                    <Reveal className="wn-advantage-lists" variants={stagger}>
-                        {content.advantages.lists.map((list) => (
-                            <RevealChild key={list.join()} as={MotionUl} className="wn-advantage-list" variants={fadeUp}>
-                                {list.map((item) => (
-                                    <li key={item}>{item}</li>
-                                ))}
-                            </RevealChild>
-                        ))}
-                    </Reveal>
-                    <Reveal className="wn-screenshots" variants={stagger}>
-                        {content.advantages.screenshots.map((src, i) => (
-                            <RevealChild
-                                key={src}
-                                as={MotionDiv}
-                                className="wn-screenshot"
-                                variants={scaleIn}
-                                custom={i * 0.06}
-                                whileHover={{ y: -8, scale: 1.02 }}
-                            >
-                                <img src={src} alt={`Captura ${i + 1}`} loading="lazy" />
-                            </RevealChild>
-                        ))}
-                    </Reveal>
                 </motion.div>
             </MotionSection>
 
@@ -417,11 +411,20 @@ export default function LandingApp({ config }) {
                                 </motion.div>
                                 <ul>
                                     {plan.perks.map((perk) => (
-                                        <li key={perk}><Icon name="check" /> {perk}</li>
+                                        <li key={perk}>
+                                            <Icon name="check" /> {perk}
+                                        </li>
                                     ))}
                                 </ul>
-                                <a href="#inicio" className="wn-btn wn-btn--primary wn-btn--block" onClick={(e) => { e.preventDefault(); scrollTo('inicio'); }}>
-                                    ¡Contrátalo ya!
+                                <a
+                                    href="#inicio"
+                                    className="wn-btn wn-btn--primary wn-btn--block"
+                                    onClick={(e) => {
+                                        e.preventDefault();
+                                        scrollTo('inicio');
+                                    }}
+                                >
+                                    Empezar gratis
                                 </a>
                             </RevealChild>
                         ))}
@@ -455,9 +458,7 @@ export default function LandingApp({ config }) {
 
             <footer className="wn-footer">
                 <motion.div className="wn-container">
-                    <p>
-                        © {new Date().getFullYear()} Webnu · Todos los derechos reservados · Desarrollado con ♥ por Webnu
-                    </p>
+                    <p>© {new Date().getFullYear()} Webnu · Todos los derechos reservados</p>
                     <a href="https://www.instagram.com/webnucartadigital/" target="_blank" rel="nofollow noopener noreferrer">
                         Instagram
                     </a>

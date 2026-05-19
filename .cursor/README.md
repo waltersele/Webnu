@@ -1,27 +1,50 @@
-# Conversaciones Cursor — Webnu
+# Workspace Cursor — Webnu
 
-## Historial importado
+## Cómo abrir el proyecto
 
-La conversación principal de desarrollo de Webnu se importó desde el workspace anterior (`c:\webproject\Webnu`).
+1. Clona o actualiza: `git clone https://github.com/waltersele/Webnu.git`
+2. Abre **`Webnu.code-workspace`** (doble clic o *File → Open Workspace from File*).
+3. Ruta local habitual: `c:\webProject\webnu\Webnu`
+
+## Sincronización con GitHub
+
+| Qué se sube | Qué no |
+|-------------|--------|
+| Código, docs, `Webnu.code-workspace`, este README | `.cursor/conversations/` (historial local) |
+| `docs/HISTORIAL-CURSOR-WEBNU.md` (resumen legible) | `.env`, `vendor/`, `node_modules/` |
+
+Tras `git pull`:
+
+```bash
+composer install
+php artisan migrate
+npm install
+```
+
+## Contexto para el agente
+
+- **README principal:** [../README.md](../README.md)
+- **Últimas features:** [../docs/ONBOARDING-FREEMIUM.md](../docs/ONBOARDING-FREEMIUM.md)
+- **Historial desarrollo:** [../docs/HISTORIAL-CURSOR-WEBNU.md](../docs/HISTORIAL-CURSOR-WEBNU.md)
+
+Si el chat no tiene contexto previo, indica por ejemplo:
+
+> Continúa Webnu: onboarding freemium, landing en `/`, límites en `UserPlanService`. Lee `docs/ONBOARDING-FREEMIUM.md`.
+
+## Historial importado (workspace anterior)
 
 | Archivo | Descripción |
 |---------|-------------|
-| `conversations/2502c06f-historial-webnu.jsonl` | Transcript completo (formato Cursor) |
-| `../docs/HISTORIAL-CURSOR-WEBNU.md` | Resumen legible en Markdown |
+| `conversations/` (gitignored) | Transcripts JSONL locales de Cursor |
+| `../docs/HISTORIAL-CURSOR-WEBNU.md` | Resumen en Markdown |
 
-**ID de conversación:** `2502c06f-0e81-4866-a184-aacb72fa4ba5`
+**ID conversación original:** `2502c06f-0e81-4866-a184-aacb72fa4ba5`
 
-## Cómo retomar el contexto
+## Estado del repo (mayo 2026)
 
-1. Abre este proyecto con **`Webnu.code-workspace`** (doble clic o *File → Open Workspace from File*).
-2. En el chat de Cursor, el historial debería aparecer en conversaciones anteriores.
-3. Si no aparece en la UI, consulta `docs/HISTORIAL-CURSOR-WEBNU.md` o pega al agente: *"Continúa desde el historial importado en docs/HISTORIAL-CURSOR-WEBNU.md"*.
+- Landing principal: Blade `landing-preview` en `/`
+- Registro freemium → onboarding 5 pasos
+- Plan Gratis: 1 carta, 5 escaneos IA
+- Estudio de plantillas, escaneo Gemini, panel plataforma
 
-## Nota sobre GitHub
-
-GitHub **no almacena** conversaciones de Cursor; solo el código. El historial proviene del almacenamiento local de Cursor en el workspace original.
-
-## Estructura de carpetas
-
-- **Este repo** (`Webnu/Webnu`): código sincronizado con GitHub, incluye el commit de rediseño (`61c46e0`).
-- **Carpeta padre** (`c:\webproject\Webnu`): workspace anterior con la conversación original; quedó en commit `49cc84a` con este subdirectorio sin trackear.
+Repositorio remoto: **https://github.com/waltersele/Webnu** (rama `main`).
