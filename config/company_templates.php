@@ -18,6 +18,27 @@ return [
             'recommended' => true,
             'preview_image' => 'img/admin/templates/bistro.svg',
         ],
+        'nocturne' => [
+            'label' => 'Nocturno',
+            'description' => 'Modo oscuro, plato destacado con overlay y categorías fijas.',
+            'group' => 'modern',
+            'recommended' => true,
+            'preview_image' => 'img/admin/templates/nocturne.svg',
+        ],
+        'temporada' => [
+            'label' => 'Temporada',
+            'description' => 'Menú claro, tarjetas con foto y etiquetas de alérgenos.',
+            'group' => 'modern',
+            'recommended' => true,
+            'preview_image' => 'img/admin/templates/temporada.svg',
+        ],
+        'catalogo' => [
+            'label' => 'Catálogo',
+            'description' => 'Listado horizontal compacto con chips de categoría fijos.',
+            'group' => 'modern',
+            'recommended' => false,
+            'preview_image' => 'img/admin/templates/catalogo.svg',
+        ],
         'basic' => [
             'label' => 'Básica',
             'description' => 'Carta clara y compacta, ideal para cualquier negocio.',
@@ -55,6 +76,27 @@ return [
         'surface' => 'Tarjetas / superficies',
         'text' => 'Texto',
         'text_muted' => 'Texto secundario',
+    ],
+
+    'font_keys' => [
+        'font_heading' => 'Fuente de títulos',
+        'font_body' => 'Fuente de textos',
+    ],
+
+    'font_defaults' => [
+        'font_heading' => 'playfair',
+        'font_body' => 'inter',
+    ],
+
+    'fonts' => [
+        'inter' => ['label' => 'Inter', 'family' => 'Inter', 'category' => 'sans-serif', 'weights' => '400;500;600;700'],
+        'open_sans' => ['label' => 'Open Sans', 'family' => 'Open Sans', 'category' => 'sans-serif', 'weights' => '400;600;700'],
+        'montserrat' => ['label' => 'Montserrat', 'family' => 'Montserrat', 'category' => 'sans-serif', 'weights' => '500;600;700'],
+        'poppins' => ['label' => 'Poppins', 'family' => 'Poppins', 'category' => 'sans-serif', 'weights' => '400;500;600'],
+        'lora' => ['label' => 'Lora', 'family' => 'Lora', 'category' => 'serif', 'weights' => '400;600;700'],
+        'playfair' => ['label' => 'Playfair Display', 'family' => 'Playfair Display', 'category' => 'serif', 'weights' => '400;600;700'],
+        'cormorant' => ['label' => 'Cormorant Garamond', 'family' => 'Cormorant Garamond', 'category' => 'serif', 'weights' => '400;600;700'],
+        'merriweather' => ['label' => 'Merriweather', 'family' => 'Merriweather', 'category' => 'serif', 'weights' => '400;700'],
     ],
 
     'defaults' => [
@@ -104,6 +146,30 @@ return [
             'background' => '#eef1f6',
             'surface' => '#ffffff',
             'text' => '#0f172a',
+            'text_muted' => '#64748b',
+        ],
+        'nocturne' => [
+            'primary' => '#7ec8ff',
+            'accent' => '#d4af37',
+            'background' => '#0a0e14',
+            'surface' => '#141a22',
+            'text' => '#f4f7fb',
+            'text_muted' => '#9aa8b8',
+        ],
+        'temporada' => [
+            'primary' => '#1e3a5f',
+            'accent' => '#2563eb',
+            'background' => '#f4f6f9',
+            'surface' => '#ffffff',
+            'text' => '#0f172a',
+            'text_muted' => '#64748b',
+        ],
+        'catalogo' => [
+            'primary' => '#334155',
+            'accent' => '#0ea5e9',
+            'background' => '#f8fafc',
+            'surface' => '#ffffff',
+            'text' => '#1e293b',
             'text_muted' => '#64748b',
         ],
     ],
@@ -202,6 +268,36 @@ return [
                 'surface' => '#ffffff',
                 'text' => '#212121',
                 'text_muted' => '#757575',
+            ],
+        ],
+        'nocturne' => [
+            'Coctelería' => [
+                'primary' => '#7ec8ff',
+                'accent' => '#c9a962',
+                'background' => '#0a0e14',
+                'surface' => '#141a22',
+                'text' => '#f4f7fb',
+                'text_muted' => '#9aa8b8',
+            ],
+        ],
+        'temporada' => [
+            'Primavera' => [
+                'primary' => '#1e3a5f',
+                'accent' => '#2563eb',
+                'background' => '#f4f6f9',
+                'surface' => '#ffffff',
+                'text' => '#0f172a',
+                'text_muted' => '#64748b',
+            ],
+        ],
+        'catalogo' => [
+            'Minimal' => [
+                'primary' => '#334155',
+                'accent' => '#0ea5e9',
+                'background' => '#f8fafc',
+                'surface' => '#ffffff',
+                'text' => '#1e293b',
+                'text_muted' => '#64748b',
             ],
         ],
     ],

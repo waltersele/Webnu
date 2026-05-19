@@ -1,4 +1,4 @@
-﻿<!-- Navbar -->
+<!-- Navbar -->
 <nav class="main-header navbar navbar-expand navbar-white navbar-light">
     <!-- Left navbar links -->
     <ul class="navbar-nav">
@@ -43,7 +43,7 @@
             <form method="POST" action="{{ route('logout') }}" class="d-inline w-100">
                 @csrf
                 <button type="submit" class="dropdown-item border-0 bg-transparent w-100 text-left">
-                    <i class="fas fa-power-off"></i> Cerrar sesión
+                    <i class="fas fa-power-off"></i> Cerrar sesi�n
                 </button>
             </form>
         </div>
@@ -51,3 +51,4 @@
     </ul>
   </nav>
   <!-- /.navbar -->
+

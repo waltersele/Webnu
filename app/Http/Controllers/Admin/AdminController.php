@@ -1,18 +1,28 @@
 <?php
 
 namespace App\Http\Controllers\Admin;
+
+use App\Company;
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cookie;
 
 class AdminController extends Controller
 {
-    /**
-     * Show the application dashboard.
-     *
-     * @return \Illuminate\Contracts\Support\Renderable
-     */
     public function index()
     {
-        return view('admin.dashboard');
+        if (auth()->user() && auth()->user()->isSuperAdmin()) {
+            return redirect()->route('admin.platform.dashboard');
+        }
+
+        $dashboardCompany = null;
+
+        $selectedId = Cookie::get('selected_company');
+        if ($selectedId && auth()->check()) {
+            $dashboardCompany = Company::where('user_id', auth()->id())
+                ->where('id', (int) $selectedId)
+                ->first();
+        }
+
+        return view('admin.dashboard', compact('dashboardCompany'));
     }
 }

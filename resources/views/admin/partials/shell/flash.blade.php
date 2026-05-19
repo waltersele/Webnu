@@ -1,4 +1,4 @@
-﻿@if(session()->has('flash'))
+@if(session()->has('flash'))
     <div class="webnu-flash">
         <div class="alert alert-success alert-dismissible fade show mb-0" role="alert">
             {{ session('flash') }}
@@ -8,3 +8,4 @@
         </div>
     </div>
 @endif
+

@@ -1,0 +1,20 @@
+{
+	"folders": [
+		{
+			"name": "Webnu (proyecto)",
+			"path": "."
+		}
+	],
+	"settings": {
+		"files.exclude": {
+			"**/vendor": true,
+			"**/node_modules": true
+		}
+	},
+	"extensions": {
+		"recommendations": [
+			"bmewburn.vscode-intelephense-client",
+			"onecentlin.laravel-blade"
+		]
+	}
+}

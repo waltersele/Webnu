@@ -1,0 +1,30 @@
+.wn-dash-menu-card {
+  background: linear-gradient(180deg, #f8fafc 0%, #fff 100%);
+  border: 1px solid #e4e6eb !important;
+}
+
+.wn-dash-stat__value {
+  font-size: 2rem;
+  font-weight: 700;
+  line-height: 1.1;
+  color: #0074d9;
+}
+
+.wn-dash-stat__label {
+  font-size: 0.8125rem;
+  color: #697a8d;
+  margin-top: 0.15rem;
+}
+
+.wn-dash-action {
+  font-weight: 500;
+  padding-top: 0.65rem;
+  padding-bottom: 0.65rem;
+}
+
+@media (max-width: 575.98px) {
+  .wn-dash-stat {
+    text-align: left !important;
+    width: 100%;
+  }
+}

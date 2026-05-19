@@ -3,15 +3,44 @@
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', 'PagesController@index')->name('home');
+Route::get('/landing-preview', 'PagesController@landingPreview')->name('landing.preview');
 Route::view('/welcome', 'welcome')->name('welcome');
 Route::post('/pay_product', 'PaymentController@pay_product')->name('pay_product');
 Route::post('/process_subscription', 'PaymentController@process_subscription')->name('process_subscription');
 Route::post('/te_llamamos', 'PagesController@te_llamamos')->middleware('throttle:10,1')->name('te_llamamos');
 Route::post('/table_reservation', 'PagesController@table_reservation')->middleware('throttle:10,1')->name('table_reservation');
 
+Route::post(
+    'stripe/webhook',
+    '\Laravel\Cashier\Http\Controllers\WebhookController@handleWebhook'
+);
+
 Route::get('carta/{companySlug}', 'PagesController@see_menu')->name('see_menu');
 
-Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['auth', 'selected.company']], function () {
+Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['auth']], function () {
+    Route::get('billing', 'BillingController@index')->name('admin.billing');
+    Route::post('billing/portal', 'BillingController@portal')->name('admin.billing.portal');
+
+    Route::group(['prefix' => 'platform', 'middleware' => ['super.admin']], function () {
+        Route::get('/', 'PlatformDashboardController@index')->name('admin.platform.dashboard');
+        Route::get('settings', 'PlatformSettingsController@edit')->name('admin.platform.settings');
+        Route::put('settings', 'PlatformSettingsController@update')->name('admin.platform.settings.update');
+        Route::post('settings/test-gemini', 'PlatformSettingsController@testGemini')->name('admin.platform.settings.test-gemini');
+        Route::get('users', 'PlatformUsersController@index')->name('admin.platform.users.index');
+        Route::get('users/{user}', 'PlatformUsersController@show')->name('admin.platform.users.show');
+        Route::post('users/{user}/grant-super-admin', 'PlatformUsersController@grantSuperAdmin')
+            ->name('admin.platform.users.grant-super-admin')
+            ->middleware('throttle:30,1');
+        Route::post('users/{user}/cancel-subscription', 'PlatformUsersController@cancelSubscription')
+            ->name('admin.platform.users.cancel-subscription')
+            ->middleware('throttle:30,1');
+        Route::post('users/{user}/resume-subscription', 'PlatformUsersController@resumeSubscription')
+            ->name('admin.platform.users.resume-subscription')
+            ->middleware('throttle:30,1');
+    });
+});
+
+Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['auth', 'subscribed', 'selected.company']], function () {
     Route::get('/', 'AdminController@index')->name('admin.dashboard');
     Route::get('companies', 'CompaniesController@index')->name('admin.companies.index');
     Route::post('companies', 'CompaniesController@store')->name('admin.companies.store');
@@ -50,6 +79,13 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['aut
     Route::delete('products/delete_video_product/{product}', 'ProductsController@delete_video_product')->name('admin.products.delete_video_product');
     Route::put('products/order_product', 'ProductsController@order_product')->name('admin.products.order_product');
     Route::patch('products/{product}/enabled', 'ProductsController@toggle_enabled')->name('admin.products.toggle_enabled');
+
+    Route::get('menu-scan', 'MenuScanController@create')->name('admin.menu-scan.create');
+    Route::post('menu-scan', 'MenuScanController@store')->name('admin.menu-scan.store');
+    Route::get('menu-scan/{job}', 'MenuScanController@show')->name('admin.menu-scan.show');
+    Route::put('menu-scan/{job}', 'MenuScanController@update')->name('admin.menu-scan.update');
+    Route::post('menu-scan/{job}/import', 'MenuScanController@import')->name('admin.menu-scan.import');
+    Route::delete('menu-scan/{job}', 'MenuScanController@destroy')->name('admin.menu-scan.destroy');
 });
 
 Route::get('login', 'Auth\LoginController@showLoginForm')->name('login');

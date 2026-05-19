@@ -76,6 +76,14 @@ class MenuService
             }
         }
 
+        foreach (array_keys(config('company_templates.font_keys', [])) as $fontKey) {
+            $value = $request->query('theme_' . $fontKey);
+            $allowed = array_keys(config('company_templates.fonts', []));
+            if (is_string($value) && in_array($value, $allowed, true)) {
+                $overrides[$fontKey] = $value;
+            }
+        }
+
         if ($overrides !== []) {
             $company->theme_settings = array_merge(
                 $company->resolvedThemeSettings(),

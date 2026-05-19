@@ -1,7 +1,7 @@
 @extends('admin.layout')
 
 @section('page_title', $company->name)
-@section('page_subtitle', 'Estudio del negocio — configura tu carta digital')
+@section('page_subtitle', 'Configura nombre, contacto, diseño y publicación de tu carta')
 
 @section('page_actions')
     <a href="{{ route('see_menu', $company->slug) }}" target="_blank" rel="noopener" class="btn btn-outline-primary btn-sm">
@@ -30,44 +30,50 @@
 
     <div class="row g-4 wn-studio-layout">
         <div class="col-lg-7 col-xl-8">
-            <div class="card border-0 shadow-sm mb-3">
-                <div class="card-body pb-0">
-                    <nav class="nav nav-pills flex-column flex-md-row wn-studio-nav gap-2 mb-0" role="tablist">
+            <div class="card border-0 shadow-sm wn-studio-card">
+                <div class="card-body pb-0 pt-3">
+                    <nav class="wn-studio-stepper" role="tablist" aria-label="Pasos del estudio">
                         @foreach($steps as $stepKey => $stepMeta)
+                            @php $stepIndex = array_search($stepKey, array_keys($steps), true); @endphp
                             <button type="button"
-                                class="nav-link {{ $activeStep === $stepKey ? 'active' : '' }}"
-                                data-wn-step="{{ $stepKey }}">
-                                <i class="{{ $stepMeta['icon'] }} me-1"></i> {{ $stepMeta['label'] }}
+                                class="wn-studio-stepper__item {{ $activeStep === $stepKey ? 'is-active' : '' }}"
+                                data-wn-step="{{ $stepKey }}"
+                                aria-current="{{ $activeStep === $stepKey ? 'step' : 'false' }}">
+                                <span class="wn-studio-stepper__num">{{ $stepIndex + 1 }}</span>
+                                <span class="wn-studio-stepper__label">{{ $stepMeta['label'] }}</span>
                             </button>
                         @endforeach
                     </nav>
                 </div>
-                <div class="card-body pt-4">
+                <div class="card-body pt-3">
                     @include('admin.companies.partials.studio-step-identity')
                     @include('admin.companies.partials.studio-step-contact')
                     @include('admin.companies.partials.studio-step-design')
                     @include('admin.companies.partials.studio-step-publish')
                 </div>
-                <div class="card-footer bg-light d-flex flex-wrap justify-content-between align-items-center gap-2 border-top">
-                    <button type="button" class="btn btn-label-secondary" id="wn-step-prev" disabled>
-                        <i class="ri-arrow-left-line me-1"></i> Anterior
-                    </button>
-                    <div class="d-flex gap-2">
-                        <button type="button" class="btn btn-outline-primary" id="wn-step-next">
-                            Siguiente <i class="ri-arrow-right-line ms-1"></i>
+                <div class="card-footer wn-studio-footer border-0">
+                    <div class="wn-studio-footer__primary">
+                        <button type="button" class="btn btn-label-secondary" id="wn-step-prev" disabled>
+                            <i class="ri-arrow-left-line me-1"></i> Anterior
                         </button>
-                        <button type="submit" class="btn btn-primary">
-                            <i class="ri-save-line me-1"></i> Guardar
+                        <div class="d-flex flex-wrap gap-2">
+                            <button type="button" class="btn btn-outline-primary" id="wn-step-next">
+                                Siguiente <i class="ri-arrow-right-line ms-1"></i>
+                            </button>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="ri-save-line me-1"></i> Guardar
+                            </button>
+                        </div>
+                    </div>
+                    <div class="wn-studio-footer__secondary">
+                        <a href="{{ route('admin.companies.index') }}" class="btn btn-sm btn-label-secondary">
+                            <i class="ri-arrow-left-s-line me-1"></i> Volver a negocios
+                        </a>
+                        <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#modal-delete-company">
+                            <i class="ri-delete-bin-line me-1"></i> Eliminar negocio
                         </button>
                     </div>
                 </div>
-            </div>
-
-            <div class="d-flex justify-content-between align-items-center">
-                <a href="{{ route('admin.companies.index') }}" class="btn btn-label-secondary btn-sm">Volver a negocios</a>
-                <a href="#" class="text-danger btn btn-sm btn-text" data-bs-toggle="modal" data-bs-target="#modal-delete-company">
-                    <i class="ri-delete-bin-line me-1"></i> Eliminar negocio
-                </a>
             </div>
         </div>
 
@@ -104,11 +110,9 @@
 
 @push('styles')
     <link rel="stylesheet" href="{{ asset('materio/css/webnu-company-studio.css') }}">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.7.0/dropzone.min.css">
 @endpush
 
 @push('scripts')
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.7.0/min/dropzone.min.js"></script>
     <script>
         window.WebnuCompanyStudio = {
             companyId: {{ $company->id }},
@@ -124,3 +128,4 @@
     </script>
     <script src="{{ asset('materio/js/webnu-company-studio.js') }}"></script>
 @endpush
+

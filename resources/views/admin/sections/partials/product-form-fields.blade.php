@@ -116,7 +116,6 @@
             'product' => $product ?? null,
         ])
         <hr class="my-4">
-        <p class="fw-medium mb-2">Etiqueta en carta</p>
         @include('admin.sections.partials.product-highlight-options', [
             'mode' => $mode ?? 'add',
             'product' => $product ?? null,
@@ -139,3 +138,4 @@
     <input type="hidden" name="product_id" id="product-modify-id">
     <input type="hidden" name="product_modify_section_id" id="product-modify-section-id">
 @endif
+

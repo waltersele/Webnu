@@ -6,31 +6,34 @@
     $options = config('product_highlights.options', []);
 @endphp
 
-<div class="webnu-product-highlight-options">
-    <p class="text-muted small mb-3 mb-md-2">Muestra una etiqueta en la carta. Solo puedes elegir una.</p>
-    <div class="d-flex flex-column gap-2">
-        <div class="form-check">
+<div class="webnu-highlight-pills" role="radiogroup" aria-label="Etiqueta en carta">
+    <p class="text-muted small mb-2">Muestra una etiqueta en la carta. Solo puedes elegir una.</p>
+    <div class="webnu-highlight-pills__row">
+        <label class="webnu-highlight-pill">
             <input type="radio"
-                   class="form-check-input"
+                   class="webnu-highlight-pill__input"
                    name="{{ $fieldName }}"
                    id="{{ $prefix }}-highlight-none"
                    value=""
                    {{ $current === '' || $current === null ? 'checked' : '' }}>
-            <label class="form-check-label" for="{{ $prefix }}-highlight-none">Sin etiqueta</label>
-        </div>
+            <span class="webnu-highlight-pill__face webnu-highlight-pill__face--none">
+                <i class="ri-close-circle-line"></i>
+                <span>Sin etiqueta</span>
+            </span>
+        </label>
         @foreach ($options as $key => $option)
-            <div class="form-check">
+            <label class="webnu-highlight-pill webnu-highlight-pill--{{ $key }}">
                 <input type="radio"
-                       class="form-check-input"
+                       class="webnu-highlight-pill__input"
                        name="{{ $fieldName }}"
                        id="{{ $prefix }}-highlight-{{ $key }}"
                        value="{{ $key }}"
                        {{ (string) $current === (string) $key ? 'checked' : '' }}>
-                <label class="form-check-label d-inline-flex align-items-center gap-2" for="{{ $prefix }}-highlight-{{ $key }}">
+                <span class="webnu-highlight-pill__face">
                     @include('admin.sections.partials.product-highlight-badge', ['highlight' => $key, 'size' => 'sm'])
-                    {{ $option['label'] }}
-                </label>
-            </div>
+                    <span>{{ $option['label'] }}</span>
+                </span>
+            </label>
         @endforeach
     </div>
 </div>

@@ -5,10 +5,12 @@ namespace App\Http\Controllers\Admin;
 use App\Company;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 
 class CompaniesController extends Controller
 {
@@ -25,6 +27,8 @@ class CompaniesController extends Controller
 
         $templates = config('company_templates.templates', []);
         $colorKeys = config('company_templates.color_keys', []);
+        $fontKeys = config('company_templates.font_keys', []);
+        $fonts = config('company_templates.fonts', []);
         $themeSettings = $company->resolvedThemeSettings();
         $themePresets = config('company_templates.presets', []);
         $previewUrl = route('see_menu', [
@@ -40,6 +44,8 @@ class CompaniesController extends Controller
             'company',
             'templates',
             'colorKeys',
+            'fontKeys',
+            'fonts',
             'themeSettings',
             'themePresets',
             'previewUrl',
@@ -155,50 +161,66 @@ class CompaniesController extends Controller
     {
         $this->authorize('update', $company);
 
-        $this->validate(request(), [
-            'logo' => 'required|image|max:5120',
-        ]);
+        $file = $this->validatedBrandImage('logo');
 
-        $company->logo = request()->file('logo')->store('negocios');
+        $old = $company->logo;
+        $company->logo = $file->store('negocios');
         $company->save();
 
-        return back()->with('flash', 'Logo actualizado correctamente');
+        if ($old && $old !== $company->logo) {
+            Storage::delete($old);
+        }
+
+        return response()->json([
+            'success' => true,
+            'url' => '/img/' . $company->logo,
+        ]);
     }
 
     public function deletelogo(Company $company)
     {
         $this->authorize('update', $company);
 
-        Storage::delete($company->logo);
-        $company->logo = null;
-        $company->save();
+        if ($company->logo) {
+            Storage::delete($company->logo);
+            $company->logo = null;
+            $company->save();
+        }
 
-        return back();
+        return response()->json(['success' => true]);
     }
 
     public function storeheader(Company $company)
     {
         $this->authorize('update', $company);
 
-        $this->validate(request(), [
-            'header' => 'required|image|max:5120',
-        ]);
+        $file = $this->validatedBrandImage('background_header');
 
-        $company->background_header = request()->file('header')->store('negocios');
+        $old = $company->background_header;
+        $company->background_header = $file->store('negocios');
         $company->save();
 
-        return back()->with('flash', 'Cabecera actualizada correctamente');
+        if ($old && $old !== $company->background_header) {
+            Storage::delete($old);
+        }
+
+        return response()->json([
+            'success' => true,
+            'url' => '/img/' . $company->background_header,
+        ]);
     }
 
     public function deleteheader(Company $company)
     {
         $this->authorize('update', $company);
 
-        Storage::delete($company->background_header);
-        $company->background_header = null;
-        $company->save();
+        if ($company->background_header) {
+            Storage::delete($company->background_header);
+            $company->background_header = null;
+            $company->save();
+        }
 
-        return back();
+        return response()->json(['success' => true]);
     }
 
     public function changecompany(Request $request)
@@ -228,6 +250,52 @@ class CompaniesController extends Controller
             }
         }
 
+        $allowedFonts = array_keys(config('company_templates.fonts', []));
+        foreach (array_keys(config('company_templates.font_keys', [])) as $fontKey) {
+            $value = $request->input('theme_' . $fontKey);
+            if ($value && in_array($value, $allowedFonts, true)) {
+                $normalized[$fontKey] = $value;
+            }
+        }
+
         return $normalized;
+    }
+
+    protected function validatedBrandImage(string $field): UploadedFile
+    {
+        $file = request()->file($field);
+
+        if (!$file) {
+            throw ValidationException::withMessages([
+                $field => ['No se recibió ningún archivo. Vuelve a seleccionar la imagen.'],
+            ]);
+        }
+
+        if (!$file->isValid()) {
+            $message = 'No se pudo subir la imagen.';
+            switch ($file->getError()) {
+                case UPLOAD_ERR_INI_SIZE:
+                case UPLOAD_ERR_FORM_SIZE:
+                    $message = 'La imagen es demasiado grande. Máximo 5 MB.';
+                    break;
+                case UPLOAD_ERR_PARTIAL:
+                    $message = 'La subida se interrumpió. Vuelve a intentarlo.';
+                    break;
+                case UPLOAD_ERR_NO_TMP_DIR:
+                case UPLOAD_ERR_CANT_WRITE:
+                    $message = 'Error del servidor al guardar la imagen. Contacta con soporte.';
+                    break;
+            }
+
+            throw ValidationException::withMessages([
+                $field => [$message],
+            ]);
+        }
+
+        $this->validate(request(), [
+            $field => 'required|file|mimes:jpeg,jpg,png,gif,webp|max:5120',
+        ]);
+
+        return $file;
     }
 }

@@ -1,0 +1,11 @@
+.wn-platform-metrics .card h3 {
+    font-weight: 600;
+}
+
+.wn-platform-users-table td {
+    vertical-align: middle;
+}
+
+.wn-platform-users-table .badge {
+    font-size: 0.75rem;
+}

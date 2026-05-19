@@ -27,12 +27,45 @@
     <div class="row g-3">
         <div class="col-md-6">
             <label class="form-label">Logo</label>
-            <div class="dropzone dropzone-logo wn-dropzone"></div>
+            @php $logoUrl = $company->logo ? '/img/' . $company->logo : null; @endphp
+            <div class="wn-brand-upload" id="wn-upload-logo"
+                data-upload-url="{{ route('admin.companies.storelogo', $company) }}"
+                data-delete-url="{{ route('admin.companies.deletelogo', $company) }}"
+                data-param="logo"
+                data-existing-url="{{ $logoUrl }}">
+                <input type="file" class="wn-brand-upload__input" accept="image/*" tabindex="-1" aria-hidden="true">
+                <div class="wn-brand-upload__empty {{ $logoUrl ? 'd-none' : '' }}">
+                    <i class="ri-upload-cloud-2-line d-block fs-3 mb-1"></i>
+                    Arrastra el logo o haz clic
+                </div>
+                <div class="wn-brand-upload__preview {{ $logoUrl ? '' : 'd-none' }}">
+                    <img src="{{ $logoUrl ?: '' }}" alt="Logo">
+                    <button type="button" class="btn btn-sm btn-outline-danger wn-brand-upload__remove">Quitar</button>
+                </div>
+                <div class="wn-brand-upload__status d-none" aria-live="polite"></div>
+            </div>
         </div>
         <div class="col-md-6">
             <label class="form-label">Imagen de cabecera</label>
-            <div class="dropzone dropzone-header wn-dropzone"></div>
+            @php $headerUrl = $company->background_header ? '/img/' . $company->background_header : null; @endphp
+            <div class="wn-brand-upload" id="wn-upload-header"
+                data-upload-url="{{ route('admin.companies.storeheader', $company) }}"
+                data-delete-url="{{ route('admin.companies.deleteheader', $company) }}"
+                data-param="background_header"
+                data-existing-url="{{ $headerUrl }}">
+                <input type="file" class="wn-brand-upload__input" accept="image/*" tabindex="-1" aria-hidden="true">
+                <div class="wn-brand-upload__empty {{ $headerUrl ? 'd-none' : '' }}">
+                    <i class="ri-image-line d-block fs-3 mb-1"></i>
+                    Arrastra la imagen o haz clic
+                </div>
+                <div class="wn-brand-upload__preview {{ $headerUrl ? '' : 'd-none' }}">
+                    <img src="{{ $headerUrl ?: '' }}" alt="Cabecera">
+                    <button type="button" class="btn btn-sm btn-outline-danger wn-brand-upload__remove">Quitar</button>
+                </div>
+                <div class="wn-brand-upload__status d-none" aria-live="polite"></div>
+            </div>
             <div class="form-text">Foto del local o plato estrella para el banner superior.</div>
         </div>
     </div>
 </div>
+

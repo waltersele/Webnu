@@ -24,9 +24,10 @@
                 <iframe id="wn-carta-preview" title="Vista previa de la carta" loading="eager"></iframe>
             </div>
             <ul class="list-unstyled small text-muted mb-0 mt-3 wn-preview-hints">
-                <li><i class="ri-check-line text-success"></i> Plantilla y colores se ven al instante aquí.</li>
+                <li><i class="ri-check-line text-success"></i> Plantilla, colores y fuentes se ven al instante aquí.</li>
                 <li><i class="ri-save-line"></i> Pulsa <strong>Guardar</strong> para publicar en la carta real.</li>
             </ul>
         </div>
     </div>
 </div>
+

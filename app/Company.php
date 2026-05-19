@@ -33,11 +33,22 @@ class Company extends Model
     {
         $template = $this->template ?: 'basic';
         $defaults = config('company_templates.defaults.' . $template, config('company_templates.defaults.basic', []));
+        $fontDefaults = config('company_templates.font_defaults', []);
         $saved = is_array($this->theme_settings) ? $this->theme_settings : [];
 
-        return array_merge($defaults, array_filter($saved, function ($value) {
+        return array_merge($defaults, $fontDefaults, array_filter($saved, function ($value) {
             return $value !== null && $value !== '';
         }));
+    }
+
+    public function themeFontFamily(string $role): string
+    {
+        $settings = $this->resolvedThemeSettings();
+        $key = $settings[$role] ?? config('company_templates.font_defaults.' . $role, 'inter');
+        $fonts = config('company_templates.fonts', []);
+        $meta = $fonts[$key] ?? $fonts['inter'] ?? ['family' => 'Inter', 'category' => 'sans-serif'];
+
+        return "'" . ($meta['family'] ?? 'Inter') . "', " . ($meta['category'] ?? 'sans-serif');
     }
 
     public function sections()

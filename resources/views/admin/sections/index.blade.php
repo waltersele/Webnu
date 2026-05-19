@@ -5,6 +5,9 @@
 
 @section('page_actions')
     <iframe src="{{ route('see_menu', $company->slug) }}" style="display:none" name="printMenu"></iframe>
+    <a class="btn btn-outline-success" href="{{ route('admin.menu-scan.create') }}">
+        <i class="ri ri-camera-line me-1"></i> Importar desde foto o PDF
+    </a>
     <div class="btn-group" role="group">
         <a class="btn btn-outline-primary" href="{{ route('see_menu', $company->slug) }}" target="_blank" rel="noopener">
             <i class="ri ri-eye-line me-1"></i> Vista previa
@@ -26,7 +29,7 @@
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h4 class="modal-title">Nueva secci?n</h4>
+                        <h4 class="modal-title">Nueva sección</h4>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
                     </div>
                     <form method="POST" action="{{ route('admin.sections.store') }}">
@@ -46,7 +49,7 @@
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">Cancelar</button>
-                            <button type="submit" class="btn btn-primary">Crear secci?n</button>
+                            <button type="submit" class="btn btn-primary">Crear sección</button>
                         </div>
                     </form>
                 </div>
@@ -57,15 +60,15 @@
                 <div class="modal-dialog">
                     <div class="modal-content">
                     <div class="modal-header">
-                        <h4 class="modal-title">Modificar secci?n</h4>
+                        <h4 class="modal-title">Modificar sección</h4>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
                     </div>
                     <form role="form" method="POST" action="{{ route('admin.sections.update') }}">
                         {{ csrf_field() }} {{ method_field('PUT') }}
                         <div class="modal-body">
                             <div class="mb-3">
-                                <label>Nombre Secci?n</label>
-                                <input type="text" name="name" id="modify-name" autofocus value="{{ old('name') }}" class="form-control {{ $errors->has('name') ? 'is-invalid' : '' }}" placeholder="Nombre secci?n" required>
+                                <label>Nombre Sección</label>
+                                <input type="text" name="name" id="modify-name" autofocus value="{{ old('name') }}" class="form-control {{ $errors->has('name') ? 'is-invalid' : '' }}" placeholder="Nombre sección" required>
                                 {!! $errors->first('name', '<span class="error invalid-feedback">:message</span>') !!}
                                 <input type="hidden" value="" name="sectionid" id="modify-id">
                             </div>
@@ -92,14 +95,14 @@
                 <div class="modal-dialog">
                     <div class="modal-content">
                     <div class="modal-header">
-                        <h4 class="modal-title">Eliminar secci?n</h4>
+                        <h4 class="modal-title">Eliminar sección</h4>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
                     </div>
                     <form role="form" method="POST" action="{{ route('admin.sections.delete') }}">
                         {{ csrf_field() }} {{ method_field('DELETE') }}
                         <div class="modal-body">
                             <div class="mb-3">
-                                <p>?Est?s seguro de eliminar la secci?n?</p>
+                                <p>¿Estás seguro de eliminar la sección?</p>
                                 <input type="hidden" value="" name="sectionid" id="delete-id">
                             </div>
                         </div>
@@ -128,7 +131,7 @@
                         {{ csrf_field() }} {{ method_field('DELETE') }}
                         <div class="modal-body">
                             <div class="mb-3">
-                                <p>?Est?s seguro de eliminar el producto?</p>
+                                <p>¿Estás seguro de eliminar el producto?</p>
                                 <input type="hidden" value="" name="productid" id="product-delete-id">
                                 <input type="hidden" value="" name="product_delete_section_id" id="product-delete-section-id">
                             </div>
@@ -224,7 +227,7 @@
                 '<i class="fas fa-file-pdf"></i><p></p></div>'
             );
         }
-        $('#pdf-preview-empty p').text(message || 'A?n no hay PDF. Sube uno para ver la vista previa aqu?.');
+        $('#pdf-preview-empty p').text(message || 'Aún no hay PDF. Sube uno para ver la vista previa aquí.');
         $filename.hide();
     }
 
@@ -241,7 +244,7 @@
             return;
         }
         if (file.type !== 'application/pdf') {
-            showEmptyPreview('Selecciona un archivo PDF v?lido.');
+            showEmptyPreview('Selecciona un archivo PDF válido.');
             return;
         }
         pdfObjectUrl = URL.createObjectURL(file);
@@ -266,8 +269,8 @@ $(document).ready(function () {
 
 $('input[type=radio][name=menu_type]').on('change', function () {
     var isCustom = this.value === 'menu_type_custom';
-    $('.webnu-menu-editor .nav-pills .nav-link').removeClass('active');
-    $(this).closest('.nav-link').addClass('active');
+    $('.webnu-menu-type__option').removeClass('is-active');
+    $(this).closest('.webnu-menu-type__option').addClass('is-active');
     setMenuTypePanels(isCustom);
     update_menu_type(this.value);
 });
@@ -451,7 +454,7 @@ $(document).on('click','.product-video-delete',function(){
             $('#product-modify-video').parent().removeClass('hidden');
         },
         error: function() {
-            alert('Se produjo un error al intentar eliminar el v?deo del producto.');
+            alert('Se produjo un error al intentar eliminar el vídeo del producto.');
         }
     });
 
@@ -516,8 +519,8 @@ $('#product-add-price-unit').keyup(function(e) {
 
 
 function isNumberKey(evt) {
-    //190 es el c?digo del punto del teclado de texto
-    //110 es el c?digo del punto del teclado num?rico
+    //190 es el código del punto del teclado de texto
+    //110 es el código del punto del teclado numérico
     var charCode = (evt.which) ? evt.which : event.keyCode;
     if (charCode != 46 && charCode != 110 && charCode != 190 && charCode > 31
     && (charCode < 48 || charCode > 57))
@@ -552,7 +555,7 @@ $(function(){
                     toastr.success('Secciones ordenadas correctamente.')
                 },
                 error: function(request,msg,error) { // What to do if we fail
-                    toastr.error('Se produjo un error al intentar ordenar la secci?n.')
+                    toastr.error('Se produjo un error al intentar ordenar la sección.')
                     return false;
                 }
             });
@@ -589,7 +592,7 @@ $(function(){
                     toastr.success('Productos ordenados correctamente.')
                 },
                 error: function(request,msg,error) { // What to do if we fail
-                    toastr.error('Se produjo un error al intentar ordenar la secci?n.')
+                    toastr.error('Se produjo un error al intentar ordenar la sección.')
                     return false;
                 }
             });
@@ -602,3 +605,4 @@ $(function(){
 </script>
 
 @endpush
+

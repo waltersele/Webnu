@@ -15,6 +15,41 @@ class PagesController extends Controller
         return view('home');
     }
 
+    public function landingPreview()
+    {
+        return view('landing-preview', [
+            'landingPayload' => [
+                'csrfToken' => csrf_token(),
+                'routes' => [
+                    'home' => route('home'),
+                    'login' => route('login'),
+                    'subscribe' => route('process_subscription'),
+                    'teLlamamos' => route('te_llamamos'),
+                ],
+                'assets' => [
+                    'logo' => asset('img/front/logo.png'),
+                    'clients' => asset('img/front/actual-clients.jpg'),
+                    'mockVideo' => asset('img/front/mockup-xd.mp4'),
+                    'mock1' => asset('img/front/mock-1.png'),
+                    'mockMenu' => asset('img/front/mock-menu-front.png'),
+                    'tvpikBar' => asset('img/front/tvpik-bar.jpg'),
+                    'tvpikDish' => asset('img/front/tvpik-dish.jpg'),
+                    'screenshots' => [
+                        asset('img/front/screenshot/screenshot1.jpg'),
+                        asset('img/front/screenshot/screenshot2.jpg'),
+                        asset('img/front/screenshot/screenshot3.jpg'),
+                        asset('img/front/screenshot/screenshot4.jpg'),
+                        asset('img/front/screenshot/screenshot5.jpg'),
+                    ],
+                ],
+                'demos' => [
+                    ['label' => 'Ver carta digital', 'url' => 'https://webnu.es/carta/webnu-test'],
+                    ['label' => 'Ver carta digital PDF', 'url' => 'https://webnu.es/carta/la-ibense'],
+                ],
+            ],
+        ]);
+    }
+
     public function see_menu($companySlug, MenuService $menuService)
     {
         $company = Company::where('slug', $companySlug)->first();
@@ -22,6 +57,8 @@ class PagesController extends Controller
         if (!$company) {
             abort(404);
         }
+
+        $this->recordMenuView($company, request());
 
         if ($company->menu_type == 1) {
             $company = $menuService->applyStudioPreview($company, request());
@@ -32,6 +69,15 @@ class PagesController extends Controller
         }
 
         return view('menu_pdf', compact('company'));
+    }
+
+    protected function recordMenuView(Company $company, Request $request): void
+    {
+        if ($request->boolean('studio_preview')) {
+            return;
+        }
+
+        Company::where('id', $company->id)->increment('menu_views');
     }
 
     public function te_llamamos(Request $request)

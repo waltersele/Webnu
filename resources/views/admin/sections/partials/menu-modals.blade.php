@@ -1,9 +1,9 @@
-﻿    <div class="webnu-menu-modals">
+    <div class="webnu-menu-modals">
         <div class="modal fade" id="modal-add-section">
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h4 class="modal-title">Nueva sección</h4>
+                        <h4 class="modal-title">Nueva secci�n</h4>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
                     </div>
                     <form method="POST" action="{{ route('admin.sections.store') }}">
@@ -23,7 +23,7 @@
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="webnu-btn webnu-btn--ghost" data-bs-dismiss="modal">Cancelar</button>
-                            <button type="submit" class="webnu-btn webnu-btn--primary">Crear sección</button>
+                            <button type="submit" class="webnu-btn webnu-btn--primary">Crear secci�n</button>
                         </div>
                     </form>
                 </div>
@@ -34,15 +34,15 @@
                 <div class="modal-dialog">
                     <div class="modal-content">
                     <div class="modal-header">
-                        <h4 class="modal-title">Modificar sección</h4>
+                        <h4 class="modal-title">Modificar secci�n</h4>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
                     </div>
                     <form role="form" method="POST" action="{{ route('admin.sections.update') }}">
                         {{ csrf_field() }} {{ method_field('PUT') }}
                         <div class="modal-body">
                             <div class="mb-3">
-                                <label>Nombre Sección</label>
-                                <input type="text" name="name" id="modify-name" autofocus value="{{ old('name') }}" class="form-control {{ $errors->has('name') ? 'is-invalid' : '' }}" placeholder="Nombre sección" required>
+                                <label>Nombre Secci�n</label>
+                                <input type="text" name="name" id="modify-name" autofocus value="{{ old('name') }}" class="form-control {{ $errors->has('name') ? 'is-invalid' : '' }}" placeholder="Nombre secci�n" required>
                                 {!! $errors->first('name', '<span class="error invalid-feedback">:message</span>') !!}
                                 <input type="hidden" value="" name="sectionid" id="modify-id">
                             </div>
@@ -54,7 +54,7 @@
                             </div>
                         </div>
                         <div class="modal-footer justify-content-between">
-                            <button type="submit" class="btn btn-success">Modificar sección</button>
+                            <button type="submit" class="btn btn-success">Modificar secci�n</button>
                             <button type="button" class="btn btn-default" data-bs-dismiss="modal">Cancelar</button>
                         </div>
                     </form>
@@ -69,19 +69,19 @@
                 <div class="modal-dialog">
                     <div class="modal-content">
                     <div class="modal-header">
-                        <h4 class="modal-title">Eliminar sección</h4>
+                        <h4 class="modal-title">Eliminar secci�n</h4>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
                     </div>
                     <form role="form" method="POST" action="{{ route('admin.sections.delete') }}">
                         {{ csrf_field() }} {{ method_field('DELETE') }}
                         <div class="modal-body">
                             <div class="mb-3">
-                                <p>¿Estás seguro de eliminar la sección?</p>
+                                <p>�Est�s seguro de eliminar la secci�n?</p>
                                 <input type="hidden" value="" name="sectionid" id="delete-id">
                             </div>
                         </div>
                         <div class="modal-footer justify-content-between">
-                            <button type="submit" class="btn btn-success">Eliminar sección</button>
+                            <button type="submit" class="btn btn-success">Eliminar secci�n</button>
                             <button type="button" class="btn btn-default" data-bs-dismiss="modal">Cancelar</button>
                         </div>
                     </form>
@@ -114,8 +114,8 @@
                                     <!--<span class="error invalid-feedback">:message</span>-->
                                 </div>
                                 <div class="mb-3">
-                                    <label>Descripción</label>
-                                    <textarea class="form-control" name="product_add_description" id="product-add-description" rows="3" placeholder="Descripción"></textarea>
+                                    <label>Descripci�n</label>
+                                    <textarea class="form-control" name="product_add_description" id="product-add-description" rows="3" placeholder="Descripci�n"></textarea>
                                 </div>
                                 @include('admin.sections.partials.product-media', ['mode' => 'add'])
                                 <div class="mb-3">
@@ -129,25 +129,25 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <small>Introducir solamente números</small>
+                                    <small>Introducir solamente n�meros</small>
                                 </div>
                                 <div class="mb-3">
                                     <div class="form-check form-switch">
                                         <input type="checkbox" class="form-check-input" name="product_add_enable_price_portion" value="1" id="product-add-enable-price-portion-switch">
-                                        <label class="form-check-label" for="product-add-enable-price-portion-switch">Habilitar precio 1/2 ración</label>
+                                        <label class="form-check-label" for="product-add-enable-price-portion-switch">Habilitar precio 1/2 raci�n</label>
                                     </div>
                                 </div>
                                 <div class="form-group hidden">
-                                    <label>Precio 1/2 ración</label>
+                                    <label>Precio 1/2 raci�n</label>
                                     <div class="input-group">
-                                        <input type="text" name="product_add_price_portion" id="product-add-price-portion" value="" class="form-control" placeholder="Precio 1/2 ración">
+                                        <input type="text" name="product_add_price_portion" id="product-add-price-portion" value="" class="form-control" placeholder="Precio 1/2 raci�n">
                                         <div class="input-group-append">
                                             <div class="input-group-text">
                                                 <span class="fas fa-euro-sign"></span>
                                             </div>
                                         </div>
                                     </div>
-                                    <small>Introducir solamente números</small>
+                                    <small>Introducir solamente n�meros</small>
                                 </div>
                                 <div class="mb-3">
                                     <div class="form-check form-switch">
@@ -156,7 +156,7 @@
                                     </div>
                                 </div>
                                 <div class="mb-3">
-                                    <label>Alérgenos</label>
+                                    <label>Al�rgenos</label>
                                     <select class="select2-allergens select2" name="allergens[]" multiple="multiple" data-placeholder="Seleccionar alérgenos" style="width: 100%;">
                                         @foreach ($allergens as $allergen)
                                             <option value="{{ $allergen->id }}">{{ $allergen->name }}</option>
@@ -166,7 +166,7 @@
                                 <input type="hidden" name="product_add_section_id" id="product-add-section-id">
                             </div>
                             <div class="modal-footer justify-content-between">
-                                <button type="submit" class="appao-btn2 btn-block">Añadir producto</button>
+                                <button type="submit" class="appao-btn2 btn-block">A�adir producto</button>
                                 <button type="button" class="btn btn-default" data-bs-dismiss="modal">Cancelar</button>
                             </div>
                         </form>
@@ -199,8 +199,8 @@
                                     <!--<span class="error invalid-feedback">:message</span>-->
                                 </div>
                                 <div class="mb-3">
-                                    <label>Descripción</label>
-                                    <textarea class="form-control" name="product_modify_description" id="product-modify-description" rows="3" placeholder="Descripción"></textarea>
+                                    <label>Descripci�n</label>
+                                    <textarea class="form-control" name="product_modify_description" id="product-modify-description" rows="3" placeholder="Descripci�n"></textarea>
                                 </div>
                                 @include('admin.sections.partials.product-media', ['mode' => 'modify'])
                                 <div class="mb-3">
@@ -214,25 +214,25 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <small>Introducir solamente números</small>
+                                    <small>Introducir solamente n�meros</small>
                                 </div>
                                 <div class="mb-3">
                                     <div class="form-check form-switch">
                                         <input type="checkbox" class="form-check-input" name="product_modify_enable_price_portion" value="1" id="product-modify-enable-price-portion-switch">
-                                        <label class="form-check-label" for="product-modify-enable-price-portion-switch">Habilitar precio 1/2 ración</label>
+                                        <label class="form-check-label" for="product-modify-enable-price-portion-switch">Habilitar precio 1/2 raci�n</label>
                                     </div>
                                 </div>
                                 <div class="form-group hidden">
-                                    <label>Precio 1/2 ración</label>
+                                    <label>Precio 1/2 raci�n</label>
                                     <div class="input-group">
-                                        <input type="text" name="product_modify_price_portion" id="product-modify-price-portion" value="" class="form-control" placeholder="Precio 1/2 ración">
+                                        <input type="text" name="product_modify_price_portion" id="product-modify-price-portion" value="" class="form-control" placeholder="Precio 1/2 raci�n">
                                         <div class="input-group-append">
                                             <div class="input-group-text">
                                                 <span class="fas fa-euro-sign"></span>
                                             </div>
                                         </div>
                                     </div>
-                                    <small>Introducir solamente números</small>
+                                    <small>Introducir solamente n�meros</small>
                                 </div>
                                 <div class="mb-3">
                                     <div class="form-check form-switch">
@@ -241,7 +241,7 @@
                                     </div>
                                 </div>
                                 <div class="mb-3">
-                                    <label>Alérgenos</label>
+                                    <label>Al�rgenos</label>
                                     <select class="select2-allergens select2" id="product-modify-allergens" name="allergens[]" multiple="multiple" data-placeholder="Seleccionar alérgenos" style="width: 100%;">
                                         @foreach ($allergens as $allergen)
                                             <option value="{{ $allergen->id }}">{{ $allergen->name }}</option>
@@ -275,7 +275,7 @@
                         {{ csrf_field() }} {{ method_field('DELETE') }}
                         <div class="modal-body">
                             <div class="mb-3">
-                                <p>¿Estás seguro de eliminar el producto?</p>
+                                <p>�Est�s seguro de eliminar el producto?</p>
                                 <input type="hidden" value="" name="productid" id="product-delete-id">
                                 <input type="hidden" value="" name="product_delete_section_id" id="product-delete-section-id">
                             </div>
@@ -291,3 +291,4 @@
                 <!-- /.modal-dialog -->
             </div>
             <!-- /.modal -->
+

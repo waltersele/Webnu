@@ -1,4 +1,4 @@
-ï»¿@extends('admin.layout')
+@extends('admin.layout')
 
 @section('content')
 <!-- Content Header (Page header) -->
@@ -58,16 +58,16 @@
                     <div class="row">
                         <div class="col-sm-12">
                             <div class="mb-3">
-                                <label>DirecciÃ³n</label>
-                                <input type="text" name="address" value="{{ old('address', $company->address) }}" class="form-control" placeholder="DirecciÃ³n">
+                                <label>Dirección</label>
+                                <input type="text" name="address" value="{{ old('address', $company->address) }}" class="form-control" placeholder="Dirección">
                             </div>
                         </div>
                     </div>
                     <div class="row">
                         <div class="col-sm-3">
                             <div class="mb-3">
-                                <label>CÃ³digo Postal</label>
-                                <input type="text" name="postal_code" value="{{ old('postal_code', $company->postal_code) }}" class="form-control" placeholder="CÃ³digo Postal">
+                                <label>Código Postal</label>
+                                <input type="text" name="postal_code" value="{{ old('postal_code', $company->postal_code) }}" class="form-control" placeholder="Código Postal">
                             </div>
                         </div>
                         <div class="col-sm-3">
@@ -84,22 +84,22 @@
                         </div>
                         <div class="col-sm-3">
                             <div class="mb-3">
-                                <label>PaÃ­s</label>
-                                <input type="text" name="country" value="{{ old('country', $company->country) }}" class="form-control" placeholder="PaÃ­s">
+                                <label>País</label>
+                                <input type="text" name="country" value="{{ old('country', $company->country) }}" class="form-control" placeholder="País">
                             </div>
                         </div>
                     </div>
                     <div class="row">
                         <div class="col-sm-4">
                             <div class="mb-3">
-                                <label>TelÃ©fono</label>
-                                <input type="text" name="phone" value="{{ old('phone', $company->phone) }}" class="form-control" placeholder="TelÃ©fono">
+                                <label>Teléfono</label>
+                                <input type="text" name="phone" value="{{ old('phone', $company->phone) }}" class="form-control" placeholder="Teléfono">
                             </div>
                         </div>
                         <div class="col-sm-4">
                             <div class="mb-3">
-                                <label>MÃ³vil</label>
-                                <input type="text" name="mobile_phone" value="{{ old('mobile_phone', $company->mobile_phone) }}" class="form-control" placeholder="MÃ³vil">
+                                <label>Móvil</label>
+                                <input type="text" name="mobile_phone" value="{{ old('mobile_phone', $company->mobile_phone) }}" class="form-control" placeholder="Móvil">
                             </div>
                         </div>
                         <div class="col-sm-4">
@@ -214,7 +214,7 @@
             headers: {
                 'X-CSRF-TOKEN': '{{ csrf_token() }}'
             },
-            dictDefaultMessage: 'Arrastra el logo o haz clic aquÃ­'
+            dictDefaultMessage: 'Arrastra el logo o haz clic aquí'
         });
 
         myDropzone.on('error', function(file, res){
@@ -225,3 +225,4 @@
         Dropzone.autoDiscover = false;
     </script>
 @endpush
+

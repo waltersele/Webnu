@@ -13,3 +13,4 @@
     <circle cx="24" cy="24" r="24" fill="{{ $meta['color'] }}"/>
     <use href="#allergen-{{ $slug }}" xlink:href="#allergen-{{ $slug }}" x="12" y="12" width="24" height="24" fill="#ffffff" color="#ffffff"/>
 </svg>
+

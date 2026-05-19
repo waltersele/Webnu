@@ -1,20 +1,46 @@
-﻿<div class="webnu-menu-editor">
-    <div class="card mb-4 border shadow-none">
+<div class="webnu-menu-editor">
+    <div class="alert alert-light border d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+        <div class="d-flex align-items-start gap-2">
+            <i class="ri-palette-line ri-lg text-primary mt-1" aria-hidden="true"></i>
+            <div>
+                <strong class="d-block mb-0">Aspecto de tu carta</strong>
+                <span class="small text-muted">
+                    Plantilla actual:
+                    <strong>{{ config('company_templates.templates.' . ($company->template ?: 'basic') . '.label', 'Básica') }}</strong>.
+                    Puedes cambiar colores y diseño en el negocio.
+                </span>
+            </div>
+        </div>
+        <a href="{{ route('admin.companies.edit', ['company' => $company, 'step' => 'design']) }}" class="btn btn-sm btn-outline-primary flex-shrink-0">
+            Personalizar colores y plantilla
+        </a>
+    </div>
+
+    <div class="card mb-4 border shadow-none webnu-menu-type-card">
         <div class="card-body py-3">
-            <ul class="nav nav-pills nav-fill gap-2" role="tablist">
-                <li class="nav-item" role="presentation">
-                    <label class="nav-link mb-0 cursor-pointer {{ $company->menu_type == 1 ? 'active' : '' }}" for="menu-type-custom">
-                        <input type="radio" class="d-none" id="menu-type-custom" name="menu_type" value="menu_type_custom" {{ $company->menu_type == 1 ? 'checked' : '' }}>
-                        <i class="ri ri-layout-grid-line me-1"></i> Personalizable
-                    </label>
-                </li>
-                <li class="nav-item" role="presentation">
-                    <label class="nav-link mb-0 cursor-pointer {{ $company->menu_type == 2 ? 'active' : '' }}" for="menu-type-pdf">
-                        <input type="radio" class="d-none" id="menu-type-pdf" name="menu_type" value="menu_type_pdf" {{ $company->menu_type == 2 ? 'checked' : '' }}>
-                        <i class="ri ri-file-pdf-line me-1"></i> PDF
-                    </label>
-                </li>
-            </ul>
+            <p class="small text-muted mb-3 mb-md-3">Elige cómo se verá tu carta pública para los clientes.</p>
+            <div class="webnu-menu-type" role="radiogroup" aria-label="Tipo de carta">
+                <label class="webnu-menu-type__option {{ $company->menu_type == 1 ? 'is-active' : '' }}" for="menu-type-custom">
+                    <input type="radio" class="d-none" id="menu-type-custom" name="menu_type" value="menu_type_custom" {{ $company->menu_type == 1 ? 'checked' : '' }}>
+                    <span class="webnu-menu-type__icon" aria-hidden="true">
+                        <i class="ri-layout-grid-line"></i>
+                    </span>
+                    <span class="webnu-menu-type__copy">
+                        <span class="webnu-menu-type__title">Carta digital</span>
+                        <span class="webnu-menu-type__desc">secciónes, platos y diseño personalizable</span>
+                    </span>
+                </label>
+                <label class="webnu-menu-type__option {{ $company->menu_type == 2 ? 'is-active' : '' }}" for="menu-type-pdf">
+                    <input type="radio" class="d-none" id="menu-type-pdf" name="menu_type" value="menu_type_pdf" {{ $company->menu_type == 2 ? 'checked' : '' }}>
+                    <span class="webnu-menu-type__icon" aria-hidden="true">
+                        <i class="ri-file-pdf-line"></i>
+                    </span>
+                    <span class="webnu-menu-type__copy">
+                        <span class="webnu-menu-type__title">Carta PDF</span>
+                        <span class="webnu-menu-type__desc">Sube un documento y muéstralo tal cual</span>
+                    </span>
+                </label>
+            </div>
         </div>
     </div>
 
@@ -50,7 +76,7 @@
             <p class="small text-muted mb-0" id="pdf-preview-filename" @if(!$pdfMenuUrl) style="display:none" @endif>
                 @if($pdfMenuUrl)
                     <i class="ri ri-checkbox-circle-line text-success"></i>
-                    PDF cargado — <a href="{{ $pdfMenuUrl }}" target="_blank" rel="noopener">Abrir archivo</a>
+                    PDF cargado � <a href="{{ $pdfMenuUrl }}" target="_blank" rel="noopener">Abrir archivo</a>
                 @endif
             </p>
         </div>
@@ -79,7 +105,7 @@
 
     <div id="custom-menu" style="{{ $company->menu_type == 2 ? 'display:none' : '' }}">
         <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
-            <p class="text-muted small mb-0">Organiza secciones y platos de tu carta digital.</p>
+            <p class="text-muted small mb-0">Organiza secciónes y platos de tu carta digital.</p>
             <div class="btn-group webnu-menu-view-toggle" role="group" aria-label="Vista de platos">
                 <button type="button" class="btn btn-sm btn-primary" data-menu-view="grid" title="Vista cuadrícula">
                     <i class="ri ri-layout-grid-line"></i>

@@ -38,6 +38,7 @@ class User extends Authenticatable
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
+        'trial_ends_at' => 'datetime',
     ];
 
     //Sobrescribimos el metodo de envio de email para que coja formato a nuestro gusto
@@ -49,5 +50,54 @@ class User extends Authenticatable
     public function companies()
     {
         return $this->hasMany(Company::class);
+    }
+
+    public function isSuperAdmin(): bool
+    {
+        $emails = config('platform.super_admin_emails', []);
+        if (in_array($this->email, $emails, true)) {
+            return true;
+        }
+
+        return $this->hasRole('super-admin');
+    }
+
+    public function hasActiveSubscription(): bool
+    {
+        if ($this->onGenericTrial()) {
+            return true;
+        }
+
+        $names = array_values(config('platform.subscription_names', []));
+        foreach ($names as $name) {
+            if ($this->subscribed($name)) {
+                return true;
+            }
+        }
+
+        return $this->subscriptions()
+            ->whereIn('stripe_status', ['active', 'trialing'])
+            ->where(function ($query) {
+                $query->whereNull('ends_at')->orWhere('ends_at', '>', now());
+            })
+            ->exists();
+    }
+
+    public function primarySubscription()
+    {
+        $names = array_values(config('platform.subscription_names', []));
+        foreach ($names as $name) {
+            $subscription = $this->subscription($name);
+            if ($subscription) {
+                return $subscription;
+            }
+        }
+
+        return $this->subscriptions()->latest('id')->first();
+    }
+
+    public function scopeWithBillingSummary($query)
+    {
+        return $query->withCount('companies')->with('subscriptions');
     }
 }

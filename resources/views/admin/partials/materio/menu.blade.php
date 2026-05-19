@@ -65,6 +65,39 @@
                 <div>Integraciones</div>
             </a>
         </li>
+
+        @if (auth()->check() && ! auth()->user()->hasActiveSubscription())
+        <li class="menu-item {{ request()->routeIs('admin.billing*') ? 'active' : '' }}">
+            <a href="{{ route('admin.billing') }}" class="menu-link">
+                <i class="menu-icon icon-base ri ri-bank-card-line"></i>
+                <div>Suscripción</div>
+            </a>
+        </li>
+        @endif
+
+        @if (auth()->check() && auth()->user()->isSuperAdmin())
+        <li class="menu-header small mt-3">
+            <span class="menu-header-text">Plataforma</span>
+        </li>
+        <li class="menu-item {{ request()->routeIs('admin.platform.dashboard') ? 'active' : '' }}">
+            <a href="{{ route('admin.platform.dashboard') }}" class="menu-link">
+                <i class="menu-icon icon-base ri ri-dashboard-line"></i>
+                <div>Dashboard</div>
+            </a>
+        </li>
+        <li class="menu-item {{ request()->is('admin/platform/users*') ? 'active' : '' }}">
+            <a href="{{ route('admin.platform.users.index') }}" class="menu-link">
+                <i class="menu-icon icon-base ri ri-team-line"></i>
+                <div>Clientes</div>
+            </a>
+        </li>
+        <li class="menu-item {{ request()->routeIs('admin.platform.settings*') ? 'active' : '' }}">
+            <a href="{{ route('admin.platform.settings') }}" class="menu-link">
+                <i class="menu-icon icon-base ri ri-camera-lens-line"></i>
+                <div>Escaneo IA</div>
+            </a>
+        </li>
+        @endif
     </ul>
 
     <div class="webnu-menu-footer mt-auto">
@@ -90,3 +123,5 @@
         </form>
     </div>
 </aside>
+
+

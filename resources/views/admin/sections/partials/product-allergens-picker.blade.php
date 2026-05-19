@@ -3,7 +3,7 @@
     $pickerKey = $isAdd ? 'add' : 'modify';
 @endphp
 <div class="webnu-allergen-picker" id="product-{{ $pickerKey }}-allergens-picker" data-picker="{{ $pickerKey }}">
-    <p class="text-muted small mb-3">Toca un icono para marcar los alérgenos que contiene este plato.</p>
+    <p class="text-muted small mb-3">Marca los alérgenos del plato. Si importas la carta con IA y la foto trae iconos o leyenda, se rellenan solos (revísalos).</p>
     @if(isset($allergens) && $allergens->count())
         <div class="webnu-allergen-picker__grid">
             @foreach ($allergens as $allergen)
@@ -27,3 +27,4 @@
         </div>
     @endif
 </div>
+

@@ -25,6 +25,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        //
+        if (method_exists(Cashier::class, 'useSubscriptionModel')) {
+            Cashier::useSubscriptionModel(\App\Subscription::class);
+        }
     }
 }

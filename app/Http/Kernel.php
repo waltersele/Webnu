@@ -37,6 +37,7 @@ class Kernel extends HttpKernel
             \Illuminate\View\Middleware\ShareErrorsFromSession::class,
             \App\Http\Middleware\VerifyCsrfToken::class,
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
+            \App\Http\Middleware\ForceUtf8Charset::class,
         ],
 
         'api' => [
@@ -65,5 +66,7 @@ class Kernel extends HttpKernel
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
         'selected.company' => \App\Http\Middleware\EnsureSelectedCompany::class,
         'digital.signage' => \App\Http\Middleware\VerifyDigitalSignageApp::class,
+        'super.admin' => \App\Http\Middleware\EnsureSuperAdmin::class,
+        'subscribed' => \App\Http\Middleware\EnsureSubscribed::class,
     ];
 }

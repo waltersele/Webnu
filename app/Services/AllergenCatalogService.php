@@ -51,6 +51,36 @@ class AllergenCatalogService
         return pathinfo($allergen->image, PATHINFO_FILENAME);
     }
 
+    /**
+     * @param array<int, string> $names
+     * @return array<int, int>
+     */
+    public static function matchIdsByNames(array $names): array
+    {
+        if (count($names) === 0) {
+            return [];
+        }
+
+        $allergens = Allergen::orderBy('name')->get();
+        $ids = [];
+
+        foreach ($names as $name) {
+            $needle = Str::lower(trim((string) $name));
+            if ($needle === '') {
+                continue;
+            }
+            foreach ($allergens as $allergen) {
+                $candidate = Str::lower($allergen->name);
+                if ($candidate === $needle || Str::contains($candidate, $needle) || Str::contains($needle, $candidate)) {
+                    $ids[] = $allergen->id;
+                    break;
+                }
+            }
+        }
+
+        return array_values(array_unique($ids));
+    }
+
     protected function writeIcon(string $dir, string $slug, string $color, string $abbr): void
     {
         $path = $dir . DIRECTORY_SEPARATOR . $slug . '.svg';

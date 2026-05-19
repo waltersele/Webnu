@@ -1,0 +1,229 @@
+/**
+ * Catálogo — listado horizontal compacto
+ */
+
+body.wn-theme-catalogo {
+  background: var(--wn-bg) !important;
+  color: var(--wn-text);
+}
+
+.wn-theme-catalogo .wn-modern-header {
+  background: rgba(255, 255, 255, 0.97);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.wn-theme-catalogo .wn-modern-header__info {
+  background: var(--wn-bg);
+  color: var(--wn-primary);
+}
+
+/* Hero */
+.wn-hero-catalogo {
+  padding: 1.15rem 1.25rem 0.65rem;
+}
+
+.wn-hero-catalogo__title {
+  margin: 0 0 0.35rem;
+  font-size: clamp(1.5rem, 5vw, 1.85rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: var(--wn-text);
+  line-height: 1.2;
+}
+
+.wn-hero-catalogo__subtitle {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--wn-text-muted);
+  line-height: 1.45;
+  max-width: 40ch;
+}
+
+/* Sticky categorías */
+.wn-menu-nav--catalogo {
+  position: sticky;
+  top: var(--wn-header-height, 52px);
+  z-index: 180;
+  background: var(--wn-bg);
+  padding: 0.5rem 0 0.65rem;
+  box-shadow: 0 2px 12px rgba(15, 23, 42, 0.06);
+}
+
+.wn-menu-nav--catalogo.is-pinned {
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.08);
+}
+
+.wn-theme-catalogo .wn-menu-chip {
+  background: #fff;
+  color: var(--wn-text-muted);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.wn-theme-catalogo .wn-menu-chip.is-active,
+.wn-theme-catalogo .wn-menu-chip:hover {
+  background: var(--wn-primary);
+  color: #fff;
+  border-color: var(--wn-primary);
+}
+
+/* Secciones */
+.wn-menu-main--catalogo {
+  padding: 0.25rem 1rem 1.5rem;
+}
+
+.wn-menu-section__title--catalogo {
+  font-size: 1rem !important;
+  font-weight: 700 !important;
+  color: var(--wn-text-muted) !important;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin: 1rem 0 0.55rem !important;
+  padding: 0;
+  border: none !important;
+}
+
+/* Tarjeta catálogo */
+.wn-card-catalogo {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  background: #fff;
+  border-radius: 14px;
+  overflow: hidden;
+  margin-bottom: 0.65rem;
+  box-shadow: 0 2px 14px rgba(15, 23, 42, 0.07);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  cursor: pointer;
+  min-height: 108px;
+}
+
+.wn-card-catalogo__media {
+  flex: 0 0 108px;
+  width: 108px;
+  min-height: 108px;
+  background: var(--wn-bg);
+  overflow: hidden;
+}
+
+.wn-card-catalogo__media img,
+.wn-card-catalogo__media video,
+.wn-card-catalogo__media .wn-card-reel {
+  width: 100%;
+  height: 100%;
+  min-height: 108px;
+  object-fit: cover;
+  display: block;
+}
+
+.wn-card-catalogo__body {
+  flex: 1;
+  min-width: 0;
+  padding: 0.75rem 2.25rem 0.75rem 0.85rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.wn-card-catalogo__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.45rem;
+  margin-bottom: 0.2rem;
+}
+
+.wn-card-catalogo__title {
+  margin: 0;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: var(--wn-text);
+  line-height: 1.25;
+  flex: 1;
+  min-width: 0;
+}
+
+.wn-catalog-tag {
+  flex-shrink: 0;
+  padding: 0.18rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.625rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+.wn-catalog-tag--fresh {
+  background: #e3f2fd;
+  color: #1565c0;
+}
+
+.wn-catalog-tag--warm {
+  background: #fce4ec;
+  color: #c2185b;
+}
+
+.wn-catalog-tag--raw {
+  background: #f3e5f5;
+  color: #7b1fa2;
+}
+
+.wn-catalog-tag--neutral {
+  background: #eceff1;
+  color: #546e7a;
+}
+
+.wn-card-catalogo__desc {
+  margin: 0 0 0.25rem;
+  font-size: 0.75rem;
+  line-height: 1.45;
+  color: var(--wn-text-muted);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.wn-card-catalogo .wn-prices {
+  margin: 0;
+}
+
+.wn-card-catalogo .wn-price-item {
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: var(--wn-primary);
+}
+
+.wn-card-catalogo__detail {
+  position: absolute;
+  right: 0.65rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--wn-text-muted);
+  font-size: 0.7rem;
+  cursor: pointer;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.wn-card-catalogo {
+  position: relative;
+}
+
+.wn-theme-catalogo .wn-modern-footer {
+  background: #fff;
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+@media (min-width: 480px) {
+  .wn-card-catalogo__media {
+    flex: 0 0 120px;
+    width: 120px;
+    min-height: 120px;
+  }
+}

@@ -48,7 +48,7 @@ $(function () {
         }
     });
 
-    $('.wn-modern-card--interactive').on('click', function (e) {
+    $('.wn-modern-card--interactive, .wn-card-overlay, .wn-card-temporada, .wn-card-catalogo').on('click', function (e) {
         if ($(e.target).closest('a, button, .wn-allergens, .modal, .wn-card-reel__open, video').length) {
             return;
         }

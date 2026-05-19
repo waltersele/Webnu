@@ -1,0 +1,226 @@
+/**
+ * Temporada — menú claro con tarjetas apiladas y etiquetas
+ */
+
+body.wn-theme-temporada {
+  background: var(--wn-bg) !important;
+  color: var(--wn-text);
+}
+
+/* Header claro */
+.wn-theme-temporada .wn-modern-header {
+  background: rgba(255, 255, 255, 0.97);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  backdrop-filter: blur(12px);
+}
+
+.wn-theme-temporada .wn-modern-header__info {
+  background: var(--wn-bg);
+  color: var(--wn-primary);
+}
+
+/* Hero */
+.wn-hero-temporada {
+  padding: 1.25rem 1.25rem 0.75rem;
+  text-align: center;
+}
+
+.wn-hero-temporada__eyebrow {
+  margin: 0 0 0.35rem;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--wn-primary);
+}
+
+.wn-hero-temporada__title {
+  margin: 0 0 0.75rem;
+  font-size: clamp(1.65rem, 5.5vw, 2rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: var(--wn-text);
+  line-height: 1.15;
+}
+
+.wn-hero-temporada__divider {
+  width: 48px;
+  height: 4px;
+  margin: 0 auto 0.75rem;
+  border-radius: 999px;
+  background: var(--wn-primary);
+}
+
+.wn-hero-temporada__subtitle {
+  margin: 0 auto;
+  max-width: 32ch;
+  font-size: 0.875rem;
+  color: var(--wn-text-muted);
+  line-height: 1.5;
+}
+
+/* Sticky categorías */
+.wn-menu-nav--temporada {
+  position: sticky;
+  top: var(--wn-header-height, 52px);
+  z-index: 180;
+  background: var(--wn-bg);
+  padding: 0.55rem 0 0.7rem;
+  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.06);
+}
+
+.wn-menu-nav--temporada.is-pinned {
+  box-shadow: 0 6px 20px rgba(15, 23, 42, 0.1);
+}
+
+.wn-theme-temporada .wn-menu-chip {
+  background: #e8edf3;
+  color: var(--wn-text-muted);
+  border: 1px solid transparent;
+  font-weight: 600;
+}
+
+.wn-theme-temporada .wn-menu-chip.is-active,
+.wn-theme-temporada .wn-menu-chip:hover {
+  background: var(--wn-primary);
+  color: #fff;
+  border-color: var(--wn-primary);
+}
+
+/* Secciones */
+.wn-menu-main--temporada {
+  padding: 0.35rem 1rem 1.5rem;
+}
+
+.wn-menu-section__title--temporada {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.125rem !important;
+  font-weight: 700 !important;
+  color: var(--wn-text) !important;
+  margin: 1.15rem 0 0.75rem !important;
+  padding: 0;
+  border: none !important;
+  text-transform: none !important;
+}
+
+.wn-theme-temporada .wn-section-icon {
+  color: var(--wn-primary);
+  font-size: 1rem;
+}
+
+/* Tarjeta temporada */
+.wn-card-temporada {
+  position: relative;
+  background: #fff;
+  border-radius: 16px;
+  overflow: hidden;
+  margin-bottom: 0.85rem;
+  box-shadow: 0 4px 20px rgba(15, 23, 42, 0.08);
+  border: 1px solid rgba(0, 0, 0, 0.04);
+  cursor: pointer;
+}
+
+.wn-card-temporada__media {
+  position: relative;
+  aspect-ratio: 16 / 10;
+  background: var(--wn-bg);
+  overflow: hidden;
+}
+
+.wn-card-temporada__media img,
+.wn-card-temporada__media video,
+.wn-card-temporada__media .wn-card-reel {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.wn-card-temporada__badge {
+  position: absolute;
+  top: 0.65rem;
+  left: 0.65rem;
+  z-index: 2;
+}
+
+.wn-card-temporada__body {
+  padding: 1rem 1.1rem 1.05rem;
+}
+
+.wn-card-temporada__title {
+  margin: 0 0 0.35rem;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--wn-text);
+  letter-spacing: -0.01em;
+}
+
+.wn-card-temporada__desc {
+  margin: 0 0 0.55rem;
+  font-size: 0.8125rem;
+  line-height: 1.55;
+  color: var(--wn-text-muted);
+}
+
+.wn-card-temporada .wn-prices {
+  margin-bottom: 0.5rem;
+}
+
+.wn-card-temporada .wn-price-item {
+  color: var(--wn-primary);
+  font-weight: 700;
+}
+
+.wn-card-temporada__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.wn-diet-tag {
+  display: inline-flex;
+  padding: 0.22rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  background: #e8f5e9;
+  color: #2e7d32;
+  border: 1px solid #a5d6a7;
+}
+
+.wn-diet-tag:nth-child(2n) {
+  background: #e3f2fd;
+  color: #1565c0;
+  border-color: #90caf9;
+}
+
+.wn-diet-tag:nth-child(3n) {
+  background: #fff3e0;
+  color: #e65100;
+  border-color: #ffcc80;
+}
+
+.wn-card-temporada__detail {
+  position: absolute;
+  top: 0.65rem;
+  right: 0.65rem;
+  z-index: 3;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.92);
+  color: var(--wn-primary);
+  font-size: 0.75rem;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.wn-theme-temporada .wn-modern-footer {
+  background: #fff;
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+}

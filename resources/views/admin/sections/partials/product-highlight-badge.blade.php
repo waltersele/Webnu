@@ -14,3 +14,4 @@
     }
 @endphp
 <span class="{{ $class }}">{{ $meta['badge'] }}</span>
+
