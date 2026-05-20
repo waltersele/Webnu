@@ -1,0 +1,73 @@
+/**
+ * Japo — japonés clásico: rojo lacado, negro y oro
+ */
+body.wn-theme-japo {
+  background: var(--wn-bg) !important;
+}
+
+.wn-theme-japo .wn-menu-hero--dark .wn-menu-hero__overlay--bleed {
+  background:
+    linear-gradient(180deg, rgba(15, 8, 8, 0.2) 0%, rgba(15, 8, 8, 0.95) 75%, var(--wn-bg) 100%),
+    radial-gradient(ellipse 70% 50% at 50% 0%, rgba(196, 30, 58, 0.35) 0%, transparent 70%);
+}
+
+.wn-theme-japo .wn-menu-hero__title {
+  font-family: var(--wn-font-heading);
+  font-size: clamp(1.85rem, 7vw, 2.6rem) !important;
+  letter-spacing: 0.12em;
+  color: var(--wn-accent) !important;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.5);
+}
+
+.wn-theme-japo .wn-menu-nav {
+  background: var(--wn-bg) !important;
+  border-bottom: 1px solid rgba(212, 175, 55, 0.25);
+}
+
+.wn-theme-japo .wn-menu-chip {
+  background: transparent;
+  color: var(--wn-text-muted);
+  border: 1px solid rgba(212, 175, 55, 0.35);
+  border-radius: 999px;
+  font-size: 0.8125rem;
+  letter-spacing: 0.06em;
+}
+
+.wn-theme-japo .wn-menu-chip.is-active,
+.wn-theme-japo .wn-menu-chip:hover {
+  background: var(--wn-primary);
+  color: #fff;
+  border-color: var(--wn-primary);
+}
+
+.wn-theme-japo .wn-menu-section__title {
+  font-family: var(--wn-font-heading) !important;
+  color: var(--wn-accent) !important;
+  font-size: 1.25rem !important;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  border-bottom: 1px solid rgba(212, 175, 55, 0.3) !important;
+  padding-bottom: 0.5rem !important;
+}
+
+.wn-theme-japo .wn-modern-card--stacked {
+  background: var(--wn-surface);
+  border: 1px solid rgba(212, 175, 55, 0.15);
+  border-radius: 2px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+}
+
+.wn-theme-japo .wn-modern-card__title {
+  color: var(--wn-text);
+  letter-spacing: 0.04em;
+}
+
+.wn-theme-japo .wn-modern-card .wn-price-item {
+  color: var(--wn-accent) !important;
+  font-weight: 600;
+}
+
+.wn-theme-japo .wn-modern-footer {
+  border-top: 1px solid rgba(212, 175, 55, 0.2);
+  background: #0a0606;
+}

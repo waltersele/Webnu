@@ -5,8 +5,22 @@
 
 @section('page_actions')
     <iframe src="{{ route('see_menu', $company->slug) }}" style="display:none" name="printMenu"></iframe>
-    <a class="btn btn-outline-success" href="{{ route('admin.menu-scan.create') }}">
+    @php
+        $pf = $planFeatures ?? [];
+        $hasTranslation = $pf['translation'] ?? true;
+        $hasMenuScan = $pf['menu_scan'] ?? true;
+    @endphp
+    <a class="btn btn-outline-primary" href="{{ route('admin.companies.languages', $company) }}">
+        <i class="ri ri-translate-2 me-1"></i> Idiomas
+        @if (! $hasTranslation)
+            @include('admin.partials.plan-pro-badge', ['label' => 'Plus', 'size' => 'xs'])
+        @endif
+    </a>
+    <a class="btn btn-outline-success {{ ! $hasMenuScan ? 'opacity-75' : '' }}" href="{{ route('admin.menu-scan.create') }}">
         <i class="ri ri-camera-line me-1"></i> Importar desde foto o PDF
+        @if (! $hasMenuScan)
+            @include('admin.partials.plan-pro-badge', ['label' => 'Plus', 'size' => 'xs'])
+        @endif
     </a>
     <div class="btn-group" role="group">
         <a class="btn btn-outline-primary" href="{{ route('see_menu', $company->slug) }}" target="_blank" rel="noopener">

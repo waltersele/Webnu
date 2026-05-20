@@ -19,4 +19,9 @@ class Section extends Model
     {
         return $this->hasMany('App\Product');
     }
+
+    public function translations()
+    {
+        return $this->hasMany(SectionTranslation::class);
+    }
 }

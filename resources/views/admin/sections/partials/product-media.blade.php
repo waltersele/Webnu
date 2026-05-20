@@ -3,6 +3,7 @@
     $idPrefix = $mode === 'add' ? 'product-add' : 'product-modify';
     $maxSeconds = config('product_media.max_video_seconds', 30);
     $maxMb = round(config('product_media.max_video_kb', 25600) / 1024);
+    $canVideos = $planFeatures['videos'] ?? true;
 @endphp
 
 <div class="card mb-4 product-media-block" data-media-mode="{{ $mode }}">
@@ -77,6 +78,7 @@
             </div>
 
             <div class="col-lg-6">
+                @if ($canVideos)
                 <div class="webnu-media-panel">
                     <div class="webnu-media-panel__head">
                         <span class="webnu-media-panel__icon webnu-media-panel__icon--video"><i class="ri-video-line"></i></span>
@@ -138,6 +140,33 @@
                         </div>
                     </div>
                 </div>
+                @else
+                @component('admin.partials.plan-feature-lock', [
+                    'feature' => 'videos',
+                    'message' => 'Añade reels y vídeos cortos en cada plato con el plan Plus.',
+                    'class' => 'p-1',
+                ])
+                <div class="webnu-media-panel">
+                    <div class="webnu-media-panel__head">
+                        <span class="webnu-media-panel__icon webnu-media-panel__icon--video"><i class="ri-video-line"></i></span>
+                        <div>
+                            <span class="webnu-media-panel__title">Vídeo del plato @include('admin.partials.plan-pro-badge', ['label' => 'Plus', 'size' => 'xs'])</span>
+                            <span class="webnu-media-panel__meta">Máx. {{ $maxSeconds }}s · {{ $maxMb }} MB</span>
+                        </div>
+                    </div>
+                    <div class="webnu-media-controls">
+                        <div class="webnu-media-mode btn-group btn-group-sm w-100 mb-2" role="group">
+                            <button type="button" class="btn btn-outline-secondary" disabled><i class="ri-upload-2-line me-1"></i> Subir</button>
+                            <button type="button" class="btn btn-outline-secondary" disabled><i class="ri-record-circle-line me-1"></i> Grabar</button>
+                        </div>
+                        <label class="webnu-file-drop webnu-file-drop--compact d-block opacity-75">
+                            <i class="ri-film-line"></i>
+                            <span>Seleccionar vídeo</span>
+                        </label>
+                    </div>
+                </div>
+                @endcomponent
+                @endif
             </div>
         </div>
     </div>

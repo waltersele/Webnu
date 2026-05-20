@@ -11,7 +11,7 @@
             </div>
             <div>
                 <label class="form-check-label fw-semibold d-block mb-1" for="company-enabled-switch">Carta publicada</label>
-                <p class="text-muted small mb-0">Si está desactivada, los clientes no podrán ver la carta en <code>/carta/{{ $company->slug }}</code>.</p>
+                <p class="text-muted small mb-0">Si está desactivada, los clientes no podrán ver la carta en tu enlace público.</p>
             </div>
         </div>
     </div>
@@ -28,14 +28,28 @@
         </div>
     </div>
 
-    <div class="card bg-label-secondary border-0">
+    <div class="card bg-label-secondary border-0 mb-4">
         <div class="card-body">
             <h6 class="fw-semibold mb-2">Enlace de tu carta</h6>
-            <div class="input-group">
-                <input type="text" class="form-control" readonly value="{{ url('/carta/' . $company->slug) }}">
+            <p class="text-muted small mb-3">URL limpia y permanente para QR, cartelería y redes. Si el nombre ya existe, añadimos ciudad o un número (<code>la-brasa-2</code>).</p>
+            <label class="form-label" for="company-slug">URL pública</label>
+            <div class="input-group mb-2">
+                <span class="input-group-text text-muted">{{ url('/carta') }}/</span>
+                <input
+                    type="text"
+                    id="company-slug"
+                    name="slug"
+                    class="form-control font-monospace {{ $errors->has('slug') ? 'is-invalid' : '' }}"
+                    value="{{ old('slug', $company->slug) }}"
+                    pattern="[a-z0-9]+(-[a-z0-9]+)*"
+                    maxlength="64"
+                    autocomplete="off"
+                    spellcheck="false"
+                >
                 <a href="{{ route('see_menu', $company->slug) }}" target="_blank" rel="noopener" class="btn btn-primary">Abrir</a>
             </div>
+            @error('slug')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
+            <p class="text-muted small mb-0">Solo minúsculas, números y guiones. Cambiarla invalida QR ya impresos con la URL anterior.</p>
         </div>
     </div>
 </div>
-

@@ -4,7 +4,9 @@ namespace App\Services;
 
 use App\Allergen;
 use App\Company;
+use App\ProductTranslation;
 use App\Section;
+use App\SectionTranslation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 
@@ -13,23 +15,74 @@ class MenuService
     /** @var Collection<int, Allergen>|null */
     protected $allergenPool;
 
-    public function sectionsForCompany(Company $company): Collection
+    /** @var MenuLocaleService */
+    protected $locales;
+
+    public function __construct(MenuLocaleService $locales)
     {
-        $sections = Section::with(['products.allergens'])
+        $this->locales = $locales;
+    }
+
+    public function resolveMenuLocale(Request $request, Company $company): string
+    {
+        return $this->locales->resolveMenuLocale($request, $company);
+    }
+
+    public function sectionsForCompany(Company $company, ?string $locale = null): Collection
+    {
+        $locale = $locale ?: $company->defaultLocale();
+
+        $sections = Section::with(['products.allergens', 'translations', 'products.translations'])
             ->orderBy('order')
             ->where('company_id', $company->id)
             ->get();
 
-        $sections = $sections->map(function ($section) {
+        $sections = $sections->map(function ($section) use ($locale, $company) {
+            $section = $this->applySectionLocale($section, $locale, $company->defaultLocale());
             $section->setRelation(
                 'products',
-                $section->products->sortBy('order')->values()
+                $section->products->sortBy('order')->map(function ($product) use ($locale, $company) {
+                    return $this->applyProductLocale($product, $locale, $company->defaultLocale());
+                })->values()
             );
 
             return $section;
         });
 
-        return $this->enrichMenuPresentation($sections);
+        return $this->enrichMenuPresentation($sections, $company);
+    }
+
+    protected function applySectionLocale(Section $section, string $locale, string $defaultLocale): Section
+    {
+        if ($locale === $defaultLocale) {
+            return $section;
+        }
+
+        $translation = $section->translations->firstWhere('locale', $locale);
+        if ($translation && $translation->name) {
+            $section->name = $translation->name;
+        }
+
+        return $section;
+    }
+
+    protected function applyProductLocale($product, string $locale, string $defaultLocale)
+    {
+        if ($locale === $defaultLocale) {
+            return $product;
+        }
+
+        $translation = $product->translations->firstWhere('locale', $locale);
+        if ($translation) {
+            if ($translation->name) {
+                $product->name = $translation->name;
+            }
+            if ($translation->description !== null && $translation->description !== '') {
+                $product->description = $translation->description;
+            }
+        }
+
+        return $product;
     }
 
     public function themeViewName(Company $company): string
@@ -41,6 +94,12 @@ class MenuService
             'visual' => [],
             'lumiere' => [],
             'bistro' => [],
+            'otaku' => [],
+            'japo' => [],
+            'fastfood' => [],
+            'mar' => [],
+            'elegance' => [],
+            'asador' => [],
         ]));
 
         if (in_array($company->template, $templates, true)) {
@@ -94,8 +153,12 @@ class MenuService
         return $company;
     }
 
-    protected function enrichMenuPresentation(Collection $sections): Collection
+    protected function enrichMenuPresentation(Collection $sections, Company $company): Collection
     {
+        if (str_starts_with($company->slug, 'demo')) {
+            return $sections;
+        }
+
         $sampleImages = config('menu_demo.sample_images', []);
         $fillImages = (bool) config('menu_demo.fill_missing_images', true);
         $fillAllergens = (bool) config('menu_demo.fill_missing_allergens', true);

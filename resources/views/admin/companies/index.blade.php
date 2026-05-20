@@ -49,6 +49,7 @@
                             </div>
                             <div class="min-w-0 flex-grow-1">
                                 <h5 class="card-title mb-1 text-truncate">{{ $company->name }}</h5>
+                                <p class="text-muted small mb-1"><code>/carta/{{ $company->slug }}</code></p>
                                 <p class="text-muted small mb-2">
                                     <i class="ri-map-pin-line"></i>
                                     {{ $company->city ?: 'Sin localidad' }}

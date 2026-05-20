@@ -1,0 +1,91 @@
+/**
+ * Elegance — fine dining, serif, espacio y oro
+ */
+body.wn-theme-elegance {
+  background: var(--wn-bg) !important;
+}
+
+.wn-theme-elegance .wn-menu-hero--circle .wn-menu-hero__logo-ring {
+  border: 2px solid var(--wn-accent);
+  box-shadow: 0 8px 32px rgba(201, 169, 98, 0.2);
+}
+
+.wn-theme-elegance .wn-menu-hero__title--compact {
+  font-family: var(--wn-font-heading);
+  font-size: clamp(1.65rem, 5vw, 2.1rem) !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.04em;
+  color: var(--wn-text) !important;
+}
+
+.wn-theme-elegance .wn-menu-hero__eyebrow--muted {
+  color: var(--wn-accent) !important;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  font-size: 0.6875rem;
+}
+
+.wn-theme-elegance .wn-menu-nav {
+  background: var(--wn-bg) !important;
+  border-bottom: 1px solid rgba(26, 26, 46, 0.08);
+}
+
+.wn-theme-elegance .wn-menu-chip {
+  background: transparent;
+  color: var(--wn-text-muted);
+  border: 1px solid rgba(26, 26, 46, 0.12);
+  border-radius: 0;
+  font-family: var(--wn-font-heading);
+  font-size: 0.8125rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.wn-theme-elegance .wn-menu-chip.is-active,
+.wn-theme-elegance .wn-menu-chip:hover {
+  background: var(--wn-text);
+  color: var(--wn-bg);
+  border-color: var(--wn-text);
+}
+
+.wn-theme-elegance .wn-menu-section__title {
+  font-family: var(--wn-font-heading) !important;
+  font-size: 1.5rem !important;
+  font-weight: 600 !important;
+  color: var(--wn-text) !important;
+  text-align: center;
+  border-bottom: none !important;
+  margin-top: 2rem !important;
+}
+
+.wn-theme-elegance .wn-menu-section__title::before,
+.wn-theme-elegance .wn-menu-section__title::after {
+  content: '—';
+  color: var(--wn-accent);
+  margin: 0 0.5rem;
+  font-weight: 400;
+}
+
+.wn-theme-elegance .wn-modern-card--stacked {
+  background: var(--wn-surface);
+  border: 1px solid rgba(26, 26, 46, 0.06);
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.wn-theme-elegance .wn-modern-card__title {
+  font-family: var(--wn-font-heading);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.wn-theme-elegance .wn-modern-card .wn-price-item {
+  color: var(--wn-accent) !important;
+  font-family: var(--wn-font-heading);
+}
+
+.wn-theme-elegance .wn-modern-footer {
+  background: var(--wn-bg);
+  border-top: 1px solid rgba(26, 26, 46, 0.08);
+  text-align: center;
+}

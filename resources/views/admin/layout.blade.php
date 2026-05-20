@@ -39,6 +39,7 @@
             <div class="content-wrapper">
                 <div class="container-xxl flex-grow-1 container-p-y">
                     @include('admin.partials.materio.flash')
+                    @include('admin.partials.plan-trial-banner')
 
                     @hasSection('page_title')
                     <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">

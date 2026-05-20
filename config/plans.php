@@ -4,6 +4,9 @@ return [
 
     'default' => 'free',
 
+    'trial_days' => 30,
+    'trial_tier' => 'plus',
+
     'tiers' => [
         'free' => [
             'label' => 'Gratis',
@@ -13,6 +16,8 @@ return [
             'videos' => false,
             'menu_scan' => true,
             'tvpik' => false,
+            'translation' => false,
+            'translation_max_locales' => 0,
         ],
         'plus' => [
             'label' => 'Plus',
@@ -22,6 +27,8 @@ return [
             'videos' => true,
             'menu_scan' => true,
             'tvpik' => false,
+            'translation' => true,
+            'translation_max_locales' => 2,
         ],
         'unlimited' => [
             'label' => 'Ilimitado',
@@ -31,6 +38,8 @@ return [
             'videos' => true,
             'menu_scan' => true,
             'tvpik' => true,
+            'translation' => true,
+            'translation_max_locales' => null,
         ],
     ],
 

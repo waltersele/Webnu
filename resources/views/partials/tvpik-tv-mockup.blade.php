@@ -15,14 +15,14 @@
                 <div class="tvpik-bar-wall-tv__screen">
                     <img
                         class="tvpik-bar-wall-tv__photo"
-                        src="{{ asset('img/front/tvpik-dish.jpg') }}"
+                        src="{{ asset('img/productos/brasa-solomillo.jpg') }}"
                         alt="Plato destacado en pantalla del bar"
                         loading="lazy"
                     >
                     <div class="tvpik-bar-wall-tv__overlay">
                         <span class="tvpik-bar-wall-tv__tag">Plato del día</span>
-                        <p class="tvpik-bar-wall-tv__title">Solomillo con ajetes</p>
-                        <p class="tvpik-bar-wall-tv__price">19,60 €</p>
+                        <p class="tvpik-bar-wall-tv__title">Solomillo al Pedro Ximénez</p>
+                        <p class="tvpik-bar-wall-tv__price">24,50 €</p>
                     </div>
                     <span class="tvpik-bar-wall-tv__brand">TVPik</span>
                 </div>

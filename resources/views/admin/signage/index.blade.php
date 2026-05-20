@@ -4,8 +4,12 @@
 @section('page_subtitle', 'Conecta Webnu con TVPik, pantallas y la API de carta.')
 
 @section('content')
+@php
+    $canTvpik = $planFeatures['tvpik'] ?? false;
+@endphp
 <div class="row g-4">
     <div class="col-lg-6">
+        @if ($canTvpik)
         <div class="card h-100">
             <div class="card-header d-flex align-items-center justify-content-between">
                 <h5 class="card-title mb-0"><i class="ri ri-tv-line me-2"></i>TVPik / Pantallas</h5>
@@ -26,6 +30,27 @@
                 @endif
             </div>
         </div>
+        @else
+        <div class="card h-100">
+            <div class="card-header d-flex align-items-center justify-content-between">
+                <h5 class="card-title mb-0"><i class="ri ri-tv-line me-2"></i>TVPik / Pantallas</h5>
+                @include('admin.partials.plan-pro-badge', ['label' => 'Ilimitado'])
+            </div>
+            @component('admin.partials.plan-feature-lock', [
+                'feature' => 'tvpik',
+                'message' => 'Sincroniza tu carta con TVPik y pantallas del local con el plan Ilimitado.',
+            ])
+            <div class="card-body">
+                <p class="text-muted">Sincroniza tu carta con TVPik u otra app de digital signage.</p>
+                <div class="input-group mb-3">
+                    <input type="text" class="form-control" readonly value="••••••••••••••••••••••••••••••••">
+                    <button type="button" class="btn btn-outline-primary" disabled>Copiar</button>
+                </div>
+                <button type="button" class="btn btn-sm btn-label-secondary" disabled>Regenerar token</button>
+            </div>
+            @endcomponent
+        </div>
+        @endif
     </div>
 
     <div class="col-lg-6">
@@ -77,7 +102,7 @@ GET /api/signage/menus/{slug}</code></pre>
 
 @push('scripts')
 <script>
-document.getElementById('copy-token').addEventListener('click', function () {
+document.getElementById('copy-token')?.addEventListener('click', function () {
     var input = document.getElementById('api-token');
     input.select();
     if (navigator.clipboard) {
@@ -91,4 +116,3 @@ document.getElementById('copy-token').addEventListener('click', function () {
 });
 </script>
 @endpush
-

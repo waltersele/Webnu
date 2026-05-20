@@ -4,13 +4,13 @@ namespace App\Http\Controllers\Admin;
 
 use App\Company;
 use App\Http\Controllers\Controller;
+use App\Services\CompanySlugService;
 use App\Services\UserPlanService;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\View;
-use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
 class CompaniesController extends Controller
@@ -54,7 +54,7 @@ class CompaniesController extends Controller
         ));
     }
 
-    public function store(Request $request, UserPlanService $plans)
+    public function store(Request $request, UserPlanService $plans, CompanySlugService $slugs)
     {
         $plans->assertCanCreateCompany($request->user());
 
@@ -62,12 +62,10 @@ class CompaniesController extends Controller
             'name' => 'required',
         ]);
 
-        $slug = Str::slug($request->get('name'));
-        $duplicateSlugCount = Company::where('slug', 'LIKE', "{$slug}%")->count();
-
-        if ($duplicateSlugCount) {
-            $slug .= '-' . ($duplicateSlugCount + 1);
-        }
+        $slug = $slugs->generateFromName(
+            $request->get('name'),
+            $request->get('city')
+        );
 
         $userId = auth()->id();
         $company = Company::create([
@@ -87,13 +85,23 @@ class CompaniesController extends Controller
         return redirect()->route('admin.companies.edit', $company);
     }
 
-    public function update(Company $company, Request $request)
+    public function update(Company $company, Request $request, CompanySlugService $slugs)
     {
         $this->authorize('update', $company);
 
         $this->validate($request, [
             'name' => 'required',
+            'slug' => 'nullable|string|max:64',
         ]);
+
+        if ($request->filled('slug')) {
+            $customSlug = $slugs->normalize($request->get('slug'));
+            $slugError = $slugs->validateCustomSlug($customSlug, $company->id);
+            if ($slugError) {
+                throw ValidationException::withMessages(['slug' => [$slugError]]);
+            }
+            $company->slug = $customSlug;
+        }
 
         $company->fill([
             'name' => $request->get('name'),

@@ -1,6 +1,9 @@
 @extends('admin.onboarding.layout')
 
 @section('content')
+@php
+    $maxStep = $maxStep ?? 6;
+@endphp
 <div class="wn-onb" data-step="{{ $step }}">
     <div class="wn-onb__bg" aria-hidden="true">
         <span class="wn-onb__orb wn-onb__orb--1"></span>
@@ -10,15 +13,17 @@
     <header class="wn-onb__top">
         <a href="{{ route('home') }}" class="wn-onb__logo">Webnu<span>.es</span></a>
         <div class="wn-onb__plan-badge">
-            <i class="ri-gift-line"></i> Plan {{ $plan['label'] ?? 'Gratis' }}
-            @if($scanLimit !== null)
+            <i class="ri-gift-line"></i> {{ $planPresentation['label'] ?? ($plan['label'] ?? 'Gratis') }}
+            @if(!empty($planPresentation['trial_active']))
+                · {{ $planPresentation['trial_days_remaining'] }} {{ $planPresentation['trial_days_remaining'] === 1 ? 'día' : 'días' }} restantes
+            @elseif($scanLimit !== null)
                 · {{ $scansRemaining }} / {{ $scanLimit }} escaneos IA
             @endif
         </div>
     </header>
 
-    <div class="wn-onb__progress" role="progressbar" aria-valuenow="{{ $step }}" aria-valuemin="1" aria-valuemax="5">
-        @for($i = 1; $i <= 5; $i++)
+    <div class="wn-onb__progress" role="progressbar" aria-valuenow="{{ $step }}" aria-valuemin="1" aria-valuemax="{{ $maxStep }}">
+        @for($i = 1; $i <= $maxStep; $i++)
             <span class="wn-onb__progress-seg {{ $i <= $step ? 'is-done' : '' }} {{ $i === $step ? 'is-current' : '' }}"></span>
         @endfor
     </div>
@@ -30,13 +35,17 @@
                 <div class="wn-onb-confetti" aria-hidden="true"></div>
                 <span class="wn-onb-eyebrow">Bienvenido, {{ explode(' ', $user->name)[0] }}</span>
                 <h1>Tu carta digital en <em>minutos</em></h1>
-                <p class="wn-onb-lead">Vamos a dejar lista la carta de <strong>{{ $company->name }}</strong>. Son 5 pasos rápidos: identidad, diseño y QR para tus mesas.</p>
+                <p class="wn-onb-lead">Vamos a dejar lista la carta de <strong>{{ $company->name }}</strong>. Son {{ $maxStep }} pasos rápidos: diseño, idiomas y QR.</p>
                 <ul class="wn-onb-checklist">
-                    <li><i class="ri-check-line"></i> Sin tarjeta · Plan {{ $plan['label'] }}</li>
+                    @if(!empty($planPresentation['trial_active']))
+                        <li><i class="ri-check-line"></i> <strong>30 días de Plus gratis</strong> — vídeos, traducciones e IA ilimitada</li>
+                    @else
+                        <li><i class="ri-check-line"></i> Sin tarjeta · Plan {{ $plan['label'] ?? 'Gratis' }}</li>
+                    @endif
                     <li><i class="ri-check-line"></i> Plantillas profesionales listas</li>
-                    <li><i class="ri-check-line"></i> @if($scanLimit) {{ $scanLimit }} escaneos IA incluidos @else Escaneo IA ilimitado @endif</li>
+                    <li><i class="ri-check-line"></i> Carta multilingüe para clientes internacionales</li>
                 </ul>
-                <a href="{{ route('admin.onboarding', ['step' => 2]) }}" class="wn-onb-btn wn-onb-btn--primary">
+                <a href="{{ route('admin.onboarding', ['step' => $companyHasIdentity ? 3 : 2]) }}" class="wn-onb-btn wn-onb-btn--primary">
                     Empezar configuración <i class="ri-arrow-right-line"></i>
                 </a>
             </div>
@@ -45,7 +54,7 @@
         {{-- Paso 2: Nombre --}}
         <section class="wn-onb-step {{ $step === 2 ? 'is-active' : '' }}" data-onb-step="2">
             <div class="wn-onb-card">
-                <span class="wn-onb-step-num">Paso 2 de 5</span>
+                <span class="wn-onb-step-num">Paso 2 de {{ $maxStep }}</span>
                 <h2>¿Cómo se llama tu negocio?</h2>
                 <p>Aparecerá en la carta y en el código QR.</p>
                 <form method="POST" action="{{ route('admin.onboarding.update') }}" class="wn-onb-form">
@@ -61,7 +70,7 @@
         {{-- Paso 3: Plantilla --}}
         <section class="wn-onb-step {{ $step === 3 ? 'is-active' : '' }}" data-onb-step="3">
             <div class="wn-onb-card wn-onb-card--wide">
-                <span class="wn-onb-step-num">Paso 3 de 5</span>
+                <span class="wn-onb-step-num">Paso 3 de {{ $maxStep }}</span>
                 <h2>Elige el estilo de tu carta</h2>
                 <p>Puedes cambiarlo después en el estudio visual.</p>
                 <form method="POST" action="{{ route('admin.onboarding.update') }}" class="wn-onb-form" id="onb-template-form">
@@ -83,10 +92,65 @@
             </div>
         </section>
 
-        {{-- Paso 4: Carta --}}
+        {{-- Paso 4: Idiomas --}}
         <section class="wn-onb-step {{ $step === 4 ? 'is-active' : '' }}" data-onb-step="4">
             <div class="wn-onb-card wn-onb-card--wide">
-                <span class="wn-onb-step-num">Paso 4 de 5</span>
+                <span class="wn-onb-step-num">Paso 4 de {{ $maxStep }}</span>
+                <h2>¿Carta para turistas internacionales?</h2>
+                <p>Activa idiomas extra y genera traducciones con IA. Tus clientes eligen idioma al escanear el QR.</p>
+
+                @if($canTranslate)
+                    <form method="POST" action="{{ route('admin.onboarding.update') }}" class="wn-onb-form">
+                        @csrf
+                        <input type="hidden" name="step" value="4">
+                        <p class="wn-onb-label">Idioma base: <strong>{{ $supportedLocales[$defaultLocale]['native'] ?? strtoupper($defaultLocale) }}</strong></p>
+                        <div class="wn-onb-locales">
+                            @foreach($supportedLocales as $code => $meta)
+                                @if($code === $defaultLocale)
+                                    @continue
+                                @endif
+                                <label class="wn-onb-locale">
+                                    <input type="checkbox" name="locales[]" value="{{ $code }}"
+                                        {{ in_array($code, $enabledExtra, true) ? 'checked' : '' }}>
+                                    <span>
+                                        <strong>{{ $meta['native'] ?? $meta['label'] }}</strong>
+                                        <small>{{ strtoupper($code) }}</small>
+                                    </span>
+                                </label>
+                            @endforeach
+                        </div>
+                        @if($maxExtraLocales !== null)
+                            <p class="wn-onb-hint">Tu plan permite hasta {{ $maxExtraLocales }} {{ $maxExtraLocales === 1 ? 'idioma extra' : 'idiomas extra' }}.</p>
+                        @endif
+                        @error('locales')<p class="wn-onb-error">{{ $message }}</p>@enderror
+                        <label class="wn-onb-check">
+                            <input type="checkbox" name="generate_ai" value="1">
+                            <span>Generar traducciones automáticamente con IA</span>
+                        </label>
+                        <button type="submit" class="wn-onb-btn wn-onb-btn--primary w-100">Guardar y continuar <i class="ri-arrow-right-line"></i></button>
+                    </form>
+                    <form method="POST" action="{{ route('admin.onboarding.update') }}" class="mt-3">
+                        @csrf
+                        <input type="hidden" name="step" value="4">
+                        <button type="submit" class="wn-onb-btn wn-onb-btn--ghost w-100">Saltar · solo español por ahora</button>
+                    </form>
+                @else
+                    <div class="wn-onb-upsell">
+                        <p>La carta multilingüe requiere <strong>Plus</strong>. <a href="{{ $billingUrl }}">Mejora tu plan</a> para activar idiomas.</p>
+                    </div>
+                    <form method="POST" action="{{ route('admin.onboarding.update') }}" class="mt-3">
+                        @csrf
+                        <input type="hidden" name="step" value="4">
+                        <button type="submit" class="wn-onb-btn wn-onb-btn--primary w-100">Continuar sin idiomas extra</button>
+                    </form>
+                @endif
+            </div>
+        </section>
+
+        {{-- Paso 5: Carta --}}
+        <section class="wn-onb-step {{ $step === 5 ? 'is-active' : '' }}" data-onb-step="5">
+            <div class="wn-onb-card wn-onb-card--wide">
+                <span class="wn-onb-step-num">Paso 5 de {{ $maxStep }}</span>
                 <h2>¿Cómo quieres crear tu carta?</h2>
                 <div class="wn-onb-choice-grid">
                     <div class="wn-onb-choice {{ $scansRemaining > 0 || $scanLimit === null ? '' : 'is-disabled' }}">
@@ -108,21 +172,21 @@
                         <div class="wn-onb-choice__icon"><i class="ri-edit-line"></i></div>
                         <h3>Crear manualmente</h3>
                         <p>Añade secciones y platos tú mismo. Ideal si empiezas desde cero.</p>
-                        <a href="{{ route('admin.onboarding', ['step' => 5]) }}" class="wn-onb-btn wn-onb-btn--primary w-100">Seguir al paso final</a>
+                        <a href="{{ route('admin.onboarding', ['step' => 6]) }}" class="wn-onb-btn wn-onb-btn--primary w-100">Seguir al paso final</a>
                     </div>
                 </div>
                 <form method="POST" action="{{ route('admin.onboarding.update') }}" class="mt-3">
                     @csrf
-                    <input type="hidden" name="step" value="4">
+                    <input type="hidden" name="step" value="5">
                     <button type="submit" class="wn-onb-btn wn-onb-btn--ghost w-100">Saltar y continuar</button>
                 </form>
             </div>
         </section>
 
-        {{-- Paso 5: Publicar --}}
-        <section class="wn-onb-step {{ $step === 5 ? 'is-active' : '' }}" data-onb-step="5">
+        {{-- Paso 6: Publicar --}}
+        <section class="wn-onb-step {{ $step === 6 ? 'is-active' : '' }}" data-onb-step="6">
             <div class="wn-onb-card wn-onb-card--finish">
-                <span class="wn-onb-step-num">Paso 5 de 5</span>
+                <span class="wn-onb-step-num">Paso 6 de {{ $maxStep }}</span>
                 <h2>¡Tu carta está casi lista!</h2>
                 <p>Publica y comparte el QR con tus clientes.</p>
                 <div class="wn-onb-finish-grid">
@@ -136,7 +200,7 @@
                         </a>
                         <form method="POST" action="{{ route('admin.onboarding.update') }}">
                             @csrf
-                            <input type="hidden" name="step" value="5">
+                            <input type="hidden" name="step" value="6">
                             <button type="submit" class="wn-onb-btn wn-onb-btn--primary w-100 wn-onb-btn--pulse">
                                 <i class="ri-rocket-line"></i> Publicar e ir al panel
                             </button>
@@ -149,8 +213,17 @@
     </main>
 
     <footer class="wn-onb__footer">
-        @if($step > 1 && $step < 5)
-            <a href="{{ route('admin.onboarding', ['step' => $step - 1]) }}" class="wn-onb-link"><i class="ri-arrow-left-line"></i> Atrás</a>
+        @if($step > 1 && $step < $maxStep)
+            @php
+                if ($step === 3 && $companyHasIdentity) {
+                    $prevStep = 1;
+                } elseif ($step === 4 && $companyHasIdentity) {
+                    $prevStep = 3;
+                } else {
+                    $prevStep = $step - 1;
+                }
+            @endphp
+            <a href="{{ route('admin.onboarding', ['step' => $prevStep]) }}" class="wn-onb-link"><i class="ri-arrow-left-line"></i> Atrás</a>
         @endif
         <form method="POST" action="{{ route('admin.onboarding.skip') }}" class="ms-auto">
             @csrf

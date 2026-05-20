@@ -489,13 +489,17 @@ body.wn-theme-oriental .wn-dish-modal .wn-allergens__item {
     overflow: hidden;
   }
 
-  .wn-theme-lumiere .wn-menu-hero {
+  .wn-theme-lumiere .wn-menu-hero:not(.wn-menu-hero--bleed) {
     min-height: 160px;
     margin-left: max(1rem, env(safe-area-inset-left, 0px));
     margin-right: max(1rem, env(safe-area-inset-right, 0px));
   }
 
-  .wn-theme-lumiere .wn-menu-hero__overlay {
+  .wn-theme-lumiere .wn-menu-hero--bleed {
+    min-height: clamp(160px, 36vw, 220px);
+  }
+
+  .wn-theme-lumiere .wn-menu-hero__overlay:not(.wn-menu-hero__overlay--bleed) {
     min-height: 160px;
     padding: 1.25rem 1rem 1rem;
   }
@@ -504,7 +508,7 @@ body.wn-theme-oriental .wn-dish-modal .wn-allergens__item {
     font-size: clamp(1.35rem, 5vw, 1.75rem);
   }
 
-  .wn-theme-pasion .wn-modern-card--stacked .wn-modern-card__media {
+  .wn-theme-pasion .wn-modern-card--stacked .wn-modern-card__media:not(:has(.wn-card-reel)) {
     aspect-ratio: 16 / 11;
     max-height: 200px;
   }
@@ -560,8 +564,12 @@ body.wn-theme-oriental .wn-dish-modal .wn-allergens__item {
 }
 
 /* Hero y spotlight alineados al viewport */
-.wn-menu-hero,
 .wn-menu-spotlight {
+  margin-left: max(1rem, env(safe-area-inset-left, 0px));
+  margin-right: max(1rem, env(safe-area-inset-right, 0px));
+}
+
+.wn-menu-hero:not(.wn-menu-hero--bleed) {
   margin-left: max(1rem, env(safe-area-inset-left, 0px));
   margin-right: max(1rem, env(safe-area-inset-right, 0px));
 }
@@ -606,9 +614,17 @@ body.wn-theme-oriental .wn-menu-nav {
   overflow: hidden;
 }
 
+.wn-modern-card--stacked .wn-modern-card__media .wn-card-reel {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  aspect-ratio: unset;
+  min-height: 0;
+}
+
 .wn-modern-card--stacked .wn-card-reel {
-  aspect-ratio: 4 / 5;
-  min-height: 220px;
+  min-height: 0;
 }
 
 .wn-modern-card--horizontal .wn-card-reel {
@@ -621,6 +637,11 @@ body.wn-theme-oriental .wn-menu-nav {
   object-fit: cover;
   display: block;
   vertical-align: top;
+}
+
+.wn-modern-card--stacked .wn-modern-card__media .wn-card-reel__video {
+  position: absolute;
+  inset: 0;
 }
 
 .wn-card-reel__badge {
@@ -671,4 +692,57 @@ body.wn-theme-oriental .wn-menu-nav {
   max-height: min(55vh, 400px);
   object-fit: cover;
   background: #000;
+}
+
+/* Selector de idioma (carta pública) */
+.wn-lang-switcher {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  padding: 0.5rem 0.75rem;
+  background: color-mix(in srgb, var(--wn-surface, #fff) 92%, transparent);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid color-mix(in srgb, var(--wn-text, #141b2b) 8%, transparent);
+}
+
+.wn-lang-switcher__track {
+  display: flex;
+  gap: 0.4rem;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+.wn-lang-switcher__track::-webkit-scrollbar {
+  display: none;
+}
+
+.wn-lang-chip {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.65rem;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--wn-text, #141b2b) 12%, transparent);
+  background: var(--wn-surface, #fff);
+  color: var(--wn-text-muted, #4b5563);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: border-color 0.2s, background 0.2s, color 0.2s;
+}
+
+.wn-lang-chip.is-active {
+  border-color: var(--wn-primary, #004ac6);
+  background: color-mix(in srgb, var(--wn-primary, #004ac6) 12%, #fff);
+  color: var(--wn-primary, #004ac6);
+}
+
+.wn-lang-chip__code {
+  font-size: 0.625rem;
+  letter-spacing: 0.04em;
+  opacity: 0.85;
 }

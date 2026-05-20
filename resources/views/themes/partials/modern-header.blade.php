@@ -6,7 +6,7 @@
             <span class="wn-modern-header__name">{{ $company->name }}</span>
         @endif
     </div>
-    <button type="button" class="wn-modern-header__info" id="wn-info-toggle" aria-label="Información del negocio">
+    <button type="button" class="wn-modern-header__info" id="wn-info-toggle" aria-label="{{ isset($menuLocaleService) ? $menuLocaleService->uiLabel('business_info', $menuLocale ?? 'es') : 'Información del negocio' }}">
         <i class="fas fa-info-circle" aria-hidden="true"></i>
     </button>
 </header>

@@ -41,4 +41,76 @@ class PlatformSettingsService
     {
         PlatformSetting::where('key', 'gemini_api_key')->delete();
     }
+
+    public function mailSettingsForForm(): array
+    {
+        return [
+            'mail_mailer' => PlatformSetting::mailMailer(),
+            'mail_host' => PlatformSetting::mailHost(),
+            'mail_port' => PlatformSetting::mailPort(),
+            'mail_username' => PlatformSetting::mailUsername(),
+            'mail_encryption' => PlatformSetting::mailEncryption(),
+            'mail_from_address' => PlatformSetting::mailFromAddress(),
+            'mail_from_name' => PlatformSetting::mailFromName(),
+            'mail_password_configured' => PlatformSetting::hasMailPassword(),
+            'mail_password_hint' => PlatformSetting::mailPasswordHint(),
+        ];
+    }
+
+    public function contactSettingsForForm(): array
+    {
+        return [
+            'contact_leads_email' => PlatformSetting::contactLeadsEmail(),
+            'contact_suggestions_email' => PlatformSetting::contactSuggestionsEmail(),
+            'contact_public_email' => PlatformSetting::contactPublicEmail(),
+        ];
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     */
+    public function updateMail(array $data): void
+    {
+        $simpleFields = [
+            'mail_mailer',
+            'mail_host',
+            'mail_port',
+            'mail_username',
+            'mail_encryption',
+            'mail_from_address',
+            'mail_from_name',
+        ];
+
+        foreach ($simpleFields as $field) {
+            if (! array_key_exists($field, $data)) {
+                continue;
+            }
+
+            $value = $data[$field];
+            PlatformSetting::setValue($field, $value === null || $value === '' ? null : trim((string) $value));
+        }
+
+        if (! empty($data['mail_password'])) {
+            PlatformSetting::setValue('mail_password', trim((string) $data['mail_password']));
+        }
+    }
+
+    public function clearMailPassword(): void
+    {
+        PlatformSetting::where('key', 'mail_password')->delete();
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     */
+    public function updateContact(array $data): void
+    {
+        foreach (['contact_leads_email', 'contact_suggestions_email', 'contact_public_email'] as $field) {
+            if (! array_key_exists($field, $data)) {
+                continue;
+            }
+
+            PlatformSetting::setValue($field, trim((string) $data[$field]));
+        }
+    }
 }

@@ -8,10 +8,10 @@ use App\Providers\RouteServiceProvider;
 use App\User;
 use Illuminate\Foundation\Auth\RegistersUsers;
 use Illuminate\Http\Request;
+use App\Services\CompanySlugService;
 use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Str;
 
 class RegisterController extends Controller
 {
@@ -45,9 +45,11 @@ class RegisterController extends Controller
         $this->middleware('guest');
     }
 
-    public function index()
+    public function index(Request $request)
     {
-        return view('auth.register');
+        return view('auth.register-webnu', [
+            'prefillEmail' => $request->query('email', old('email', '')),
+        ]);
     }
 
     /**
@@ -62,7 +64,7 @@ class RegisterController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
-            'business_name' => ['nullable', 'string', 'max:255'],
+            'business_name' => ['required', 'string', 'max:255'],
         ]);
     }
 
@@ -80,14 +82,11 @@ class RegisterController extends Controller
             'password' => Hash::make($data['password']),
             'plan' => 'free',
             'onboarding_step' => 1,
+            'trial_ends_at' => now()->addDays((int) config('plans.trial_days', 30)),
         ]);
 
         $businessName = trim($data['business_name'] ?? '') ?: 'Mi restaurante';
-        $slug = Str::slug($businessName);
-        $duplicateSlugCount = Company::where('slug', 'LIKE', "{$slug}%")->count();
-        if ($duplicateSlugCount) {
-            $slug .= '-' . ($duplicateSlugCount + 1);
-        }
+        $slug = app(CompanySlugService::class)->generateFromName($businessName);
 
         $company = Company::create([
             'name' => $businessName,

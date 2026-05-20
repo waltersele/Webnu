@@ -69,7 +69,12 @@
                 <h5 class="card-title mb-2">Mi carta</h5>
                 <p class="text-muted small mb-3">Secciones, platos, fotos y vídeos.</p>
                 <a href="{{ route('admin.sections.index') }}" class="btn btn-webnu w-100 mb-2">Ir a mi carta</a>
-                <a href="{{ route('admin.menu-scan.create') }}" class="btn btn-outline-success w-100 btn-sm">Importar desde foto o PDF</a>
+                <a href="{{ route('admin.menu-scan.create') }}" class="btn btn-outline-success w-100 btn-sm">
+                    Importar desde foto o PDF
+                    @if (! ($planFeatures['menu_scan'] ?? true))
+                        @include('admin.partials.plan-pro-badge', ['label' => 'Plus', 'size' => 'xs'])
+                    @endif
+                </a>
             </div>
         </div>
     </div>
@@ -85,7 +90,12 @@
                 </div>
                 <h5 class="card-title mb-2">Integraciones</h5>
                 <p class="text-muted small mb-3">TVPik, API y pantallas.</p>
-                <a href="{{ route('admin.integrations.index') }}" class="btn btn-webnu w-100">Ver integraciones</a>
+                <a href="{{ route('admin.integrations.index') }}" class="btn btn-webnu w-100">
+                    Ver integraciones
+                    @if (! ($planFeatures['tvpik'] ?? false))
+                        @include('admin.partials.plan-pro-badge', ['label' => 'Ilimitado', 'size' => 'xs'])
+                    @endif
+                </a>
             </div>
         </div>
     </div>
@@ -93,8 +103,12 @@
 
 <div class="card bg-primary text-white overflow-hidden">
     <div class="card-body position-relative">
-        <span class="badge bg-white text-primary mb-2">Nuevo: TVPik 2.0</span>
+        <span class="badge bg-white text-primary mb-2">TVPik 2.0</span>
+        @if (! ($planFeatures['tvpik'] ?? false))
+            @include('admin.partials.plan-pro-badge', ['label' => 'Ilimitado', 'size' => 'xs'])
+        @endif
         <h4 class="text-white mb-3">Potencia la experiencia de tus comensales</h4>
+        <p class="text-white opacity-75 small mb-3">Muestra tu carta en pantallas del local con sincronización automática.</p>
         <a href="{{ route('admin.integrations.index') }}" class="btn btn-light btn-sm">Saber más</a>
     </div>
 </div>

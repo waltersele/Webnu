@@ -22,6 +22,8 @@ class EnsureOnboardingComplete
             'admin.onboarding',
             'admin.onboarding.*',
             'admin.menu-scan.*',
+            'admin.companies.languages',
+            'admin.companies.languages.*',
             'admin.billing',
             'admin.billing.*'
         )) {

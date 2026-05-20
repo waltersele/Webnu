@@ -4,13 +4,17 @@ namespace App\Http\Controllers\Admin;
 
 use App\Company;
 use App\Http\Controllers\Controller;
+use App\Services\CompanySlugService;
+use App\Services\MenuTranslationService;
 use App\Services\UserPlanService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cookie;
 
 class OnboardingController extends Controller
 {
-    public function show(Request $request, UserPlanService $plans)
+    protected const MAX_STEP = 6;
+
+    public function show(Request $request, UserPlanService $plans, MenuTranslationService $translations)
     {
         $user = $request->user();
         $company = $this->primaryCompany($user);
@@ -19,22 +23,28 @@ class OnboardingController extends Controller
             return redirect()->route('admin.companies.edit', $company);
         }
 
-        $step = max(1, min(5, (int) $request->get('step', max(1, (int) $user->onboarding_step ?: 1))));
+        $step = max(1, min(self::MAX_STEP, (int) $request->get('step', max(1, (int) $user->onboarding_step ?: 1))));
 
-        $templates = collect(config('company_templates.templates', []))
-            ->only(['lumiere', 'bistro', 'nocturne', 'temporada', 'catalogo']);
+        $companyHasIdentity = $this->companyHasIdentity($company);
+        if ($step === 2 && $companyHasIdentity) {
+            return redirect()->route('admin.onboarding', ['step' => 3]);
+        }
 
+        $templates = collect(config('company_templates.templates', []));
         $themePresets = config('company_templates.presets', []);
         $publicUrl = route('see_menu', $company->slug);
         $qrImageUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=220x220&margin=12&data=' . urlencode($publicUrl);
+        $planPresentation = $plans->planPresentation($user);
 
         return view('admin.onboarding.show', [
             'user' => $user,
             'company' => $company,
             'step' => $step,
+            'maxStep' => self::MAX_STEP,
             'templates' => $templates,
             'themePresets' => $themePresets,
             'plan' => $plans->tier($user),
+            'planPresentation' => $planPresentation,
             'scansRemaining' => $plans->menuScansRemaining($user),
             'scansUsed' => $plans->menuScansUsed($user),
             'scanLimit' => $plans->menuScanLimit($user),
@@ -42,10 +52,16 @@ class OnboardingController extends Controller
             'qrImageUrl' => $qrImageUrl,
             'menuScanUrl' => route('admin.menu-scan.create'),
             'billingUrl' => route('admin.billing'),
+            'companyHasIdentity' => $companyHasIdentity,
+            'supportedLocales' => config('menu_locales.supported', []),
+            'defaultLocale' => $company->defaultLocale(),
+            'enabledExtra' => is_array($company->enabled_locales) ? $company->enabled_locales : [],
+            'canTranslate' => $plans->canUseTranslation($user),
+            'maxExtraLocales' => $plans->maxTranslationLocales($user),
         ]);
     }
 
-    public function update(Request $request, UserPlanService $plans)
+    public function update(Request $request, UserPlanService $plans, MenuTranslationService $translations)
     {
         $user = $request->user();
         $company = $this->primaryCompany($user);
@@ -59,6 +75,13 @@ class OnboardingController extends Controller
                     'name' => 'required|string|max:255',
                 ]);
                 $company->name = $data['name'];
+                if (! $company->enabled) {
+                    $company->slug = app(CompanySlugService::class)->generateFromName(
+                        $data['name'],
+                        $company->city,
+                        $company->id
+                    );
+                }
                 $company->save();
                 break;
 
@@ -78,12 +101,44 @@ class OnboardingController extends Controller
                 $company->save();
                 break;
 
-            case 5:
+            case 4:
+                $supported = array_keys(config('menu_locales.supported', []));
+                $default = $company->defaultLocale();
+                $validated = $request->validate([
+                    'locales' => 'nullable|array',
+                    'locales.*' => 'string|in:' . implode(',', $supported),
+                    'generate_ai' => 'nullable|boolean',
+                ]);
+
+                $locales = array_values(array_filter(
+                    $validated['locales'] ?? [],
+                    fn ($locale) => $locale !== $default
+                ));
+
+                if ($locales !== [] && $plans->canUseTranslation($user)) {
+                    $plans->assertCanEnableLocales($user, count($locales));
+                    $translations->updateCompanyLocales($company, $user, $locales);
+
+                    if ($request->boolean('generate_ai')) {
+                        foreach ($locales as $locale) {
+                            try {
+                                $translations->translateCompany($company, $user, $locale);
+                            } catch (\Throwable $e) {
+                                return redirect()
+                                    ->route('admin.onboarding', ['step' => 4])
+                                    ->withErrors(['locales' => 'No se pudo traducir a ' . strtoupper($locale) . ': ' . $e->getMessage()]);
+                            }
+                        }
+                    }
+                }
+                break;
+
+            case 6:
                 $company->enabled = true;
                 $company->save();
 
                 $user->onboarding_completed_at = now();
-                $user->onboarding_step = 5;
+                $user->onboarding_step = self::MAX_STEP;
                 $user->save();
 
                 return redirect()
@@ -94,7 +149,7 @@ class OnboardingController extends Controller
         $user->onboarding_step = max((int) $user->onboarding_step, $step);
         $user->save();
 
-        $nextStep = min(5, $step + 1);
+        $nextStep = min(self::MAX_STEP, $step + 1);
 
         return redirect()->route('admin.onboarding', ['step' => $nextStep]);
     }
@@ -109,7 +164,7 @@ class OnboardingController extends Controller
         $company->save();
 
         $user->onboarding_completed_at = now();
-        $user->onboarding_step = 5;
+        $user->onboarding_step = self::MAX_STEP;
         $user->save();
 
         return redirect()
@@ -132,5 +187,12 @@ class OnboardingController extends Controller
         }
 
         return $company;
+    }
+
+    protected function companyHasIdentity(Company $company): bool
+    {
+        $name = trim((string) $company->name);
+
+        return $name !== '' && $name !== 'Mi restaurante';
     }
 }

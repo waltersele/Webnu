@@ -31,6 +31,8 @@
 @endphp
 
 <div class="wn-menu-shell{{ $hasHeroBanner ? ' wn-menu-shell--no-topbar' : '' }}">
+    @include('themes.partials.language-switcher')
+
     @if(!$hasHeroBanner)
         @include('themes.partials.modern-header')
     @endif
@@ -69,15 +71,22 @@
                 ? URL::to('/') . '/img/' . $company->background_header
                 : asset('img/demo/demo-01.jpg');
         @endphp
-        <section class="wn-menu-hero wn-menu-hero--dark" style="--wn-hero-image: url('{{ $heroBgUrl }}')">
-            <div class="wn-menu-hero__overlay">
-                @if($company->chef_name)
-                    <p class="wn-menu-hero__eyebrow">{{ strtoupper($company->chef_name) }}</p>
-                @endif
-                <h1 class="wn-menu-hero__title">{{ $company->name }}</h1>
-                @if($company->comments)
-                    <p class="wn-menu-hero__subtitle">{{ $company->comments }}</p>
-                @endif
+        <section class="wn-menu-hero wn-menu-hero--dark wn-menu-hero--bleed" style="--wn-hero-image: url('{{ $heroBgUrl }}')">
+            <div class="wn-menu-hero__overlay wn-menu-hero__overlay--bleed">
+                <div class="wn-menu-hero__brand">
+                    @if($company->logo)
+                        <img class="wn-menu-hero__logo-inline" src="{{ asset('img/'.$company->logo) }}" alt="{{ $company->name }}">
+                    @endif
+                    <div class="wn-menu-hero__brand-text">
+                        @if($company->chef_name)
+                            <p class="wn-menu-hero__eyebrow">{{ strtoupper($company->chef_name) }}</p>
+                        @endif
+                        <h1 class="wn-menu-hero__title">{{ $company->name }}</h1>
+                        @if($company->comments)
+                            <p class="wn-menu-hero__subtitle">{{ $company->comments }}</p>
+                        @endif
+                    </div>
+                </div>
             </div>
         </section>
     @elseif($heroMode === 'light' && $company->background_header)
@@ -87,19 +96,23 @@
             </div>
         </section>
     @elseif(in_array($heroMode, ['compact', 'circle'], true))
-        <section class="wn-menu-hero wn-menu-hero--{{ $heroMode }}" @if($company->background_header) style="--wn-hero-image: url('{{ URL::to('/') . '/img/' . $company->background_header }}')" @else style="--wn-hero-image: url('{{ asset('img/default-header.jpg') }}')" @endif>
-            <div class="wn-menu-hero__overlay wn-menu-hero__overlay--{{ $heroMode }}">
-                @if($heroMode === 'circle')
-                    <div class="wn-menu-hero__logo-ring">
-                        <img src="{{ $company->logo ? asset('img/'.$company->logo) : asset('img/front/logo.png') }}" alt="{{ $company->name }}">
+        <section class="wn-menu-hero wn-menu-hero--{{ $heroMode }} wn-menu-hero--bleed" @if($company->background_header) style="--wn-hero-image: url('{{ URL::to('/') . '/img/' . $company->background_header }}')" @else style="--wn-hero-image: url('{{ asset('img/default-header.jpg') }}')" @endif>
+            <div class="wn-menu-hero__overlay wn-menu-hero__overlay--bleed wn-menu-hero__overlay--{{ $heroMode }}">
+                <div class="wn-menu-hero__brand">
+                    @if($heroMode === 'circle')
+                        <div class="wn-menu-hero__logo-ring">
+                            <img src="{{ $company->logo ? asset('img/'.$company->logo) : asset('img/front/logo.png') }}" alt="{{ $company->name }}">
+                        </div>
+                    @elseif($company->logo)
+                        <img class="wn-menu-hero__logo-inline" src="{{ asset('img/'.$company->logo) }}" alt="{{ $company->name }}">
+                    @endif
+                    <div class="wn-menu-hero__brand-text">
+                        <h1 class="wn-menu-hero__title wn-menu-hero__title--compact">{{ $company->name }}</h1>
+                        @if($company->chef_name)
+                            <p class="wn-menu-hero__eyebrow wn-menu-hero__eyebrow--muted">{{ $company->chef_name }}</p>
+                        @endif
                     </div>
-                @else
-                    <img class="wn-menu-hero__logo-inline" src="{{ $company->logo ? asset('img/'.$company->logo) : asset('img/front/logo.png') }}" alt="{{ $company->name }}">
-                @endif
-                <h1 class="wn-menu-hero__title wn-menu-hero__title--compact">{{ $company->name }}</h1>
-                @if($company->chef_name)
-                    <p class="wn-menu-hero__eyebrow wn-menu-hero__eyebrow--muted">{{ $company->chef_name }}</p>
-                @endif
+                </div>
             </div>
         </section>
     @endif
@@ -110,7 +123,7 @@
         </button>
     @endif
 
-    <nav class="wn-menu-nav {{ in_array($variant, ['bistro', 'basic', 'visual'], true) ? 'wn-menu-nav--light' : '' }}" id="sticker" aria-label="Secciones">
+    <nav class="wn-menu-nav {{ in_array($variant, ['bistro', 'basic', 'visual', 'mar', 'elegance', 'temporada', 'catalogo'], true) ? 'wn-menu-nav--light' : '' }}" id="sticker" aria-label="Secciones">
         <div class="wn-menu-nav__track">
             @foreach ($sections as $index => $section)
                 <a href="#" class="wn-menu-chip linkTo {{ $index === 0 ? 'is-active' : '' }}" id="{{ $section->id }}">{{ $section->name }}</a>
@@ -118,7 +131,7 @@
         </div>
     </nav>
 
-    @php $lightSurface = in_array($variant, ['bistro', 'basic', 'visual'], true); @endphp
+    @php $lightSurface = in_array($variant, ['bistro', 'basic', 'visual', 'fastfood', 'mar', 'elegance', 'temporada', 'catalogo'], true); @endphp
     <main class="wn-menu-main {{ $lightSurface ? 'wn-menu-main--light' : '' }}">
         @foreach ($sections as $section)
             <section class="wn-menu-section" id="section-{{ $section->id }}">

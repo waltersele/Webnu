@@ -53,7 +53,7 @@
             <div class="alert alert-warning">
                 @if ($isSuperAdmin)
                     El escaneo con IA no está configurado.
-                    <a href="{{ route('admin.platform.settings') }}" class="alert-link">Configura la API de Gemini en Plataforma → Escaneo IA</a>.
+                    <a href="{{ route('admin.platform.settings') }}" class="alert-link">Configura la API de Gemini en Plataforma → Configuración</a>.
                 @else
                     El escaneo con IA no está disponible en este momento. Contacta con el administrador de Webnu.
                 @endif
@@ -72,6 +72,9 @@
             </div>
         @endif
 
+        @php $scanLocked = ! ($canScan ?? true) && $scanLimit !== null; @endphp
+        <div class="{{ $scanLocked ? 'wn-plan-feature-lock' : '' }}">
+            <div class="{{ $scanLocked ? 'wn-plan-feature-lock__content' : '' }}">
         <form method="POST" action="{{ route('admin.menu-scan.store') }}" enctype="multipart/form-data" id="menu-scan-upload-form">
             @csrf
             <input type="file" name="files[]" id="menu-scan-files" accept="image/jpeg,image/png,image/webp,application/pdf" multiple class="d-none">
@@ -113,6 +116,14 @@
                 </button>
             </div>
         </form>
+            </div>
+            @if ($scanLocked)
+                @include('admin.partials.plan-upgrade-veil', [
+                    'feature' => 'menu_scan',
+                    'message' => 'Has usado tus escaneos incluidos. Pásate a Plus para escaneos ilimitados.',
+                ])
+            @endif
+        </div>
     </div>
 </div>
 

@@ -8,6 +8,7 @@ Route::view('/welcome', 'welcome')->name('welcome');
 Route::post('/pay_product', 'PaymentController@pay_product')->name('pay_product');
 Route::post('/process_subscription', 'PaymentController@process_subscription')->name('process_subscription');
 Route::post('/te_llamamos', 'PagesController@te_llamamos')->middleware('throttle:10,1')->name('te_llamamos');
+Route::post('/sugerencia', 'PagesController@suggestion')->middleware('throttle:10,1')->name('suggestion');
 Route::post('/table_reservation', 'PagesController@table_reservation')->middleware('throttle:10,1')->name('table_reservation');
 
 Route::post(
@@ -30,6 +31,7 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['aut
         Route::get('settings', 'PlatformSettingsController@edit')->name('admin.platform.settings');
         Route::put('settings', 'PlatformSettingsController@update')->name('admin.platform.settings.update');
         Route::post('settings/test-gemini', 'PlatformSettingsController@testGemini')->name('admin.platform.settings.test-gemini');
+        Route::post('settings/test-mail', 'PlatformSettingsController@testMail')->name('admin.platform.settings.test-mail');
         Route::get('users', 'PlatformUsersController@index')->name('admin.platform.users.index');
         Route::get('users/{user}', 'PlatformUsersController@show')->name('admin.platform.users.show');
         Route::post('users/{user}/grant-super-admin', 'PlatformUsersController@grantSuperAdmin')
@@ -50,6 +52,11 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['aut
     Route::post('companies', 'CompaniesController@store')->name('admin.companies.store');
     Route::get('companies/{company}', 'CompaniesController@edit')->name('admin.companies.edit');
     Route::put('companies/{company}', 'CompaniesController@update')->name('admin.companies.update');
+    Route::get('companies/{company}/languages', 'TranslationController@edit')->name('admin.companies.languages');
+    Route::put('companies/{company}/languages', 'TranslationController@updateLocales')->name('admin.companies.languages.update');
+    Route::post('companies/{company}/languages/translate', 'TranslationController@generate')->name('admin.companies.languages.translate');
+    Route::put('companies/{company}/languages/sections/{section}', 'TranslationController@updateSection')->name('admin.companies.languages.section');
+    Route::put('companies/{company}/languages/products/{product}', 'TranslationController@updateProduct')->name('admin.companies.languages.product');
     Route::delete('companies', 'CompaniesController@delete')->name('admin.companies.delete');
     Route::post('companies/{company}/logo', 'CompaniesController@storelogo')->name('admin.companies.storelogo');
     Route::delete('companies/{company}/deletelogo', 'CompaniesController@deletelogo')->name('admin.companies.deletelogo');

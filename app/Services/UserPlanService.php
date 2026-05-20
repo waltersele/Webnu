@@ -15,6 +15,13 @@ class UserPlanService
             return 'unlimited';
         }
 
+        if ($user->onGenericTrial()) {
+            $trialTier = config('plans.trial_tier', 'plus');
+            if ($this->tierExists($trialTier)) {
+                return $trialTier;
+            }
+        }
+
         if ($user->hasActiveSubscription()) {
             $subscription = $user->primarySubscription();
             if ($subscription && $subscription->name) {
@@ -155,8 +162,115 @@ class UserPlanService
         ]);
     }
 
+    public function canUseTranslation(User $user): bool
+    {
+        if ($user->isSuperAdmin()) {
+            return true;
+        }
+
+        return (bool) ($this->tier($user)['translation'] ?? false);
+    }
+
+    public function maxTranslationLocales(User $user): ?int
+    {
+        if ($user->isSuperAdmin()) {
+            return null;
+        }
+
+        $max = $this->tier($user)['translation_max_locales'] ?? 0;
+
+        return $max === null ? null : (int) $max;
+    }
+
+    public function assertCanUseTranslation(User $user): void
+    {
+        if ($this->canUseTranslation($user)) {
+            return;
+        }
+
+        throw ValidationException::withMessages([
+            'locales' => 'La carta multilingüe está disponible desde el plan Plus (9,90 €/mes).',
+        ]);
+    }
+
+    public function assertCanEnableLocales(User $user, int $extraLocaleCount): void
+    {
+        $this->assertCanUseTranslation($user);
+
+        $max = $this->maxTranslationLocales($user);
+        if ($max === null) {
+            return;
+        }
+
+        if ($extraLocaleCount > $max) {
+            throw ValidationException::withMessages([
+                'locales' => "Tu plan permite hasta {$max} " . ($max === 1 ? 'idioma extra' : 'idiomas extra') . '. Mejora a Ilimitado para más idiomas.',
+            ]);
+        }
+    }
+
     protected function tierExists(string $key): bool
     {
         return array_key_exists($key, config('plans.tiers', []));
+    }
+
+    /** @return array<string, mixed> */
+    public function planPresentation(User $user): array
+    {
+        $tier = $this->tier($user);
+        $presentation = [
+            'key' => $tier['key'] ?? 'free',
+            'label' => $tier['label'] ?? 'Gratis',
+            'trial_active' => false,
+            'trial_expired' => false,
+            'trial_days_remaining' => null,
+            'trial_ends_at' => null,
+        ];
+
+        if ($user->isSuperAdmin()) {
+            return $presentation;
+        }
+
+        if ($user->onGenericTrial()) {
+            $presentation['trial_active'] = true;
+            $presentation['trial_ends_at'] = $user->trial_ends_at;
+            $presentation['trial_days_remaining'] = $user->trial_ends_at
+                ? max(0, (int) now()->diffInDays($user->trial_ends_at, false))
+                : null;
+            $presentation['label'] = ($tier['label'] ?? 'Plus') . ' · prueba gratis';
+
+            return $presentation;
+        }
+
+        if ($user->trial_ends_at && $user->trial_ends_at->isPast() && ! $user->hasActiveSubscription()) {
+            $presentation['trial_expired'] = true;
+        }
+
+        return $presentation;
+    }
+
+    /** @return array<string, bool> */
+    public function featureFlags(User $user): array
+    {
+        return [
+            'videos' => $this->canUseVideos($user),
+            'translation' => $this->canUseTranslation($user),
+            'tvpik' => $this->canUseTvpik($user),
+            'menu_scan' => $this->canUseMenuScan($user),
+            'multi_company' => $this->maxCompanies($user) === null || $this->maxCompanies($user) > 1,
+        ];
+    }
+
+    public function requiredPlanLabel(string $feature): ?string
+    {
+        $map = [
+            'videos' => 'Plus',
+            'translation' => 'Plus',
+            'menu_scan' => 'Plus',
+            'multi_company' => 'Plus',
+            'tvpik' => 'Ilimitado',
+        ];
+
+        return $map[$feature] ?? null;
     }
 }

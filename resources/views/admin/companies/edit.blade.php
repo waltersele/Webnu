@@ -7,6 +7,9 @@
     <a href="{{ route('see_menu', $company->slug) }}" target="_blank" rel="noopener" class="btn btn-outline-primary btn-sm">
         <i class="ri-eye-line me-1"></i> Ver carta
     </a>
+    <a href="{{ route('admin.companies.languages', $company) }}" class="btn btn-outline-primary btn-sm">
+        <i class="ri-translate-2 me-1"></i> Idiomas
+    </a>
     <a href="{{ route('admin.sections.index') }}" class="btn btn-outline-secondary btn-sm">
         <i class="ri-restaurant-line me-1"></i> Mi carta
     </a>

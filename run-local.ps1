@@ -60,6 +60,7 @@ Set-Location $PSScriptRoot
 & $Php -c $Ini artisan migrate --force
 & $Php -c $Ini scripts/seed-local-demo.php
 & $Php -c $Ini scripts/fix-demo-ownership.php 2>$null
+& $Php -c $Ini scripts/seed-demo-translations.php 2>$null
 & $Php -c $Ini scripts/seed-platform-roles.php 2>$null
 & $Php -c $Ini scripts/seed-platform-demo.php
 & $Php -c $Ini scripts/fix-gemini-model.php 2>$null

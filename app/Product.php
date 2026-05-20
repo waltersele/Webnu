@@ -32,6 +32,11 @@ class Product extends Model
         return $this->belongsToMany('App\Allergen', 'product_allergen');
     }
 
+    public function translations()
+    {
+        return $this->hasMany(ProductTranslation::class);
+    }
+
     public function getImageUrlAttribute()
     {
         return $this->image ? url('img/' . ltrim($this->image, '/')) : null;

@@ -93,8 +93,8 @@
         </li>
         <li class="menu-item {{ request()->routeIs('admin.platform.settings*') ? 'active' : '' }}">
             <a href="{{ route('admin.platform.settings') }}" class="menu-link">
-                <i class="menu-icon icon-base ri ri-camera-lens-line"></i>
-                <div>Escaneo IA</div>
+                <i class="menu-icon icon-base ri ri-settings-3-line"></i>
+                <div>Configuración</div>
             </a>
         </li>
         @endif

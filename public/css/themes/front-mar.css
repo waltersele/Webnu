@@ -1,0 +1,83 @@
+/**
+ * Mar — pescado y mariscos, azules oceánicos
+ */
+body.wn-theme-mar {
+  background: var(--wn-bg) !important;
+}
+
+body.wn-theme-mar::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.06;
+  background: linear-gradient(180deg, transparent 60%, rgba(0, 119, 182, 0.15) 100%);
+}
+
+body.wn-theme-mar .wn-menu-shell {
+  position: relative;
+  z-index: 1;
+}
+
+.wn-theme-mar .wn-menu-hero--light .wn-menu-hero__overlay--light {
+  background: linear-gradient(180deg, rgba(224, 247, 250, 0.3) 0%, var(--wn-bg) 100%);
+}
+
+.wn-theme-mar .wn-menu-hero__title {
+  color: var(--wn-primary) !important;
+  font-family: var(--wn-font-heading);
+  letter-spacing: -0.02em;
+}
+
+.wn-theme-mar .wn-menu-nav {
+  background: rgba(255, 255, 255, 0.92) !important;
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid rgba(2, 119, 189, 0.12);
+}
+
+.wn-theme-mar .wn-menu-chip {
+  background: #fff;
+  color: var(--wn-text-muted);
+  border: 1px solid rgba(2, 119, 189, 0.15);
+  border-radius: 999px;
+}
+
+.wn-theme-mar .wn-menu-chip.is-active,
+.wn-theme-mar .wn-menu-chip:hover {
+  background: var(--wn-primary);
+  color: #fff;
+  border-color: var(--wn-primary);
+}
+
+.wn-theme-mar .wn-menu-section__title {
+  font-family: var(--wn-font-heading) !important;
+  color: var(--wn-primary) !important;
+  font-size: 1.35rem !important;
+  border-bottom: 2px solid rgba(0, 180, 216, 0.35) !important;
+  padding-bottom: 0.45rem !important;
+}
+
+.wn-theme-mar .wn-menu-section__title::after {
+  content: ' ~';
+  color: var(--wn-accent);
+  font-weight: 400;
+}
+
+.wn-theme-mar .wn-modern-card--stacked {
+  background: var(--wn-surface);
+  border: 1px solid rgba(2, 119, 189, 0.1);
+  border-radius: 16px;
+  box-shadow: 0 4px 24px rgba(2, 119, 189, 0.08);
+  overflow: hidden;
+}
+
+.wn-theme-mar .wn-modern-card .wn-price-item {
+  color: var(--wn-primary) !important;
+  font-weight: 600;
+}
+
+.wn-theme-mar .wn-modern-footer {
+  background: var(--wn-surface);
+  border-top: 1px solid rgba(2, 119, 189, 0.12);
+}

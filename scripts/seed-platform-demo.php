@@ -31,7 +31,7 @@ $clients = [
         'stripe_id' => 'cus_demo_admin',
         'card_brand' => 'visa',
         'card_last_four' => '4242',
-        'company' => ['slug' => 'demo', 'name' => 'Restaurante Demo'],
+        'company' => ['slug' => 'demo', 'name' => 'La Brasa del Puerto'],
         'subscription' => ['name' => $monthlyName, 'stripe_status' => 'active', 'stripe_id' => 'sub_demo_admin'],
     ],
     [

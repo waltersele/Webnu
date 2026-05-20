@@ -188,7 +188,18 @@ class MenuScanController extends Controller
         $job->save();
         $this->deleteJobFiles($job);
 
-        return redirect()->route('admin.sections.index')
+        $user = auth()->user();
+        if ($user && ! $user->onboarding_completed_at) {
+            $user->onboarding_step = max((int) $user->onboarding_step, 5);
+            $user->save();
+
+            return redirect()
+                ->route('admin.onboarding', ['step' => 6])
+                ->with('flash', "Carta importada: {$count} platos añadidos. Ya puedes publicar tu QR.");
+        }
+
+        return redirect()
+            ->route('admin.sections.index')
             ->with('flash', "Carta importada: {$count} platos añadidos.");
     }
 

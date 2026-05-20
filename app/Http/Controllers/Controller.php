@@ -22,6 +22,16 @@ class Controller extends BaseController
             $this->user = auth()->user();
             if($this->user)
             {
+                $plans = app(\App\Services\UserPlanService::class);
+                View::share('planFeatures', array_merge(
+                    $plans->featureFlags($this->user),
+                    [
+                        'plan_key' => $plans->planKey($this->user),
+                        'plan_label' => $plans->tier($this->user)['label'] ?? 'Gratis',
+                        'billing_url' => route('admin.billing'),
+                    ]
+                ));
+
                 if(Cookie::get('selected_company')){
                     $value = Cookie::get('selected_company');
                     View::share('selected_company', $value);

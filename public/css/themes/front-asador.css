@@ -1,0 +1,110 @@
+/**
+ * Asador — brasa, carbón y brasas
+ */
+body.wn-theme-asador {
+  background: var(--wn-bg) !important;
+}
+
+body.wn-theme-asador::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.5;
+  background:
+    radial-gradient(ellipse 80% 40% at 50% 0%, rgba(255, 87, 34, 0.12) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 30% at 80% 100%, rgba(255, 171, 64, 0.08) 0%, transparent 50%);
+}
+
+body.wn-theme-asador .wn-menu-shell {
+  position: relative;
+  z-index: 1;
+}
+
+.wn-theme-asador .wn-menu-hero--dark .wn-menu-hero__overlay--bleed {
+  background:
+    linear-gradient(180deg, rgba(20, 16, 16, 0.25) 0%, rgba(20, 16, 16, 0.95) 70%, var(--wn-bg) 100%),
+    radial-gradient(ellipse 90% 55% at 50% 100%, rgba(255, 87, 34, 0.35) 0%, transparent 65%);
+}
+
+.wn-theme-asador .wn-menu-hero__title {
+  font-family: var(--wn-font-heading);
+  font-size: clamp(2rem, 8vw, 2.75rem) !important;
+  font-weight: 700 !important;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #fff !important;
+  text-shadow: 0 0 24px rgba(255, 87, 34, 0.5);
+}
+
+.wn-theme-asador .wn-menu-nav {
+  background: rgba(20, 16, 16, 0.96) !important;
+  border-bottom: 1px solid rgba(255, 87, 34, 0.25);
+}
+
+.wn-theme-asador .wn-menu-chip {
+  background: rgba(255, 87, 34, 0.08);
+  color: var(--wn-text-muted);
+  border: 1px solid rgba(255, 87, 34, 0.2);
+  border-radius: 4px;
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 0.06em;
+}
+
+.wn-theme-asador .wn-menu-chip.is-active,
+.wn-theme-asador .wn-menu-chip:hover {
+  background: var(--wn-primary);
+  color: #fff;
+  border-color: var(--wn-primary);
+  box-shadow: 0 0 16px rgba(255, 87, 34, 0.4);
+}
+
+.wn-theme-asador .wn-menu-section__title {
+  font-family: var(--wn-font-heading) !important;
+  font-weight: 700 !important;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--wn-primary) !important;
+  border-left: 4px solid var(--wn-accent) !important;
+  padding-left: 0.65rem !important;
+  border-bottom: none !important;
+}
+
+.wn-theme-asador .wn-modern-card--stacked {
+  background: var(--wn-surface);
+  border: 1px solid rgba(255, 87, 34, 0.12);
+  border-radius: 8px;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.4);
+  overflow: hidden;
+}
+
+.wn-theme-asador .wn-modern-card--stacked .wn-modern-card__media:has(.wn-card-reel) {
+  aspect-ratio: 16 / 9;
+  max-height: none;
+}
+
+.wn-theme-asador .wn-modern-card__title {
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  font-size: 1.1rem;
+}
+
+.wn-theme-asador .wn-modern-card .wn-price-item {
+  color: var(--wn-accent) !important;
+  font-weight: 700;
+  font-size: 1.4rem;
+}
+
+.wn-theme-asador .wn-modern-footer {
+  background: #0c0908;
+  border-top: 1px solid rgba(255, 87, 34, 0.2);
+}
+
+.wn-theme-asador .webnu-product-badge--featured {
+  background: var(--wn-primary) !important;
+  color: #fff !important;
+}

@@ -1,0 +1,150 @@
+/**
+ * Otaku — naranja neón, oscuro, estilo japonés pop
+ */
+body.wn-theme-otaku {
+  background: var(--wn-bg) !important;
+  color: var(--wn-text);
+  position: relative;
+}
+
+body.wn-theme-otaku::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.04;
+  background-image: radial-gradient(circle at 1px 1px, var(--wn-primary) 1px, transparent 0);
+  background-size: 18px 18px;
+}
+
+body.wn-theme-otaku .wn-menu-shell {
+  position: relative;
+  z-index: 1;
+}
+
+.wn-theme-otaku .wn-menu-hero--dark.wn-menu-hero--bleed {
+  min-height: 220px;
+  max-height: 280px;
+}
+
+.wn-theme-otaku .wn-menu-hero--dark .wn-menu-hero__overlay--bleed {
+  background:
+    linear-gradient(180deg, rgba(10, 10, 10, 0.35) 0%, rgba(10, 10, 10, 0.92) 70%, var(--wn-bg) 100%),
+    radial-gradient(ellipse 80% 60% at 50% 0%, rgba(255, 85, 0, 0.45) 0%, transparent 65%);
+}
+
+.wn-theme-otaku .wn-menu-hero__title {
+  font-family: var(--wn-font-heading);
+  font-size: clamp(2.4rem, 10vw, 3.4rem) !important;
+  font-weight: 400 !important;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #fff !important;
+  text-shadow: 0 0 20px rgba(255, 85, 0, 0.8), 0 0 40px rgba(255, 85, 0, 0.35), 2px 2px 0 var(--wn-primary);
+  line-height: 0.95;
+}
+
+.wn-theme-otaku .wn-menu-hero__eyebrow {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--wn-accent) !important;
+}
+
+.wn-theme-otaku .wn-menu-nav {
+  position: sticky;
+  top: 0;
+  z-index: 200;
+  background: rgba(10, 10, 10, 0.94) !important;
+  backdrop-filter: blur(10px);
+  border-bottom: 2px solid rgba(255, 85, 0, 0.35);
+  box-shadow: 0 4px 24px rgba(255, 85, 0, 0.15);
+}
+
+.wn-theme-otaku .wn-menu-chip {
+  background: rgba(255, 85, 0, 0.08);
+  color: var(--wn-text-muted);
+  border: 2px solid rgba(255, 85, 0, 0.25);
+  font-family: var(--wn-font-heading);
+  font-size: 0.8125rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border-radius: 4px;
+}
+
+.wn-theme-otaku .wn-menu-chip.is-active,
+.wn-theme-otaku .wn-menu-chip:hover {
+  background: var(--wn-primary);
+  color: #0a0a0a;
+  border-color: var(--wn-primary);
+  box-shadow: 0 0 16px rgba(255, 85, 0, 0.65);
+}
+
+.wn-theme-otaku .wn-menu-main {
+  padding: 0.25rem 0.85rem 2rem;
+}
+
+.wn-theme-otaku .wn-menu-section__title {
+  font-family: var(--wn-font-heading) !important;
+  font-size: clamp(1.5rem, 5vw, 1.85rem) !important;
+  font-weight: 400 !important;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--wn-primary) !important;
+  padding-left: 0.65rem !important;
+  border-left: 4px solid var(--wn-primary) !important;
+  border-bottom: none !important;
+  text-shadow: 0 0 18px rgba(255, 85, 0, 0.35);
+}
+
+.wn-theme-otaku .wn-modern-card--stacked {
+  background: var(--wn-surface);
+  border: 2px solid rgba(255, 85, 0, 0.18);
+  border-radius: 6px;
+  box-shadow: 0 4px 0 rgba(255, 85, 0, 0.12), 0 8px 32px rgba(0, 0, 0, 0.45);
+  overflow: hidden;
+}
+
+.wn-theme-otaku .wn-modern-card--stacked .wn-modern-card__media {
+  border-bottom: 2px solid rgba(255, 85, 0, 0.25);
+}
+
+.wn-theme-otaku .wn-modern-card--stacked .wn-modern-card__media:has(.wn-card-reel) {
+  aspect-ratio: 16 / 9;
+  max-height: none;
+}
+
+.wn-theme-otaku .wn-modern-card__title {
+  font-family: var(--wn-font-heading);
+  font-size: 1.35rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #fff;
+}
+
+.wn-theme-otaku .wn-modern-card .wn-price-item {
+  font-family: var(--wn-font-heading);
+  font-size: 1.65rem;
+  color: var(--wn-primary) !important;
+  text-shadow: 0 0 12px rgba(255, 85, 0, 0.45);
+}
+
+.wn-theme-otaku .wn-modern-footer {
+  background: #050505;
+  border-top: 2px solid rgba(255, 85, 0, 0.3);
+}
+
+.wn-theme-otaku .wn-dish-modal .modal-content.wn-dish-modal__content {
+  background: #111;
+  border: 2px solid var(--wn-primary);
+  color: #fff;
+}
+
+@media (min-width: 768px) {
+  .wn-theme-otaku .wn-menu-main {
+    max-width: 480px;
+    margin: 0 auto;
+  }
+}
