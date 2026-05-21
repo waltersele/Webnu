@@ -60,6 +60,13 @@ return [
             'recommended' => false,
             'preview_image' => 'img/admin/templates/fastfood.svg',
         ],
+        'pizza' => [
+            'label' => 'Pizza',
+            'description' => 'Tomate, mozzarella y albahaca. Ideal para pizzerías y delivery.',
+            'group' => 'specialty',
+            'recommended' => true,
+            'preview_image' => 'img/admin/templates/pizza.svg',
+        ],
         'mar' => [
             'label' => 'Mar',
             'description' => 'Azules oceánicos para pescaderías, chiringuitos y marisquerías.',
@@ -243,6 +250,16 @@ return [
             'surface' => '#ffffff',
             'text' => '#1a1a1a',
             'text_muted' => '#5d4037',
+            'font_heading' => 'bebas_neue',
+            'font_body' => 'open_sans',
+        ],
+        'pizza' => [
+            'primary' => '#c62828',
+            'accent' => '#2e7d32',
+            'background' => '#fff8f0',
+            'surface' => '#ffffff',
+            'text' => '#1b1b1b',
+            'text_muted' => '#6d4c41',
             'font_heading' => 'bebas_neue',
             'font_body' => 'open_sans',
         ],
@@ -432,6 +449,16 @@ return [
                 'surface' => '#ffffff',
                 'text' => '#1a1a1a',
                 'text_muted' => '#5d4037',
+            ],
+        ],
+        'pizza' => [
+            'Forno clásico' => [
+                'primary' => '#c62828',
+                'accent' => '#2e7d32',
+                'background' => '#fff8f0',
+                'surface' => '#ffffff',
+                'text' => '#1b1b1b',
+                'text_muted' => '#6d4c41',
             ],
         ],
         'mar' => [

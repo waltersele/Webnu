@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Allergen;
 use App\Company;
 use App\ProductTranslation;
+use App\Product;
 use App\Section;
 use App\SectionTranslation;
 use Illuminate\Http\Request;
@@ -49,7 +50,80 @@ class MenuService
             return $section;
         });
 
+        if ($this->shouldUseSampleMenu($sections, $company)) {
+            $sections = $this->buildPreviewSampleSections($company);
+        }
+
         return $this->enrichMenuPresentation($sections, $company);
+    }
+
+    protected function shouldUseSampleMenu(Collection $sections, Company $company): bool
+    {
+        if (! request()->boolean('studio_preview') && ! request()->boolean('sales_demo')) {
+            return false;
+        }
+
+        if (request()->boolean('sales_demo')) {
+            return false;
+        }
+
+        if (str_starts_with((string) $company->slug, 'demo')) {
+            return false;
+        }
+
+        $productCount = $sections->sum(function ($section) {
+            return $section->products->count();
+        });
+
+        return $productCount === 0;
+    }
+
+    protected function buildPreviewSampleSections(Company $company): Collection
+    {
+        $sample = config('menu_demo.sample_menu', []);
+        $sections = collect();
+        $sectionOrder = 0;
+
+        foreach ($sample as $sectionData) {
+            $sectionOrder++;
+            $section = new Section([
+                'name' => $sectionData['name'] ?? 'Carta',
+                'order' => $sectionOrder,
+                'enabled' => true,
+                'company_id' => $company->id,
+            ]);
+            $section->id = -$sectionOrder;
+            $section->exists = false;
+
+            $products = collect();
+            $productOrder = 0;
+
+            foreach ($sectionData['products'] ?? [] as $productData) {
+                $productOrder++;
+                $product = new Product([
+                    'name' => $productData['name'] ?? 'Plato de ejemplo',
+                    'description' => $productData['description'] ?? '',
+                    'price_unit' => $productData['price_unit'] ?? '',
+                    'image' => $productData['image'] ?? null,
+                    'video' => $productData['video'] ?? null,
+                    'highlight' => $productData['highlight'] ?? null,
+                    'order' => $productOrder,
+                    'enabled' => true,
+                    'section_id' => $section->id,
+                ]);
+                $product->id = -($sectionOrder * 100 + $productOrder);
+                $product->exists = false;
+                $product->setRelation('allergens', collect());
+                $product->setRelation('translations', collect());
+                $products->push($product);
+            }
+
+            $section->setRelation('products', $products);
+            $section->setRelation('translations', collect());
+            $sections->push($section);
+        }
+
+        return $sections;
     }
 
     protected function applySectionLocale(Section $section, string $locale, string $defaultLocale): Section
@@ -85,6 +159,23 @@ class MenuService
         return $product;
     }
 
+    public function dailyHighlightsForCompany(Company $company, ?string $locale = null): array
+    {
+        $text = trim((string) $company->daily_spotlight);
+        if ($text === '') {
+            return [];
+        }
+
+        $price = trim((string) $company->daily_spotlight_price);
+
+        return [[
+            'type' => 'spotlight',
+            'label' => 'Especial de hoy',
+            'text' => $text,
+            'price' => $price !== '' ? $price : null,
+        ]];
+    }
+
     public function themeViewName(Company $company): string
     {
         $templates = array_keys(config('company_templates.templates', [
@@ -97,6 +188,7 @@ class MenuService
             'otaku' => [],
             'japo' => [],
             'fastfood' => [],
+            'pizza' => [],
             'mar' => [],
             'elegance' => [],
             'asador' => [],
@@ -113,11 +205,19 @@ class MenuService
 
     public function applyStudioPreview(Company $company, Request $request): Company
     {
-        if (!$request->boolean('studio_preview')) {
+        if (! $request->boolean('studio_preview') && ! $request->boolean('sales_demo')) {
             return $company;
         }
 
-        if (!auth()->check() || (int) auth()->id() !== (int) $company->user_id) {
+        if (! auth()->check()) {
+            return $company;
+        }
+
+        $user = auth()->user();
+        $canPreview = (int) $user->id === (int) $company->user_id
+            || ($company->isActiveSalesLead() && (int) $company->sales_rep_user_id === (int) $user->id);
+
+        if (! $canPreview) {
             return $company;
         }
 

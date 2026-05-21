@@ -1,0 +1,22 @@
+/**
+ * Pizza — pizzería: rojo tomate, verde albahaca, fondo crema
+ */
+body.wn-theme-pizza {
+  background: var(--wn-bg) !important;
+  color: var(--wn-text);
+}
+
+body.wn-theme-pizza .wn-menu-shell {
+  position: relative;
+  z-index: 1;
+}
+
+body.wn-theme-pizza .wn-modern-card {
+  border-radius: 14px;
+  border: 1px solid color-mix(in srgb, var(--wn-primary) 15%, transparent);
+}
+
+body.wn-theme-pizza .wn-menu-chip.is-active {
+  background: var(--wn-primary);
+  color: #fff;
+}

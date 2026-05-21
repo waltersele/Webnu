@@ -1,120 +1,194 @@
 @extends('admin.layout')
 
-@section('page_title', 'Panel de control')
-@section('page_subtitle', 'Gestiona negocios, carta digital e integraciones.')
-
 @section('content')
-@if($dashboardCompany ?? null)
-    <div class="card border-0 shadow-sm mb-4 wn-dash-menu-card">
-        <div class="card-body">
-            <div class="d-flex flex-wrap align-items-start justify-content-between gap-3 mb-3">
+@php
+    $d = $dashboard ?? [];
+    $company = $dashboardCompany;
+    $next = $d['nextStep'] ?? [];
+    $progress = $d['progress'] ?? [];
+    $completed = $d['progressCompleted'] ?? 0;
+    $currentStep = $d['progressCurrent'] ?? 1;
+    $primaryKey = $d['primaryActionKey'] ?? 'add_dishes';
+    $pf = $planFeatures ?? [];
+    $canScan = $d['canMenuScan'] ?? ($pf['menu_scan'] ?? true);
+    $canTvpik = $d['canTvpik'] ?? ($pf['tvpik'] ?? false);
+    $billingUrl = $pf['billing_url'] ?? route('admin.settings');
+
+    $scanUrl = $canScan ? route('admin.menu-scan.create') : route('admin.sections.index');
+    $qrUrl = $company ? route('admin.qrgenerator', $company) : route('admin.companies.index');
+    $printUrl = $company ? route('admin.menu-print', $company) : route('admin.companies.index');
+    $menuUrl = $company ? route('see_menu', $company->slug) : '#';
+    $sectionsUrl = $company ? route('admin.sections.index') : route('admin.companies.index');
+@endphp
+
+<div class="wn-dash">
+    @if(!empty($d['hasCompany']) && $company)
+        <div class="wn-dash-greeting">
+            <h1>Hola, {{ $company->name }}</h1>
+            <p>Tu carta ha recibido {{ number_format($d['menuViews'] ?? 0, 0, ',', '.') }} {{ ($d['menuViews'] ?? 0) === 1 ? 'visita' : 'visitas' }} (total acumulado)</p>
+        </div>
+
+        <div class="wn-dash-next">
+            <div class="wn-dash-next__icon">
+                <i class="ti {{ $next['icon'] ?? 'ti-camera' }}"></i>
+            </div>
+            <div class="wn-dash-next__text">
+                <strong>{{ $next['title'] ?? 'Siguiente paso' }}</strong>
+                <span>{{ $next['subtitle'] ?? '' }}</span>
+            </div>
+            <a href="{{ $next['ctaUrl'] ?? $sectionsUrl }}" class="wn-dash-next__btn">
+                @if(($next['key'] ?? '') === 'import_dishes')
+                    <i class="ti ti-sparkles"></i>
+                @endif
+                {{ $next['cta'] ?? 'Continuar' }}
+            </a>
+        </div>
+
+        <div class="wn-dash-progress" role="progressbar" aria-valuenow="{{ $completed }}" aria-valuemin="0" aria-valuemax="4" aria-label="Progreso de configuración">
+            @foreach(['account', 'business', 'dishes', 'qr'] as $i => $stepKey)
+                @php
+                    $isDone = !empty($progress[$stepKey]);
+                    $isActive = !$isDone && ($i === $completed);
+                @endphp
+                <div class="wn-dash-progress__seg {{ $isDone ? 'is-done' : '' }} {{ $isActive ? 'is-active' : '' }}" title="Paso {{ $i + 1 }}"></div>
+            @endforeach
+            <span class="wn-dash-progress__label">Paso {{ min(4, max(1, $currentStep)) }} de 4</span>
+        </div>
+
+        <p class="wn-dash-section-title">¿Qué quieres hacer?</p>
+        <div class="wn-dash-actions">
+            <a href="{{ $scanUrl }}" class="wn-dash-action {{ $primaryKey === 'add_dishes' ? 'is-primary' : '' }}">
+                <div class="wn-dash-action__icon" style="background: #e6f1fb;">
+                    <i class="ti ti-camera" style="color: #378add;"></i>
+                </div>
                 <div>
-                    <p class="text-muted small mb-1">Negocio activo</p>
-                    <h5 class="mb-0 fw-semibold">{{ $dashboardCompany->name }}</h5>
-                    <a href="{{ route('see_menu', $dashboardCompany->slug) }}" target="_blank" rel="noopener" class="small text-primary">
-                        webnu.es/carta/{{ $dashboardCompany->slug }}
-                    </a>
+                    <p class="wn-dash-action__title">Añadir platos</p>
+                    <p class="wn-dash-action__desc">Fotografía la carta o escríbelos tú mismo</p>
                 </div>
-                <div class="wn-dash-stat text-center text-md-end">
-                    <div class="wn-dash-stat__value">{{ number_format($dashboardCompany->menu_views ?? 0, 0, ',', '.') }}</div>
-                    <div class="wn-dash-stat__label">Visitas a la carta (QR)</div>
+            </a>
+            <a href="{{ $qrUrl }}" class="wn-dash-action {{ $primaryKey === 'qr' ? 'is-primary' : '' }}">
+                <div class="wn-dash-action__icon" style="background: #f1f5f9;">
+                    <i class="ti ti-qrcode" style="color: #64748b;"></i>
                 </div>
-            </div>
-            <div class="row g-2">
-                <div class="col-sm-6 col-md-4">
-                    <a href="{{ route('see_menu', $dashboardCompany->slug) }}" target="_blank" rel="noopener" class="btn btn-outline-primary w-100 wn-dash-action">
-                        <i class="ri-eye-line me-1"></i> Ver carta
-                    </a>
+                <div>
+                    <p class="wn-dash-action__title">Mi código QR</p>
+                    <p class="wn-dash-action__desc">Descárgalo e imprímelo para las mesas</p>
                 </div>
-                <div class="col-sm-6 col-md-4">
-                    <a href="{{ route('admin.qrgenerator', $dashboardCompany) }}" target="_blank" rel="noopener" class="btn btn-primary w-100 wn-dash-action">
-                        <i class="ri-qr-code-line me-1"></i> Obtener QR
-                    </a>
+            </a>
+            <a href="{{ $menuUrl }}" target="_blank" rel="noopener" class="wn-dash-action {{ $primaryKey === 'view_menu' ? 'is-primary' : '' }}">
+                <div class="wn-dash-action__icon" style="background: #f1f5f9;">
+                    <i class="ti ti-eye" style="color: #64748b;"></i>
                 </div>
-                <div class="col-md-4">
-                    <a href="{{ route('admin.companies.edit', ['company' => $dashboardCompany, 'step' => 'design']) }}" class="btn btn-label-secondary w-100 wn-dash-action">
-                        <i class="ri-palette-line me-1"></i> Personalizar diseño
-                    </a>
+                <div>
+                    <p class="wn-dash-action__title">Ver mi carta</p>
+                    <p class="wn-dash-action__desc">Tal como la ven tus clientes en el móvil</p>
                 </div>
-            </div>
+            </a>
         </div>
-    </div>
-@endif
 
-<div class="row g-4 mb-4">
-    <div class="col-sm-6 col-xl-4">
-        <div class="card h-100">
-            <div class="card-body text-center">
-                <div class="avatar avatar-lg mx-auto mb-3">
-                    <span class="avatar-initial rounded bg-label-primary">
-                        <i class="ri ri-store-2-line icon-28px"></i>
-                    </span>
-                </div>
-                <h5 class="card-title mb-2">Negocios</h5>
-                <p class="text-muted small mb-3">Alta y configuración de establecimientos.</p>
-                <a href="{{ route('admin.companies.index') }}" class="btn btn-webnu w-100">Ir a negocios</a>
+        <p class="wn-dash-section-title">Este mes</p>
+        <div class="wn-dash-stats">
+            <div class="wn-dash-stat">
+                <p class="wn-dash-stat__label">Escaneos QR</p>
+                <p class="wn-dash-stat__value is-blue">{{ number_format($d['menuViews'] ?? 0, 0, ',', '.') }}</p>
             </div>
-        </div>
-    </div>
-
-    @if (!empty($selected_company))
-    <div class="col-sm-6 col-xl-4">
-        <div class="card h-100">
-            <div class="card-body text-center">
-                <div class="avatar avatar-lg mx-auto mb-3">
-                    <span class="avatar-initial rounded bg-label-primary">
-                        <i class="ri ri-restaurant-line icon-28px"></i>
-                    </span>
-                </div>
-                <h5 class="card-title mb-2">Mi carta</h5>
-                <p class="text-muted small mb-3">Secciones, platos, fotos y vídeos.</p>
-                <a href="{{ route('admin.sections.index') }}" class="btn btn-webnu w-100 mb-2">Ir a mi carta</a>
-                <a href="{{ route('admin.menu-scan.create') }}" class="btn btn-outline-success w-100 btn-sm">
-                    Importar desde foto o PDF
-                    @if (! ($planFeatures['menu_scan'] ?? true))
-                        @include('admin.partials.plan-pro-badge', ['label' => 'Plus', 'size' => 'xs'])
+            <div class="wn-dash-stat">
+                <p class="wn-dash-stat__label">Platos publicados</p>
+                <p class="wn-dash-stat__value">{{ number_format($d['productCount'] ?? 0, 0, ',', '.') }}</p>
+            </div>
+            <a href="{{ $billingUrl }}" class="wn-dash-stat wn-dash-stat--link" title="Gestionar suscripción">
+                <p class="wn-dash-stat__label">Días gratis</p>
+                <p class="wn-dash-stat__value is-green">
+                    @if(!empty($d['trialActive']) && $d['trialDaysRemaining'] !== null)
+                        {{ $d['trialDaysRemaining'] }}
+                    @else
+                        —
                     @endif
+                </p>
+            </a>
+        </div>
+
+        <div class="wn-dash-qr">
+            <div class="wn-dash-qr__icon">
+                <i class="ti ti-qrcode"></i>
+            </div>
+            <div class="wn-dash-qr__info">
+                <p class="wn-dash-qr__url">{{ $d['publicPath'] ?? ('webnu.es/carta/' . $company->slug) }}</p>
+                <div class="wn-dash-qr__meta">
+                    @if(!empty($d['isPublished']))
+                        <span class="wn-dash-qr__status">Publicada</span>
+                    @endif
+                    <span>Plantilla {{ $d['templateLabel'] ?? '—' }}</span>
+                </div>
+            </div>
+            <div class="wn-dash-qr__actions">
+                <button type="button" class="wn-dash-btn-secondary" data-bs-toggle="modal" data-bs-target="#modal-share-menu">
+                    <i class="ti ti-share"></i> Compartir carta
+                </button>
+                <a href="{{ $qrUrl }}" target="_blank" rel="noopener" class="wn-dash-btn-secondary">
+                    <i class="ti ti-download"></i> Descargar QR
+                </a>
+                @if($company)
+                <a href="https://api.qrserver.com/v1/create-qr-code/?size=400x400&data={{ urlencode(route('see_menu', $company->slug)) }}"
+                   target="_blank" rel="noopener" class="wn-dash-btn-secondary" title="Alternativa si el PDF no abre">
+                    <i class="ti ti-photo"></i> QR imagen
+                </a>
+                @endif
+                <a href="{{ $d['publicUrl'] ?? $menuUrl }}" target="_blank" rel="noopener" class="wn-dash-btn-secondary">
+                    <i class="ti ti-external-link"></i> Ver carta
                 </a>
             </div>
         </div>
-    </div>
+
+        <div class="wn-dash-tvpik">
+            <div class="wn-dash-tvpik__left">
+                <div class="wn-dash-tvpik__icon">
+                    <i class="ti ti-device-tv"></i>
+                </div>
+                <div class="wn-dash-tvpik__text">
+                    <strong>Muestra tu carta en la TV con TVPik</strong>
+                    <span>Configuras aquí; en TVPik eliges carta y plantilla para cada pantalla</span>
+                </div>
+            </div>
+            <span class="wn-dash-tvpik__badge">TVPik</span>
+            @if($canTvpik)
+                <a href="{{ route('admin.tvpik.index') }}" class="wn-dash-tvpik__btn">
+                    <i class="ti ti-plug"></i> Conectar TV
+                </a>
+            @else
+                <a href="{{ $billingUrl }}" class="wn-dash-tvpik__btn">
+                    <i class="ti ti-arrow-up-circle"></i> Plan Ilimitado
+                </a>
+            @endif
+        </div>
+    @else
+        <div class="wn-dash-greeting">
+            <h1>Hola{{ auth()->user() ? ', ' . explode(' ', auth()->user()->name)[0] : '' }}</h1>
+            <p>Crea tu primer negocio para tener carta digital, QR y estadísticas.</p>
+        </div>
+
+        <div class="wn-dash-next">
+            <div class="wn-dash-next__icon">
+                <i class="ti {{ $next['icon'] ?? 'ti-store' }}"></i>
+            </div>
+            <div class="wn-dash-next__text">
+                <strong>{{ $next['title'] ?? 'Siguiente paso: crea tu negocio' }}</strong>
+                <span>{{ $next['subtitle'] ?? '' }}</span>
+            </div>
+            <a href="{{ $next['ctaUrl'] ?? route('admin.companies.index') }}" class="wn-dash-next__btn">
+                {{ $next['cta'] ?? 'Crear mi negocio' }}
+            </a>
+        </div>
+
+        <div class="wn-dash-empty">
+            <h2>Aún no tienes un restaurante configurado</h2>
+            <p>Da de alta tu local, elige plantilla y empieza a añadir platos en minutos.</p>
+            <a href="{{ route('admin.companies.index') }}" class="wn-dash-next__btn">Ir a mis negocios</a>
+        </div>
     @endif
-
-    <div class="col-sm-6 col-xl-4">
-        <div class="card h-100">
-            <div class="card-body text-center">
-                <div class="avatar avatar-lg mx-auto mb-3">
-                    <span class="avatar-initial rounded bg-label-primary">
-                        <i class="ri ri-plug-line icon-28px"></i>
-                    </span>
-                </div>
-                <h5 class="card-title mb-2">Integraciones</h5>
-                <p class="text-muted small mb-3">TVPik, API y pantallas.</p>
-                <a href="{{ route('admin.integrations.index') }}" class="btn btn-webnu w-100">
-                    Ver integraciones
-                    @if (! ($planFeatures['tvpik'] ?? false))
-                        @include('admin.partials.plan-pro-badge', ['label' => 'Ilimitado', 'size' => 'xs'])
-                    @endif
-                </a>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="card bg-primary text-white overflow-hidden">
-    <div class="card-body position-relative">
-        <span class="badge bg-white text-primary mb-2">TVPik 2.0</span>
-        @if (! ($planFeatures['tvpik'] ?? false))
-            @include('admin.partials.plan-pro-badge', ['label' => 'Ilimitado', 'size' => 'xs'])
-        @endif
-        <h4 class="text-white mb-3">Potencia la experiencia de tus comensales</h4>
-        <p class="text-white opacity-75 small mb-3">Muestra tu carta en pantallas del local con sincronización automática.</p>
-        <a href="{{ route('admin.integrations.index') }}" class="btn btn-light btn-sm">Saber más</a>
-    </div>
 </div>
 @endsection
 
 @push('styles')
     <link rel="stylesheet" href="{{ asset('materio/css/webnu-dashboard.css') }}">
 @endpush
-

@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 180" role="img" aria-label="Vista previa vídeos">
+  <rect width="320" height="180" fill="#0f1419"/>
+  <rect x="40" y="16" width="240" height="135" rx="10" fill="#1a2332"/>
+  <rect x="48" y="24" width="224" height="119" rx="6" fill="#2a3544"/>
+  <polygon points="150,72 150,108 188,90" fill="#fff" opacity="0.85"/>
+  <rect x="48" y="130" width="120" height="8" rx="2" fill="#f5f7fa" opacity="0.9"/>
+  <rect x="48" y="144" width="64" height="6" rx="2" fill="#7eb8ff"/>
+  <circle cx="268" cy="36" r="10" fill="#004ac6" opacity="0.5"/>
+  <text x="258" y="40" fill="#fff" font-family="system-ui,sans-serif" font-size="8">¶</text>
+</svg>

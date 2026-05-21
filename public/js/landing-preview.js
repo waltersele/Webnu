@@ -29,6 +29,14 @@
 
     const phone = document.getElementById('customize-phone');
     if (phone) {
+        var textPresets = [];
+        try {
+            var customizeWrap = document.getElementById('personalizable');
+            textPresets = JSON.parse(customizeWrap.getAttribute('data-customize-presets') || '[]');
+        } catch (e) {
+            textPresets = [];
+        }
+
         const presets = [
             {
                 business: 'La Brasa del Puerto',
@@ -78,11 +86,11 @@
             {
                 business: 'Burger & Go',
                 template: 'Fastfood',
-                section: 'Combos · XL',
-                dish: 'Smash Burger XL',
-                price: '9,90 €',
-                desc: 'Doble carne, cheddar fundido y salsa house.',
-                hint: 'Precio destacado en pill',
+                section: 'Burgers',
+                dish: 'Double Smash',
+                price: '8,90 €',
+                desc: 'Doble carne, cheddar y salsa house.',
+                hint: 'Logo y cabecera',
                 primary: '#e31837',
                 bg: '#fffbeb',
                 surface: '#fef3c7',
@@ -90,37 +98,13 @@
                 muted: '#57534e',
                 thumb: 'linear-gradient(135deg, #e31837 0%, #fbbf24 100%)',
             },
-            {
-                business: 'Marisquería Costa',
-                template: 'Mar',
-                section: 'Pescados · Del día',
-                dish: 'Lubina a la sal',
-                price: '22,00 €',
-                desc: 'Con patatas panadera y alioli de ajo.',
-                hint: 'Paleta oceánica personalizable',
-                primary: '#0284c7',
-                bg: '#f0f9ff',
-                surface: '#e0f2fe',
-                text: '#0c4a6e',
-                muted: '#64748b',
-                thumb: 'linear-gradient(135deg, #38bdf8 0%, #0284c7 100%)',
-            },
-            {
-                business: 'Le Jardin',
-                template: 'Elegance',
-                section: 'Entrantes · Chef',
-                dish: 'Burrata de temporada',
-                price: '14,50 €',
-                desc: 'Tomate confitado, pesto y reducción balsámica.',
-                hint: 'Tipografía serif y dorado',
-                primary: '#92702a',
-                bg: '#fafaf9',
-                surface: '#f5f5f4',
-                text: '#292524',
-                muted: '#78716c',
-                thumb: 'linear-gradient(135deg, #d6d3d1 0%, #ca8a04 100%)',
-            },
         ];
+
+        presets.forEach(function (preset, i) {
+            if (textPresets[i]) {
+                Object.assign(preset, textPresets[i]);
+            }
+        });
 
         const el = {
             business: document.getElementById('customize-business'),
@@ -188,121 +172,240 @@
         setInterval(switchPreset, 3200);
     }
 
-    const tvpikSection = document.getElementById('tvpik');
-    if (tvpikSection) {
-        const slides = JSON.parse(tvpikSection.dataset.tvpikSlides || '[]');
-        const tv = document.getElementById('tvpik-tv');
-        const screen = document.getElementById('tvpik-screen');
-        const phone = document.getElementById('tvpik-phone');
-        const sync = document.getElementById('tvpik-sync');
-        const dotsWrap = document.getElementById('tvpik-dots');
+    document.querySelectorAll('[data-tvpik-root]').forEach(function (root) {
+        const slides = JSON.parse(root.dataset.tvpikSlides || '[]');
+        const tv = root.querySelector('[data-tvpik-tv]');
+        const screen = root.querySelector('[data-tvpik-screen]');
+        const phone = root.querySelector('[data-tvpik-phone]');
+        const sync = root.querySelector('[data-tvpik-sync]');
+        const dotsWrap = root.querySelector('[data-tvpik-dots]');
+        const publishingLabel = root.dataset.tvpikPublishing || 'Publishing…';
+        const syncedLabel = root.dataset.tvpikSynced || 'Synced';
         const el = {
-            photo: document.getElementById('tvpik-photo'),
-            tag: document.getElementById('tvpik-tag'),
-            title: document.getElementById('tvpik-title'),
-            price: document.getElementById('tvpik-price'),
-            items: document.getElementById('tvpik-items'),
-            action: document.getElementById('tvpik-action'),
-            phoneStatus: document.getElementById('tvpik-phone-status'),
-            updated: document.getElementById('tvpik-updated'),
+            photo: root.querySelector('[data-tvpik-photo]'),
+            tag: root.querySelector('[data-tvpik-tag]'),
+            title: root.querySelector('[data-tvpik-title]'),
+            price: root.querySelector('[data-tvpik-price]'),
+            items: root.querySelector('[data-tvpik-items]'),
+            action: root.querySelector('[data-tvpik-action]'),
+            phoneStatus: root.querySelector('[data-tvpik-phone-status]'),
+            updated: root.querySelector('[data-tvpik-updated]'),
         };
 
-        if (slides.length && tv && screen) {
-            slides.forEach(function (_, i) {
-                const dot = document.createElement('span');
-                dot.className = 'landing-tvpik-dot' + (i === 0 ? ' is-active' : '');
-                if (dotsWrap) dotsWrap.appendChild(dot);
-            });
-
-            let current = 0;
-            let busy = false;
-
-            function setTheme(theme) {
-                screen.classList.remove('landing-tvpik-tv__screen--warm', 'landing-tvpik-tv__screen--dark', 'landing-tvpik-tv__screen--menu');
-                screen.classList.add('landing-tvpik-tv__screen--' + (theme || 'warm'));
-            }
-
-            function applySlide(index) {
-                const slide = slides[index];
-                if (!slide) return;
-
-                if (el.photo) el.photo.src = slide.image;
-                if (el.tag) el.tag.textContent = slide.tag;
-                if (el.title) el.title.textContent = slide.title;
-                if (el.price) el.price.textContent = slide.price;
-                if (el.action) el.action.textContent = slide.action;
-                setTheme(slide.theme);
-
-                if (el.items) {
-                    el.items.innerHTML = '';
-                    if (slide.theme === 'menu' && slide.items && slide.items.length) {
-                        el.items.classList.remove('hidden');
-                        slide.items.forEach(function (item) {
-                            const li = document.createElement('li');
-                            li.textContent = item;
-                            el.items.appendChild(li);
-                        });
-                        if (el.price) el.price.classList.add('hidden');
-                    } else {
-                        el.items.classList.add('hidden');
-                        if (el.price) el.price.classList.remove('hidden');
-                    }
-                }
-
-                if (dotsWrap) {
-                    dotsWrap.querySelectorAll('.landing-tvpik-dot').forEach(function (node, i) {
-                        node.classList.toggle('is-active', i === index);
-                    });
-                }
-            }
-
-            function runSyncCycle(nextIndex) {
-                if (busy) return;
-                busy = true;
-
-                if (phone) {
-                    phone.classList.add('is-publishing', 'is-switching');
-                }
-                if (el.phoneStatus) {
-                    el.phoneStatus.textContent = 'Publicando…';
-                    el.phoneStatus.classList.remove('is-done');
-                }
-                if (sync) sync.classList.add('is-active');
-                if (el.updated) el.updated.classList.remove('is-visible');
-
-                setTimeout(function () {
-                    if (tv) tv.classList.add('is-switching');
-                    if (phone) phone.classList.remove('is-switching');
-                }, 400);
-
-                setTimeout(function () {
-                    current = nextIndex;
-                    applySlide(current);
-                    if (tv) tv.classList.remove('is-switching');
-                }, 750);
-
-                setTimeout(function () {
-                    if (sync) sync.classList.remove('is-active');
-                    if (phone) phone.classList.remove('is-publishing');
-                    if (el.phoneStatus) {
-                        el.phoneStatus.textContent = 'Sincronizado con TVPik';
-                        el.phoneStatus.classList.add('is-done');
-                    }
-                    if (el.updated) el.updated.classList.add('is-visible');
-                }, 1200);
-
-                setTimeout(function () {
-                    if (el.updated) el.updated.classList.remove('is-visible');
-                    busy = false;
-                }, 2200);
-            }
-
-            applySlide(0);
-            setInterval(function () {
-                runSyncCycle((current + 1) % slides.length);
-            }, 4200);
+        if (!slides.length || !tv || !screen) {
+            return;
         }
-    }
+
+        const isStatic = root.dataset.tvpikStatic === '1';
+
+        slides.forEach(function (_, i) {
+            const dot = document.createElement('span');
+            dot.className = 'landing-tvpik-dot' + (i === 0 ? ' is-active' : '');
+            if (dotsWrap) dotsWrap.appendChild(dot);
+        });
+
+        let current = 0;
+        let busy = false;
+
+        function setTheme(theme) {
+            screen.classList.remove('landing-tvpik-tv__screen--warm', 'landing-tvpik-tv__screen--dark', 'landing-tvpik-tv__screen--menu');
+            screen.classList.add('landing-tvpik-tv__screen--' + (theme || 'warm'));
+        }
+
+        function applySlide(index) {
+            const slide = slides[index];
+            if (!slide) return;
+
+            if (el.photo) el.photo.src = slide.image;
+            if (el.tag) el.tag.textContent = slide.tag;
+            if (el.title) el.title.textContent = slide.title;
+            if (el.price) el.price.textContent = slide.price;
+            if (el.action) el.action.textContent = slide.action;
+            setTheme(slide.theme);
+
+            if (el.items) {
+                el.items.innerHTML = '';
+                if (slide.theme === 'menu' && slide.items && slide.items.length) {
+                    el.items.classList.remove('hidden');
+                    slide.items.forEach(function (item) {
+                        const li = document.createElement('li');
+                        li.textContent = item;
+                        el.items.appendChild(li);
+                    });
+                    if (el.price) el.price.classList.add('hidden');
+                } else {
+                    el.items.classList.add('hidden');
+                    if (el.price) el.price.classList.remove('hidden');
+                }
+            }
+
+            if (dotsWrap) {
+                dotsWrap.querySelectorAll('.landing-tvpik-dot').forEach(function (node, i) {
+                    node.classList.toggle('is-active', i === index);
+                });
+            }
+        }
+
+        function runSyncCycle(nextIndex) {
+            if (busy) return;
+            busy = true;
+
+            if (phone) {
+                phone.classList.add('is-publishing', 'is-switching');
+            }
+            if (el.phoneStatus) {
+                el.phoneStatus.textContent = publishingLabel;
+                el.phoneStatus.classList.remove('is-done');
+            }
+            if (sync) sync.classList.add('is-active');
+            if (el.updated) el.updated.classList.remove('is-visible');
+
+            setTimeout(function () {
+                if (tv) tv.classList.add('is-switching');
+                if (phone) phone.classList.remove('is-switching');
+            }, 400);
+
+            setTimeout(function () {
+                current = nextIndex;
+                applySlide(current);
+                if (tv) tv.classList.remove('is-switching');
+            }, 750);
+
+            setTimeout(function () {
+                if (sync) sync.classList.remove('is-active');
+                if (phone) phone.classList.remove('is-publishing');
+                if (el.phoneStatus) {
+                    el.phoneStatus.textContent = syncedLabel;
+                    el.phoneStatus.classList.add('is-done');
+                }
+                if (el.updated) el.updated.classList.add('is-visible');
+            }, 1200);
+
+            setTimeout(function () {
+                if (el.updated) el.updated.classList.remove('is-visible');
+                busy = false;
+            }, 2200);
+        }
+
+        applySlide(0);
+        if (isStatic) {
+            return;
+        }
+
+        const intervalMs = root.classList.contains('landing-tvpik-scene--hero') ? 3800 : 4200;
+        setInterval(function () {
+            runSyncCycle((current + 1) % slides.length);
+        }, intervalMs);
+    });
+
+    (function initLandingLangSelect() {
+        if (!window.__landingLangSelectGlobals) {
+            window.__landingLangSelectGlobals = true;
+            document.addEventListener('click', function (e) {
+                document.querySelectorAll('[data-landing-lang].is-open').forEach(function (root) {
+                    if (!root.contains(e.target)) {
+                        closeLandingLangSelect(root);
+                    }
+                });
+            });
+            document.addEventListener('keydown', function (e) {
+                if (e.key === 'Escape') {
+                    document.querySelectorAll('[data-landing-lang].is-open').forEach(closeLandingLangSelect);
+                }
+            });
+        }
+
+        function closeLandingLangSelect(root) {
+            const menu = root.querySelector('.landing-lang-select__menu');
+            const btn = root.querySelector('.landing-lang-select__trigger');
+            root.classList.remove('is-open');
+            if (menu) {
+                menu.hidden = true;
+            }
+            if (btn) {
+                btn.setAttribute('aria-expanded', 'false');
+            }
+        }
+
+        function openLandingLangSelect(root) {
+            document.querySelectorAll('[data-landing-lang].is-open').forEach(function (other) {
+                if (other !== root) {
+                    closeLandingLangSelect(other);
+                }
+            });
+            const menu = root.querySelector('.landing-lang-select__menu');
+            const btn = root.querySelector('.landing-lang-select__trigger');
+            root.classList.add('is-open');
+            if (menu) {
+                menu.hidden = false;
+            }
+            if (btn) {
+                btn.setAttribute('aria-expanded', 'true');
+            }
+        }
+
+        document.querySelectorAll('[data-landing-lang]').forEach(function (root) {
+            if (root.dataset.langReady === '1') {
+                return;
+            }
+            root.dataset.langReady = '1';
+
+            const btn = root.querySelector('.landing-lang-select__trigger');
+            const menu = root.querySelector('.landing-lang-select__menu');
+            if (!btn || !menu) {
+                return;
+            }
+
+            btn.addEventListener('click', function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+                if (root.classList.contains('is-open')) {
+                    closeLandingLangSelect(root);
+                } else {
+                    openLandingLangSelect(root);
+                }
+            });
+        });
+    })();
+
+    document.querySelectorAll('[data-landing-user-menu]').forEach(function (wrap) {
+        const toggle = wrap.querySelector('[data-landing-user-menu-toggle]');
+        const panel = wrap.querySelector('[data-landing-user-menu-panel]');
+        if (!toggle || !panel) return;
+
+        function closeMenu() {
+            wrap.classList.remove('is-open');
+            panel.classList.add('hidden');
+            toggle.setAttribute('aria-expanded', 'false');
+        }
+
+        function openMenu() {
+            wrap.classList.add('is-open');
+            panel.classList.remove('hidden');
+            toggle.setAttribute('aria-expanded', 'true');
+        }
+
+        toggle.addEventListener('click', function (e) {
+            e.stopPropagation();
+            if (wrap.classList.contains('is-open')) {
+                closeMenu();
+            } else {
+                openMenu();
+            }
+        });
+
+        document.addEventListener('click', function (e) {
+            if (!wrap.contains(e.target)) {
+                closeMenu();
+            }
+        });
+
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape') {
+                closeMenu();
+            }
+        });
+    });
 
     window.addEventListener('scroll', function () {
         const nav = document.querySelector('[data-landing-nav]');

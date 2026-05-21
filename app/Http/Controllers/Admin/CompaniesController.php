@@ -4,7 +4,9 @@ namespace App\Http\Controllers\Admin;
 
 use App\Company;
 use App\Http\Controllers\Controller;
+use App\Product;
 use App\Services\CompanySlugService;
+use App\Services\CompanyThemeService;
 use App\Services\UserPlanService;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
@@ -17,7 +19,16 @@ class CompaniesController extends Controller
 {
     public function index()
     {
-        $companies = Company::where('user_id', auth()->id())->latest('updated_at')->get();
+        $query = Company::where('user_id', auth()->id());
+
+        if (auth()->user()->isSalesRep() && ! auth()->user()->isSuperAdmin()) {
+            $query->where(function ($q) {
+                $q->whereNull('sales_rep_user_id')
+                    ->orWhereNotNull('sales_converted_at');
+            });
+        }
+
+        $companies = $query->latest('updated_at')->get();
 
         return view('admin.companies.index', compact('companies'));
     }
@@ -41,6 +52,9 @@ class CompaniesController extends Controller
             return [$key => $meta['label'] ?? $key];
         })->all();
 
+        $hasMenuProducts = $company->sections()->whereHas('products')->exists();
+        $previewUsesSamples = ! $hasMenuProducts;
+
         return view('admin.companies.edit', compact(
             'company',
             'templates',
@@ -50,7 +64,8 @@ class CompaniesController extends Controller
             'themeSettings',
             'themePresets',
             'previewUrl',
-            'templateLabels'
+            'templateLabels',
+            'previewUsesSamples'
         ));
     }
 
@@ -85,7 +100,7 @@ class CompaniesController extends Controller
         return redirect()->route('admin.companies.edit', $company);
     }
 
-    public function update(Company $company, Request $request, CompanySlugService $slugs)
+    public function update(Company $company, Request $request, CompanySlugService $slugs, CompanyThemeService $themes)
     {
         $this->authorize('update', $company);
 
@@ -121,8 +136,9 @@ class CompaniesController extends Controller
             'instagram' => $request->get('instagram'),
             'comments' => $request->get('comments'),
             'schedule' => $request->get('schedule'),
+            'suggest_translation_upgrade' => $request->boolean('suggest_translation_upgrade'),
             'template' => $request->get('template', $company->template ?: 'basic'),
-            'theme_settings' => $this->normalizeThemeSettings($request),
+            'theme_settings' => $themes->normalizeFromRequest($request),
             'enabled' => $request->get('enabled') != null,
         ]);
         $company->save();
@@ -250,29 +266,6 @@ class CompaniesController extends Controller
         return redirect()->route('admin.dashboard');
     }
 
-    protected function normalizeThemeSettings(Request $request): array
-    {
-        $keys = array_keys(config('company_templates.color_keys', []));
-        $normalized = [];
-
-        foreach ($keys as $key) {
-            $value = $request->input('theme_' . $key);
-            if ($value && preg_match('/^#[0-9A-Fa-f]{6}$/', $value)) {
-                $normalized[$key] = strtolower($value);
-            }
-        }
-
-        $allowedFonts = array_keys(config('company_templates.fonts', []));
-        foreach (array_keys(config('company_templates.font_keys', [])) as $fontKey) {
-            $value = $request->input('theme_' . $fontKey);
-            if ($value && in_array($value, $allowedFonts, true)) {
-                $normalized[$fontKey] = $value;
-            }
-        }
-
-        return $normalized;
-    }
-
     protected function validatedBrandImage(string $field): UploadedFile
     {
         $file = request()->file($field);
@@ -309,5 +302,45 @@ class CompaniesController extends Controller
         ]);
 
         return $file;
+    }
+
+    public function updateDailyHighlights(Request $request, Company $company)
+    {
+        $this->authorize('update', $company);
+
+        if ($request->has('clear')) {
+            $company->daily_spotlight = null;
+            $company->daily_spotlight_price = null;
+            $company->save();
+
+            return redirect()
+                ->route('admin.sections.index')
+                ->with('flash', 'Especial de hoy quitado de la carta.');
+        }
+
+        $validated = $request->validate([
+            'daily_spotlight' => ['nullable', 'string', 'max:500'],
+            'daily_spotlight_price' => ['nullable', 'string', 'max:32'],
+        ]);
+
+        $text = trim($validated['daily_spotlight'] ?? '');
+        $price = trim(str_replace(',', '.', $validated['daily_spotlight_price'] ?? ''));
+        if ($price !== '' && !preg_match('/^\d+(\.\d{1,2})?$/', $price)) {
+            throw ValidationException::withMessages([
+                'daily_spotlight_price' => ['Indica un precio válido (ej: 12 o 12,50).'],
+            ]);
+        }
+
+        $company->daily_spotlight = $text !== '' ? $text : null;
+        $company->daily_spotlight_price = $price !== '' ? $price : null;
+        $company->save();
+
+        $message = $company->hasDailySpotlight()
+            ? 'Especial de hoy publicado en la carta.'
+            : 'Especial de hoy quitado de la carta.';
+
+        return redirect()
+            ->route('admin.sections.index')
+            ->with('flash', $message);
     }
 }

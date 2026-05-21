@@ -14,8 +14,7 @@ class SectionPolicy
     {
         $section->loadMissing('company');
 
-        return $section->company
-            && (int) $section->company->user_id === (int) $user->id;
+        return $section->company && $section->company->canBeManagedBy($user);
     }
 
     public function delete(User $user, Section $section)

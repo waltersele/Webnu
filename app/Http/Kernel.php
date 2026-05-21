@@ -69,5 +69,8 @@ class Kernel extends HttpKernel
         'super.admin' => \App\Http\Middleware\EnsureSuperAdmin::class,
         'subscribed' => \App\Http\Middleware\EnsureSubscribed::class,
         'onboarding.complete' => \App\Http\Middleware\EnsureOnboardingComplete::class,
+        'sales.rep' => \App\Http\Middleware\EnsureSalesRep::class,
+        'sales.guest' => \App\Http\Middleware\RedirectSalesGuest::class,
+        'redirect.sales.from.admin' => \App\Http\Middleware\RedirectSalesRepFromAdmin::class,
     ];
 }

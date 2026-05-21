@@ -28,6 +28,20 @@
                     <label class="form-label">País</label>
                     <input type="text" name="country" value="{{ old('country', $company->country) }}" class="form-control" placeholder="España">
                 </div>
+                <div class="col-12">
+                    <div class="form-check form-switch mt-1">
+                        <input type="checkbox"
+                               class="form-check-input"
+                               name="suggest_translation_upgrade"
+                               id="suggest-translation-upgrade"
+                               value="1"
+                               {{ old('suggest_translation_upgrade', $company->suggest_translation_upgrade) ? 'checked' : '' }}>
+                        <label class="form-check-label" for="suggest-translation-upgrade">
+                            Zona turística — sugerir carta multilingüe (Plus)
+                        </label>
+                    </div>
+                    <p class="form-text mb-0">Activa el aviso de idiomas aunque la provincia no esté en la lista automática. También detectamos zonas turísticas por localidad/provincia.</p>
+                </div>
             </div>
         </div>
     </div>

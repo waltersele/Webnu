@@ -32,7 +32,7 @@
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
     @include('themes.partials.theme-modal-overrides')
 
-    <link rel="icon" type="image/png" href="{{asset('img/front/favicon.png') }}" />
+    <link rel="icon" type="image/png" href="{{ \App\PlatformSetting::brandUrl('favicon') }}" />
 
     <script async src="https://www.googletagmanager.com/gtag/js?id=UA-167367604-1"></script>
 

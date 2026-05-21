@@ -9,8 +9,13 @@
         $pf = $planFeatures ?? [];
         $hasTranslation = $pf['translation'] ?? true;
         $hasMenuScan = $pf['menu_scan'] ?? true;
+        $ut = $upgradeTriggers ?? [];
+        $languageTrigger = ! $hasTranslation && ($ut['show_language_trigger'] ?? false);
+        $languagesUrl = route('admin.companies.languages', $company);
     @endphp
-    <a class="btn btn-outline-primary" href="{{ route('admin.companies.languages', $company) }}">
+    <a class="btn btn-outline-primary {{ $languageTrigger ? '' : '' }}"
+       href="{{ $languagesUrl }}"
+       @if ($languageTrigger) data-upgrade-trigger="translation" data-upgrade-fallback-href="{{ $languagesUrl }}" @endif>
         <i class="ri ri-translate-2 me-1"></i> Idiomas
         @if (! $hasTranslation)
             @include('admin.partials.plan-pro-badge', ['label' => 'Plus', 'size' => 'xs'])
@@ -22,20 +27,41 @@
             @include('admin.partials.plan-pro-badge', ['label' => 'Plus', 'size' => 'xs'])
         @endif
     </a>
+    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modal-share-menu">
+        <i class="ri ri-share-line me-1"></i> Compartir carta
+    </button>
     <div class="btn-group" role="group">
         <a class="btn btn-outline-primary" href="{{ route('see_menu', $company->slug) }}" target="_blank" rel="noopener">
             <i class="ri ri-eye-line me-1"></i> Vista previa
         </a>
-        <button type="button" class="btn btn-outline-secondary" onclick="frames['printMenu'].print(); return false;">
-            <i class="ri ri-printer-line me-1"></i> Imprimir
+        <a class="btn btn-outline-secondary" href="{{ route('admin.menu-print', $company) }}" target="_blank" rel="noopener">
+            <i class="ri ri-file-pdf-line me-1"></i> Carta A4 (PDF)
+        </a>
+        <button type="button" class="btn btn-outline-secondary" onclick="frames['printMenu'].print(); return false;" title="Imprimir la vista web de la carta">
+            <i class="ri ri-printer-line me-1"></i> Imprimir web
         </button>
-        <a class="btn btn-primary" href="{{ route('admin.qrgenerator', $company->id) }}" target="_blank">
+        <a class="btn btn-primary" href="{{ route('admin.qrgenerator', $company) }}" target="_blank" rel="noopener">
             <i class="ri ri-qr-code-line me-1"></i> QR
         </a>
     </div>
 @endsection
 
 @section('content')
+@php
+    $ut = $upgradeTriggers ?? [];
+    $showLangBanner = ! ($planFeatures['translation'] ?? true) && ($ut['show_language_trigger'] ?? false);
+@endphp
+@if ($showLangBanner)
+    <div class="alert alert-primary d-flex flex-wrap align-items-center gap-3 mb-4 wn-upgrade-lang-banner">
+        <i class="ri-global-line fs-4 shrink-0"></i>
+        <div class="flex-grow-1">
+            <strong>Clientes internacionales</strong>
+            <p class="mb-0 small">{{ $ut['copy']['translation_banner'] ?? 'Activa idiomas en tu carta con Plus.' }}</p>
+        </div>
+        <button type="button" class="btn btn-sm btn-primary" data-upgrade-trigger="translation">Activar idiomas (Plus)</button>
+        <a href="{{ route('admin.companies.languages', $company) }}" class="btn btn-sm btn-label-secondary">Ver idiomas</a>
+    </div>
+@endif
 @include('admin.sections.partials.menu-page-content')
 
 <div class="webnu-menu-modals">

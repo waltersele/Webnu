@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Services\UserPlanService;
 use App\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -30,6 +31,8 @@ class SignageAuthController extends Controller
             $user->save();
         }
 
+        $plans = app(UserPlanService::class);
+
         return response()->json([
             'token' => $user->api_token,
             'token_type' => 'Bearer',
@@ -38,19 +41,29 @@ class SignageAuthController extends Controller
                 'name' => $user->name,
                 'email' => $user->email,
             ],
+            'entitlements' => $plans->signageEntitlements($user),
         ]);
     }
 
     public function me(Request $request)
     {
-        $user = $request->user();
+        return $this->account($request);
+    }
 
-        return response()->json([
-            'user' => [
-                'id' => $user->id,
-                'name' => $user->name,
-                'email' => $user->email,
+    public function account(Request $request)
+    {
+        $user = $request->user();
+        $plans = app(UserPlanService::class);
+
+        return response()->json(array_merge(
+            [
+                'user' => [
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'email' => $user->email,
+                ],
             ],
-        ]);
+            $plans->signageEntitlements($user)
+        ));
     }
 }

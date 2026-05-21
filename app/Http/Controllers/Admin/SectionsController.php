@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Allergen;
 use App\Company;
 use App\Http\Controllers\Controller;
+use App\Product;
 use App\Section;
 use App\Services\AllergenCatalogService;
 use App\Services\MenuService;

@@ -31,6 +31,7 @@ class OnboardingController extends Controller
         }
 
         $templates = collect(config('company_templates.templates', []));
+        $templatePreviewUrls = $this->templatePreviewUrls();
         $themePresets = config('company_templates.presets', []);
         $publicUrl = route('see_menu', $company->slug);
         $qrImageUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=220x220&margin=12&data=' . urlencode($publicUrl);
@@ -42,7 +43,9 @@ class OnboardingController extends Controller
             'step' => $step,
             'maxStep' => self::MAX_STEP,
             'templates' => $templates,
+            'templatePreviewUrls' => $templatePreviewUrls,
             'themePresets' => $themePresets,
+            'scanPeriod' => $plans->menuScanPeriod($user),
             'plan' => $plans->tier($user),
             'planPresentation' => $planPresentation,
             'scansRemaining' => $plans->menuScansRemaining($user),
@@ -51,7 +54,7 @@ class OnboardingController extends Controller
             'publicUrl' => $publicUrl,
             'qrImageUrl' => $qrImageUrl,
             'menuScanUrl' => route('admin.menu-scan.create'),
-            'billingUrl' => route('admin.billing'),
+            'billingUrl' => route('admin.settings'),
             'companyHasIdentity' => $companyHasIdentity,
             'supportedLocales' => config('menu_locales.supported', []),
             'defaultLocale' => $company->defaultLocale(),
@@ -194,5 +197,36 @@ class OnboardingController extends Controller
         $name = trim((string) $company->name);
 
         return $name !== '' && $name !== 'Mi restaurante';
+    }
+
+    /** @return array<string, string> */
+    protected function templatePreviewUrls(): array
+    {
+        $fallbackSlugs = [
+            'basic' => 'demo',
+            'nocturne' => 'demo-cocktails',
+            'otaku' => 'demo-fuego',
+            'japo' => 'demo-japo',
+            'fastfood' => 'demo-fastfood',
+            'pizza' => 'demo-pizza',
+            'mar' => 'demo-mar',
+            'elegance' => 'demo-elegance',
+            'asador' => 'demo-asador',
+            'lumiere' => 'demo-elegance',
+            'bistro' => 'demo',
+            'temporada' => 'demo',
+            'catalogo' => 'demo',
+            'pasion' => 'demo',
+            'oriental' => 'demo-japo',
+            'visual' => 'demo',
+        ];
+
+        $urls = [];
+        foreach (config('company_templates.templates', []) as $id => $tpl) {
+            $slug = $tpl['preview_slug'] ?? $fallbackSlugs[$id] ?? 'demo';
+            $urls[$id] = route('see_menu', $slug);
+        }
+
+        return $urls;
     }
 }

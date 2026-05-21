@@ -1,0 +1,13 @@
+# Fragmento OBLIGATORIO al fusionar public/.htaccess en producción.
+# Copiar estas líneas AL INICIO del .htaccess del servidor (antes de RewriteEngine de Laravel).
+# No eliminar al desplegar código nuevo.
+
+redirect 301 /cerveceria-el-parque-san-vicente-del-raspeig/ 	https://webnu.es/carta/cerveceria-el-parque
+redirect 301 /hejiahuan-l-g-j-sl-2/	https://webnu.es/carta/bar-and-sushi
+redirect 301 /hejiahuan-l-g-j-sl/	https://webnu.es/carta/bar-and-sushi
+redirect 301 /hela2-jose-luis-gisbert-s-l/	https://webnu.es/carta/la-ibense
+redirect 301 /los-casanueva/	https://webnu.es/carta/los-casanueva
+redirect 301 /wanyuan/	https://webnu.es/carta/restaurante-wan-yuan
+redirect 301 /wanyuan-2/	https://webnu.es/carta/restaurante-wan-yuan
+redirect 301 /xiaohe-xu/ https://webnu.es/carta/restaurante-abc
+redirect 301 /pasionxlacarne    https://webnu.es/carta/pasionxlacarne

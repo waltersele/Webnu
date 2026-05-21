@@ -34,7 +34,7 @@
     <!-- Responsive CSS -->
     <link rel="stylesheet" type="text/css" href="{{ asset('css/responsive.css') }}" media="all" />
     <!-- Favicon Icon -->
-    <link rel="icon" type="image/png" href="{{ asset('img/front/favicon.png') }}" />
+    <link rel="icon" type="image/png" href="{{ \App\PlatformSetting::brandUrl('favicon') }}" />
     <!--[if lt IE 9]>
         <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
         <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>

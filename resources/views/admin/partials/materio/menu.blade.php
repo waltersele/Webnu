@@ -8,7 +8,7 @@
     <div class="app-brand demo">
         <a href="{{ route('admin.dashboard') }}" class="app-brand-link">
             <span class="app-brand-logo demo me-2">
-                <img src="{{ asset('adminlte/img/webnu.png') }}" alt="Webnu">
+                <img src="{{ \App\PlatformSetting::brandUrl('isotipo') }}" alt="Webnu">
             </span>
             <span class="app-brand-text demo menu-text fw-semibold">Webnu</span>
         </a>
@@ -59,10 +59,10 @@
         <li class="menu-header small mt-3">
             <span class="menu-header-text">Conectar</span>
         </li>
-        <li class="menu-item {{ request()->is('admin/integrations*') || request()->is('admin/signage*') ? 'active' : '' }}">
-            <a href="{{ route('admin.integrations.index') }}" class="menu-link">
-                <i class="menu-icon icon-base ri ri-plug-line"></i>
-                <div>Integraciones</div>
+        <li class="menu-item {{ request()->is('admin/tvpik*') || request()->is('admin/integrations*') || request()->is('admin/signage*') ? 'active' : '' }}">
+            <a href="{{ route('admin.tvpik.index') }}" class="menu-link">
+                <i class="menu-icon icon-base ri ri-tv-line"></i>
+                <div>TV / TVPik</div>
             </a>
         </li>
 
@@ -89,6 +89,12 @@
             <a href="{{ route('admin.platform.users.index') }}" class="menu-link">
                 <i class="menu-icon icon-base ri ri-team-line"></i>
                 <div>Clientes</div>
+            </a>
+        </li>
+        <li class="menu-item {{ request()->routeIs('admin.platform.sales*') ? 'active' : '' }}">
+            <a href="{{ route('admin.platform.sales.index') }}" class="menu-link">
+                <i class="menu-icon icon-base ri ri-briefcase-line"></i>
+                <div>Comercial</div>
             </a>
         </li>
         <li class="menu-item {{ request()->routeIs('admin.platform.settings*') ? 'active' : '' }}">

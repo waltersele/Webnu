@@ -6,7 +6,7 @@
 @endphp
 <aside class="webnu-sidebar" aria-label="Navegación principal">
     <a href="{{ route('admin.dashboard') }}" class="webnu-sidebar__brand">
-        <img src="{{ asset('adminlte/img/webnu.png') }}" alt="Webnu" width="32" height="32">
+        <img src="{{ \App\PlatformSetting::brandUrl('isotipo') }}" alt="Webnu" width="32" height="32">
         <span>Webnu<span class="text-primary">.es</span></span>
     </a>
 

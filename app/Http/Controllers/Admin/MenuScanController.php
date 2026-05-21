@@ -27,11 +27,13 @@ class MenuScanController extends Controller
             'company' => $company,
             'scanConfigured' => $platformSettings->hasGeminiApiKey(),
             'isSuperAdmin' => $user->isSuperAdmin(),
+            'plan' => $plans->tier($user),
             'scansRemaining' => $plans->menuScansRemaining($user),
             'scansUsed' => $plans->menuScansUsed($user),
             'scanLimit' => $plans->menuScanLimit($user),
+            'scanPeriod' => $plans->menuScanPeriod($user),
             'canScan' => $plans->canUseMenuScan($user),
-            'billingUrl' => route('admin.billing'),
+            'billingUrl' => route('admin.settings'),
         ]);
     }
 
@@ -115,8 +117,13 @@ class MenuScanController extends Controller
         $job->error_message = $result->errorMessage ?? 'No se pudo analizar la carta.';
         $job->save();
 
+        $failMessage = $job->error_message;
+        if ($lifetimeLimit !== null) {
+            $failMessage .= ' Este intento no consume tu escaneo.';
+        }
+
         return redirect()->route('admin.menu-scan.show', $job)
-            ->withErrors(['scan' => $job->error_message]);
+            ->withErrors(['scan' => $failMessage]);
     }
 
     public function show(MenuScanJob $job)

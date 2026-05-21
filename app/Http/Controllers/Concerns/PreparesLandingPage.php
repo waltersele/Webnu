@@ -1,0 +1,310 @@
+<?php
+
+namespace App\Http\Controllers\Concerns;
+
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\App;
+
+trait PreparesLandingPage
+{
+    /** @return list<string> */
+    protected function landingSupportedLocales(): array
+    {
+        return array_keys(config('landing.locales', []));
+    }
+
+    protected function resolveLandingLocale(Request $request): string
+    {
+        $supported = $this->landingSupportedLocales();
+        $fallback = config('landing.fallback_locale', 'en');
+
+        $query = $request->query('lang');
+        if (is_string($query) && in_array($query, $supported, true)) {
+            return $query;
+        }
+
+        $cookieName = config('landing.cookie_name', 'webnu_landing_lang');
+        $cookie = $request->cookie($cookieName);
+        if (is_string($cookie) && in_array($cookie, $supported, true)) {
+            return $cookie;
+        }
+
+        $accept = $request->header('Accept-Language');
+        if (! is_string($accept) || trim($accept) === '') {
+            return config('landing.default', 'es');
+        }
+
+        $preferred = $request->getPreferredLanguage($supported);
+
+        if (is_string($preferred) && in_array($preferred, $supported, true)) {
+            return $preferred;
+        }
+
+        return $fallback;
+    }
+
+    /** @return list<array<string, mixed>> */
+    protected function buildTemplateShowcase(): array
+    {
+        $templates = config('company_templates.templates', []);
+        $demoUrls = config('landing.template_demo_urls', []);
+        $showcaseKeys = config('landing.template_showcase_keys', ['basic', 'nocturne', 'otaku']);
+        $items = [];
+
+        foreach ($showcaseKeys as $key) {
+            $meta = $templates[$key] ?? null;
+            if (! is_array($meta) || empty($meta['label'])) {
+                continue;
+            }
+            $demoPath = $demoUrls[$key] ?? null;
+            $label = __("landing.templates.showcase.{$key}.label");
+            $description = __("landing.templates.showcase.{$key}.description");
+            if ($label === "landing.templates.showcase.{$key}.label") {
+                $label = $meta['label'];
+            }
+            if ($description === "landing.templates.showcase.{$key}.description") {
+                $description = $meta['description'] ?? '';
+            }
+            $items[] = [
+                'key' => $key,
+                'label' => $label,
+                'description' => $description,
+                'group' => $meta['group'] ?? 'modern',
+                'recommended' => ! empty($meta['recommended']),
+                'preview' => asset($meta['preview_image'] ?? 'img/admin/templates/basic.svg'),
+                'demo_url' => $demoPath ? url($demoPath) : null,
+            ];
+        }
+
+        return $items;
+    }
+
+    protected function landingTemplateCatalogCount(): int
+    {
+        $templates = config('company_templates.templates', []);
+
+        return count(array_filter($templates, function ($meta) {
+            return is_array($meta) && ! empty($meta['label']);
+        }));
+    }
+
+    /** @return list<string> */
+    protected function landingPricingTierOrder(): array
+    {
+        $order = config('landing.pricing_order', ['free', 'plus', 'unlimited']);
+        $tiers = config('plans.tiers', []);
+
+        return array_values(array_filter($order, function ($tierId) use ($tiers) {
+            return is_string($tierId) && isset($tiers[$tierId]);
+        }));
+    }
+
+    /** @return list<array<string, mixed>> */
+    protected function buildLandingPricingPlans(): array
+    {
+        $highlight = config('landing.pricing_highlight', 'plus');
+        $tiers = config('plans.tiers', []);
+        $plans = [];
+
+        foreach ($this->landingPricingTierOrder() as $tierId) {
+            $langKey = "landing.pricing.{$tierId}";
+            $tier = $tiers[$tierId];
+            $name = __("{$langKey}.name");
+            if ($name === "{$langKey}.name") {
+                $name = $tier['label'] ?? $tierId;
+            }
+
+            $badge = __("{$langKey}.badge");
+            if ($badge === "{$langKey}.badge") {
+                $badge = null;
+            }
+
+            $plans[] = [
+                'id' => $tierId,
+                'highlight' => $tierId === $highlight,
+                'name' => $name,
+                'tagline' => __("{$langKey}.tagline"),
+                'price' => __("{$langKey}.price"),
+                'period' => __("{$langKey}.period"),
+                'badge' => $tierId === $highlight ? $badge : null,
+                'cta' => __("{$langKey}.cta"),
+                'features' => __("{$langKey}.features"),
+                'cta_url' => route('register'),
+            ];
+        }
+
+        return $plans;
+    }
+
+    /** @return list<array<string, mixed>> */
+    protected function buildLandingPricingComparison(): array
+    {
+        $rowKeys = ['menus', 'ai_scans', 'videos', 'translation', 'tvpik'];
+        $rows = [];
+
+        foreach ($rowKeys as $key) {
+            $values = [];
+            foreach ($this->landingPricingTierOrder() as $tierId) {
+                $values[$tierId] = $this->landingPricingComparisonCell($tierId, $key);
+            }
+            $rows[] = [
+                'key' => $key,
+                'label' => __("landing.pricing.comparison.rows.{$key}"),
+                'values' => $values,
+            ];
+        }
+
+        return $rows;
+    }
+
+    protected function landingPricingComparisonCell(string $tierId, string $row): string
+    {
+        $tier = config("plans.tiers.{$tierId}", []);
+
+        switch ($row) {
+            case 'menus':
+                if (($tier['max_companies'] ?? 1) === null) {
+                    return __('landing.pricing.comparison.menus_unlimited');
+                }
+
+                return trans_choice(
+                    'landing.pricing.comparison.menus_count',
+                    (int) $tier['max_companies'],
+                    ['count' => $tier['max_companies']]
+                );
+
+            case 'ai_scans':
+                if (($tier['menu_scans'] ?? 0) === null) {
+                    return __('landing.pricing.comparison.unlimited');
+                }
+                if (($tier['menu_scans_period'] ?? '') === 'lifetime') {
+                    return trans('landing.pricing.comparison.scans_lifetime', [
+                        'count' => $tier['menu_scans'],
+                    ]);
+                }
+
+                return trans('landing.pricing.comparison.scans_monthly', [
+                    'count' => $tier['menu_scans'],
+                ]);
+
+            case 'videos':
+                return ! empty($tier['videos'])
+                    ? __('landing.pricing.comparison.yes')
+                    : __('landing.pricing.comparison.no');
+
+            case 'translation':
+                if (empty($tier['translation'])) {
+                    return __('landing.pricing.comparison.no');
+                }
+                $maxLocales = $tier['translation_max_locales'] ?? null;
+                if ($maxLocales === null) {
+                    return __('landing.pricing.comparison.translation_unlimited');
+                }
+
+                return trans('landing.pricing.comparison.translation_locales', [
+                    'count' => $maxLocales,
+                ]);
+
+            case 'tvpik':
+                return ! empty($tier['tvpik'])
+                    ? __('landing.pricing.comparison.yes')
+                    : __('landing.pricing.comparison.no');
+
+            default:
+                return '—';
+        }
+    }
+
+    /** @return array<string, mixed> */
+    protected function landingViewData(Request $request): array
+    {
+        $locale = $this->resolveLandingLocale($request);
+        App::setLocale($locale);
+
+        $demoUrls = [
+            url('/carta/demo'),
+            url('/carta/demo-cocktails'),
+            url('/carta/demo-fuego'),
+        ];
+        $demoPreviews = [
+            'brasa-solomillo.jpg',
+            'cocktail-negroni.jpg',
+            'fuego-tonkotsu.jpg',
+        ];
+        $demoAccents = [
+            'border-border-subtle bg-surface-container-lowest',
+            'border-primary/30 bg-surface-container',
+            'border-orange-400 bg-orange-950/10',
+        ];
+
+        $demoShowcases = [];
+        foreach (__('landing.demos.items') as $i => $item) {
+            $demoShowcases[] = array_merge($item, [
+                'url' => $demoUrls[$i] ?? $demoUrls[0],
+                'preview' => asset('img/productos/' . ($demoPreviews[$i] ?? $demoPreviews[0])),
+                'accent' => $demoAccents[$i] ?? $demoAccents[0],
+            ]);
+        }
+
+        $tvpikSlides = [];
+        foreach (__('landing.tvpik.slides') as $i => $slide) {
+            $images = [
+                asset('img/productos/brasa-solomillo.jpg'),
+                asset('img/productos/brasa-burrata.jpg'),
+                asset('img/productos/cocktail-negroni.jpg'),
+                asset('img/productos/brasa-brownie.jpg'),
+            ];
+            $tvpikSlides[] = array_merge($slide, [
+                'image' => $images[$i] ?? $images[0],
+            ]);
+        }
+
+        $steakFile = config('demo_media.videos.steak.file', 'reel-grill-chicken.mp4');
+        $templateCount = $this->landingTemplateCatalogCount();
+
+        $contactEmail = \App\PlatformSetting::contactPublicEmail();
+        $landingFaq = collect(__('landing.faq.items'))->map(function (array $item) use ($contactEmail) {
+            $item['a'] = str_replace(':email', $contactEmail, $item['a']);
+
+            return $item;
+        })->all();
+
+        $user = $request->user();
+        $userDisplayName = $user ? $this->landingUserDisplayName($user->name ?? '') : '';
+
+        return [
+            'locale' => $locale,
+            'landingLocales' => config('landing.locales', []),
+            'heroHooks' => __('landing.hero.hooks'),
+            'demoShowcases' => $demoShowcases,
+            'tvpikSlides' => $tvpikSlides,
+            'landingFeatures' => __('landing.features.items'),
+            'landingTestimonials' => __('landing.testimonials.items'),
+            'landingSteps' => __('landing.process.steps'),
+            'landingFaq' => $landingFaq,
+            'landingPricingPlans' => $this->buildLandingPricingPlans(),
+            'landingPricingComparison' => $this->buildLandingPricingComparison(),
+            'landingPricingTierOrder' => $this->landingPricingTierOrder(),
+            'landingCustomizePresets' => __('landing.customize.presets'),
+            'landingReelVideo' => asset('img/demo/' . $steakFile),
+            'demoCocktailsUrl' => url('/carta/demo-cocktails'),
+            'templateCount' => $templateCount,
+            'userDisplayName' => $userDisplayName,
+            'settingsUrl' => route('admin.settings'),
+            'panelUrl' => route('admin.dashboard'),
+            'logoutUrl' => route('logout'),
+        ];
+    }
+
+    protected function landingUserDisplayName(string $fullName): string
+    {
+        $fullName = trim($fullName);
+        if ($fullName === '') {
+            return '';
+        }
+
+        $parts = preg_split('/\s+/', $fullName);
+
+        return $parts[0] ?? $fullName;
+    }
+}

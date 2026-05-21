@@ -34,5 +34,10 @@ composer.phar
 !/storage/framework/views/.gitignore
 /storage/logs/*
 !/storage/logs/.gitignore
+/storage/backups/*
+!/storage/backups/.gitkeep
+!/storage/backups/import/.gitkeep
+/storage/migration-inventory/*
+!/storage/migration-inventory/.gitkeep
 /bootstrap/cache/*
 !/bootstrap/cache/.gitignore

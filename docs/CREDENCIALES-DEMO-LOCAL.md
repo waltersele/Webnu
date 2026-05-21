@@ -10,6 +10,17 @@ php scripts/seed-platform-demo.php
 
 **Contraseña de todos los usuarios:** `demo123`
 
+### Migraciones del módulo comercial (obligatorio la primera vez)
+
+Si `/admin/platform/comercial` falla con `no such table: sales_handoffs`, ejecuta en la **terminal de Laragon** (misma PHP que el servidor):
+
+```bash
+cd c:\webproject\Webnu\Webnu
+php artisan migrate
+```
+
+Alternativa sin artisan: `php scripts/run-sales-migrations.php` (usa credenciales de tu `.env`).
+
 ---
 
 ## Superadmin (panel plataforma)
@@ -22,7 +33,20 @@ php scripts/seed-platform-demo.php
 | Plataforma | http://127.0.0.1:8000/admin/platform |
 | Listado clientes | http://127.0.0.1:8000/admin/platform/users |
 
-En el menú lateral verás **Plataforma → Dashboard** y **Clientes**.
+En el menú lateral verás **Plataforma → Dashboard**, **Clientes** y **Comercial**.
+
+---
+
+## Portal comercial (visitas en calle)
+
+| Campo | Valor |
+|--------|--------|
+| Email | `comercial@webnu.local` |
+| Contraseña | `demo123` |
+| Login | http://127.0.0.1:8000/comercial/login |
+| Gestión (superadmin) | http://127.0.0.1:8000/admin/platform/comercial |
+
+El usuario comercial se crea al ejecutar `php scripts/seed-platform-demo.php` (requiere migraciones aplicadas), o desde **Plataforma → Comercial → pestaña Comerciales → Nuevo comercial**.
 
 Asegúrate de tener en `.env` (o lo define `run-local.ps1`):
 

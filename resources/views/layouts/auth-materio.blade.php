@@ -6,7 +6,7 @@
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Acceso') — {{ config('app.name', 'Webnu') }}</title>
-    <link rel="icon" type="image/png" href="{{ asset('img/front/favicon.png') }}">
+    <link rel="icon" type="image/png" href="{{ \App\PlatformSetting::brandUrl('favicon') }}">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -35,7 +35,7 @@
             <div class="webnu-auth-cover__bg" style="background-image: url('{{ $coverImage }}');"></div>
             <div class="webnu-auth-cover__overlay"></div>
             <div class="webnu-auth-cover__content">
-                <img src="{{ asset('img/front/logo.png') }}" alt="Webnu" class="webnu-auth-cover__logo">
+                <img src="{{ \App\PlatformSetting::brandUrl('logo') }}" alt="Webnu" class="webnu-auth-cover__logo">
                 <h1 class="webnu-auth-cover__title">Tu carta digital, siempre actualizada</h1>
                 <p class="webnu-auth-cover__lead">Gestiona menús, QR, pantallas TVPik y pedidos desde un panel pensado para hostelería.</p>
                 <ul class="webnu-auth-cover__features">
@@ -50,7 +50,7 @@
             <div class="webnu-auth-cover__bg" style="background-image: url('{{ $coverImage }}');"></div>
             <div class="webnu-auth-cover__overlay"></div>
             <div class="webnu-auth-cover__content">
-                <img src="{{ asset('img/front/logo.png') }}" alt="Webnu" class="webnu-auth-cover__logo">
+                <img src="{{ \App\PlatformSetting::brandUrl('logo') }}" alt="Webnu" class="webnu-auth-cover__logo">
                 <h1 class="webnu-auth-cover__title">Tu carta digital</h1>
             </div>
         </div>

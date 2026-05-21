@@ -33,6 +33,7 @@ class MenuSyncService
                 'sync_version' => $this->syncVersion($company),
                 'public_url' => route('see_menu', $company->slug),
                 'api_url' => url('/api/signage/menus/' . $company->slug),
+                'tv_urls' => $this->tvUrls($company),
             ];
         })->values()->all();
     }
@@ -51,6 +52,9 @@ class MenuSyncService
                     ? $this->assetUrl($company->menu_type_2_pdf)
                     : null,
                 'sections' => [],
+                'daily_spotlight' => $this->dailySpotlightPayload($company),
+                'highlights' => [],
+                'tv_urls' => $this->tvUrls($company),
             ];
         }
 
@@ -114,6 +118,9 @@ class MenuSyncService
                     })->values()->all(),
                 ];
             })->values()->all(),
+            'daily_spotlight' => $this->dailySpotlightPayload($company),
+            'highlights' => $this->highlightsPayload($company, $onlyEnabled),
+            'tv_urls' => $this->tvUrls($company),
         ];
     }
 
@@ -165,5 +172,74 @@ class MenuSyncService
     protected function assetUrl(string $path): string
     {
         return url('img/' . ltrim($path, '/'));
+    }
+
+    public function tvUrls(Company $company): array
+    {
+        $slug = $company->slug;
+        $urls = [
+            'default' => route('tv.show', ['companySlug' => $slug]),
+        ];
+
+        foreach (config('tvpik_templates.templates', []) as $template) {
+            $layout = $template['layout'] ?? $template['key'] ?? null;
+            if ($layout) {
+                $urls[$template['key'] ?? $layout] = route('tv.show.layout', [
+                    'companySlug' => $slug,
+                    'layout' => $layout,
+                ]);
+            }
+        }
+
+        return $urls;
+    }
+
+    public function tvUrlForTemplate(Company $company, string $templateKey): string
+    {
+        $urls = $this->tvUrls($company);
+
+        return $urls[$templateKey] ?? $urls['default'] ?? route('see_menu', $company->slug);
+    }
+
+    protected function dailySpotlightPayload(Company $company): ?array
+    {
+        $text = trim((string) $company->daily_spotlight);
+        if ($text === '') {
+            return null;
+        }
+
+        return [
+            'label' => 'Especial de hoy',
+            'text' => $text,
+            'price' => trim((string) $company->daily_spotlight_price) ?: null,
+        ];
+    }
+
+    protected function highlightsPayload(Company $company, bool $onlyEnabled): array
+    {
+        $query = Product::query()
+            ->whereHas('section', function ($q) use ($company) {
+                $q->where('company_id', $company->id);
+            })
+            ->where(function ($q) {
+                $q->whereNotNull('highlight')->where('highlight', '!=', '');
+            })
+            ->orderBy('order');
+
+        if ($onlyEnabled) {
+            $query->where('enabled', true);
+        }
+
+        return $query->get()->map(function (Product $product) {
+            return [
+                'id' => $product->id,
+                'name' => $product->name,
+                'highlight' => $product->highlight,
+                'price_unit' => $product->price_unit,
+                'price_portion' => $product->price_portion,
+                'image_url' => $product->image ? $this->assetUrl($product->image) : null,
+                'video_url' => $product->video ? $this->assetUrl($product->video) : null,
+            ];
+        })->values()->all();
     }
 }

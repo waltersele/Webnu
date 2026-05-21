@@ -33,7 +33,7 @@ class TranslationController extends Controller
             'canTranslate' => $plans->canUseTranslation($user),
             'maxExtraLocales' => $plans->maxTranslationLocales($user),
             'planLabel' => $plans->tier($user)['label'] ?? 'Gratis',
-            'billingUrl' => route('admin.billing'),
+            'billingUrl' => route('admin.settings'),
             'publicUrl' => route('see_menu', $company->slug),
         ]);
     }

@@ -68,9 +68,15 @@ Configurados en [`config/billing.php`](../config/billing.php):
 
 Alta de nuevos clientes: página [`/welcome`](../resources/views/welcome.blade.php) → `process_subscription`.
 
-## Bloqueo del panel
+## Acceso al panel
 
-Si el usuario **no** es superadmin y **no** tiene suscripción activa (ni trial), no puede acceder a `/admin/*` excepto:
+El middleware `subscribed` permite el **plan Gratis** con límites (`UserPlanService`). Los clientes con suscripción Stripe activa (`planqrmensual` / `planqranual`) obtienen plan **Plus** vía `subscription_map` en [`config/plans.php`](../config/plans.php).
 
-- `/admin/billing`
-- `/admin/platform/*` (solo superadmin)
+Migración a producción: prioridad cartas/QR en [MIGRACION-PRODUCCION.md](MIGRACION-PRODUCCION.md). Si el cobro es manual (sin Stripe activo), asignad `users.plan` en BD hasta reactivar suscripciones.
+
+## TVPik (facturación en Webnu)
+
+Los servicios de **pantallas TV / TVPik** se facturan y limitan desde Webnu. TVPik no tiene Stripe propio: consume `GET /api/signage/account`.
+
+Documentación del contrato: **[PLATFORM-BILLING-TVPIK.md](PLATFORM-BILLING-TVPIK.md)**.
+

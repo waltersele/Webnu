@@ -1,4 +1,37 @@
 <div class="webnu-menu-editor">
+    @if((int) $company->menu_type === 1)
+        @include('admin.sections.partials.daily-highlights-form', ['company' => $company])
+        @php
+            $canTvpikMenu = auth()->check() && app(\App\Services\UserPlanService::class)->canUseTvpik(auth()->user());
+            $tvpikLinksCount = $canTvpikMenu
+                ? \App\TvpikScreenLink::where('company_id', $company->id)->count()
+                : 0;
+        @endphp
+        @if($canTvpikMenu)
+            <div class="alert alert-light border d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+                <div>
+                    <strong class="d-block"><i class="ti ti-device-tv me-1"></i> Pantallas TV (TVPik)</strong>
+                    <span class="small text-muted">
+                        @if($tvpikLinksCount > 0)
+                            {{ $tvpikLinksCount }} pantalla(s) vinculada(s). Al guardar platos se republican automáticamente.
+                        @else
+                            Publica esta carta en TV desde el hub TVPik.
+                        @endif
+                    </span>
+                </div>
+                <div class="d-flex gap-2">
+                    <a href="{{ route('admin.tvpik.index') }}" class="btn btn-sm btn-outline-primary">Gestionar TVs</a>
+                    @if($tvpikLinksCount > 0)
+                        <form method="POST" action="{{ route('admin.tvpik.publish-all') }}" class="d-inline">
+                            @csrf
+                            <button type="submit" class="btn btn-sm btn-primary">Republicar TVs</button>
+                        </form>
+                    @endif
+                </div>
+            </div>
+        @endif
+    @endif
+
     <div class="alert alert-light border d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
         <div class="d-flex align-items-start gap-2">
             <i class="ri-palette-line ri-lg text-primary mt-1" aria-hidden="true"></i>
@@ -27,7 +60,7 @@
                     </span>
                     <span class="webnu-menu-type__copy">
                         <span class="webnu-menu-type__title">Carta digital</span>
-                        <span class="webnu-menu-type__desc">secciónes, platos y diseño personalizable</span>
+                        <span class="webnu-menu-type__desc">Secciones, platos y diseño personalizable</span>
                     </span>
                 </label>
                 <label class="webnu-menu-type__option {{ $company->menu_type == 2 ? 'is-active' : '' }}" for="menu-type-pdf">

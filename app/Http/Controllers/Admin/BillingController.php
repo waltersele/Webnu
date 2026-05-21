@@ -10,18 +10,9 @@ use Stripe\Stripe;
 
 class BillingController extends Controller
 {
-    public function index(UserBillingPresenter $presenter)
+    public function index()
     {
-        $user = auth()->user();
-
-        return view('admin.billing.index', [
-            'user' => $user,
-            'statusLabel' => $presenter->statusLabel($user),
-            'statusBadgeClass' => $presenter->statusBadgeClass($user),
-            'planLabel' => $presenter->planLabel($user),
-            'subscription' => $user->primarySubscription(),
-            'hasAccess' => $user->hasActiveSubscription(),
-        ]);
+        return redirect()->to(route('admin.settings') . '#plan', 301);
     }
 
     public function portal(Request $request)
@@ -38,7 +29,7 @@ class BillingController extends Controller
 
         $session = BillingPortalSession::create([
             'customer' => $user->stripe_id,
-            'return_url' => route('admin.billing'),
+            'return_url' => route('admin.settings') . '#plan',
         ]);
 
         return redirect($session->url);

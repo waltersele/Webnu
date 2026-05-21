@@ -81,7 +81,12 @@ class UserBillingPresenter
             return null;
         }
 
-        return rtrim(config('platform.stripe_dashboard_customer_url'), '/') . '/' . $user->stripe_id;
+        $base = config('platform.stripe_dashboard_customer_url', 'https://dashboard.stripe.com/test/customers');
+        if (! is_string($base) || trim($base) === '') {
+            return null;
+        }
+
+        return rtrim($base, '/') . '/' . $user->stripe_id;
     }
 
     /**
@@ -112,13 +117,15 @@ class UserBillingPresenter
         }
 
         $monthly = config('billing.subscription_names.monthly');
-        $mrr = config('platform.mrr');
+        $mrr = config('platform.mrr', []);
+        $monthlyEur = (float) ($mrr['monthly_eur'] ?? 9.90);
+        $yearlyEur = (float) ($mrr['yearly_eur'] ?? 99);
 
         if ($subscription->name === $monthly) {
-            return (float) $mrr['monthly_eur'];
+            return $monthlyEur;
         }
 
-        return round((float) $mrr['yearly_eur'] / 12, 2);
+        return round($yearlyEur / 12, 2);
     }
 
     protected function mapStripeStatus(?string $status): string

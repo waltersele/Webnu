@@ -9,7 +9,7 @@
     <script type="text/javascript" src="{{ asset('js/wowbook/wow_book.min.js') }}"></script>
     <link rel="stylesheet" href="{{ asset('js/wowbook/wow_book.css') }}" type="text/css" />
     <script type="text/javascript" src="{{ asset('js/wowbook/pdf.combined.min.js') }}"></script>
-    <link rel="icon" type="image/png" href="{{ asset('img/front/favicon.png') }}" />
+    <link rel="icon" type="image/png" href="{{ \App\PlatformSetting::brandUrl('favicon') }}" />
     <style>
         body {
             margin: 0;
@@ -46,7 +46,7 @@
 </head>
 <body>
     <header class="menu-pdf-header">
-        <img src="{{ asset('img/front/logo.png') }}" alt="Webnu">
+        <img src="{{ \App\PlatformSetting::brandUrl('logo') }}" alt="Webnu">
         <div class="text-end">
             <p class="menu-pdf-header__title">{{ $company->name }}</p>
             <p class="menu-pdf-header__url">{{ url('/carta/' . $company->slug) }}</p>

@@ -46,7 +46,12 @@ class PlatformMetricsService
             }
         }
 
-        $companies = (int) DB::table('companies')->count();
+        $companies = (int) DB::table('companies')
+            ->where(function ($q) {
+                $q->whereNull('sales_rep_user_id')
+                    ->orWhereNotNull('sales_converted_at');
+            })
+            ->count();
 
         return [
             'total_users' => $total,

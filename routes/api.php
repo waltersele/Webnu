@@ -10,6 +10,7 @@ Route::prefix('signage')
 
         Route::middleware('auth:api')->group(function () {
             Route::get('me', 'SignageAuthController@me');
+            Route::get('account', 'SignageAuthController@account');
             Route::get('menus', 'SignageMenuController@index');
             Route::get('menus/{slug}/version', 'SignageMenuController@version');
             Route::get('menus/{slug}', 'SignageMenuController@show');

@@ -81,6 +81,9 @@ Límites en `config/plans.php` y `App\Services\UserPlanService`.
 | [docs/ONBOARDING-FREEMIUM.md](docs/ONBOARDING-FREEMIUM.md) | Onboarding, middleware, migración `plan` |
 | [docs/MENU-SCAN.md](docs/MENU-SCAN.md) | Gemini, Tesseract, flujo de importación |
 | [docs/PLATFORM-BILLING.md](docs/PLATFORM-BILLING.md) | Stripe, webhooks, panel plataforma |
+| [docs/MIGRACION-PRODUCCION.md](docs/MIGRACION-PRODUCCION.md) | Despliegue prod, backup, QR/slugs |
+| [docs/TVPIK-INTEGRATION.md](docs/TVPIK-INTEGRATION.md) | Publicar carta en TV desde Webnu |
+| [docs/PLATFORM-BILLING-TVPIK.md](docs/PLATFORM-BILLING-TVPIK.md) | Webnu cobra; TVPik consulta permisos (API) |
 | [docs/CREDENCIALES-DEMO-LOCAL.md](docs/CREDENCIALES-DEMO-LOCAL.md) | Usuarios `demo123` para pruebas |
 | [docs/HISTORIAL-CURSOR-WEBNU.md](docs/HISTORIAL-CURSOR-WEBNU.md) | Resumen del desarrollo con Cursor |
 | [.cursor/README.md](.cursor/README.md) | Workspace Cursor |

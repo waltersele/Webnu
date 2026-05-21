@@ -18,7 +18,7 @@ class ProductPolicy
             return false;
         }
 
-        return (int) $product->section->company->user_id === (int) $user->id;
+        return $product->section->company->canBeManagedBy($user);
     }
 
     public function delete(User $user, Product $product)

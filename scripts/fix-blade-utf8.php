@@ -5,11 +5,9 @@
  * Uso: php scripts/fix-blade-utf8.php
  */
 
-$files = [
-    __DIR__ . '/../resources/views/admin/sections/index.blade.php',
-    __DIR__ . '/../resources/views/admin/sections/partials/menu-modals.blade.php',
-    __DIR__ . '/../resources/views/admin/sections/partials/product-modal.blade.php',
-];
+$files = glob(__DIR__ . '/../resources/views/admin/**/*.blade.php') ?: [];
+$files = array_merge($files, glob(__DIR__ . '/../resources/views/admin/**/**/*.blade.php') ?: []);
+$files = array_unique($files);
 
 $replacements = [
     'secci?n' => 'sección',

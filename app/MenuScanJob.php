@@ -12,6 +12,12 @@ class MenuScanJob extends Model
     public const STATUS_IMPORTED = 'imported';
     public const STATUS_FAILED = 'failed';
 
+    /** Estados que consumen cupo de escaneo (IA procesó la carta correctamente). */
+    public static function billableStatuses(): array
+    {
+        return [self::STATUS_REVIEW, self::STATUS_IMPORTED];
+    }
+
     protected $fillable = [
         'company_id',
         'user_id',

@@ -10,17 +10,22 @@
         <span class="wn-onb__orb wn-onb__orb--2"></span>
     </div>
 
-    <header class="wn-onb__top">
-        <a href="{{ route('home') }}" class="wn-onb__logo">Webnu<span>.es</span></a>
-        <div class="wn-onb__plan-badge">
-            <i class="ri-gift-line"></i> {{ $planPresentation['label'] ?? ($plan['label'] ?? 'Gratis') }}
-            @if(!empty($planPresentation['trial_active']))
-                · {{ $planPresentation['trial_days_remaining'] }} {{ $planPresentation['trial_days_remaining'] === 1 ? 'día' : 'días' }} restantes
-            @elseif($scanLimit !== null)
-                · {{ $scansRemaining }} / {{ $scanLimit }} escaneos IA
-            @endif
-        </div>
-    </header>
+    <div class="wn-onb__top-bar">
+        <header class="wn-onb__top">
+            <a href="{{ route('home') }}" class="wn-onb__logo">Webnu<span>.es</span></a>
+            <div class="wn-onb__plan-badge">
+                <i class="ri-gift-line"></i> {{ $planPresentation['label'] ?? ($plan['label'] ?? 'Gratis') }}
+                @if(!empty($planPresentation['trial_active']))
+                    · {{ $planPresentation['trial_days_remaining'] }} {{ $planPresentation['trial_days_remaining'] === 1 ? 'día' : 'días' }} restantes
+                @elseif($scanLimit !== null)
+                    · {{ $scansRemaining }} / {{ $scanLimit }} escaneos IA
+                    @if(($scanPeriod ?? null) === 'monthly')
+                        este mes
+                    @endif
+                @endif
+            </div>
+        </header>
+    </div>
 
     <div class="wn-onb__progress" role="progressbar" aria-valuenow="{{ $step }}" aria-valuemin="1" aria-valuemax="{{ $maxStep }}">
         @for($i = 1; $i <= $maxStep; $i++)
@@ -28,7 +33,7 @@
         @endfor
     </div>
 
-    <main class="wn-onb__main">
+    <main class="wn-onb__main {{ $step === 3 ? 'wn-onb__main--wide' : '' }}">
         {{-- Paso 1: Bienvenida --}}
         <section class="wn-onb-step {{ $step === 1 ? 'is-active' : '' }}" data-onb-step="1">
             <div class="wn-onb-card wn-onb-card--hero">
@@ -68,24 +73,39 @@
         </section>
 
         {{-- Paso 3: Plantilla --}}
+        @php
+            $selectedTemplate = old('template', $company->template ?: 'lumiere');
+            $initialPreviewUrl = $templatePreviewUrls[$selectedTemplate] ?? $templatePreviewUrls['lumiere'] ?? route('see_menu', 'demo');
+        @endphp
         <section class="wn-onb-step {{ $step === 3 ? 'is-active' : '' }}" data-onb-step="3">
             <div class="wn-onb-card wn-onb-card--wide">
                 <span class="wn-onb-step-num">Paso 3 de {{ $maxStep }}</span>
                 <h2>Elige el estilo de tu carta</h2>
-                <p>Puedes cambiarlo después en el estudio visual.</p>
+                <p>Puedes cambiarlo después en el estudio visual. Selecciona un estilo y mira el ejemplo en vivo.</p>
                 <form method="POST" action="{{ route('admin.onboarding.update') }}" class="wn-onb-form" id="onb-template-form">
                     @csrf
                     <input type="hidden" name="step" value="3">
-                    <input type="hidden" name="template" id="onb-template-input" value="{{ old('template', $company->template ?: 'lumiere') }}">
-                    <div class="wn-onb-templates">
-                        @foreach($templates as $id => $tpl)
-                            <button type="button"
-                                class="wn-onb-template {{ ($company->template ?: 'lumiere') === $id ? 'is-selected' : '' }}"
-                                data-template="{{ $id }}">
-                                <img src="{{ asset($tpl['preview_image']) }}" alt="{{ $tpl['label'] }}">
-                                <span>{{ $tpl['label'] }}</span>
-                            </button>
-                        @endforeach
+                    <input type="hidden" name="template" id="onb-template-input" value="{{ $selectedTemplate }}">
+                    <div class="wn-onb-template-layout">
+                        <div class="wn-onb-templates" role="listbox" aria-label="Estilos de carta">
+                            @foreach($templates as $id => $tpl)
+                                <button type="button"
+                                    class="wn-onb-template {{ $selectedTemplate === $id ? 'is-selected' : '' }}"
+                                    data-template="{{ $id }}"
+                                    data-preview-url="{{ $templatePreviewUrls[$id] ?? $initialPreviewUrl }}"
+                                    aria-pressed="{{ $selectedTemplate === $id ? 'true' : 'false' }}">
+                                    <span class="wn-onb-template__label">{{ $tpl['label'] }}</span>
+                                </button>
+                            @endforeach
+                        </div>
+                        <div class="wn-onb-template-preview">
+                            <div class="wn-onb-template-preview__phone">
+                                <iframe id="onb-template-iframe" src="{{ $initialPreviewUrl }}" title="Vista previa de la carta" loading="lazy"></iframe>
+                            </div>
+                            <a id="onb-template-preview-link" href="{{ $initialPreviewUrl }}" target="_blank" rel="noopener" class="wn-onb-link">
+                                Abrir ejemplo en nueva pestaña <i class="ri-external-link-line"></i>
+                            </a>
+                        </div>
                     </div>
                     <button type="submit" class="wn-onb-btn wn-onb-btn--primary w-100">Continuar <i class="ri-arrow-right-line"></i></button>
                 </form>
@@ -158,9 +178,11 @@
                         <h3>Escaneo con IA</h3>
                         <p>Foto o PDF de tu carta actual. Detectamos platos y precios automáticamente.</p>
                         @if($scanLimit !== null)
-                            <span class="wn-onb-choice__badge">{{ $scansRemaining }} de {{ $scanLimit }} escaneos restantes</span>
+                            <span class="wn-onb-choice__badge">{{ $scansRemaining }} de {{ $scanLimit }} escaneos correctos
+                                @if(($scanPeriod ?? null) === 'monthly') este mes @endif
+                            </span>
                         @else
-                            <span class="wn-onb-choice__badge wn-onb-choice__badge--pro">Ilimitado en tu plan</span>
+                            <span class="wn-onb-choice__badge wn-onb-choice__badge--pro">Sin límite de escaneos</span>
                         @endif
                         @if($scansRemaining > 0 || $scanLimit === null)
                             <a href="{{ $menuScanUrl }}" class="wn-onb-btn wn-onb-btn--outline w-100">Escanear ahora</a>
@@ -208,6 +230,9 @@
                         <a href="{{ route('admin.qrgenerator', $company) }}" target="_blank" class="wn-onb-link">Descargar QR en PDF</a>
                     </div>
                 </div>
+                <div class="wn-onb-pwa mt-4">
+                    @include('admin.partials.pwa-install', ['variant' => 'compact'])
+                </div>
             </div>
         </section>
     </main>
@@ -235,11 +260,24 @@
 
 @push('scripts')
 <script>
+    var previewIframe = document.getElementById('onb-template-iframe');
+    var previewLink = document.getElementById('onb-template-preview-link');
     document.querySelectorAll('.wn-onb-template').forEach(function (btn) {
         btn.addEventListener('click', function () {
-            document.querySelectorAll('.wn-onb-template').forEach(function (b) { b.classList.remove('is-selected'); });
+            document.querySelectorAll('.wn-onb-template').forEach(function (b) {
+                b.classList.remove('is-selected');
+                b.setAttribute('aria-pressed', 'false');
+            });
             btn.classList.add('is-selected');
+            btn.setAttribute('aria-pressed', 'true');
             document.getElementById('onb-template-input').value = btn.getAttribute('data-template');
+            var url = btn.getAttribute('data-preview-url');
+            if (url && previewIframe) {
+                previewIframe.src = url;
+            }
+            if (url && previewLink) {
+                previewLink.href = url;
+            }
         });
     });
 </script>

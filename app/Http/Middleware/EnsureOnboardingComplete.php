@@ -25,7 +25,9 @@ class EnsureOnboardingComplete
             'admin.companies.languages',
             'admin.companies.languages.*',
             'admin.billing',
-            'admin.billing.*'
+            'admin.billing.*',
+            'admin.settings',
+            'admin.settings.*'
         )) {
             return $next($request);
         }

@@ -1,0 +1,455 @@
+/**
+ * Webnu admin shell — topbar + sidebar compacta (cliente)
+ */
+:root {
+  --wn-shell-bg: #f8fafc;
+  --wn-shell-surface: #ffffff;
+  --wn-shell-border: #e2e8f0;
+  --wn-shell-primary: #378add;
+  --wn-shell-primary-dark: #2563eb;
+  --wn-shell-primary-light: #e6f1fb;
+  --wn-shell-text: #0f172a;
+  --wn-shell-muted: #64748b;
+  --wn-shell-topbar-h: 56px;
+  --wn-shell-sidebar-w: 72px;
+}
+
+body.wn-shell-body {
+  background: var(--wn-shell-bg);
+  color: var(--wn-shell-text);
+  font-family: Inter, system-ui, -apple-system, sans-serif;
+  font-weight: 400;
+}
+
+body.wn-shell-body .layout-wrapper,
+body.wn-shell-body .layout-container,
+body.wn-shell-body .layout-page,
+body.wn-shell-body .content-wrapper {
+  all: unset;
+  display: contents;
+}
+
+.wn-shell-app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.wn-shell-topbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: var(--wn-shell-topbar-h);
+  background: var(--wn-shell-surface);
+  border-bottom: 0.5px solid var(--wn-shell-border);
+  display: flex;
+  align-items: center;
+  padding: 0 20px 0 calc(var(--wn-shell-sidebar-w) + 16px);
+  gap: 16px;
+  z-index: 110;
+}
+
+.wn-shell-topbar__logo {
+  position: fixed;
+  left: 0;
+  width: var(--wn-shell-sidebar-w);
+  height: var(--wn-shell-topbar-h);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--wn-shell-text);
+  text-decoration: none;
+  background: var(--wn-shell-surface);
+  border-bottom: 0.5px solid var(--wn-shell-border);
+  border-right: 0.5px solid var(--wn-shell-border);
+  z-index: 111;
+}
+
+.wn-shell-topbar__logo-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--wn-shell-primary);
+}
+
+.wn-shell-topbar__center {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  min-width: 0;
+}
+
+.wn-shell-business-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--wn-shell-primary-light);
+  color: var(--wn-shell-primary-dark);
+  font-size: 12px;
+  font-weight: 500;
+  padding: 4px 12px;
+  border-radius: 20px;
+  max-width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.wn-shell-business-pill__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #16a34a;
+  flex-shrink: 0;
+}
+
+.wn-shell-business-select {
+  border: 0.5px solid var(--wn-shell-border);
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 13px;
+  font-weight: 500;
+  max-width: 220px;
+  background: var(--wn-shell-surface);
+  color: var(--wn-shell-text);
+}
+
+.wn-shell-topbar__url {
+  font-size: 12px;
+  color: var(--wn-shell-muted);
+}
+
+.wn-shell-topbar__hint {
+  font-size: 13px;
+  color: var(--wn-shell-muted);
+}
+
+.wn-shell-topbar__right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-left: auto;
+}
+
+a.wn-shell-trial-badge:hover {
+  opacity: 0.9;
+}
+
+.wn-shell-trial-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: #fff7ed;
+  border: 1px solid #fed7aa;
+  color: #c2410c;
+  font-size: 11px;
+  font-weight: 500;
+  padding: 4px 10px;
+  border-radius: 20px;
+}
+
+.wn-shell-topbar__plan-btn {
+  font-size: 12px;
+  font-weight: 500;
+  color: #fff;
+  background: var(--wn-shell-primary);
+  padding: 7px 14px;
+  border-radius: 8px;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.wn-shell-topbar__plan-btn:hover {
+  background: var(--wn-shell-primary-dark);
+  color: #fff;
+}
+
+.wn-shell-topbar__menu-btn {
+  width: 40px;
+  height: 40px;
+  border: 0.5px solid var(--wn-shell-border);
+  border-radius: 8px;
+  background: var(--wn-shell-surface);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--wn-shell-text);
+  cursor: pointer;
+}
+
+.wn-shell-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: none;
+  background: var(--wn-shell-primary);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.wn-shell-sidebar {
+  position: fixed;
+  left: 0;
+  top: var(--wn-shell-topbar-h);
+  bottom: 0;
+  width: var(--wn-shell-sidebar-w);
+  background: var(--wn-shell-surface);
+  border-right: 0.5px solid var(--wn-shell-border);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 12px 0;
+  gap: 4px;
+  z-index: 100;
+}
+
+.wn-shell-sidebar__spacer {
+  flex: 1;
+  min-height: 8px;
+}
+
+.wn-shell-nav {
+  width: 52px;
+  min-height: 52px;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  text-decoration: none;
+  color: var(--wn-shell-muted);
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.wn-shell-nav i {
+  font-size: 20px;
+}
+
+.wn-shell-nav__label {
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+}
+
+.wn-shell-nav:hover {
+  background: var(--wn-shell-bg);
+  color: var(--wn-shell-text);
+}
+
+.wn-shell-nav.is-active {
+  background: var(--wn-shell-primary-light);
+  color: var(--wn-shell-primary);
+}
+
+.wn-shell-nav.is-disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.wn-shell-main {
+  margin-top: var(--wn-shell-topbar-h);
+  margin-left: var(--wn-shell-sidebar-w);
+  padding: 28px 32px 100px;
+  flex: 1;
+  min-height: calc(100vh - var(--wn-shell-topbar-h));
+  width: calc(100% - var(--wn-shell-sidebar-w));
+  max-width: none;
+  box-sizing: border-box;
+}
+
+.wn-shell-main--dashboard .wn-dash {
+  max-width: 960px;
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.wn-shell-main:not(.wn-shell-main--dashboard) > .row,
+.wn-shell-main:not(.wn-shell-main--dashboard) > .wn-shell-page-header {
+  max-width: 1200px;
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.wn-shell-main .container-xxl {
+  max-width: 100%;
+  padding: 0;
+}
+
+.wn-shell-page-header {
+  margin-bottom: 24px;
+}
+
+.wn-shell-page-header h1 {
+  font-size: 1.25rem;
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+
+.wn-shell-page-header p {
+  font-size: 14px;
+  color: var(--wn-shell-muted);
+  margin: 0;
+}
+
+.wn-shell-offcanvas .wn-shell-sidebar {
+  position: static;
+  width: 100%;
+  border: none;
+  flex-direction: column;
+  align-items: stretch;
+  padding: 8px;
+  display: flex !important;
+}
+
+.wn-shell-offcanvas .wn-shell-nav {
+  width: 100%;
+  flex-direction: row;
+  justify-content: flex-start;
+  padding: 12px 16px;
+  gap: 12px;
+  min-height: auto;
+}
+
+.wn-shell-offcanvas .wn-shell-nav__label {
+  font-size: 14px;
+}
+
+.wn-shell-offcanvas .wn-shell-sidebar__spacer {
+  display: none;
+}
+
+.wn-shell-offcanvas-nav {
+  display: flex;
+  flex-direction: column;
+  padding: 8px;
+  gap: 4px;
+}
+
+.wn-shell-offcanvas-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: 10px;
+  text-decoration: none;
+  color: var(--wn-shell-text);
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.wn-shell-offcanvas-link i {
+  font-size: 22px;
+  color: var(--wn-shell-muted);
+}
+
+.wn-shell-offcanvas-link:hover {
+  background: var(--wn-shell-bg);
+  color: var(--wn-shell-text);
+}
+
+.wn-shell-offcanvas-link.is-active {
+  background: var(--wn-shell-primary-light);
+  color: var(--wn-shell-primary);
+}
+
+.wn-shell-offcanvas-link.is-active i {
+  color: var(--wn-shell-primary);
+}
+
+.wn-shell-offcanvas-link.is-disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+@media (max-width: 991.98px) {
+  .wn-shell-topbar {
+    padding-left: 16px;
+  }
+
+  .wn-shell-topbar__logo {
+    position: static;
+    width: auto;
+    height: auto;
+    border: none;
+    padding: 0;
+    margin-right: 4px;
+  }
+
+  /* Solo ocultar la barra lateral fija; la del offcanvas sigue visible */
+  .wn-shell-app > .wn-shell-sidebar {
+    display: none;
+  }
+
+  .wn-shell-offcanvas .wn-shell-sidebar {
+    display: flex !important;
+  }
+
+  .wn-shell-main {
+    margin-left: 0;
+    width: 100%;
+    padding: 20px 16px 88px;
+  }
+}
+
+@media (min-width: 992px) {
+  .wn-shell-topbar__menu-btn {
+    display: none !important;
+  }
+}
+
+/* Bottom nav (móvil) — reactivar frente a webnu-theme.css */
+body.wn-shell-body .webnu-bottomnav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  max-width: none;
+  transform: none;
+  height: 64px;
+  background: var(--wn-shell-surface);
+  border-top: 0.5px solid var(--wn-shell-border);
+  display: flex !important;
+  align-items: stretch;
+  justify-content: space-around;
+  z-index: 200;
+  padding-bottom: env(safe-area-inset-bottom, 0);
+}
+
+body.wn-shell-body .webnu-bottomnav__item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--wn-shell-muted);
+  text-decoration: none;
+  padding: 8px 4px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+body.wn-shell-body .webnu-bottomnav__item i {
+  font-size: 20px;
+}
+
+body.wn-shell-body .webnu-bottomnav__item.is-active {
+  color: var(--wn-shell-primary);
+}

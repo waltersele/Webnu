@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Company;
+use App\Http\Controllers\Concerns\PreparesLandingPage;
 use App\PlatformSetting;
 use App\Services\MenuService;
 use Illuminate\Http\Request;
@@ -11,11 +12,20 @@ use Illuminate\Support\Facades\Validator;
 
 class PagesController extends Controller
 {
-    public function index()
+    use PreparesLandingPage;
+
+    public function index(Request $request)
     {
-        return view('landing-preview', [
-            'contactPublicEmail' => PlatformSetting::contactPublicEmail(),
-        ]);
+        $locale = $this->resolveLandingLocale($request);
+        $data = array_merge(
+            $this->landingViewData($request),
+            ['contactPublicEmail' => PlatformSetting::contactPublicEmail()]
+        );
+
+        $response = response()->view('landing-preview', $data);
+        $cookieName = config('landing.cookie_name', 'webnu_landing_lang');
+
+        return $response->cookie($cookieName, $locale, 60 * 24 * 365, null, null, false, false);
     }
 
     public function landingPreview()
@@ -27,7 +37,11 @@ class PagesController extends Controller
     {
         $company = Company::where('slug', $companySlug)->with('user')->first();
 
-        if (!$company) {
+        if (! $company) {
+            abort(404);
+        }
+
+        if (! $company->enabled && ! $request->boolean('studio_preview') && ! $request->boolean('sales_demo')) {
             abort(404);
         }
 
@@ -47,8 +61,9 @@ class PagesController extends Controller
             $sections = $menuService->sectionsForCompany($company, $menuLocale);
             $viewName = $menuService->themeViewName($company);
             $menuLocaleService = app(\App\Services\MenuLocaleService::class);
+            $dailyHighlights = $menuService->dailyHighlightsForCompany($company, $menuLocale);
 
-            return view($viewName, compact('company', 'sections', 'menuLocale', 'menuLocaleService'));
+            return view($viewName, compact('company', 'sections', 'menuLocale', 'menuLocaleService', 'dailyHighlights'));
         }
 
         return view('menu_pdf', compact('company'));
@@ -56,7 +71,7 @@ class PagesController extends Controller
 
     protected function recordMenuView(Company $company, Request $request): void
     {
-        if ($request->boolean('studio_preview')) {
+        if ($request->boolean('studio_preview') || $request->boolean('sales_demo')) {
             return;
         }
 

@@ -38,6 +38,20 @@
                         <button type="submit" class="btn btn-sm btn-outline-primary">Asignar super-admin</button>
                     </form>
                 @endif
+                <hr class="my-3">
+                <dt>Comercial</dt>
+                <dd>{{ $user->isSalesRep() ? 'Sí' : 'No' }}</dd>
+                @if (! $user->isSalesRep())
+                    <form method="POST" action="{{ route('admin.platform.users.grant-sales-rep', $user) }}" class="mt-2">
+                        @csrf
+                        <button type="submit" class="btn btn-sm btn-outline-success">Asignar rol comercial</button>
+                    </form>
+                @else
+                    <form method="POST" action="{{ route('admin.platform.users.revoke-sales-rep', $user) }}" class="mt-2" onsubmit="return confirm('¿Quitar acceso comercial?');">
+                        @csrf
+                        <button type="submit" class="btn btn-sm btn-outline-danger">Quitar rol comercial</button>
+                    </form>
+                @endif
             </div>
         </div>
     </div>

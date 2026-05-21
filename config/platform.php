@@ -13,8 +13,43 @@ return [
     ],
 
     'contact' => [
-        'leads_email' => 'info@webnu.es',
-        'suggestions_email' => 'hola@webnu.es',
-        'public_email' => 'hola@webnu.es',
+        'leads_email' => 'hello@webnu.es',
+        'suggestions_email' => 'hello@webnu.es',
+        'public_email' => 'hello@webnu.es',
     ],
+
+    /*
+    | Rutas relativas a public/ — kit de marca Webnu.
+    | isotipo: solo símbolo · logo: wordmark completo
+    */
+    'brand' => [
+        'isotipo' => 'adminlte/img/isotipo-color.png',
+        'logo' => 'adminlte/img/logo-color.png',
+        'favicon' => 'adminlte/img/isotipo-color.png',
+        'isotipo_color' => 'adminlte/img/isotipo-color.png',
+        'isotipo_white' => 'adminlte/img/isotipo-white.png',
+        'isotipo_black' => 'adminlte/img/isotipo-black.png',
+        'logo_color' => 'adminlte/img/logo-color.png',
+        'logo_white' => 'adminlte/img/logo-white.png',
+        'logo_black' => 'adminlte/img/logo-black.png',
+    ],
+
+    /*
+    | Emails con acceso al panel /admin/platform (además del rol super-admin).
+    */
+    'super_admin_emails' => array_values(array_filter(array_map('trim', explode(',', (string) env('SUPER_ADMIN_EMAILS', ''))))),
+
+    /*
+    | MRR estimado por suscripción Stripe (nombres en config/billing.php).
+    | Mensual: planqrmensual · Anual: planqranual
+    */
+    'mrr' => [
+        'monthly_eur' => (float) env('PLATFORM_MRR_MONTHLY_EUR', 9.90),
+        'yearly_eur' => (float) env('PLATFORM_MRR_YEARLY_EUR', 99),
+    ],
+
+    'stripe_dashboard_customer_url' => env(
+        'STRIPE_DASHBOARD_CUSTOMER_URL',
+        'https://dashboard.stripe.com/test/customers'
+    ),
 ];

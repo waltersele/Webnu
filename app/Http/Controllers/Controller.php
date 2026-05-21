@@ -28,17 +28,28 @@ class Controller extends BaseController
                     [
                         'plan_key' => $plans->planKey($this->user),
                         'plan_label' => $plans->tier($this->user)['label'] ?? 'Gratis',
-                        'billing_url' => route('admin.billing'),
+                        'billing_url' => route('admin.settings'),
                     ]
                 ));
 
-                if(Cookie::get('selected_company')){
-                    $value = Cookie::get('selected_company');
-                    View::share('selected_company', $value);
+                $userId = auth()->id();
+                $companies = Company::where('user_id', $userId)->orderBy('name')->get();
 
-                    $userId = auth()->id();
-                    $companies = Company::where('user_id', $userId)->orderBy('name')->get();
-                    View::share('available_companies', $companies);
+                $selectedId = Cookie::get('selected_company');
+                $selectedCompany = $selectedId && $companies->contains('id', (int) $selectedId)
+                    ? $companies->firstWhere('id', (int) $selectedId)
+                    : ($companies->isNotEmpty() ? $companies->first() : null);
+                View::share('upgradeTriggers', app(\App\Services\UpgradeTriggerService::class)
+                    ->contextFor($this->user, $selectedCompany, $request));
+                View::share('available_companies', $companies);
+                View::share('planPresentation', $plans->planPresentation($this->user));
+
+                if ($selectedId && $companies->contains('id', (int) $selectedId)) {
+                    View::share('selected_company', (int) $selectedId);
+                } elseif ($companies->isNotEmpty()) {
+                    $firstId = (int) $companies->first()->id;
+                    Cookie::queue(Cookie::forever('selected_company', $firstId));
+                    View::share('selected_company', $firstId);
                 }
             }
 

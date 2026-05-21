@@ -113,4 +113,54 @@ class PlatformSettingsService
             PlatformSetting::setValue($field, trim((string) $data[$field]));
         }
     }
+
+    public function salesSettingsForForm(): array
+    {
+        return [
+            'sales_handoff_plan_key' => PlatformSetting::salesHandoffPlanKey(),
+            'sales_handoff_trial_days' => PlatformSetting::salesHandoffTrialDays(),
+            'sales_demo_max_photo_products' => PlatformSetting::salesDemoMaxPhotoProducts(),
+        ];
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    public function availablePlanKeys(): array
+    {
+        return array_keys(config('plans.tiers', []));
+    }
+
+    /**
+     * Planes válidos para cierre comercial (sin plan gratuito).
+     *
+     * @return array<int, string>
+     */
+    public function handoffPlanKeys(): array
+    {
+        return array_values(array_filter($this->availablePlanKeys(), function ($key) {
+            return $key !== 'free';
+        }));
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     */
+    public function updateSales(array $data): void
+    {
+        if (array_key_exists('sales_handoff_plan_key', $data)) {
+            $key = trim((string) $data['sales_handoff_plan_key']);
+            if (in_array($key, $this->availablePlanKeys(), true)) {
+                PlatformSetting::setValue('sales_handoff_plan_key', $key);
+            }
+        }
+
+        if (array_key_exists('sales_handoff_trial_days', $data)) {
+            PlatformSetting::setValue('sales_handoff_trial_days', (string) max(1, (int) $data['sales_handoff_trial_days']));
+        }
+
+        if (array_key_exists('sales_demo_max_photo_products', $data)) {
+            PlatformSetting::setValue('sales_demo_max_photo_products', (string) max(1, (int) $data['sales_demo_max_photo_products']));
+        }
+    }
 }

@@ -17,9 +17,18 @@ class Product extends Model
         'weight_sale',
         'weight_unit_label',
         'highlight',
+        'sales_demo_highlight',
         'order',
         'enabled',
         'section_id',
+    ];
+
+    protected $casts = [
+        'sales_demo_highlight' => 'boolean',
+        'highlight' => 'boolean',
+        'enabled' => 'boolean',
+        'individual_sale' => 'boolean',
+        'weight_sale' => 'boolean',
     ];
 
     public function section()

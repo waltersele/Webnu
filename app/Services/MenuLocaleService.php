@@ -19,7 +19,7 @@ class MenuLocaleService
             }
         }
 
-        if (! $request->has('lang') && ! $request->boolean('studio_preview')) {
+        if (! $request->has('lang') && ! $request->boolean('studio_preview') && ! $request->boolean('sales_demo')) {
             $preferred = $this->preferredLocaleFromRequest($request, $allowed);
             if ($preferred) {
                 return $preferred;

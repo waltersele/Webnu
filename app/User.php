@@ -20,8 +20,10 @@ class User extends Authenticatable
      * @var array
      */
     protected $fillable = [
-        'name', 'email', 'password', 'plan', 'onboarding_step', 'onboarding_completed_at',
-        'api_token', 'stripe_id', 'card_brand', 'card_last_four', 'trial_ends_at',
+        'name', 'email', 'password', 'plan', 'trial_plan_key', 'onboarding_step', 'onboarding_completed_at',
+        'api_token', 'tvpik_api_token', 'tvpik_connected_at', 'tvpik_org_id',
+        'stripe_id', 'card_brand', 'card_last_four', 'trial_ends_at',
+        'phone', 'legal_name', 'tax_id', 'billing_address', 'billing_postal_code', 'billing_city', 'billing_country',
     ];
 
     /**
@@ -42,7 +44,36 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'trial_ends_at' => 'datetime',
         'onboarding_completed_at' => 'datetime',
+        'tvpik_connected_at' => 'datetime',
     ];
+
+    public function setTvpikApiTokenAttribute(?string $value): void
+    {
+        $this->attributes['tvpik_api_token'] = $value ? encrypt($value) : null;
+    }
+
+    public function plainTvpikApiToken(): ?string
+    {
+        if (empty($this->attributes['tvpik_api_token'])) {
+            return null;
+        }
+
+        try {
+            return decrypt($this->attributes['tvpik_api_token']);
+        } catch (\Throwable $e) {
+            return null;
+        }
+    }
+
+    public function isTvpikConnected(): bool
+    {
+        return $this->tvpik_connected_at !== null && $this->plainTvpikApiToken() !== null;
+    }
+
+    public function tvpikScreenLinks()
+    {
+        return $this->hasMany(TvpikScreenLink::class);
+    }
 
     //Sobrescribimos el metodo de envio de email para que coja formato a nuestro gusto
     public function sendPasswordResetNotification($token)
@@ -65,13 +96,23 @@ class User extends Authenticatable
         return $this->hasRole('super-admin');
     }
 
+    public function isSalesRep(): bool
+    {
+        return $this->hasRole('sales-rep');
+    }
+
+    public function salesHandoffs()
+    {
+        return $this->hasMany(SalesHandoff::class, 'sales_rep_user_id');
+    }
+
     public function hasActiveSubscription(): bool
     {
         if ($this->onGenericTrial()) {
             return true;
         }
 
-        $names = array_values(config('platform.subscription_names', []));
+        $names = array_values(config('billing.subscription_names', []));
         foreach ($names as $name) {
             if ($this->subscribed($name)) {
                 return true;
@@ -88,7 +129,7 @@ class User extends Authenticatable
 
     public function primarySubscription()
     {
-        $names = array_values(config('platform.subscription_names', []));
+        $names = array_values(config('billing.subscription_names', []));
         foreach ($names as $name) {
             $subscription = $this->subscription($name);
             if ($subscription) {

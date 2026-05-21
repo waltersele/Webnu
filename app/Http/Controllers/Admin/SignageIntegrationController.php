@@ -34,7 +34,7 @@ class SignageIntegrationController extends Controller
         $user->save();
 
         return redirect()
-            ->route('admin.integrations.index')
+            ->route('admin.tvpik.index')
             ->with('flash', 'Token de API regenerado. Actualízalo en tus integraciones conectadas.');
     }
 }

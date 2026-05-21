@@ -1,76 +1,50 @@
 @php
+    $hasCompany = !empty($selected_company);
+    $companyId = $hasCompany ? (int) $selected_company : null;
     $currentCompany = null;
-    if (!empty($selected_company) && !empty($available_companies)) {
-        $currentCompany = $available_companies->firstWhere('id', (int) $selected_company);
+    if ($hasCompany && !empty($available_companies)) {
+        $currentCompany = $available_companies->firstWhere('id', $companyId);
     }
+
+    $businessUrl = $hasCompany && $currentCompany
+        ? route('admin.companies.edit', ['company' => $currentCompany, 'step' => 'identity'])
+        : route('admin.companies.index');
+
+    $qrUrl = $hasCompany && $currentCompany
+        ? route('admin.qrgenerator', $currentCompany)
+        : route('admin.companies.index');
+
+    $cartaUrl = $hasCompany
+        ? route('admin.sections.index')
+        : route('admin.companies.index');
+
+    $navItems = [
+        ['key' => 'home', 'label' => 'Inicio', 'icon' => 'ti-home', 'url' => route('admin.dashboard'), 'active' => request()->routeIs('admin.dashboard'), 'enabled' => true],
+        ['key' => 'menu', 'label' => 'Carta', 'icon' => 'ti-tools-kitchen-2', 'url' => $cartaUrl, 'active' => request()->is('admin/sections*') || request()->is('admin/products*') || request()->is('admin/menu-scan*'), 'enabled' => $hasCompany],
+        ['key' => 'qr', 'label' => 'QR', 'icon' => 'ti-qrcode', 'url' => $qrUrl, 'active' => request()->is('admin/qrgenerator*'), 'enabled' => $hasCompany],
+        ['key' => 'tv', 'label' => 'TV', 'icon' => 'ti-device-tv', 'url' => route('admin.tvpik.index'), 'active' => request()->is('admin/tvpik*') || request()->is('admin/integrations*') || request()->is('admin/signage*'), 'enabled' => true],
+        ['key' => 'business', 'label' => 'Mi negocio', 'icon' => 'ti-settings', 'url' => $businessUrl, 'active' => request()->is('admin/companies*') && !request()->routeIs('admin.dashboard'), 'enabled' => true, 'bottom' => true],
+    ];
 @endphp
-<aside id="webnu-sidebar" class="webnu-sidebar">
-    <a href="{{ route('admin.dashboard') }}" class="webnu-sidebar__brand">
-        <img src="{{ asset('adminlte/img/webnu.png') }}" alt="Webnu">
-        <div class="webnu-sidebar__brand-text">
-            <span class="webnu-sidebar__brand-name">Webnu</span>
-            <span class="webnu-sidebar__brand-sub">Panel</span>
-        </div>
-    </a>
 
-    <nav class="webnu-sidebar__nav">
-        <div class="webnu-sidebar__group">
-            <span class="webnu-sidebar__group-label">Tu cuenta</span>
-            <a href="{{ route('admin.dashboard') }}" class="webnu-nav-item {{ request()->routeIs('admin.dashboard') ? 'is-active' : '' }}">
-                <i class="fas fa-home"></i>
-                <span>Inicio</span>
-            </a>
-            <a href="{{ route('admin.companies.index') }}" class="webnu-nav-item {{ request()->is('admin/companies*') ? 'is-active' : '' }}">
-                <i class="fas fa-store"></i>
-                <span>Negocios</span>
-            </a>
-        </div>
-
-        @if (!empty($selected_company) && !empty($available_companies))
-        <div class="webnu-sidebar__group">
-            <span class="webnu-sidebar__group-label">Negocio actual</span>
-            <div class="webnu-sidebar__company">
-                <label for="company_selection">Establecimiento</label>
-                <form method="POST" action="{{ route('admin.companies.changecompany', '0') }}" id="company-selection-form">
-                    @csrf
-                    <select name="company_selection" id="company_selection">
-                        @foreach ($available_companies as $company)
-                            <option value="{{ $company->id }}" {{ $company->id == $selected_company ? 'selected' : '' }}>{{ $company->name }}</option>
-                        @endforeach
-                    </select>
-                </form>
-            </div>
-            <a href="{{ route('admin.sections.index') }}" class="webnu-nav-item {{ request()->is('admin/sections*') ? 'is-active' : '' }}">
-                <i class="fas fa-utensils"></i>
-                <span>Carta</span>
-            </a>
-            @if ($currentCompany)
-            <a href="{{ route('see_menu', $currentCompany->slug) }}" class="webnu-nav-item" target="_blank" rel="noopener">
-                <i class="fas fa-external-link-alt"></i>
-                <span>Ver carta pública</span>
-            </a>
-            @endif
-        </div>
+<nav class="wn-shell-sidebar" aria-label="Navegación principal">
+    @foreach($navItems as $item)
+        @if(!empty($item['bottom']))
+            <div class="wn-shell-sidebar__spacer" aria-hidden="true"></div>
         @endif
-
-        <div class="webnu-sidebar__group">
-            <span class="webnu-sidebar__group-label">Conectar</span>
-            <a href="{{ route('admin.integrations.index') }}" class="webnu-nav-item {{ request()->is('admin/integrations*') || request()->is('admin/signage*') ? 'is-active' : '' }}">
-                <i class="fas fa-plug"></i>
-                <span>Integraciones</span>
+        @if($item['enabled'])
+            <a href="{{ $item['url'] }}"
+               class="wn-shell-nav {{ $item['active'] ? 'is-active' : '' }}"
+               aria-label="{{ $item['label'] }}"
+               @if($item['active']) aria-current="page" @endif>
+                <i class="ti {{ $item['icon'] }}"></i>
+                <span class="wn-shell-nav__label">{{ $item['label'] }}</span>
             </a>
-        </div>
-    </nav>
-
-    <div class="webnu-sidebar__footer">
-        <div class="mb-2 text-truncate">{{ auth()->user()->name }}</div>
-        <form method="POST" action="{{ route('logout') }}">
-            @csrf
-            <button type="submit" class="webnu-nav-item w-100 border-0 bg-transparent text-left">
-                <i class="fas fa-sign-out-alt"></i>
-                <span>Cerrar sesión</span>
-            </button>
-        </form>
-    </div>
-</aside>
-
+        @else
+            <span class="wn-shell-nav is-disabled" title="Crea un negocio primero" aria-disabled="true">
+                <i class="ti {{ $item['icon'] }}"></i>
+                <span class="wn-shell-nav__label">{{ $item['label'] }}</span>
+            </span>
+        @endif
+    @endforeach
+</nav>

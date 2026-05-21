@@ -60,9 +60,17 @@
                     @php $fontValue = old('theme_' . $fontKey, $themeSettings[$fontKey] ?? config('company_templates.font_defaults.' . $fontKey, 'inter')); @endphp
                     <div class="col-md-6">
                         <label class="form-label small mb-1" for="theme_{{ $fontKey }}">{{ $fontLabel }}</label>
-                        <select name="theme_{{ $fontKey }}" id="theme_{{ $fontKey }}" class="form-select form-select-sm theme-font-select">
+                        <select name="theme_{{ $fontKey }}" id="theme_{{ $fontKey }}" class="form-select form-select-sm theme-font-select" data-font-role="{{ $fontKey }}">
                             @foreach($fonts as $fontId => $fontMeta)
-                                <option value="{{ $fontId }}" {{ $fontValue === $fontId ? 'selected' : '' }}>{{ $fontMeta['label'] }}</option>
+                                @php
+                                    $fontFamily = ($fontMeta['family'] ?? 'Inter') . ', ' . ($fontMeta['category'] ?? 'sans-serif');
+                                @endphp
+                                <option value="{{ $fontId }}"
+                                    {{ $fontValue === $fontId ? 'selected' : '' }}
+                                    style="font-family: {{ $fontFamily }};"
+                                    data-font-family="{{ $fontFamily }}">
+                                    {{ $fontMeta['label'] }}
+                                </option>
                             @endforeach
                         </select>
                     </div>

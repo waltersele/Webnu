@@ -4,7 +4,7 @@
     $formId = $isAdd ? 'modal-add-product-form' : 'modal-modify-product-form';
     $action = $isAdd ? route('admin.products.store') : route('admin.products.update');
     $title = $isAdd ? 'Nuevo plato' : 'Editar plato';
-    $submitLabel = $isAdd ? 'Añadir plato' : 'Guardar cambios';
+    $submitLabel = $isAdd ? 'AÃ±adir plato' : 'Guardar cambios';
     $enabledName = $isAdd ? 'product_add_enabled' : 'product_modify_enabled';
     $enabledId = $isAdd ? 'product-add-enabled-switch' : 'product-modify-enabled';
 @endphp

@@ -159,10 +159,28 @@ if (! is_array(config('platform.super_admin_emails')) || count(config('platform.
 $seeder = new PlatformRolesSeeder();
 $seeder->run();
 
+$salesRep = User::updateOrCreate(
+    ['email' => 'comercial@webnu.local'],
+    [
+        'name' => 'Comercial Demo',
+        'password' => $password,
+        'plan' => 'free',
+    ]
+);
+if (! $salesRep->hasRole('sales-rep')) {
+    $salesRep->assignRole('sales-rep');
+}
+if ($salesRep->hasRole('super-admin')) {
+    $salesRep->removeRole('super-admin');
+}
+
 echo "\n";
 echo "=== Datos de prueba — panel plataforma ===\n\n";
 echo "URL:     http://127.0.0.1:8000/admin\n";
 echo "Login:   demo@webnu.local / demo123  (superadmin → menú Plataforma)\n\n";
+echo "Comercial (portal visitas): comercial@webnu.local / demo123\n";
+echo "  Login:     http://127.0.0.1:8000/comercial/login\n";
+echo "  Gestión:   http://127.0.0.1:8000/admin/platform/comercial\n\n";
 echo "Otros clientes (contraseña demo123 para todos):\n";
 echo "  maria@webnu.local   — suscripción ACTIVA (mensual)\n";
 echo "  jose@webnu.local    — suscripción ACTIVA (anual), 2 negocios\n";

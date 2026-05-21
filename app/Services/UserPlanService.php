@@ -16,7 +16,7 @@ class UserPlanService
         }
 
         if ($user->onGenericTrial()) {
-            $trialTier = config('plans.trial_tier', 'plus');
+            $trialTier = $user->trial_plan_key ?: config('plans.trial_tier', 'plus');
             if ($this->tierExists($trialTier)) {
                 return $trialTier;
             }
@@ -56,9 +56,23 @@ class UserPlanService
         return $limit === null ? null : (int) $limit;
     }
 
+    public function menuScanPeriod(User $user): ?string
+    {
+        $period = $this->tier($user)['menu_scans_period'] ?? null;
+
+        return $period === null || $period === '' ? null : (string) $period;
+    }
+
     public function menuScansUsed(User $user): int
     {
-        return (int) MenuScanJob::where('user_id', $user->id)->count();
+        $query = MenuScanJob::where('user_id', $user->id)
+            ->whereIn('status', MenuScanJob::billableStatuses());
+
+        if ($this->menuScanPeriod($user) === 'monthly') {
+            $query->where('created_at', '>=', now()->startOfMonth());
+        }
+
+        return (int) $query->count();
     }
 
     public function menuScansRemaining(User $user): ?int
@@ -71,8 +85,12 @@ class UserPlanService
         return max(0, $limit - $this->menuScansUsed($user));
     }
 
-    public function canUseMenuScan(User $user): bool
+    public function canUseMenuScan(User $user, ?Company $company = null): bool
     {
+        if ($this->canBypassMenuScanLimits($user, $company)) {
+            return true;
+        }
+
         if ($user->isSuperAdmin()) {
             return true;
         }
@@ -84,6 +102,16 @@ class UserPlanService
         $remaining = $this->menuScansRemaining($user);
 
         return $remaining === null || $remaining > 0;
+    }
+
+    public function canBypassMenuScanLimits(User $user, ?Company $company = null): bool
+    {
+        if (! $company || ! $user->isSalesRep()) {
+            return false;
+        }
+
+        return $company->isActiveSalesLead()
+            && (int) $company->sales_rep_user_id === (int) $user->id;
     }
 
     public function canUseVideos(User $user): bool
@@ -118,7 +146,9 @@ class UserPlanService
             return true;
         }
 
-        return Company::where('user_id', $user->id)->count() < $max;
+        return Company::where('user_id', $user->id)
+            ->countsTowardPlanLimit()
+            ->count() < $max;
     }
 
     public function assertCanCreateCompany(User $user): void
@@ -133,16 +163,28 @@ class UserPlanService
         ]);
     }
 
-    public function assertCanUseMenuScan(User $user): void
+    public function assertCanUseMenuScan(User $user, ?Company $company = null): void
     {
-        if ($this->canUseMenuScan($user)) {
+        if ($this->canUseMenuScan($user, $company)) {
             return;
         }
 
         $remaining = $this->menuScansRemaining($user);
         if ($remaining === 0) {
+            $key = $this->planKey($user);
+            if ($key === 'free') {
+                throw ValidationException::withMessages([
+                    'files' => 'Has usado tu escaneo IA correcto del plan Gratis. Pásate a Plus (9,90 €/mes) para más escaneos.',
+                ]);
+            }
+            if ($key === 'plus') {
+                throw ValidationException::withMessages([
+                    'files' => 'Has usado tus 10 escaneos IA correctos de este mes en Plus. El cupo se renueva el día 1.',
+                ]);
+            }
+
             throw ValidationException::withMessages([
-                'files' => 'Has usado tus 5 escaneos IA del plan Gratis. Pásate a Plus (9,90 €/mes) para escaneos ilimitados.',
+                'files' => 'Has alcanzado el límite de escaneos IA de tu plan.',
             ]);
         }
 
@@ -225,6 +267,7 @@ class UserPlanService
             'trial_expired' => false,
             'trial_days_remaining' => null,
             'trial_ends_at' => null,
+            'trial_ends_at_formatted' => null,
         ];
 
         if ($user->isSuperAdmin()) {
@@ -234,6 +277,9 @@ class UserPlanService
         if ($user->onGenericTrial()) {
             $presentation['trial_active'] = true;
             $presentation['trial_ends_at'] = $user->trial_ends_at;
+            $presentation['trial_ends_at_formatted'] = $user->trial_ends_at
+                ? $user->trial_ends_at->format('d/m/Y')
+                : null;
             $presentation['trial_days_remaining'] = $user->trial_ends_at
                 ? max(0, (int) now()->diffInDays($user->trial_ends_at, false))
                 : null;
@@ -258,6 +304,66 @@ class UserPlanService
             'tvpik' => $this->canUseTvpik($user),
             'menu_scan' => $this->canUseMenuScan($user),
             'multi_company' => $this->maxCompanies($user) === null || $this->maxCompanies($user) > 1,
+        ];
+    }
+
+    /**
+     * Payload para integraciones (TVPik, signage). Webnu es la fuente de verdad de facturación.
+     *
+     * @return array<string, mixed>
+     */
+    public function signageEntitlements(User $user): array
+    {
+        $planKey = $this->planKey($user);
+        $tier = $this->tier($user);
+        $presentation = $this->planPresentation($user);
+        $features = $this->featureFlags($user);
+
+        $billingSource = 'manual';
+        if ($user->isSuperAdmin()) {
+            $billingSource = 'superadmin';
+        } elseif ($user->onGenericTrial()) {
+            $billingSource = 'trial';
+        } elseif ($user->hasActiveSubscription()) {
+            $billingSource = 'stripe';
+        }
+
+        return [
+            'api_version' => config('digital_signage.api_version', '1.0'),
+            'billing' => [
+                'owner' => 'webnu',
+                'source' => $billingSource,
+                'upgrade_url' => url('/admin/settings') . '#plan',
+                'portal_available' => $user->hasActiveSubscription(),
+            ],
+            'plan' => [
+                'key' => $planKey,
+                'label' => $presentation['label'],
+                'price_label' => $tier['price_label'] ?? null,
+                'trial_active' => $presentation['trial_active'],
+                'trial_expired' => $presentation['trial_expired'],
+                'trial_ends_at' => $presentation['trial_ends_at']
+                    ? $presentation['trial_ends_at']->toIso8601String()
+                    : null,
+            ],
+            'features' => [
+                'tvpik' => $features['tvpik'],
+                'videos' => $features['videos'],
+                'translation' => $features['translation'],
+                'menu_scan' => $features['menu_scan'],
+                'multi_company' => $features['multi_company'],
+            ],
+            'limits' => [
+                'max_companies' => $this->maxCompanies($user),
+                'menu_scans_remaining' => $this->menuScansRemaining($user),
+                'translation_max_locales' => $this->maxTranslationLocales($user),
+                'tvpik_max_screens' => $features['tvpik'] ? null : 0,
+            ],
+            'required_plan_for' => [
+                'tvpik' => $this->requiredPlanLabel('tvpik'),
+                'videos' => $this->requiredPlanLabel('videos'),
+                'translation' => $this->requiredPlanLabel('translation'),
+            ],
         ];
     }
 

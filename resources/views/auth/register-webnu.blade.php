@@ -11,7 +11,9 @@
 @endphp
 
 <nav class="flex justify-between items-center w-full px-margin-mobile md:px-gutter max-w-container-max mx-auto h-20 border-b border-border-subtle">
-    <a href="{{ $homeUrl }}" class="text-headline-md font-headline font-extrabold text-primary">Webnu.es</a>
+    <a href="{{ $homeUrl }}" class="inline-flex items-center" title="Webnu">
+        @include('partials.brand-logo', ['brandKey' => 'logo', 'brandClass' => 'landing-brand-logo'])
+    </a>
     <a href="{{ $loginUrl }}" class="text-label-md text-text-muted hover:text-primary transition-colors">¿Ya tienes cuenta? Inicia sesión</a>
 </nav>
 

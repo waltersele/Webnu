@@ -14,39 +14,6 @@
 @endsection
 
 @section('content')
-<div class="card mb-4">
-    <div class="card-body wn-menu-scan-guide">
-        <h6 class="fw-semibold mb-3"><i class="ri-camera-line me-1"></i> Cómo conseguir una foto perfecta</h6>
-        <div class="row g-3">
-            <div class="col-md-4">
-                <div class="wn-scan-tip">
-                    <span class="wn-scan-tip__icon ri-sun-line"></span>
-                    <strong>Luz uniforme</strong>
-                    <p class="small text-muted mb-0">Evita sombras y reflejos sobre el papel.</p>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="wn-scan-tip">
-                    <span class="wn-scan-tip__icon ri-focus-3-line"></span>
-                    <strong>Encuadra entero</strong>
-                    <p class="small text-muted mb-0">Toda la página visible; usa el marco de la cámara.</p>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="wn-scan-tip">
-                    <span class="wn-scan-tip__icon ri-smartphone-line"></span>
-                    <strong>Móvil en vertical</strong>
-                    <p class="small text-muted mb-0">Sujeta el teléfono paralelo a la mesa, sin inclinar.</p>
-                </div>
-            </div>
-        </div>
-        <ul class="small text-muted mb-0 mt-3 ps-3">
-            <li>Puedes hacer varias fotos (una por página o sección).</li>
-            <li>También puedes subir un PDF desde el móvil o el ordenador.</li>
-        </ul>
-    </div>
-</div>
-
 <div class="card">
     <div class="card-body">
         @if (! $scanConfigured)
@@ -62,13 +29,22 @@
 
         @if ($scanLimit !== null)
             <div class="alert {{ ($canScan ?? true) ? 'alert-info' : 'alert-warning' }} mb-3">
-                <strong>Plan Gratis:</strong>
+                <strong>{{ $plan['label'] ?? 'Tu plan' }}:</strong>
                 @if (($scansRemaining ?? 0) > 0)
-                    Te quedan <strong>{{ $scansRemaining }}</strong> de {{ $scanLimit }} escaneos IA (has usado {{ $scansUsed }}).
+                    Te quedan <strong>{{ $scansRemaining }}</strong> de {{ $scanLimit }} escaneos IA correctos
+                    @if(($scanPeriod ?? null) === 'monthly')
+                        este mes
+                    @endif
+                    (has usado {{ $scansUsed }}).
                 @else
-                    Has usado tus {{ $scanLimit }} escaneos IA incluidos.
-                    <a href="{{ $billingUrl }}" class="alert-link">Pásate a Plus</a> para escaneos ilimitados.
+                    Has usado tus {{ $scanLimit }} escaneos IA correctos
+                    @if(($scanPeriod ?? null) === 'monthly')
+                        de este mes
+                    @endif
+                    .
+                    <a href="{{ $billingUrl }}" class="alert-link">Mejorar plan</a> para más escaneos.
                 @endif
+                <span class="d-block small mt-1 text-muted">Solo cuentan los escaneos en los que la IA procesa bien la carta; los fallidos no consumen cupo.</span>
             </div>
         @endif
 
@@ -80,13 +56,22 @@
             <input type="file" name="files[]" id="menu-scan-files" accept="image/jpeg,image/png,image/webp,application/pdf" multiple class="d-none">
             <input type="file" id="menu-scan-camera-native" accept="image/*" capture="environment" class="d-none">
 
-            <div class="d-grid gap-2 d-sm-flex mb-3">
-                <button type="button" class="btn btn-primary btn-lg flex-sm-fill" id="menu-scan-open-camera" @if(! $scanConfigured || ! ($canScan ?? true)) disabled @endif>
-                    <i class="ri-camera-line me-1"></i> Hacer foto
-                </button>
-                <button type="button" class="btn btn-outline-primary btn-lg flex-sm-fill" id="menu-scan-pick-files" @if(! $scanConfigured || ! ($canScan ?? true)) disabled @endif>
-                    <i class="ri-image-add-line me-1"></i> Galería / archivos
-                </button>
+            <div class="wn-menu-scan-start py-4 mb-2">
+                <p class="text-muted text-center mb-4">Fotografía tu carta o sube un PDF; la digitalizamos con IA. Revisamos la nitidez antes de enviar para ahorrarte escaneos fallidos.</p>
+                <div class="wn-menu-scan-start__actions">
+                    <button type="button"
+                            class="btn btn-primary btn-lg wn-menu-scan-start__btn"
+                            id="menu-scan-start"
+                            @if(! $scanConfigured || ! ($canScan ?? true)) disabled @endif>
+                        <i class="ti ti-scan me-2"></i> Escanear carta
+                    </button>
+                    <button type="button"
+                            class="btn btn-primary btn-lg wn-menu-scan-start__btn"
+                            id="menu-scan-pick-files"
+                            @if(! $scanConfigured || ! ($canScan ?? true)) disabled @endif>
+                        <i class="ti ti-upload me-2"></i> Subir PDF o fotos
+                    </button>
+                </div>
             </div>
 
             <div class="wn-menu-scan-dropzone d-none d-md-block" id="menu-scan-dropzone">
@@ -120,7 +105,7 @@
             @if ($scanLocked)
                 @include('admin.partials.plan-upgrade-veil', [
                     'feature' => 'menu_scan',
-                    'message' => 'Has usado tus escaneos incluidos. Pásate a Plus para escaneos ilimitados.',
+                    'message' => 'Has usado tus escaneos IA incluidos. Mejora tu plan para seguir digitalizando cartas.',
                 ])
             @endif
         </div>
@@ -135,7 +120,7 @@
             <div class="wn-scan-processing__ring wn-scan-processing__ring--1"></div>
             <div class="wn-scan-processing__ring wn-scan-processing__ring--2"></div>
             <div class="wn-scan-processing__core">
-                <i class="ri-sparkling-2-fill"></i>
+                <i class="ti ti-sparkles"></i>
             </div>
             <div class="wn-scan-processing__beam"></div>
         </div>
@@ -146,13 +131,96 @@
             <div class="wn-scan-processing__progress-bar" id="menu-scan-processing-bar"></div>
         </div>
         <ul class="wn-scan-processing__steps" id="menu-scan-processing-steps">
-            <li data-step="upload" class="is-active"><i class="ri-upload-cloud-line"></i> Subida</li>
-            <li data-step="read"><i class="ri-eye-line"></i> Lectura</li>
-            <li data-step="sections"><i class="ri-layout-grid-line"></i> Secciones</li>
-            <li data-step="prices"><i class="ri-price-tag-3-line"></i> Precios</li>
-            <li data-step="done"><i class="ri-check-line"></i> Listo</li>
+            <li data-step="upload" class="is-active"><i class="ti ti-upload"></i> Subida</li>
+            <li data-step="read"><i class="ti ti-eye"></i> Lectura</li>
+            <li data-step="sections"><i class="ti ti-layout-grid"></i> Secciones</li>
+            <li data-step="prices"><i class="ti ti-tag"></i> Precios</li>
+            <li data-step="done"><i class="ti ti-check"></i> Listo</li>
         </ul>
         <p class="wn-scan-processing__hint">Puede tardar hasta un minuto. No cierres esta pestaña.</p>
+    </div>
+</div>
+
+{{-- Guía: foto perfecta (se abre al pulsar Escanear) --}}
+<div class="modal fade" id="menu-scan-guide-modal" tabindex="-1" aria-labelledby="menu-scan-guide-title" aria-hidden="true" data-bs-backdrop="static" data-guide-user-id="{{ auth()->id() }}">
+    <div class="modal-dialog modal-dialog-centered wn-scan-guide-modal__dialog">
+        <div class="modal-content wn-scan-guide-modal border-0">
+            <button type="button" class="btn-close wn-scan-guide-modal__close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            <div class="modal-body wn-scan-guide-modal__body">
+                <p class="wn-scan-guide-step-label" id="menu-scan-guide-step-label">
+                    Paso <span id="menu-scan-guide-step-num">1</span> de 3
+                </p>
+                <div class="wn-scan-guide-carousel" id="menu-scan-guide-carousel" data-guide-carousel>
+                    <div class="wn-scan-guide-carousel__track">
+                        <div class="wn-scan-guide-slide is-active" data-guide-slide="0">
+                            <div class="wn-scan-guide-visual wn-scan-guide-visual--light" aria-hidden="true">
+                                <div class="wn-scan-guide-slide__icon"><i class="ti ti-sun"></i></div>
+                                <span class="wn-scan-guide-visual__glow"></span>
+                            </div>
+                            <h2 class="wn-scan-guide-slide__title" id="menu-scan-guide-title">Luz uniforme</h2>
+                            <p class="wn-scan-guide-slide__text">Evita sombras y reflejos sobre el papel.</p>
+                        </div>
+                        <div class="wn-scan-guide-slide" data-guide-slide="1">
+                            <div class="wn-scan-guide-visual wn-scan-guide-visual--frame" aria-hidden="true">
+                                <div class="wn-scan-guide-slide__icon"><i class="ti ti-focus-2"></i></div>
+                                <span class="wn-scan-guide-visual__frame"></span>
+                                <span class="wn-scan-guide-visual__scanline"></span>
+                            </div>
+                            <h2 class="wn-scan-guide-slide__title">Encuadra entero</h2>
+                            <p class="wn-scan-guide-slide__text">Toda la página visible; usa el marco de la cámara.</p>
+                        </div>
+                        <div class="wn-scan-guide-slide" data-guide-slide="2">
+                            <div class="wn-scan-guide-visual wn-scan-guide-visual--phone" aria-hidden="true">
+                                <div class="wn-scan-guide-slide__icon"><i class="ti ti-device-mobile"></i></div>
+                                <span class="wn-scan-guide-visual__phone"></span>
+                            </div>
+                            <h2 class="wn-scan-guide-slide__title">Móvil en vertical</h2>
+                            <p class="wn-scan-guide-slide__text">Sujeta el teléfono paralelo a la mesa, sin inclinar.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer wn-scan-guide-modal__footer border-0">
+                <button type="button" class="btn btn-primary btn-lg w-100 wn-scan-guide-cta" id="menu-scan-guide-next">
+                    Siguiente
+                    <i class="ti ti-arrow-right ms-2"></i>
+                </button>
+                <button type="button" class="btn btn-primary btn-lg w-100 wn-scan-guide-cta d-none" id="menu-scan-guide-continue">
+                    <i class="ti ti-scan me-2"></i>
+                    Escanear
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{{-- Revisión de foto antes de enviar a IA --}}
+<div class="modal fade" id="menu-scan-preview-modal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title mb-0" id="menu-scan-preview-title">Revisar foto</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <div class="wn-scan-preview-image-wrap mb-3">
+                    <img src="" alt="Vista previa" id="menu-scan-preview-img" class="wn-scan-preview-img d-none">
+                    <div id="menu-scan-preview-pdf" class="wn-scan-preview-pdf d-none text-center py-5">
+                        <i class="ri-file-pdf-line display-4 text-danger"></i>
+                        <p class="mb-0 mt-2 fw-medium" id="menu-scan-preview-pdf-name"></p>
+                    </div>
+                </div>
+                <div id="menu-scan-preview-quality" class="mb-3">
+                    <span class="badge d-none" id="menu-scan-preview-badge"></span>
+                    <p class="small mb-0 mt-2" id="menu-scan-preview-message"></p>
+                </div>
+            </div>
+            <div class="modal-footer flex-wrap gap-2">
+                <button type="button" class="btn btn-outline-secondary" id="menu-scan-preview-retake">Otra foto</button>
+                <button type="button" class="btn btn-outline-warning d-none" id="menu-scan-preview-force">Usar igualmente</button>
+                <button type="button" class="btn btn-primary" id="menu-scan-preview-accept">Usar esta foto</button>
+            </div>
+        </div>
     </div>
 </div>
 

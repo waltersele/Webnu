@@ -36,14 +36,17 @@ class PlatformMailConfigurator
             }
         }
 
-        $fromAddress = $this->value('mail_from_address', 'platform.mail.from_address', $overrides);
-        $fromName = $this->value('mail_from_name', 'platform.mail.from_name', $overrides);
-        if ($fromAddress) {
-            config([
-                'mail.from.address' => $fromAddress,
-                'mail.from.name' => $fromName ?: 'Webnu',
-            ]);
-        }
+        $fromAddress = $this->value('mail_from_address', 'platform.mail.from_address', $overrides)
+            ?: PlatformSetting::mailFromAddress();
+        $fromName = $this->value('mail_from_name', 'platform.mail.from_name', $overrides)
+            ?: PlatformSetting::mailFromName();
+
+        config([
+            'mail.from' => [
+                'address' => $fromAddress,
+                'name' => $fromName ?: 'Webnu',
+            ],
+        ]);
     }
 
     /**

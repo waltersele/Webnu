@@ -2,7 +2,7 @@
 <aside class="main-sidebar sidebar-dark-primary elevation-4">
     <!-- Brand Logo -->
     <a href="{{ route('admin.dashboard') }}" class="brand-link">
-      <img src="{{ asset('adminlte/img/webnu.png') }}" alt="Webnu" class="brand-img">
+      <img src="{{ \App\PlatformSetting::brandUrl('isotipo') }}" alt="Webnu" class="brand-img">
       <span class="brand-text font-weight-light">&nbsp;</span>
     </a>
 

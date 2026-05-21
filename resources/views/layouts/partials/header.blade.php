@@ -6,7 +6,7 @@
         <div class="row flexbox-center">
             <div class="col-lg-2 col-md-3 col-6">
                 <div class="logo">
-                    <a href="#home"><img src="{{ asset('img/front/logo.png') }}" alt="logo" /></a>
+                    <a href="#home"><img src="{{ \App\PlatformSetting::brandUrl('logo') }}" alt="Webnu" /></a>
                 </div>
             </div>
             <div class="col-lg-10 col-md-9 col-6">

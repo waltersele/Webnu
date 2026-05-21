@@ -37,6 +37,8 @@
         @include('themes.partials.modern-header')
     @endif
 
+    @include('themes.partials.daily-highlights')
+
     @if($heroMode === 'spotlight' && $featuredProduct)
         <section class="wn-menu-spotlight">
             <div class="wn-menu-spotlight__media">
@@ -101,7 +103,7 @@
                 <div class="wn-menu-hero__brand">
                     @if($heroMode === 'circle')
                         <div class="wn-menu-hero__logo-ring">
-                            <img src="{{ $company->logo ? asset('img/'.$company->logo) : asset('img/front/logo.png') }}" alt="{{ $company->name }}">
+                            <img src="{{ $company->logo ? asset('img/'.$company->logo) : \App\PlatformSetting::brandUrl('logo') }}" alt="{{ $company->name }}">
                         </div>
                     @elseif($company->logo)
                         <img class="wn-menu-hero__logo-inline" src="{{ asset('img/'.$company->logo) }}" alt="{{ $company->name }}">
@@ -131,7 +133,7 @@
         </div>
     </nav>
 
-    @php $lightSurface = in_array($variant, ['bistro', 'basic', 'visual', 'fastfood', 'mar', 'elegance', 'temporada', 'catalogo'], true); @endphp
+    @php $lightSurface = in_array($variant, ['bistro', 'basic', 'visual', 'fastfood', 'pizza', 'mar', 'elegance', 'temporada', 'catalogo'], true); @endphp
     <main class="wn-menu-main {{ $lightSurface ? 'wn-menu-main--light' : '' }}">
         @foreach ($sections as $section)
             <section class="wn-menu-section" id="section-{{ $section->id }}">

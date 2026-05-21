@@ -177,8 +177,32 @@
     });
   }
 
+  function applyFontSelectPreview(selectEl) {
+    if (!selectEl || !selectEl.options) {
+      return;
+    }
+    var opt = selectEl.options[selectEl.selectedIndex];
+    if (!opt) {
+      return;
+    }
+    var family = opt.getAttribute('data-font-family') || opt.style.fontFamily;
+    if (family) {
+      selectEl.style.fontFamily = family;
+    }
+  }
+
+  function initFontSelectPreviews() {
+    $('.theme-font-select').each(function () {
+      applyFontSelectPreview(this);
+    });
+  }
+
   function bindFontSelects() {
-    $(document).on('change', '.theme-font-select', debouncedRefreshPreview);
+    initFontSelectPreviews();
+    $(document).on('change', '.theme-font-select', function () {
+      applyFontSelectPreview(this);
+      debouncedRefreshPreview();
+    });
   }
 
   function initBrandUpload(el) {

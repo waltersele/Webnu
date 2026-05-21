@@ -122,9 +122,24 @@ class PlatformSetting extends Model
         return '••••' . substr($key, -4);
     }
 
+    protected static function stringSetting(string $key, string $configPath, string $fallback): string
+    {
+        $value = static::getValue($key);
+        if ($value !== null && $value !== '') {
+            return $value;
+        }
+
+        $fromConfig = config($configPath);
+        if ($fromConfig !== null && $fromConfig !== '') {
+            return (string) $fromConfig;
+        }
+
+        return $fallback;
+    }
+
     public static function mailMailer(): string
     {
-        return static::getValue('mail_mailer') ?? config('platform.mail.mailer', 'smtp');
+        return static::stringSetting('mail_mailer', 'platform.mail.mailer', 'smtp');
     }
 
     public static function mailHost(): ?string
@@ -170,27 +185,27 @@ class PlatformSetting extends Model
 
     public static function mailFromAddress(): string
     {
-        return static::getValue('mail_from_address') ?? config('platform.mail.from_address', 'info@webnu.es');
+        return static::stringSetting('mail_from_address', 'platform.mail.from_address', 'info@webnu.es');
     }
 
     public static function mailFromName(): string
     {
-        return static::getValue('mail_from_name') ?? config('platform.mail.from_name', 'Webnu');
+        return static::stringSetting('mail_from_name', 'platform.mail.from_name', 'Webnu');
     }
 
     public static function contactLeadsEmail(): string
     {
-        return static::getValue('contact_leads_email') ?? config('platform.contact.leads_email', 'info@webnu.es');
+        return static::stringSetting('contact_leads_email', 'platform.contact.leads_email', 'hello@webnu.es');
     }
 
     public static function contactSuggestionsEmail(): string
     {
-        return static::getValue('contact_suggestions_email') ?? config('platform.contact.suggestions_email', 'hola@webnu.es');
+        return static::stringSetting('contact_suggestions_email', 'platform.contact.suggestions_email', 'hello@webnu.es');
     }
 
     public static function contactPublicEmail(): string
     {
-        return static::getValue('contact_public_email') ?? config('platform.contact.public_email', 'hola@webnu.es');
+        return static::stringSetting('contact_public_email', 'platform.contact.public_email', 'hello@webnu.es');
     }
 
     public static function mailPasswordHint(): ?string
@@ -206,5 +221,44 @@ class PlatformSetting extends Model
     public static function hasMailPassword(): bool
     {
         return static::mailPassword() !== null && static::mailPassword() !== '';
+    }
+
+    /** URL pública de un asset de marca (clave en config platform.brand). */
+    public static function brandUrl(string $key = 'logo'): string
+    {
+        $paths = config('platform.brand', []);
+        $path = $paths[$key] ?? $paths['logo'] ?? 'adminlte/img/logo-color.png';
+
+        return asset($path);
+    }
+
+    /** Ruta absoluta en disco para PDF/QR (misma clave que brandUrl). */
+    public static function brandPath(string $key = 'logo'): string
+    {
+        $paths = config('platform.brand', []);
+        $path = $paths[$key] ?? $paths['logo'] ?? 'adminlte/img/logo-color.png';
+
+        return public_path($path);
+    }
+
+    public static function salesHandoffPlanKey(): string
+    {
+        $key = static::getValue('sales_handoff_plan_key');
+
+        return $key !== null && $key !== '' ? $key : (string) config('plans.trial_tier', 'plus');
+    }
+
+    public static function salesHandoffTrialDays(): int
+    {
+        $days = static::getValue('sales_handoff_trial_days');
+
+        return $days !== null && $days !== '' ? max(1, (int) $days) : (int) config('plans.trial_days', 30);
+    }
+
+    public static function salesDemoMaxPhotoProducts(): int
+    {
+        $max = static::getValue('sales_demo_max_photo_products');
+
+        return $max !== null && $max !== '' ? max(1, (int) $max) : 2;
     }
 }

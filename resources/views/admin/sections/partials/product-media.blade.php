@@ -1,19 +1,36 @@
 @php
     $prefix = $mode === 'add' ? 'product_add' : 'product_modify';
     $idPrefix = $mode === 'add' ? 'product-add' : 'product-modify';
-    $maxSeconds = config('product_media.max_video_seconds', 30);
-    $maxMb = round(config('product_media.max_video_kb', 25600) / 1024);
+    $maxSeconds = config('product_media.max_video_seconds', 20);
+    $maxMb = round(config('product_media.max_video_kb', 15360) / 1024);
+    $tvHeight = config('product_media.tv_max_height', 720);
     $canVideos = $planFeatures['videos'] ?? true;
+    $showVideoUpgrade = ! $canVideos && ($upgradeTriggers['show_video_trigger'] ?? true);
 @endphp
 
 <div class="card mb-4 product-media-block" data-media-mode="{{ $mode }}">
     <div class="card-header d-flex align-items-center justify-content-between flex-wrap gap-2">
         <h5 class="card-title mb-0">Foto y vídeo</h5>
-        <span class="text-muted small">Sube archivos o usa la cámara del dispositivo</span>
+        <div class="d-flex flex-wrap gap-2 webnu-media-quick-actions">
+            <button type="button" class="btn btn-sm btn-outline-primary webnu-media-go-photo">
+                <i class="ri-image-add-line me-1"></i> Añadir foto
+            </button>
+            @if ($canVideos)
+                <button type="button" class="btn btn-sm btn-outline-secondary webnu-media-go-video">
+                    <i class="ri-video-add-line me-1"></i> Añadir vídeo
+                </button>
+            @else
+                <button type="button"
+                        class="btn btn-sm btn-outline-secondary"
+                        data-upgrade-trigger="video">
+                    <i class="ri-video-add-line me-1"></i> Añadir vídeo (Plus)
+                </button>
+            @endif
+        </div>
     </div>
     <div class="card-body">
         <div class="row g-4">
-            <div class="col-lg-6">
+            <div class="col-lg-{{ $canVideos ? '6' : '12' }}">
                 <div class="webnu-media-panel">
                     <div class="webnu-media-panel__head">
                         <span class="webnu-media-panel__icon webnu-media-panel__icon--photo"><i class="ri-image-line"></i></span>
@@ -77,14 +94,14 @@
                 </div>
             </div>
 
+            @if ($canVideos)
             <div class="col-lg-6">
-                @if ($canVideos)
                 <div class="webnu-media-panel">
                     <div class="webnu-media-panel__head">
                         <span class="webnu-media-panel__icon webnu-media-panel__icon--video"><i class="ri-video-line"></i></span>
                         <div>
                             <span class="webnu-media-panel__title">Vídeo del plato</span>
-                            <span class="webnu-media-panel__meta">Máx. {{ $maxSeconds }}s · {{ $maxMb }} MB</span>
+                            <span class="webnu-media-panel__meta">Máx. {{ $maxSeconds }}s · {{ $maxMb }} MB · hasta {{ $tvHeight }}p en TV</span>
                         </div>
                     </div>
 
@@ -138,36 +155,24 @@
                         <div class="webnu-media-preview mt-2" id="{{ $idPrefix }}-video-preview" style="display:none;">
                             <video src="" controls playsinline class="webnu-media-existing__preview w-100"></video>
                         </div>
+                        <p class="text-muted small mt-2 mb-0">
+                            <i class="ri-tv-line me-1"></i>
+                            Ideal 10–15 s, vertical u horizontal. Webnu comprime a H.264 ligero para móvil y Smart TV (sin audio, menos peso, buena nitidez).
+                        </p>
                     </div>
                 </div>
-                @else
-                @component('admin.partials.plan-feature-lock', [
-                    'feature' => 'videos',
-                    'message' => 'Añade reels y vídeos cortos en cada plato con el plan Plus.',
-                    'class' => 'p-1',
-                ])
-                <div class="webnu-media-panel">
-                    <div class="webnu-media-panel__head">
-                        <span class="webnu-media-panel__icon webnu-media-panel__icon--video"><i class="ri-video-line"></i></span>
-                        <div>
-                            <span class="webnu-media-panel__title">Vídeo del plato @include('admin.partials.plan-pro-badge', ['label' => 'Plus', 'size' => 'xs'])</span>
-                            <span class="webnu-media-panel__meta">Máx. {{ $maxSeconds }}s · {{ $maxMb }} MB</span>
-                        </div>
-                    </div>
-                    <div class="webnu-media-controls">
-                        <div class="webnu-media-mode btn-group btn-group-sm w-100 mb-2" role="group">
-                            <button type="button" class="btn btn-outline-secondary" disabled><i class="ri-upload-2-line me-1"></i> Subir</button>
-                            <button type="button" class="btn btn-outline-secondary" disabled><i class="ri-record-circle-line me-1"></i> Grabar</button>
-                        </div>
-                        <label class="webnu-file-drop webnu-file-drop--compact d-block opacity-75">
-                            <i class="ri-film-line"></i>
-                            <span>Seleccionar vídeo</span>
-                        </label>
-                    </div>
-                </div>
-                @endcomponent
-                @endif
             </div>
+            @elseif ($showVideoUpgrade)
+            <div class="col-lg-6 d-none d-lg-block">
+                <div class="wn-upgrade-trigger-teaser rounded-xl border border-dashed p-4 h-100 d-flex flex-column justify-content-center text-center">
+                    <i class="ri-play-circle-line text-primary mb-2" style="font-size: 2.5rem;"></i>
+                    <p class="text-muted small mb-3">Los vídeos en platos aumentan el apetito y las ventas. Disponibles en Plus.</p>
+                    <button type="button" class="btn btn-sm btn-primary" data-upgrade-trigger="video">
+                        Saber más · Plus
+                    </button>
+                </div>
+            </div>
+            @endif
         </div>
     </div>
 </div>

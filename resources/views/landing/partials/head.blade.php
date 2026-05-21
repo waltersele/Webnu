@@ -1,8 +1,18 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<meta name="description" content="Webnu.es — Carta digital para restaurantes. Plan gratis, escaneo IA, reels en platos y QR al instante."/>
-<title>Webnu.es — Carta digital para hostelería</title>
-<link rel="icon" type="image/png" href="{{ asset('img/front/favicon.png') }}"/>
+<meta name="description" content="{{ __('landing.meta.description') }}"/>
+<title>{{ __('landing.meta.title') }}</title>
+@isset($landingLocales, $locale)
+    @php
+        $homeUrl = url('/');
+    @endphp
+    @foreach($landingLocales as $code => $meta)
+        <link rel="alternate" hreflang="{{ $meta['hreflang'] ?? $code }}" href="{{ $homeUrl }}?lang={{ $code }}"/>
+    @endforeach
+    <link rel="alternate" hreflang="x-default" href="{{ $homeUrl }}?lang={{ config('landing.fallback_locale', 'en') }}"/>
+@endisset
+<link rel="icon" type="image/png" href="{{ \App\PlatformSetting::brandUrl('favicon') }}"/>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.2.3/css/flag-icons.min.css"/>
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
@@ -368,6 +378,20 @@
         opacity: 0;
     }
 
+    /* Hero — TVPik protagonista */
+    .landing-hero-badge--tvpik {
+        background: linear-gradient(135deg, #ea580c 0%, #f97316 100%);
+        color: #fff;
+        border: none;
+        box-shadow: 0 4px 14px rgba(234, 88, 12, 0.35);
+    }
+    .landing-hero-visual {
+        width: 100%;
+    }
+    .landing-hero-signup {
+        margin-top: 0;
+    }
+
     /* TVPik — escena bar + TV animada */
     .landing-tvpik-scene {
         position: relative;
@@ -377,6 +401,32 @@
         background: linear-gradient(165deg, #1a120c 0%, #2a2118 45%, #141010 100%);
         box-shadow: 0 28px 56px rgba(20, 27, 43, 0.22);
         padding: 1.75rem 1.5rem 1.25rem;
+    }
+    .landing-tvpik-scene--hero {
+        min-height: 360px;
+        padding: 1.35rem 1.25rem 1rem;
+        box-shadow: 0 32px 64px rgba(234, 88, 12, 0.18), 0 20px 48px rgba(20, 27, 43, 0.2);
+    }
+    .landing-tvpik-scene--hero .landing-tvpik-tv {
+        max-width: 100%;
+    }
+    .landing-tvpik-scene__hero-badge {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        z-index: 5;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        padding: 0.35rem 0.65rem;
+        border-radius: 999px;
+        background: rgba(234, 88, 12, 0.92);
+        color: #fff;
+        font-size: 0.6875rem;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
     }
     .landing-tvpik-scene__ambience {
         position: absolute;
@@ -751,6 +801,9 @@
             min-height: 380px;
             padding: 1.25rem 1rem 1rem;
         }
+        .landing-tvpik-scene--hero {
+            min-height: 320px;
+        }
         .landing-tvpik-tv {
             max-width: 100%;
         }
@@ -760,6 +813,156 @@
         }
         .landing-tvpik-sync.is-active .landing-tvpik-sync__line {
             width: 36px;
+        }
+    }
+
+    /* Cartas en TV — ilustración fast food / restaurante */
+    .landing-tv-wall__scene {
+        position: relative;
+        background: linear-gradient(180deg, #1a1f26 0%, #2d3540 55%, #3d4654 100%);
+        border-radius: 1.25rem;
+        padding: 1rem 1rem 2.5rem;
+        box-shadow: 0 24px 48px rgba(15, 23, 42, 0.18);
+        overflow: hidden;
+    }
+    .landing-tv-wall__banner {
+        background: linear-gradient(90deg, #c41e3a, #e63946);
+        margin: -1rem -1rem 0.75rem;
+        padding: 0.55rem 1rem;
+        text-align: center;
+    }
+    .landing-tv-wall__banner-text {
+        font-size: clamp(0.65rem, 2.5vw, 0.8rem);
+        font-weight: 800;
+        letter-spacing: 0.14em;
+        color: #fff7c2;
+        text-shadow: 0 1px 0 rgba(0, 0, 0, 0.25);
+    }
+    .landing-tv-wall__screens {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 0.45rem;
+        min-height: 220px;
+    }
+    .landing-tv-wall__screen {
+        background: #f4f5f7;
+        border-radius: 6px;
+        border: 2px solid #1f2937;
+        padding: 0.45rem 0.4rem;
+        font-size: 0.5rem;
+        color: #111827;
+        overflow: hidden;
+        box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.6);
+    }
+    .landing-tv-wall__screen-title {
+        font-weight: 800;
+        font-size: 0.48rem;
+        letter-spacing: 0.06em;
+        margin: 0 0 0.35rem;
+        color: #b91c1c;
+    }
+    .landing-tv-wall__menu-list {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
+    .landing-tv-wall__menu-list li {
+        display: flex;
+        justify-content: space-between;
+        gap: 0.2rem;
+        padding: 0.12rem 0;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+        line-height: 1.2;
+    }
+    .landing-tv-wall__menu-list strong {
+        color: #b91c1c;
+        font-size: 0.46rem;
+        white-space: nowrap;
+    }
+    .landing-tv-wall__screen--combo {
+        background: #fff;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+    .landing-tv-wall__screen-kicker {
+        font-weight: 900;
+        font-size: 0.52rem;
+        margin: 0 0 0.25rem;
+        color: #111;
+    }
+    .landing-tv-wall__combo-photo {
+        width: 100%;
+        flex: 1;
+        min-height: 72px;
+        border-radius: 4px;
+        background: linear-gradient(145deg, #d97706 0%, #92400e 45%, #451a03 100%);
+        position: relative;
+    }
+    .landing-tv-wall__combo-photo::after {
+        content: "";
+        position: absolute;
+        inset: 18% 12% 28%;
+        border-radius: 40% 40% 8% 8%;
+        background: linear-gradient(180deg, #fbbf24, #b45309);
+        box-shadow: 0 4px 0 #78350f;
+    }
+    .landing-tv-wall__combo-price {
+        margin: 0.25rem 0 0;
+        font-weight: 700;
+        font-size: 0.42rem;
+        color: #374151;
+    }
+    .landing-tv-wall__drinks-row {
+        display: flex;
+        gap: 0.2rem;
+        margin-bottom: 0.35rem;
+    }
+    .landing-tv-wall__drinks-row span {
+        flex: 1;
+        height: 36px;
+        border-radius: 4px;
+        background: linear-gradient(180deg, #f472b6, #db2777);
+    }
+    .landing-tv-wall__drinks-row span:nth-child(2) {
+        background: linear-gradient(180deg, #60a5fa, #2563eb);
+    }
+    .landing-tv-wall__drinks-row span:nth-child(3) {
+        background: linear-gradient(180deg, #fbbf24, #d97706);
+    }
+    .landing-tv-wall__counter {
+        height: 28px;
+        margin: 0.65rem -1rem -2.5rem;
+        background: linear-gradient(180deg, #6b7280, #4b5563);
+        border-top: 3px solid #9ca3af;
+    }
+    .landing-tv-wall__brand {
+        position: absolute;
+        bottom: 0.65rem;
+        right: 0.75rem;
+        display: flex;
+        align-items: center;
+        gap: 0.35rem;
+        background: rgba(255, 255, 255, 0.95);
+        padding: 0.25rem 0.5rem;
+        border-radius: 999px;
+        font-size: 0.6rem;
+        font-weight: 700;
+        color: #004ac6;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+    .landing-tv-wall__logo {
+        height: 18px;
+        width: auto;
+    }
+    @media (max-width: 640px) {
+        .landing-tv-wall__screens {
+            grid-template-columns: repeat(2, 1fr);
+            min-height: 280px;
+        }
+        .landing-tv-wall__screen--mirror {
+            display: none;
         }
     }
 
@@ -858,5 +1061,250 @@
     .landing-modal__form button:disabled {
         opacity: 0.6;
         cursor: not-allowed;
+    }
+
+    .landing-user-menu__panel:not(.hidden) {
+        display: block;
+    }
+    .landing-user-menu.is-open .landing-user-menu__chevron {
+        transform: rotate(180deg);
+    }
+
+    .landing-lang-select {
+        position: relative;
+    }
+    .landing-lang-select__trigger {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        background: #fff;
+        padding: 6px 10px;
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: #374151;
+        cursor: pointer;
+        transition: border-color 0.2s, box-shadow 0.2s;
+        font-family: inherit;
+        line-height: 1.2;
+    }
+    .landing-lang-select__trigger:hover,
+    .landing-lang-select__trigger:focus-visible {
+        border-color: #004ac6;
+        box-shadow: 0 0 0 2px rgba(0, 74, 198, 0.15);
+        outline: none;
+    }
+    .landing-lang-select__flag {
+        width: 22px;
+        height: 16px;
+        flex-shrink: 0;
+        border-radius: 2px;
+        box-shadow: 0 0 0 1px rgba(15, 23, 42, 0.08);
+    }
+    .landing-lang-select__label {
+        white-space: nowrap;
+    }
+    .landing-lang-select__chevron {
+        font-size: 18px;
+        color: #64748b;
+        margin-left: 2px;
+    }
+    .landing-lang-select__menu[hidden] {
+        display: none !important;
+    }
+    .landing-lang-select__menu {
+        position: absolute;
+        right: 0;
+        top: calc(100% + 6px);
+        z-index: 200;
+        min-width: 100%;
+        margin: 0;
+        padding: 6px;
+        list-style: none;
+        background: #fff;
+        border: 1px solid #e5e7eb;
+        border-radius: 10px;
+        box-shadow: 0 12px 32px rgba(15, 23, 42, 0.14);
+    }
+    .landing-lang-select__option {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 8px 10px;
+        border-radius: 6px;
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: #374151;
+        text-decoration: none;
+        white-space: nowrap;
+        transition: background 0.15s;
+    }
+    .landing-lang-select__option:hover {
+        background: #f1f3ff;
+        color: #004ac6;
+    }
+    .landing-lang-select__option.is-active {
+        background: rgba(0, 74, 198, 0.08);
+        color: #004ac6;
+    }
+
+    .landing-brand-logo {
+        display: block;
+        height: 36px;
+        width: auto;
+        max-width: 160px;
+        object-fit: contain;
+    }
+    .landing-brand-logo--footer {
+        height: 32px;
+    }
+
+    .landing-template-card {
+        display: flex;
+        flex-direction: column;
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        overflow: hidden;
+        background: #fff;
+        transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .landing-template-card:hover {
+        border-color: rgba(0, 74, 198, 0.35);
+        box-shadow: 0 8px 24px rgba(20, 27, 43, 0.08);
+    }
+    .landing-template-card__thumb {
+        aspect-ratio: 4 / 3;
+        background: #f1f3ff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 12px;
+    }
+    .landing-template-card__thumb img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+    }
+    .landing-template-card__body {
+        padding: 12px 14px 14px;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+    .landing-template-card__label {
+        font-size: 0.875rem;
+        font-weight: 700;
+        color: #141b2b;
+        line-height: 1.2;
+    }
+    .landing-template-card__desc {
+        font-size: 0.75rem;
+        line-height: 1.4;
+        color: #4b5563;
+        flex: 1;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+    .landing-template-more {
+        border: 2px dashed #c3c6d7;
+        border-radius: 12px;
+        background: linear-gradient(135deg, #f9f9ff 0%, #e9edff 100%);
+    }
+
+    .landing-scan-demo {
+        position: relative;
+        padding: 8px 8px 0;
+    }
+    .landing-scan-demo__frame {
+        position: relative;
+        background: #0f172a;
+        border-radius: 20px;
+        padding: 20px 18px 24px;
+        overflow: hidden;
+        box-shadow: 0 24px 48px rgba(15, 23, 42, 0.28);
+    }
+    .landing-scan-demo__section {
+        margin: 0 0 10px;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        color: #94a3b8;
+        text-transform: uppercase;
+    }
+    .landing-scan-demo__section--spaced {
+        margin-top: 16px;
+    }
+    .landing-scan-demo__row {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        gap: 12px;
+        margin-bottom: 8px;
+        font-size: 14px;
+        color: #e2e8f0;
+    }
+    .landing-scan-demo__row strong {
+        color: #38bdf8;
+        font-weight: 700;
+        white-space: nowrap;
+    }
+    .landing-scan-demo__scanline {
+        position: absolute;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: linear-gradient(90deg, transparent, #38bdf8 20%, #0074da 50%, #38bdf8 80%, transparent);
+        box-shadow: 0 0 16px rgba(56, 189, 248, 0.9), 0 0 32px rgba(0, 116, 218, 0.5);
+        animation: landing-scan-sweep 2.8s ease-in-out infinite;
+        pointer-events: none;
+    }
+    @keyframes landing-scan-sweep {
+        0%, 100% { top: 18%; opacity: 0.6; }
+        50% { top: 72%; opacity: 1; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+        .landing-scan-demo__scanline { animation: none; top: 45%; }
+    }
+    .landing-scan-demo__badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        margin: 14px auto 0;
+        padding: 10px 16px;
+        border-radius: 999px;
+        background: #16a34a;
+        color: #fff;
+        font-size: 13px;
+        font-weight: 600;
+        box-shadow: 0 8px 20px rgba(22, 163, 74, 0.35);
+        width: fit-content;
+        position: relative;
+        left: 50%;
+        transform: translateX(-50%);
+    }
+    .landing-scan-path-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        min-height: 52px;
+        padding: 14px 18px;
+        border-radius: 12px;
+        font-size: 15px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: opacity 0.2s, box-shadow 0.2s;
+    }
+    .landing-scan-path-btn--primary {
+        background: #004ac6;
+        color: #fff;
+        box-shadow: 0 8px 24px rgba(0, 74, 198, 0.25);
+    }
+    .landing-scan-path-btn--primary:hover {
+        opacity: 0.92;
     }
 </style>

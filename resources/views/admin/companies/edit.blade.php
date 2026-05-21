@@ -55,26 +55,26 @@
                     @include('admin.companies.partials.studio-step-publish')
                 </div>
                 <div class="card-footer wn-studio-footer border-0">
-                    <div class="wn-studio-footer__primary">
-                        <button type="button" class="btn btn-label-secondary" id="wn-step-prev" disabled>
-                            <i class="ri-arrow-left-line me-1"></i> Anterior
-                        </button>
-                        <div class="d-flex flex-wrap gap-2">
+                    <div class="wn-studio-footer__row">
+                        <div class="wn-studio-footer__group wn-studio-footer__group--start">
+                            <button type="button" class="btn btn-outline-secondary" id="wn-step-prev" disabled>
+                                <i class="ri-arrow-left-line me-1"></i> Anterior
+                            </button>
+                            <a href="{{ route('admin.companies.index') }}" class="btn btn-outline-secondary">
+                                <i class="ri-arrow-left-s-line me-1"></i> Volver a negocios
+                            </a>
+                        </div>
+                        <div class="wn-studio-footer__group wn-studio-footer__group--end">
                             <button type="button" class="btn btn-outline-primary" id="wn-step-next">
                                 Siguiente <i class="ri-arrow-right-line ms-1"></i>
                             </button>
                             <button type="submit" class="btn btn-primary">
                                 <i class="ri-save-line me-1"></i> Guardar
                             </button>
+                            <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#modal-delete-company">
+                                <i class="ri-delete-bin-line me-1"></i> Eliminar negocio
+                            </button>
                         </div>
-                    </div>
-                    <div class="wn-studio-footer__secondary">
-                        <a href="{{ route('admin.companies.index') }}" class="btn btn-sm btn-label-secondary">
-                            <i class="ri-arrow-left-s-line me-1"></i> Volver a negocios
-                        </a>
-                        <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#modal-delete-company">
-                            <i class="ri-delete-bin-line me-1"></i> Eliminar negocio
-                        </button>
                     </div>
                 </div>
             </div>
@@ -113,6 +113,19 @@
 
 @push('styles')
     <link rel="stylesheet" href="{{ asset('materio/css/webnu-company-studio.css') }}">
+    @php
+        $studioFontFamilies = [];
+        foreach ($fonts as $fontMeta) {
+            $family = str_replace(' ', '+', $fontMeta['family'] ?? 'Inter');
+            $weights = $fontMeta['weights'] ?? '400;600;700';
+            $studioFontFamilies[] = 'family=' . $family . ':wght@' . $weights;
+        }
+    @endphp
+    @if(count($studioFontFamilies))
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?{{ implode('&', $studioFontFamilies) }}&display=swap" rel="stylesheet">
+    @endif
 @endpush
 
 @push('scripts')

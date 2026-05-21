@@ -7,6 +7,7 @@ use App\Allergen;
 use App\Product;
 use App\Section;
 use App\Services\AllergenCatalogService;
+use App\Services\ProductVideoOptimizer;
 use App\Services\UserPlanService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cookie;
@@ -52,7 +53,9 @@ class ProductsController extends Controller
 
         $productVideoPath = null;
         if ($request->hasFile('product_add_video')) {
-            $productVideoPath = $request->file('product_add_video')->store('productos');
+            $productVideoPath = app(ProductVideoOptimizer::class)->storeOptimized(
+                $request->file('product_add_video')
+            );
         }
 
         $sectionOrder = (int) Product::where('section_id', $section->id)->max('order') + 1;
@@ -119,7 +122,9 @@ class ProductsController extends Controller
             if ($product->video) {
                 Storage::delete($product->video);
             }
-            $product->video = $request->file('product_modify_video')->store('productos');
+            $product->video = app(ProductVideoOptimizer::class)->storeOptimized(
+                $request->file('product_modify_video')
+            );
         }
 
         $product->save();

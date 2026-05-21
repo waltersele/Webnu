@@ -8,6 +8,9 @@
 @endpush
 
 @section('page_actions')
+    <a href="{{ route('admin.platform.sales.index') }}" class="btn btn-outline-primary btn-sm">
+        <i class="ri-briefcase-line me-1"></i> Comercial
+    </a>
     <a href="{{ route('admin.platform.users.index') }}" class="btn btn-primary btn-sm">
         <i class="ri-team-line me-1"></i> Ver clientes
     </a>

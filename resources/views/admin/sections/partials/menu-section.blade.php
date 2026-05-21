@@ -4,7 +4,7 @@
 @endphp
 <article id="{{ $section->id }}" class="card mb-4 webnu-section-card is-open">
     <div class="card-header webnu-section-card__header d-flex flex-wrap align-items-center gap-2 border-0 pb-0">
-        <i class="ri ri-draggable icon-20px text-muted webnu-drag-handle" title="Arrastrar sección"></i>
+        <i class="ri ri-draggable icon-20px text-muted webnu-drag-handle" title="Arrastrar secciÃ³n"></i>
         <div class="me-auto min-w-0">
             <h5 class="card-title mb-0">{{ $section->name }}</h5>
             <p class="text-muted small mb-0">
@@ -19,7 +19,7 @@
                 section-id="{{ $section->id }}"
                 data-bs-toggle="modal"
                 data-bs-target="#modal-add-product">
-            <i class="ri ri-add-line"></i> Añadir plato
+            <i class="ri ri-add-line"></i> AÃ±adir plato
         </button>
         <button type="button" class="btn btn-sm btn-icon btn-text-secondary webnu-section-toggle" aria-label="Mostrar u ocultar">
             <i class="ri ri-arrow-down-s-line"></i>
@@ -27,7 +27,7 @@
     </div>
 
     <div class="webnu-section-card__body card-body pt-3">
-        {{-- Vista cuadrícula --}}
+        {{-- Vista cuadrï¿½cula --}}
         <div class="webnu-menu-grid-view">
             <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-3 sortable-product"
                  section-id="{{ $section->id }}"
@@ -36,7 +36,7 @@
                     @include('admin.sections.partials.menu-product-card', ['product' => $product, 'section' => $section])
                 @empty
                     <div class="col-12">
-                        <p class="text-center text-muted py-4 mb-0">No hay platos en esta sección.</p>
+                        <p class="text-center text-muted py-4 mb-0">No hay platos en esta secciÃ³n.</p>
                     </div>
                 @endforelse
             </div>
@@ -52,7 +52,7 @@
                             <th>Plato</th>
                             <th>Precio</th>
                             <th>Estado</th>
-                            <th>Alérgenos</th>
+                            <th>AlÃ©rgenos</th>
                             <th class="text-end">Acciones</th>
                         </tr>
                     </thead>
@@ -103,7 +103,7 @@
                                             @endforeach
                                         </div>
                                     @else
-                                        <span class="text-muted small">—</span>
+                                        <span class="text-muted small">ï¿½</span>
                                     @endif
                                 </td>
                                 <td class="align-middle text-end text-nowrap">
@@ -127,20 +127,20 @@
 
         <div class="d-flex flex-wrap justify-content-end gap-2 mt-3 pt-3 border-top">
             <div class="dropdown">
-                <button type="button" class="btn btn-sm btn-label-secondary dropdown-toggle" data-bs-toggle="dropdown">Sección</button>
+                <button type="button" class="btn btn-sm btn-label-secondary dropdown-toggle" data-bs-toggle="dropdown">SecciÃ“n</button>
                 <ul class="dropdown-menu dropdown-menu-end">
                     <li>
                         <button type="button" class="dropdown-item modify-section-btn"
                                 data-id="{{ $section->id }}" data-name="{{ $section->name }}"
                                 data-enabled="{{ $section->enabled }}"
                                 data-bs-toggle="modal" data-bs-target="#modal-modify-section">
-                            <i class="ri ri-settings-3-line me-2"></i> Editar sección
+                            <i class="ri ri-settings-3-line me-2"></i> Editar secciÃ³n
                         </button>
                     </li>
                     <li>
                         <button type="button" class="dropdown-item text-danger delete-section-btn"
                                 data-id="{{ $section->id }}" data-bs-toggle="modal" data-bs-target="#modal-delete-section">
-                            <i class="ri ri-delete-bin-line me-2"></i> Eliminar sección
+                            <i class="ri ri-delete-bin-line me-2"></i> Eliminar secciÃ³n
                         </button>
                     </li>
                 </ul>

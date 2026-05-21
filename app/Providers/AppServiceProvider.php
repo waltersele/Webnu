@@ -2,8 +2,14 @@
 
 namespace App\Providers;
 
-use Illuminate\Support\ServiceProvider;
+use App\Company;
+use App\Observers\CompanyObserver;
+use App\Observers\ProductObserver;
+use App\Observers\SectionObserver;
+use App\Product;
+use App\Section;
 use App\Services\Platform\PlatformMailConfigurator;
+use Illuminate\Support\ServiceProvider;
 use Laravel\Cashier\Cashier;
 
 class AppServiceProvider extends ServiceProvider
@@ -31,5 +37,9 @@ class AppServiceProvider extends ServiceProvider
         }
 
         $this->app->make(PlatformMailConfigurator::class)->apply();
+
+        Company::observe(CompanyObserver::class);
+        Section::observe(SectionObserver::class);
+        Product::observe(ProductObserver::class);
     }
 }

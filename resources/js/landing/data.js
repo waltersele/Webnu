@@ -64,7 +64,7 @@ export function buildLandingContent(config) {
             subtitle: 'Proyecta platos y precios en Smart TV del local. Se actualiza sola cuando editas en Webnu.',
             badge: 'Integración TVPik',
             heading: 'Digital signage conectado a tu carta',
-            text: 'Sincroniza Webnu con TVPik y muestra promociones y platos del día en barra, salón o terraza — la misma carta que escanean con QR.',
+            text: 'Sincroniza Webnu con TVPik: en la TV muestra slides, menú del día o destacados con plantillas propias — sin tener que replicar la vista del QR.',
             features: [
                 'Actualización automática al guardar cambios',
                 'Misma información que la carta QR',

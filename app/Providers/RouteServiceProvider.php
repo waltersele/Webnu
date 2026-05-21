@@ -33,12 +33,22 @@ class RouteServiceProvider extends ServiceProvider
     public function boot()
     {
         Route::bind('company', function ($value) {
-            if (!auth()->check()) {
+            if (! auth()->check()) {
                 abort(404);
             }
 
+            $user = auth()->user();
+
             return Company::where('id', $value)
-                ->where('user_id', auth()->id())
+                ->where(function ($query) use ($user) {
+                    $query->where('user_id', $user->id);
+                    if ($user->isSalesRep()) {
+                        $query->orWhere(function ($q) use ($user) {
+                            $q->where('sales_rep_user_id', $user->id)
+                                ->whereNull('sales_converted_at');
+                        });
+                    }
+                })
                 ->firstOrFail();
         });
 

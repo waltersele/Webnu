@@ -10,6 +10,17 @@
 @section('content')
 <div class="row justify-content-center">
     <div class="col-lg-9">
+        <div class="alert alert-info mb-4">
+            <strong>Portal comercial.</strong>
+            Gestiona roles, cierres de venta y métricas en
+            <a href="{{ route('admin.platform.sales.index') }}" class="alert-link">Gestión comercial</a>.
+            Los comerciales inician sesión en el
+            <a href="{{ route('sales.login') }}" class="alert-link" target="_blank" rel="noopener">portal comercial</a>
+            (<code>/comercial/login</code>).
+            Asigna el rol «comercial» desde <a href="{{ route('admin.platform.users.index') }}" class="alert-link">Clientes</a>
+            o desde Gestión comercial.
+        </div>
+
         <form method="POST" action="{{ route('admin.platform.settings.update') }}" id="platform-settings-form">
             @csrf
             @method('PUT')
@@ -175,19 +186,19 @@
                         <div class="col-md-4">
                             <label for="contact_suggestions_email" class="form-label">Sugerencias de mejora</label>
                             <input type="email" name="contact_suggestions_email" id="contact_suggestions_email" class="form-control"
-                                   value="{{ old('contact_suggestions_email', $contact['contact_suggestions_email']) }}" required>
+                                   value="{{ old('contact_suggestions_email', $contact['contact_suggestions_email']) }}" placeholder="hello@webnu.es" required>
                             <div class="form-text">Popup «Sugerir una mejora»</div>
                         </div>
                         <div class="col-md-4">
                             <label for="contact_leads_email" class="form-label">Leads «Te llamamos»</label>
                             <input type="email" name="contact_leads_email" id="contact_leads_email" class="form-control"
-                                   value="{{ old('contact_leads_email', $contact['contact_leads_email']) }}" required>
+                                   value="{{ old('contact_leads_email', $contact['contact_leads_email']) }}" placeholder="hello@webnu.es" required>
                             <div class="form-text">Formulario de contacto comercial</div>
                         </div>
                         <div class="col-md-4">
                             <label for="contact_public_email" class="form-label">Email público</label>
                             <input type="email" name="contact_public_email" id="contact_public_email" class="form-control"
-                                   value="{{ old('contact_public_email', $contact['contact_public_email']) }}" required>
+                                   value="{{ old('contact_public_email', $contact['contact_public_email']) }}" placeholder="hello@webnu.es" required>
                             <div class="form-text">Mostrado en FAQ y textos de la landing</div>
                         </div>
                     </div>

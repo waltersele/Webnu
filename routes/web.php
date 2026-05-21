@@ -17,14 +17,21 @@ Route::post(
 );
 
 Route::get('carta/{companySlug}', 'PagesController@see_menu')->name('see_menu');
+Route::get('tv/{companySlug}/sync.json', 'TvMenuController@sync')->name('tv.sync');
+Route::get('tv/{companySlug}', 'TvMenuController@show')->name('tv.show');
+Route::get('tv/{companySlug}/{layout}', 'TvMenuController@show')->name('tv.show.layout');
 
-Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['auth', 'subscribed']], function () {
+Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['auth', 'subscribed', 'redirect.sales.from.admin']], function () {
     Route::get('onboarding', 'OnboardingController@show')->name('admin.onboarding');
     Route::post('onboarding', 'OnboardingController@update')->name('admin.onboarding.update');
     Route::post('onboarding/skip', 'OnboardingController@skip')->name('admin.onboarding.skip');
 
-    Route::get('billing', 'BillingController@index')->name('admin.billing');
+    Route::get('settings', 'AccountSettingsController@index')->name('admin.settings');
+    Route::put('settings/profile', 'AccountSettingsController@updateProfile')->name('admin.settings.profile');
+    Route::put('settings/billing-info', 'AccountSettingsController@updateBillingInfo')->name('admin.settings.billing-info');
     Route::post('billing/portal', 'BillingController@portal')->name('admin.billing.portal');
+
+    Route::get('billing', 'BillingController@index')->name('admin.billing');
 
     Route::group(['prefix' => 'platform', 'middleware' => ['super.admin']], function () {
         Route::get('/', 'PlatformDashboardController@index')->name('admin.platform.dashboard');
@@ -43,6 +50,17 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['aut
         Route::post('users/{user}/resume-subscription', 'PlatformUsersController@resumeSubscription')
             ->name('admin.platform.users.resume-subscription')
             ->middleware('throttle:30,1');
+        Route::get('comercial', 'PlatformSalesController@index')->name('admin.platform.sales.index');
+        Route::put('comercial', 'PlatformSalesController@update')->name('admin.platform.sales.update');
+        Route::get('comercial/export', 'PlatformSalesController@export')->name('admin.platform.sales.export');
+        Route::post('comercial/comerciales', 'PlatformSalesController@storeRep')->name('admin.platform.sales.reps.store')->middleware('throttle:20,1');
+        Route::post('comercial/comerciales/{user}/reenviar-acceso', 'PlatformSalesController@resendRepAccess')->name('admin.platform.sales.reps.resend-access')->middleware('throttle:20,1');
+        Route::post('users/{user}/grant-sales-rep', 'PlatformSalesController@grantSalesRep')
+            ->name('admin.platform.users.grant-sales-rep')
+            ->middleware('throttle:30,1');
+        Route::post('users/{user}/revoke-sales-rep', 'PlatformSalesController@revokeSalesRep')
+            ->name('admin.platform.users.revoke-sales-rep')
+            ->middleware('throttle:30,1');
     });
 });
 
@@ -52,6 +70,7 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['aut
     Route::post('companies', 'CompaniesController@store')->name('admin.companies.store');
     Route::get('companies/{company}', 'CompaniesController@edit')->name('admin.companies.edit');
     Route::put('companies/{company}', 'CompaniesController@update')->name('admin.companies.update');
+    Route::put('companies/{company}/daily-highlights', 'CompaniesController@updateDailyHighlights')->name('admin.companies.daily-highlights');
     Route::get('companies/{company}/languages', 'TranslationController@edit')->name('admin.companies.languages');
     Route::put('companies/{company}/languages', 'TranslationController@updateLocales')->name('admin.companies.languages.update');
     Route::post('companies/{company}/languages/translate', 'TranslationController@generate')->name('admin.companies.languages.translate');
@@ -73,13 +92,24 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['aut
     Route::put('sections/update_menu_type', 'SectionsController@update_menu_type')->name('admin.sections.updatemenutype');
     Route::put('sections/update_pdf_menu', 'SectionsController@update_pdf_menu')->name('admin.sections.updatepdfmenu');
     Route::get('qrgenerator/{company}', 'QrController@qrgenerator')->name('admin.qrgenerator');
+    Route::get('menu-print/{company}', 'MenuPrintController@printPdf')->name('admin.menu-print');
 
-    Route::get('integrations', 'SignageIntegrationController@index')->name('admin.integrations.index');
+    Route::get('integrations', function () {
+        return redirect()->route('admin.tvpik.index', [], 301);
+    })->name('admin.integrations.index');
     Route::get('signage', function () {
-        return redirect()->route('admin.integrations.index', [], 301);
+        return redirect()->route('admin.tvpik.index', [], 301);
     })->name('admin.signage.index');
     Route::post('signage/token', 'SignageIntegrationController@regenerateToken')->name('admin.signage.regenerate');
     Route::post('integrations/token', 'SignageIntegrationController@regenerateToken')->name('admin.integrations.regenerate');
+
+    Route::get('tvpik', 'TvpikController@index')->name('admin.tvpik.index');
+    Route::post('tvpik/connect', 'TvpikController@connect')->name('admin.tvpik.connect');
+    Route::post('tvpik/disconnect', 'TvpikController@disconnect')->name('admin.tvpik.disconnect');
+    Route::post('tvpik/publish', 'TvpikController@publish')->name('admin.tvpik.publish');
+    Route::post('tvpik/publish-all', 'TvpikController@publishAll')->name('admin.tvpik.publish-all');
+    Route::get('tvpik/preview', 'TvpikController@preview')->name('admin.tvpik.preview');
+    Route::get('tvpik/player', 'TvpikController@player')->name('admin.tvpik.player');
 
     Route::get('products', 'ProductsController@index')->name('admin.products.index');
     Route::get('products/{product}/edit', 'ProductsController@edit')->name('admin.products.edit');
@@ -97,6 +127,33 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['aut
     Route::put('menu-scan/{job}', 'MenuScanController@update')->name('admin.menu-scan.update');
     Route::post('menu-scan/{job}/import', 'MenuScanController@import')->name('admin.menu-scan.import');
     Route::delete('menu-scan/{job}', 'MenuScanController@destroy')->name('admin.menu-scan.destroy');
+});
+
+Route::group(['prefix' => 'comercial', 'namespace' => 'Sales'], function () {
+    Route::get('login', 'LoginController@showLoginForm')->name('sales.login');
+    Route::post('login', 'LoginController@login')->middleware('throttle:10,1');
+    Route::post('logout', 'LoginController@logout')->name('sales.logout')->middleware('auth');
+
+    Route::group(['middleware' => ['auth', 'sales.rep']], function () {
+        Route::get('/', 'DashboardController@index')->name('sales.dashboard');
+        Route::post('visitas', 'VisitController@store')->name('sales.visit.store');
+        Route::get('visitas/{company}', 'VisitController@show')->name('sales.visit.show')->where('company', '[0-9]+');
+        Route::get('visitas/{company}/carta', 'VisitController@carta')->name('sales.visit.carta')->where('company', '[0-9]+');
+        Route::get('visitas/{company}/presentar', 'VisitDesignController@show')->name('sales.visit.present')->where('company', '[0-9]+');
+        Route::put('visitas/{company}/diseno', 'VisitDesignController@update')->name('sales.visit.design.update')->where('company', '[0-9]+');
+
+        Route::get('visitas/{company}/menu-scan', 'MenuScanController@create')->name('sales.menu-scan.create')->where('company', '[0-9]+');
+        Route::post('visitas/{company}/menu-scan', 'MenuScanController@store')->name('sales.menu-scan.store')->where('company', '[0-9]+');
+        Route::get('visitas/{company}/menu-scan/{job}', 'MenuScanController@show')->name('sales.menu-scan.show')->where(['company' => '[0-9]+', 'job' => '[0-9]+']);
+        Route::put('visitas/{company}/menu-scan/{job}', 'MenuScanController@update')->name('sales.menu-scan.update')->where(['company' => '[0-9]+', 'job' => '[0-9]+']);
+        Route::post('visitas/{company}/menu-scan/{job}/import', 'MenuScanController@import')->name('sales.menu-scan.import')->where(['company' => '[0-9]+', 'job' => '[0-9]+']);
+
+        Route::get('visitas/{company}/demo-productos', 'DemoProductsController@index')->name('sales.demo-products.index')->where('company', '[0-9]+');
+        Route::post('visitas/{company}/demo-productos/{product}', 'DemoProductsController@update')->name('sales.demo-products.update')->where(['company' => '[0-9]+', 'product' => '[0-9]+']);
+
+        Route::get('visitas/{company}/cerrar', 'HandoffController@show')->name('sales.handoff.show')->where('company', '[0-9]+');
+        Route::post('visitas/{company}/cerrar', 'HandoffController@store')->name('sales.handoff.store')->middleware('throttle:10,1')->where('company', '[0-9]+');
+    });
 });
 
 Route::get('login', 'Auth\LoginController@showLoginForm')->name('login');
