@@ -163,7 +163,7 @@
 @stack('scripts')
 @if($useClientShell)
 <script src="{{ asset('js/admin-share-menu.js') }}"></script>
-<script src="{{ asset('js/admin-pwa-install.js') }}"></script>
+<script src="{{ asset('js/webnu-pwa-install.js') }}"></script>
 <script>
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', function () {

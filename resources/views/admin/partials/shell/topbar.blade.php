@@ -62,14 +62,14 @@
                 {{ $showTrial ? 'Gestionar plan' : 'Activar plan' }}
             </a>
         @endif
-        <div class="dropdown d-none" id="wn-pwa-topbar-wrap">
+        <div class="dropdown d-none" id="wn-pwa-topbar-wrap" data-pwa-topbar-wrap>
             <button type="button"
                     class="wn-shell-topbar__pwa-btn"
                     data-bs-toggle="dropdown"
                     aria-expanded="false"
-                    title="Instalar app">
-                <i class="ti ti-device-mobile" aria-hidden="true"></i>
-                <span class="d-none d-md-inline ms-1">App</span>
+                    title="Instalar Webnu como aplicación">
+                <i class="ti ti-download" aria-hidden="true"></i>
+                <span class="d-none d-md-inline ms-1">Instalar app</span>
             </button>
             <div class="dropdown-menu dropdown-menu-end p-0 border-0 shadow">
                 @include('admin.partials.pwa-install', ['variant' => 'dropdown'])

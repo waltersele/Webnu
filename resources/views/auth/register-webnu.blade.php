@@ -87,5 +87,6 @@
         </p>
     </div>
 </main>
+@include('partials.pwa-landing-scripts')
 </body>
 </html>

@@ -18,7 +18,7 @@
 <body class="wn-onb-body">
 @yield('content')
 <script src="{{ asset('js/webnu-onboarding.js') }}"></script>
-<script src="{{ asset('js/admin-pwa-install.js') }}"></script>
+<script src="{{ asset('js/webnu-pwa-install.js') }}"></script>
 <script>
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', function () {

@@ -24,8 +24,9 @@ return [
         'badge_tvpik' => '+ TVPik (Illimité)',
         'badge_scan' => 'Scan IA',
         'badge_qr' => 'QR instantané',
-        'badge_lang' => 'Multilingue',
+        'badge_lang' => 'Langue automatique',
         'hooks' => [
+            'Le client scanne le QR et la carte s\'ouvre déjà dans sa langue — sans demander de traduction à table.',
             'Fini les réimpressions de carte à chaque changement de prix.',
             'Votre carte sur le téléphone du client. Mise à jour en secondes.',
             'Photographiez votre carte papier et publiez-la aujourd\'hui avec l\'IA.',

@@ -86,7 +86,8 @@
                     @endif
 
                     <button type="submit" class="btn btn-outline-primary mb-4"
-                            formaction="{{ route('admin.platform.settings.test-stripe') }}">
+                            formaction="{{ route('admin.platform.settings.test-stripe') }}"
+                            formmethod="post">
                         <i class="ri-bank-card-line me-1"></i> Probar conexión con Stripe
                     </button>
 
@@ -204,7 +205,8 @@
                     @endif
 
                     <button type="submit" class="btn btn-outline-primary"
-                            formaction="{{ route('admin.platform.settings.test-gemini') }}">
+                            formaction="{{ route('admin.platform.settings.test-gemini') }}"
+                            formmethod="post">
                         <i class="ri-link me-1"></i> Probar conexión con Gemini
                     </button>
                     <p class="text-muted small mt-2 mb-0">La prueba usa la API key y el modelo del formulario (aunque no hayas guardado).</p>
@@ -289,7 +291,8 @@
                         </div>
                         <div class="col-md-4">
                             <button type="submit" class="btn btn-outline-primary w-100"
-                                    formaction="{{ route('admin.platform.settings.test-mail') }}">
+                                    formaction="{{ route('admin.platform.settings.test-mail') }}"
+                                    formmethod="post">
                                 <i class="ri-mail-send-line me-1"></i> Enviar prueba
                             </button>
                         </div>

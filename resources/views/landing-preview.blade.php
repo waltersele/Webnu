@@ -38,6 +38,7 @@
         <a class="text-text-muted hover:text-primary transition-colors text-label-md" href="#pricing">{{ __('landing.nav.pricing') }}</a>
     </div>
     <div class="flex items-center gap-3">
+        @include('partials.pwa-landing-badge')
         @include('landing.partials.language-selector')
         @if($isLoggedIn)
             @include('landing.partials.user-menu')
@@ -630,5 +631,6 @@
 </div>
 
 <script src="{{ asset('js/landing-preview.js') }}"></script>
+@include('partials.pwa-landing-scripts')
 </body>
 </html>

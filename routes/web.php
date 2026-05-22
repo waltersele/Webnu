@@ -37,9 +37,9 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['aut
         Route::get('/', 'PlatformDashboardController@index')->name('admin.platform.dashboard');
         Route::get('settings', 'PlatformSettingsController@edit')->name('admin.platform.settings');
         Route::put('settings', 'PlatformSettingsController@update')->name('admin.platform.settings.update');
-        Route::post('settings/test-gemini', 'PlatformSettingsController@testGemini')->name('admin.platform.settings.test-gemini');
-        Route::post('settings/test-mail', 'PlatformSettingsController@testMail')->name('admin.platform.settings.test-mail');
-        Route::post('settings/test-stripe', 'PlatformSettingsController@testStripe')->name('admin.platform.settings.test-stripe');
+        Route::match(['post', 'put'], 'settings/test-gemini', 'PlatformSettingsController@testGemini')->name('admin.platform.settings.test-gemini');
+        Route::match(['post', 'put'], 'settings/test-mail', 'PlatformSettingsController@testMail')->name('admin.platform.settings.test-mail');
+        Route::match(['post', 'put'], 'settings/test-stripe', 'PlatformSettingsController@testStripe')->name('admin.platform.settings.test-stripe');
         Route::get('billing', 'PlatformBillingController@index')->name('admin.platform.billing.index');
         Route::post('billing/create-price', 'PlatformBillingController@createPrice')->name('admin.platform.billing.create-price');
         Route::post('billing/recreate-price', 'PlatformBillingController@recreatePrice')->name('admin.platform.billing.recreate-price');

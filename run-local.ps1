@@ -57,6 +57,18 @@ $env:MENU_SCAN_SCANS_PER_HOUR = "30"
 
 Set-Location $PSScriptRoot
 
+# .env con BOM UTF-8 rompe vlucas/phpdotenv y deja respuestas vacías en el navegador
+$envPath = Join-Path $PSScriptRoot ".env"
+if (Test-Path $envPath) {
+    $bytes = [System.IO.File]::ReadAllBytes($envPath)
+    if ($bytes.Length -ge 3 -and $bytes[0] -eq 0xEF -and $bytes[1] -eq 0xBB -and $bytes[2] -eq 0xBF) {
+        $text = [System.Text.Encoding]::UTF8.GetString($bytes, 3, $bytes.Length - 3)
+        $utf8NoBom = New-Object System.Text.UTF8Encoding $false
+        [System.IO.File]::WriteAllText($envPath, $text, $utf8NoBom)
+        Write-Host "Aviso: se eliminó BOM UTF-8 de .env (causa pantalla en blanco)." -ForegroundColor Yellow
+    }
+}
+
 & $Php -c $Ini artisan migrate --force
 & $Php -c $Ini scripts/seed-local-demo.php
 & $Php -c $Ini scripts/fix-demo-ownership.php 2>$null
