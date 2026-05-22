@@ -127,6 +127,12 @@ if (! columnExists($pdo, 'users', 'trial_plan_key', $isSqlite)) {
     recordMigration($pdo, '2026_05_23_100000_add_trial_plan_key_to_users_table', $isSqlite);
 }
 
+if (! columnExists($pdo, 'users', 'tvpik_extra_screens', $isSqlite)) {
+    $pdo->exec('ALTER TABLE users ADD tvpik_extra_screens INTEGER NOT NULL DEFAULT 0');
+    echo "users.tvpik_extra_screens OK\n";
+    recordMigration($pdo, '2026_05_24_100000_add_tvpik_extra_screens_to_users_table', $isSqlite);
+}
+
 if (! columnExists($pdo, 'companies', 'sales_rep_user_id', $isSqlite)) {
     $pdo->exec('ALTER TABLE companies ADD sales_rep_user_id BIGINT UNSIGNED NULL');
     $pdo->exec('ALTER TABLE companies ADD sales_converted_at TIMESTAMP NULL');

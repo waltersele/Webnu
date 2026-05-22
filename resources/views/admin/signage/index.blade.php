@@ -57,7 +57,7 @@
         <div class="card h-100">
             <div class="card-header d-flex align-items-center justify-content-between flex-wrap gap-2">
                 <h5 class="card-title mb-0"><i class="ti ti-plug me-2"></i>Token para TVPik</h5>
-                <span class="badge bg-label-success">Plan Ilimitado</span>
+                <span class="badge bg-label-success">Plan Plus</span>
             </div>
             <div class="card-body">
                 <p class="text-muted">Pega este código en TVPik para que tus TVs lean las cartas de tu cuenta Webnu.</p>
@@ -78,14 +78,14 @@
         <div class="card h-100">
             <div class="card-header d-flex align-items-center justify-content-between flex-wrap gap-2">
                 <h5 class="card-title mb-0"><i class="ti ti-plug me-2"></i>Token para TVPik</h5>
-                @include('admin.partials.plan-pro-badge', ['label' => 'Ilimitado'])
+                @include('admin.partials.plan-pro-badge', ['label' => 'Plus'])
             </div>
             @component('admin.partials.plan-feature-lock', [
                 'feature' => 'tvpik',
-                'message' => 'Muestra tu carta Webnu en las TVs del local con el plan Ilimitado.',
+                'message' => 'Muestra tu carta Webnu en las TVs del local con el plan Plus o add-on TVPik en Pro.',
             ])
             <div class="card-body">
-                <p class="text-muted">Con el plan Ilimitado obtienes el token para conectar TVPik y elegir carta + plantilla en cada pantalla.</p>
+                <p class="text-muted">Plus incluye 1 pantalla TVPik. En Pro puedes añadir pantallas desde 5 €/mes.</p>
                 <div class="input-group mb-3">
                     <input type="text" class="form-control" readonly value="••••••••••••••••••••••••••••••••">
                     <button type="button" class="btn btn-outline-primary" disabled>Copiar</button>

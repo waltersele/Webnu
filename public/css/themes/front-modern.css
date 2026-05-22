@@ -625,6 +625,31 @@
   opacity: 0.65;
 }
 
+.wn-webnu-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 0.75rem;
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  text-decoration: none !important;
+  color: var(--wn-text-muted);
+  background: rgba(0, 0, 0, 0.06);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.wn-theme-lumiere .wn-webnu-badge,
+.wn-theme-nocturne .wn-webnu-badge,
+.wn-theme-oriental .wn-webnu-badge {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.12);
+  color: var(--wn-text-muted);
+}
+
 /* —— Bottom action bar (modern themes) —— */
 .wn-theme-lumiere .fixed-bottom-bar,
 .wn-theme-bistro .fixed-bottom-bar {

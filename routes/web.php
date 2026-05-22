@@ -39,6 +39,10 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['aut
         Route::put('settings', 'PlatformSettingsController@update')->name('admin.platform.settings.update');
         Route::post('settings/test-gemini', 'PlatformSettingsController@testGemini')->name('admin.platform.settings.test-gemini');
         Route::post('settings/test-mail', 'PlatformSettingsController@testMail')->name('admin.platform.settings.test-mail');
+        Route::get('billing', 'PlatformBillingController@index')->name('admin.platform.billing.index');
+        Route::post('billing/create-price', 'PlatformBillingController@createPrice')->name('admin.platform.billing.create-price');
+        Route::post('billing/create-all', 'PlatformBillingController@createAllPrices')->name('admin.platform.billing.create-all');
+        Route::post('billing/save-price-id', 'PlatformBillingController@savePriceId')->name('admin.platform.billing.save-price-id');
         Route::get('users', 'PlatformUsersController@index')->name('admin.platform.users.index');
         Route::get('users/{user}', 'PlatformUsersController@show')->name('admin.platform.users.show');
         Route::post('users/{user}/grant-super-admin', 'PlatformUsersController@grantSuperAdmin')
@@ -50,6 +54,9 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['aut
         Route::post('users/{user}/resume-subscription', 'PlatformUsersController@resumeSubscription')
             ->name('admin.platform.users.resume-subscription')
             ->middleware('throttle:30,1');
+        Route::put('users/{user}/billing', 'PlatformUsersController@updateBilling')
+            ->name('admin.platform.users.update-billing')
+            ->middleware('throttle:20,1');
         Route::get('comercial', 'PlatformSalesController@index')->name('admin.platform.sales.index');
         Route::put('comercial', 'PlatformSalesController@update')->name('admin.platform.sales.update');
         Route::get('comercial/export', 'PlatformSalesController@export')->name('admin.platform.sales.export');

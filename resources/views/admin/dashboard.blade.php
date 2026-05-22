@@ -157,7 +157,7 @@
                 </a>
             @else
                 <a href="{{ $billingUrl }}" class="wn-dash-tvpik__btn">
-                    <i class="ti ti-arrow-up-circle"></i> Plan Ilimitado
+                    <i class="ti ti-arrow-up-circle"></i> Plan Plus
                 </a>
             @endif
         </div>

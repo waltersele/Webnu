@@ -31,11 +31,27 @@
     <input required type="password" name="password_confirmation" class="form-control" id="password_confirmation" placeholder="Repite tu contraseña" minlength="8">
 </div>
 <div class="form-group">
-    <label for="subscription">Suscripción</label>
-    <select required name="subscription" class="custom-select" id="subscription">
-        <option value="1" {{ old('subscription') == 1 ? 'selected' : '' }}>Mensual 10€ / Mes</option>
-        <option value="2" {{ old('subscription') == 2 ? 'selected' : '' }}>Anual 100€ / Año</option>
+    <label for="plan_tier">Plan</label>
+    <select required name="plan_tier" class="custom-select" id="plan_tier">
+        <option value="pro" {{ old('plan_tier', 'pro') === 'pro' ? 'selected' : '' }}>Pro — {{ config('billing.display.pro_monthly', '9,90 €/mes') }}</option>
+        <option value="plus" {{ old('plan_tier') === 'plus' ? 'selected' : '' }}>Plus — {{ config('billing.display.plus_monthly', '19,90 €/mes') }}</option>
     </select>
+</div>
+<div class="form-group">
+    <label for="billing_cycle">Facturación</label>
+    <select required name="billing_cycle" class="custom-select" id="billing_cycle">
+        <option value="monthly" {{ old('billing_cycle', 'monthly') === 'monthly' ? 'selected' : '' }}>Mensual</option>
+        <option value="yearly" {{ old('billing_cycle') === 'yearly' ? 'selected' : '' }}>Anual</option>
+    </select>
+</div>
+<div class="form-group">
+    <label for="tvpik_addon">TVPik (opcional en Pro)</label>
+    <select name="tvpik_addon" class="custom-select" id="tvpik_addon">
+        <option value="" {{ old('tvpik_addon', '') === '' ? 'selected' : '' }}>Sin pantallas extra</option>
+        <option value="screen_1" {{ old('tvpik_addon') === 'screen_1' ? 'selected' : '' }}>+1 pantalla — 5 €/mes</option>
+        <option value="pack_5" {{ old('tvpik_addon') === 'pack_5' ? 'selected' : '' }}>Pack 5 pantallas — 20 €/mes</option>
+    </select>
+    <small class="form-text text-muted">Plus incluye 1 pantalla. En Pro, TVPik es add-on.</small>
 </div>
 
 @include('partials.subscription-payment')

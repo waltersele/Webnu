@@ -58,12 +58,42 @@
 
     <div class="col-lg-7">
         <div class="card h-100">
-            <div class="card-header"><h6 class="mb-0">Suscripción</h6></div>
+            <div class="card-header"><h6 class="mb-0">Suscripción y plan</h6></div>
             <div class="card-body">
                 <p>
                     <span class="badge {{ $presenter->statusBadgeClass($user) }}">{{ $presenter->statusLabel($user) }}</span>
-                    <span class="ms-2">{{ $presenter->planLabel($user) }}</span>
                 </p>
+                <p class="mb-2"><strong>Plan efectivo:</strong> {{ $planPresentation['label'] ?? '—' }} <code class="small">({{ $effectivePlanKey }})</code></p>
+                @if ($presenter->stripeSubscriptionLabel($user))
+                    <p class="small text-muted mb-2">Stripe: {{ $presenter->stripeSubscriptionLabel($user) }}</p>
+                @endif
+                <form method="POST" action="{{ route('admin.platform.users.update-billing', $user) }}" class="border rounded p-3 mb-3 bg-light">
+                    @csrf
+                    @method('PUT')
+                    <p class="small fw-semibold mb-2">Plan manual (sin Stripe / transferencia / franquicia)</p>
+                    <div class="row g-2">
+                        <div class="col-sm-6">
+                            <label class="form-label small mb-0" for="plan">Plan</label>
+                            <select name="plan" id="plan" class="form-select form-select-sm">
+                                @foreach ($planTiers as $key => $tier)
+                                    @if (empty($tier['contact_only']))
+                                        <option value="{{ $key }}" @if(($user->plan ?? 'free') === $key || ($effectivePlanKey === $key && ! $user->hasActiveSubscription())) selected @endif>
+                                            {{ $tier['label'] ?? $key }}
+                                        </option>
+                                    @endif
+                                @endforeach
+                                <option value="franchise" @if(($user->plan ?? '') === 'franchise') selected @endif>Franquicias</option>
+                            </select>
+                        </div>
+                        <div class="col-sm-6">
+                            <label class="form-label small mb-0" for="tvpik_extra_screens">Pantallas TVPik extra</label>
+                            <input type="number" min="0" max="100" name="tvpik_extra_screens" id="tvpik_extra_screens" class="form-control form-control-sm" value="{{ (int) ($user->tvpik_extra_screens ?? 0) }}">
+                        </div>
+                        <div class="col-12">
+                            <button type="submit" class="btn btn-sm btn-primary">Guardar plan</button>
+                        </div>
+                    </div>
+                </form>
                 <p class="text-muted small mb-3">Tarjeta: {{ $presenter->cardSummary($user) }}</p>
                 @if ($subscription && $subscription->ends_at)
                     <p class="small">Cancelación / fin: {{ $subscription->ends_at->format('d/m/Y H:i') }}</p>

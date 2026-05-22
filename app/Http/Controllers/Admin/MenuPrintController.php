@@ -6,14 +6,17 @@ use App\Company;
 use App\Http\Controllers\Concerns\SendsTcpdfResponse;
 use App\Http\Controllers\Controller;
 use App\Services\MenuService;
+use App\Services\UserPlanService;
 use TCPDF;
 
 class MenuPrintController extends Controller
 {
     use SendsTcpdfResponse;
-    public function printPdf(Company $company, MenuService $menuService)
+
+    public function printPdf(Company $company, MenuService $menuService, UserPlanService $plans)
     {
         $this->authorize('view', $company);
+        $plans->assertCanUsePdfMenu(auth()->user());
 
         if ((int) $company->menu_type === 2 && $company->menu_type_2_pdf) {
             $pdfPath = public_path('img/' . ltrim($company->menu_type_2_pdf, '/'));

@@ -56,6 +56,259 @@ body.wn-sales-body {
     border-bottom: none;
 }
 
+/* Visita — hub de pasos */
+.wn-sales-visit-header {
+    margin-bottom: 1rem;
+}
+
+.wn-sales-visit-back {
+    display: inline-block;
+    color: #64748b;
+    font-size: 0.9rem;
+    text-decoration: none;
+    margin-bottom: 0.35rem;
+}
+
+.wn-sales-visit-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin: 0 0 0.15rem;
+    line-height: 1.2;
+}
+
+.wn-sales-visit-meta {
+    margin: 0 0 0.75rem;
+    color: #64748b;
+    font-size: 0.9rem;
+}
+
+.wn-sales-progress {
+    display: flex;
+    gap: 0.35rem;
+    margin-bottom: 0.5rem;
+}
+
+.wn-sales-progress__seg {
+    flex: 1;
+    height: 4px;
+    border-radius: 999px;
+    background: #e2e8f0;
+}
+
+.wn-sales-progress__seg.is-done {
+    background: #22c55e;
+}
+
+.wn-sales-progress__seg.is-current {
+    background: var(--wn-sales-primary);
+}
+
+.wn-sales-progress-label {
+    margin: 0;
+    font-size: 0.8rem;
+    color: #64748b;
+}
+
+.wn-sales-hero-cta {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    padding: 1rem 1.1rem;
+    margin-bottom: 1rem;
+    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+    color: #fff;
+    border-radius: 14px;
+    text-decoration: none;
+    box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35);
+}
+
+.wn-sales-hero-cta__icon {
+    font-size: 1.75rem;
+    line-height: 1;
+}
+
+.wn-sales-hero-cta__text {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+}
+
+.wn-sales-hero-cta__text strong {
+    font-size: 1.05rem;
+}
+
+.wn-sales-hero-cta__text small {
+    font-size: 0.85rem;
+    opacity: 0.9;
+    font-weight: 400;
+}
+
+.wn-sales-hero-cta__arrow {
+    font-size: 1.25rem;
+    font-weight: 700;
+}
+
+.wn-sales-visit-steps {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+}
+
+.wn-sales-visit-step {
+    display: flex;
+    gap: 0.85rem;
+    padding: 1rem;
+    background: #fff;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+
+.wn-sales-visit-step.is-active {
+    border-color: var(--wn-sales-primary);
+    box-shadow: 0 0 0 1px var(--wn-sales-primary), 0 4px 12px rgba(37, 99, 235, 0.12);
+}
+
+.wn-sales-visit-step.is-done {
+    border-color: #bbf7d0;
+    background: #f0fdf4;
+}
+
+.wn-sales-visit-step.is-locked {
+    opacity: 0.55;
+}
+
+.wn-sales-visit-step__marker {
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: 50%;
+    background: #e0e7ff;
+    color: var(--wn-sales-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.9rem;
+    flex-shrink: 0;
+}
+
+.wn-sales-visit-step.is-done .wn-sales-visit-step__marker {
+    background: #22c55e;
+    color: #fff;
+}
+
+.wn-sales-visit-step.is-active .wn-sales-visit-step__marker {
+    background: var(--wn-sales-primary);
+    color: #fff;
+}
+
+.wn-sales-visit-step__check {
+    font-size: 1rem;
+    line-height: 1;
+}
+
+.wn-sales-visit-step__body {
+    flex: 1;
+    min-width: 0;
+}
+
+.wn-sales-visit-step__head {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.35rem 0.5rem;
+    margin-bottom: 0.2rem;
+}
+
+.wn-sales-visit-step__head strong {
+    font-size: 1rem;
+}
+
+.wn-sales-visit-step__icon {
+    font-size: 1.1rem;
+    line-height: 1;
+}
+
+.wn-sales-visit-step__badge {
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: #64748b;
+    background: #f1f5f9;
+    padding: 0.15rem 0.45rem;
+    border-radius: 4px;
+}
+
+.wn-sales-visit-step__hint {
+    margin: 0 0 0.65rem;
+    font-size: 0.85rem;
+    color: #64748b;
+    line-height: 1.35;
+}
+
+.wn-sales-visit-step__action {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-decoration: none;
+    color: var(--wn-sales-primary);
+    border: 2px solid var(--wn-sales-primary);
+    background: #fff;
+}
+
+.wn-sales-visit-step__action--primary {
+    background: var(--wn-sales-primary);
+    color: #fff;
+    border-color: var(--wn-sales-primary);
+}
+
+.wn-sales-visit-step__locked {
+    font-size: 0.8rem;
+    color: #94a3b8;
+    font-style: italic;
+}
+
+.wn-sales-visit-footer-spacer {
+    height: 5.5rem;
+}
+
+.wn-sales-visit-footer {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 15;
+    padding: 0.75rem 1rem calc(0.75rem + env(safe-area-inset-bottom, 0));
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(8px);
+    border-top: 1px solid #e2e8f0;
+    box-shadow: 0 -4px 16px rgba(15, 23, 42, 0.08);
+    max-width: 32rem;
+    margin: 0 auto;
+    box-sizing: border-box;
+}
+
+.wn-sales-visit-footer__btn {
+    margin: 0;
+}
+
+.wn-sales-visit-footer__secondary {
+    display: block;
+    text-align: center;
+    margin-top: 0.5rem;
+    font-size: 0.85rem;
+    color: #64748b;
+    text-decoration: none;
+    font-weight: 600;
+}
+
 .wn-sales-step-num {
     width: 2rem;
     height: 2rem;

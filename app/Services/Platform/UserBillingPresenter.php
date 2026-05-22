@@ -2,11 +2,19 @@
 
 namespace App\Services\Platform;
 
+use App\Services\UserPlanService;
 use App\User;
 use Illuminate\Support\Collection;
 
 class UserBillingPresenter
 {
+    protected UserPlanService $plans;
+
+    public function __construct(UserPlanService $plans)
+    {
+        $this->plans = $plans;
+    }
+
     public function statusLabel(User $user): string
     {
         if ($user->onGenericTrial()) {
@@ -15,7 +23,7 @@ class UserBillingPresenter
 
         $subscription = $user->primarySubscription();
         if (! $subscription) {
-            return 'Sin suscripción';
+            return 'Sin suscripción Stripe';
         }
 
         return $this->mapStripeStatus($subscription->stripe_status);
@@ -46,21 +54,37 @@ class UserBillingPresenter
         }
     }
 
+    public function effectivePlanLabel(User $user): string
+    {
+        return $this->plans->planPresentation($user)['label'] ?? '—';
+    }
+
     public function planLabel(User $user): string
     {
+        $presentation = $this->plans->planPresentation($user);
+        $stripePlan = $this->stripeSubscriptionLabel($user);
+
+        if ($stripePlan) {
+            return $stripePlan . ' · efectivo: ' . ($presentation['label'] ?? '—');
+        }
+
+        return ($presentation['label'] ?? '—') . ' (manual / free)';
+    }
+
+    public function stripeSubscriptionLabel(User $user): ?string
+    {
         $subscription = $user->primarySubscription();
-        if (! $subscription) {
-            return '—';
+        if (! $subscription || ! $subscription->name) {
+            return null;
         }
 
-        $monthly = config('billing.subscription_names.monthly');
-        $yearly = config('billing.subscription_names.yearly');
-
-        if ($subscription->name === $monthly) {
-            return 'Mensual (10 €/mes)';
-        }
-        if ($subscription->name === $yearly) {
-            return 'Anual (100 €/año)';
+        $map = config('billing.subscription_names', []);
+        foreach ($map as $catalogKey => $name) {
+            if ($subscription->name === $name) {
+                return config('billing.display.' . $catalogKey)
+                    ?? config('billing.price_catalog.' . $catalogKey . '.label')
+                    ?? $subscription->name;
+            }
         }
 
         return $subscription->name;
@@ -116,16 +140,24 @@ class UserBillingPresenter
             return 0.0;
         }
 
-        $monthly = config('billing.subscription_names.monthly');
-        $mrr = config('platform.mrr', []);
-        $monthlyEur = (float) ($mrr['monthly_eur'] ?? 9.90);
-        $yearlyEur = (float) ($mrr['yearly_eur'] ?? 99);
+        $map = config('billing.subscription_names', []);
+        foreach ($map as $catalogKey => $name) {
+            if ($subscription->name === $name) {
+                $cents = config('billing.price_catalog.' . $catalogKey . '.amount_cents');
+                if ($cents) {
+                    $monthly = ((int) $cents) / 100;
+                    if (substr($catalogKey, -7) === '_yearly') {
+                        return round($monthly / 12, 2);
+                    }
 
-        if ($subscription->name === $monthly) {
-            return $monthlyEur;
+                    return round($monthly, 2);
+                }
+            }
         }
 
-        return round($yearlyEur / 12, 2);
+        $mrr = config('platform.mrr', []);
+
+        return (float) ($mrr['monthly_eur'] ?? 9.90);
     }
 
     protected function mapStripeStatus(?string $status): string

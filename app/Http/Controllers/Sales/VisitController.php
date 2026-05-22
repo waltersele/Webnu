@@ -32,12 +32,17 @@ class VisitController extends Controller
 
         $productCount = $visit->sections()->withCount('products')->get()->sum('products_count');
         $photoSlotsRemaining = $leads->demoPhotoSlotsRemaining($visit);
+        $hasMenu = $productCount > 0;
+        $progressStep = $hasMenu ? 2 : 1;
 
         return view('sales.visit.show', [
             'visit' => $visit,
             'productCount' => $productCount,
             'photoSlotsRemaining' => $photoSlotsRemaining,
+            'hasMenu' => $hasMenu,
+            'progressStep' => $progressStep,
             'menuUrl' => route('see_menu', $visit->slug) . '?sales_demo=1',
+            'importUrl' => route('sales.menu-scan.create', $visit->id),
         ]);
     }
 

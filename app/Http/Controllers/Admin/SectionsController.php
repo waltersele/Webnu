@@ -9,6 +9,7 @@ use App\Product;
 use App\Section;
 use App\Services\AllergenCatalogService;
 use App\Services\MenuService;
+use App\Services\UserPlanService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cookie;
 
@@ -109,7 +110,7 @@ class SectionsController extends Controller
         return response()->json(['success' => true]);
     }
 
-    public function update_menu_type(Request $request)
+    public function update_menu_type(Request $request, UserPlanService $plans)
     {
         $request->validate([
             'menu_type' => 'required|in:menu_type_custom,menu_type_pdf',
@@ -120,13 +121,17 @@ class SectionsController extends Controller
             ->where('id', $request->get('company_id'))
             ->firstOrFail();
 
+        if ($request->get('menu_type') === 'menu_type_pdf') {
+            $plans->assertCanUsePdfMenu($request->user());
+        }
+
         $company->menu_type = $request->get('menu_type') === 'menu_type_custom' ? 1 : 2;
         $company->save();
 
         return response()->json(['success' => true]);
     }
 
-    public function update_pdf_menu(Request $request)
+    public function update_pdf_menu(Request $request, UserPlanService $plans)
     {
         $request->validate([
             'company_id' => 'required|integer',
@@ -136,6 +141,8 @@ class SectionsController extends Controller
         $company = Company::where('user_id', auth()->id())
             ->where('id', $request->get('company_id'))
             ->firstOrFail();
+
+        $plans->assertCanUsePdfMenu($request->user());
 
         if ($request->hasFile('pdf_menu_file')) {
             $company->menu_type_2_pdf = $request->file('pdf_menu_file')->store('pdf');

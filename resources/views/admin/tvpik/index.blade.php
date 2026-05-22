@@ -40,7 +40,7 @@
         <div class="col-12">
             @include('admin.partials.plan-feature-lock', [
                 'feature' => 'tvpik',
-                'message' => 'Publica tu carta en pantallas TV con el plan Ilimitado.',
+                'message' => 'Publica tu carta en pantallas TV con Plus (1 pantalla incluida) o add-on TVPik en Pro.',
             ])
         </div>
     @else

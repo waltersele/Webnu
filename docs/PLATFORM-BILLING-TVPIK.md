@@ -12,40 +12,25 @@
 
 TVPik **no implementa Stripe ni precios**. Solo consulta permisos vía API y bloquea o permite acciones (publicar pantalla, sincronizar galería, etc.).
 
-## Planes y feature TVPik (estado actual)
+## Planes y feature TVPik
 
-| Plan (`users.plan` o suscripción Stripe) | TVPik (`features.tvpik`) | Notas |
-|------------------------------------------|--------------------------|--------|
-| `free` | `false` | Carta web/QR sí; sin hub TV |
-| `plus` | `false` | Vídeos, traducción, más cartas; sin TVPik por ahora |
-| `unlimited` | `true` | Carta + publicación en pantallas |
-| Superadmin | `true` | Bypass en [`UserPlanService`](../app/Services/UserPlanService.php) |
-| Trial genérico | Según `plans.trial_tier` (Plus) | `tvpik` sigue en `false` hasta Ilimitado |
+| Plan | `tvpik_max_screens` | Notas |
+|------|---------------------|--------|
+| `free` | `0` | Sin hub TV |
+| `pro` | `0` + `users.tvpik_extra_screens` | Add-on Stripe: 1 pantalla (5 €) o pack 5 (20 €) |
+| `plus` | `1` incluida + extras | Pantallas adicionales vía add-on |
+| `franchise` | Ilimitado (`null`) | Asignación manual |
+| Superadmin | Ilimitado | Bypass |
 
-Para clientes que **pagan fuera de Stripe**:
+`GET /api/signage/account` devuelve `limits.tvpik_max_screens` desde [`UserPlanService::signageEntitlements()`](../app/Services/UserPlanService.php).
+
+Asignación manual:
 
 ```sql
-UPDATE users SET plan = 'unlimited' WHERE email = 'cliente@ejemplo.com';
+UPDATE users SET plan = 'plus', tvpik_extra_screens = 4 WHERE email = 'cliente@ejemplo.com';
 ```
 
-Tras el cambio, TVPik debe **volver a llamar** `GET /api/signage/account` (o re-login).
-
-### Evolución de producto (opcional)
-
-Si en el futuro Plus incluye 1 pantalla TV, añadir en `config/plans.php`:
-
-```php
-'plus' => [
-    // ...
-    'tvpik' => true,
-    'tvpik_max_screens' => 1,
-],
-'unlimited' => [
-    'tvpik_max_screens' => null, // ilimitado
-],
-```
-
-Y leer `tvpik_max_screens` en `UserPlanService::signageEntitlements()` (hoy: `null` si `tvpik`, `0` si no).
+Tras el cambio, TVPik debe **volver a llamar** la API de cuenta (o re-login).
 
 ---
 

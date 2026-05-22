@@ -56,15 +56,15 @@ return [
     'copy' => [
         'video' => [
             'title' => 'Vídeos en platos',
-            'body' => 'Un plato con vídeo vende hasta un 42% más que uno con foto. Desbloquea los vídeos de comida en el plan Plus por :price.',
-            'cta' => 'Desbloquear vídeos con Plus',
+            'body' => 'Un plato con vídeo vende hasta un 42% más que uno con foto. Desbloquea los vídeos de comida en el plan Pro por :price.',
+            'cta' => 'Desbloquear vídeos con Pro',
         ],
         'translation' => [
             'title' => 'Carta para turistas',
-            'body' => 'En zonas turísticas, muchos comensales no leen el menú en español. Activa inglés y más idiomas en tu carta QR (traducción IA + selector) con el plan Plus por :price.',
-            'cta' => 'Activar idiomas con Plus',
+            'body' => 'En zonas turísticas, muchos comensales no leen el menú en español. Activa inglés y más idiomas en tu carta QR (traducción IA + selector) con el plan Pro por :price.',
+            'cta' => 'Activar idiomas con Pro',
         ],
-        'translation_banner' => 'Tu zona recibe muchos clientes internacionales. Ofrece la carta en varios idiomas con Plus (:price).',
+        'translation_banner' => 'Tu zona recibe muchos clientes internacionales. Ofrece la carta en varios idiomas con Pro (:price).',
     ],
 
 ];

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Services\Platform\UserBillingPresenter;
+use App\Services\UserPlanService;
 use App\User;
 use Illuminate\Http\Request;
 
@@ -20,7 +21,7 @@ class PlatformUsersController extends Controller
         return view('admin.platform.users.index', compact('users', 'presenter'));
     }
 
-    public function show(User $user, UserBillingPresenter $presenter)
+    public function show(User $user, UserBillingPresenter $presenter, UserPlanService $plans)
     {
         $this->authorize('platform.access');
 
@@ -32,7 +33,30 @@ class PlatformUsersController extends Controller
             'user' => $user,
             'presenter' => $presenter,
             'invoices' => $presenter->invoices($user),
+            'planPresentation' => $plans->planPresentation($user),
+            'planTiers' => config('plans.tiers', []),
+            'effectivePlanKey' => $plans->planKey($user),
         ]);
+    }
+
+    public function updateBilling(Request $request, User $user)
+    {
+        $this->authorize('platform.access');
+
+        $tierKeys = implode(',', array_keys(config('plans.tiers', [])));
+
+        $request->validate([
+            'plan' => 'required|string|in:' . $tierKeys,
+            'tvpik_extra_screens' => 'nullable|integer|min:0|max:100',
+        ]);
+
+        $user->plan = $request->input('plan');
+        $user->tvpik_extra_screens = (int) $request->input('tvpik_extra_screens', 0);
+        $user->save();
+
+        return redirect()
+            ->route('admin.platform.users.show', $user)
+            ->with('flash', 'Plan y pantallas TVPik actualizados.');
     }
 
     public function grantSuperAdmin(User $user)

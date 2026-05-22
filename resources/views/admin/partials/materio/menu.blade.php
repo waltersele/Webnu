@@ -85,6 +85,12 @@
                 <div>Dashboard</div>
             </a>
         </li>
+        <li class="menu-item {{ request()->routeIs('admin.platform.billing*') ? 'active' : '' }}">
+            <a href="{{ route('admin.platform.billing.index') }}" class="menu-link">
+                <i class="menu-icon icon-base ri ri-bank-card-line"></i>
+                <div>Facturación</div>
+            </a>
+        </li>
         <li class="menu-item {{ request()->is('admin/platform/users*') ? 'active' : '' }}">
             <a href="{{ route('admin.platform.users.index') }}" class="menu-link">
                 <i class="menu-icon icon-base ri ri-team-line"></i>

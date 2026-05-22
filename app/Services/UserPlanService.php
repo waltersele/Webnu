@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Company;
 use App\MenuScanJob;
+use App\Product;
 use App\User;
 use Illuminate\Validation\ValidationException;
 
@@ -12,11 +13,12 @@ class UserPlanService
     public function planKey(User $user): string
     {
         if ($user->isSuperAdmin()) {
-            return 'unlimited';
+            return 'plus';
         }
 
         if ($user->onGenericTrial()) {
-            $trialTier = $user->trial_plan_key ?: config('plans.trial_tier', 'plus');
+            $trialTier = $this->resolveTierKey($user->trial_plan_key ?: config('plans.trial_tier', 'pro'));
+
             if ($this->tierExists($trialTier)) {
                 return $trialTier;
             }
@@ -26,15 +28,15 @@ class UserPlanService
             $subscription = $user->primarySubscription();
             if ($subscription && $subscription->name) {
                 $mapped = config('plans.subscription_map.' . $subscription->name);
-                if ($mapped && $this->tierExists($mapped)) {
-                    return $mapped;
+                if ($mapped && $this->tierExists($this->resolveTierKey($mapped))) {
+                    return $this->resolveTierKey($mapped);
                 }
             }
 
-            return 'plus';
+            return 'pro';
         }
 
-        $plan = $user->plan ?? config('plans.default', 'free');
+        $plan = $this->resolveTierKey($user->plan ?? config('plans.default', 'free'));
 
         return $this->tierExists($plan) ? $plan : config('plans.default', 'free');
     }
@@ -47,6 +49,27 @@ class UserPlanService
             ['key' => $key],
             config('plans.tiers.' . $key, config('plans.tiers.free', []))
         );
+    }
+
+    public function resolveTierKey(?string $key): string
+    {
+        if ($key === null || $key === '') {
+            return config('plans.default', 'free');
+        }
+
+        $aliases = config('plans.tier_aliases', []);
+
+        return $aliases[$key] ?? $key;
+    }
+
+    public function proPriceLabel(): string
+    {
+        return config('plans.tiers.pro.price_label', '9,90 €/mes');
+    }
+
+    public function plusPriceLabel(): string
+    {
+        return config('plans.tiers.plus.price_label', '19,90 €/mes');
     }
 
     public function menuScanLimit(User $user): ?int
@@ -123,13 +146,108 @@ class UserPlanService
         return (bool) ($this->tier($user)['videos'] ?? false);
     }
 
+    public function canUseProductPhotos(User $user): bool
+    {
+        if ($user->isSuperAdmin()) {
+            return true;
+        }
+
+        return (bool) ($this->tier($user)['product_photos'] ?? false);
+    }
+
+    public function canUsePdfMenu(User $user): bool
+    {
+        if ($user->isSuperAdmin()) {
+            return true;
+        }
+
+        return (bool) ($this->tier($user)['pdf_menu'] ?? false);
+    }
+
+    public function shouldShowWebnuBadge(User $user): bool
+    {
+        if ($user->isSuperAdmin()) {
+            return false;
+        }
+
+        return (bool) ($this->tier($user)['show_webnu_badge'] ?? false);
+    }
+
+    public function maxProductsPerCompany(User $user): ?int
+    {
+        $max = $this->tier($user)['max_products_per_company'] ?? null;
+
+        return $max === null ? null : (int) $max;
+    }
+
+    public function productsCountForCompany(Company $company): int
+    {
+        return (int) Product::whereIn('section_id', function ($query) use ($company) {
+            $query->select('id')
+                ->from('sections')
+                ->where('company_id', $company->id);
+        })->count();
+    }
+
+    public function canAddProduct(User $user, Company $company): bool
+    {
+        $max = $this->maxProductsPerCompany($user);
+        if ($max === null) {
+            return true;
+        }
+
+        return $this->productsCountForCompany($company) < $max;
+    }
+
+    public function tvpikScreensIncluded(User $user): ?int
+    {
+        if ($user->isSuperAdmin()) {
+            return null;
+        }
+
+        $included = $this->tier($user)['tvpik_screens_included'] ?? 0;
+
+        return $included === null ? null : (int) $included;
+    }
+
+    public function tvpikExtraScreens(User $user): int
+    {
+        if ($user->isSuperAdmin()) {
+            return 0;
+        }
+
+        return max(0, (int) ($user->tvpik_extra_screens ?? 0));
+    }
+
+    public function tvpikMaxScreens(User $user): ?int
+    {
+        if ($user->isSuperAdmin()) {
+            return null;
+        }
+
+        $included = $this->tvpikScreensIncluded($user);
+        $extra = $this->tvpikExtraScreens($user);
+
+        if ($included === null) {
+            return $extra > 0 ? $extra : null;
+        }
+
+        $total = $included + $extra;
+
+        return $total > 0 ? $total : 0;
+    }
+
     public function canUseTvpik(User $user): bool
     {
         if ($user->isSuperAdmin()) {
             return true;
         }
 
-        return (bool) ($this->tier($user)['tvpik'] ?? false);
+        if ((bool) ($this->tier($user)['tvpik'] ?? false)) {
+            return true;
+        }
+
+        return $this->tvpikMaxScreens($user) > 0;
     }
 
     public function maxCompanies(User $user): ?int
@@ -159,7 +277,41 @@ class UserPlanService
 
         $max = $this->maxCompanies($user);
         throw ValidationException::withMessages([
-            'name' => "Tu plan permite hasta {$max} " . ($max === 1 ? 'carta' : 'cartas') . '. Mejora a Plus o Ilimitado para añadir más.',
+            'name' => "Tu plan permite hasta {$max} " . ($max === 1 ? 'carta' : 'cartas') . '. Mejora a Pro (' . $this->proPriceLabel() . ') o Plus (' . $this->plusPriceLabel() . ') para añadir más.',
+        ]);
+    }
+
+    public function assertCanAddProduct(User $user, Company $company): void
+    {
+        if ($this->canAddProduct($user, $company)) {
+            return;
+        }
+
+        $max = $this->maxProductsPerCompany($user);
+        throw ValidationException::withMessages([
+            'product_add_name' => "Tu plan Free permite hasta {$max} platos por carta. Pásate a Pro (" . $this->proPriceLabel() . ') para platos ilimitados.',
+        ]);
+    }
+
+    public function assertCanUseProductPhotos(User $user): void
+    {
+        if ($this->canUseProductPhotos($user)) {
+            return;
+        }
+
+        throw ValidationException::withMessages([
+            'product_add_image' => 'Las fotos de platos están disponibles desde el plan Pro (' . $this->proPriceLabel() . ').',
+        ]);
+    }
+
+    public function assertCanUsePdfMenu(User $user): void
+    {
+        if ($this->canUsePdfMenu($user)) {
+            return;
+        }
+
+        throw ValidationException::withMessages([
+            'menu_type' => 'La carta en PDF está disponible desde el plan Pro (' . $this->proPriceLabel() . ').',
         ]);
     }
 
@@ -174,12 +326,7 @@ class UserPlanService
             $key = $this->planKey($user);
             if ($key === 'free') {
                 throw ValidationException::withMessages([
-                    'files' => 'Has usado tu escaneo IA correcto del plan Gratis. Pásate a Plus (9,90 €/mes) para más escaneos.',
-                ]);
-            }
-            if ($key === 'plus') {
-                throw ValidationException::withMessages([
-                    'files' => 'Has usado tus 10 escaneos IA correctos de este mes en Plus. El cupo se renueva el día 1.',
+                    'files' => 'Has usado tu escaneo IA del plan Free. Pásate a Pro (' . $this->proPriceLabel() . ') para escaneos ilimitados.',
                 ]);
             }
 
@@ -200,7 +347,7 @@ class UserPlanService
         }
 
         throw ValidationException::withMessages([
-            'product_add_video' => 'Los vídeos en platos están disponibles desde el plan Plus (9,90 €/mes).',
+            'product_add_video' => 'Los vídeos en platos están disponibles desde el plan Pro (' . $this->proPriceLabel() . ').',
         ]);
     }
 
@@ -231,7 +378,7 @@ class UserPlanService
         }
 
         throw ValidationException::withMessages([
-            'locales' => 'La carta multilingüe está disponible desde el plan Plus (9,90 €/mes).',
+            'locales' => 'La carta multilingüe está disponible desde el plan Pro (' . $this->proPriceLabel() . ').',
         ]);
     }
 
@@ -246,7 +393,7 @@ class UserPlanService
 
         if ($extraLocaleCount > $max) {
             throw ValidationException::withMessages([
-                'locales' => "Tu plan permite hasta {$max} " . ($max === 1 ? 'idioma extra' : 'idiomas extra') . '. Mejora a Ilimitado para más idiomas.',
+                'locales' => "Tu plan Pro permite hasta {$max} idiomas extra. Mejora a Plus (" . $this->plusPriceLabel() . ') para idiomas ilimitados.',
             ]);
         }
     }
@@ -262,7 +409,7 @@ class UserPlanService
         $tier = $this->tier($user);
         $presentation = [
             'key' => $tier['key'] ?? 'free',
-            'label' => $tier['label'] ?? 'Gratis',
+            'label' => $tier['label'] ?? 'Free',
             'trial_active' => false,
             'trial_expired' => false,
             'trial_days_remaining' => null,
@@ -283,7 +430,7 @@ class UserPlanService
             $presentation['trial_days_remaining'] = $user->trial_ends_at
                 ? max(0, (int) now()->diffInDays($user->trial_ends_at, false))
                 : null;
-            $presentation['label'] = ($tier['label'] ?? 'Plus') . ' · prueba gratis';
+            $presentation['label'] = ($tier['label'] ?? 'Pro') . ' · prueba gratis';
 
             return $presentation;
         }
@@ -300,16 +447,17 @@ class UserPlanService
     {
         return [
             'videos' => $this->canUseVideos($user),
+            'product_photos' => $this->canUseProductPhotos($user),
+            'pdf_menu' => $this->canUsePdfMenu($user),
             'translation' => $this->canUseTranslation($user),
             'tvpik' => $this->canUseTvpik($user),
             'menu_scan' => $this->canUseMenuScan($user),
             'multi_company' => $this->maxCompanies($user) === null || $this->maxCompanies($user) > 1,
+            'show_webnu_badge' => $this->shouldShowWebnuBadge($user),
         ];
     }
 
     /**
-     * Payload para integraciones (TVPik, signage). Webnu es la fuente de verdad de facturación.
-     *
      * @return array<string, mixed>
      */
     public function signageEntitlements(User $user): array
@@ -352,31 +500,50 @@ class UserPlanService
                 'translation' => $features['translation'],
                 'menu_scan' => $features['menu_scan'],
                 'multi_company' => $features['multi_company'],
+                'product_photos' => $features['product_photos'],
+                'pdf_menu' => $features['pdf_menu'],
             ],
             'limits' => [
                 'max_companies' => $this->maxCompanies($user),
+                'max_products_per_company' => $this->maxProductsPerCompany($user),
                 'menu_scans_remaining' => $this->menuScansRemaining($user),
                 'translation_max_locales' => $this->maxTranslationLocales($user),
-                'tvpik_max_screens' => $features['tvpik'] ? null : 0,
+                'tvpik_max_screens' => $this->tvpikMaxScreens($user),
             ],
             'required_plan_for' => [
                 'tvpik' => $this->requiredPlanLabel('tvpik'),
                 'videos' => $this->requiredPlanLabel('videos'),
                 'translation' => $this->requiredPlanLabel('translation'),
+                'product_photos' => $this->requiredPlanLabel('product_photos'),
+                'pdf_menu' => $this->requiredPlanLabel('pdf_menu'),
             ],
         ];
     }
 
     public function requiredPlanLabel(string $feature): ?string
     {
-        $map = [
-            'videos' => 'Plus',
-            'translation' => 'Plus',
-            'menu_scan' => 'Plus',
-            'multi_company' => 'Plus',
-            'tvpik' => 'Ilimitado',
+        foreach (config('plans.tiers', []) as $tierKey => $tier) {
+            $requiredFor = $tier['required_for'] ?? [];
+            if (! empty($requiredFor[$feature])) {
+                return $tier['label'] ?? ucfirst($tierKey);
+            }
+        }
+
+        $fallback = [
+            'videos' => 'pro',
+            'translation' => 'pro',
+            'menu_scan' => 'pro',
+            'multi_company' => 'pro',
+            'product_photos' => 'pro',
+            'pdf_menu' => 'pro',
+            'tvpik' => 'plus',
         ];
 
-        return $map[$feature] ?? null;
+        $tierKey = $fallback[$feature] ?? null;
+        if ($tierKey && isset(config('plans.tiers')[$tierKey])) {
+            return config('plans.tiers.' . $tierKey . '.label');
+        }
+
+        return null;
     }
 }

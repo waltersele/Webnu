@@ -238,8 +238,8 @@
             @foreach($landingFeatures ?? [] as $feat)
                 <div class="relative bg-surface-container-lowest border border-border-subtle rounded-xl p-6 hover:border-primary/30 hover:shadow-md transition-all {{ !empty($feat['plan']) ? 'landing-feat--premium' : '' }}">
                     @if(!empty($feat['plan']))
-                        <span class="landing-plan-badge landing-plan-badge--{{ $feat['plan'] === 'ilimitado' ? 'unlimited' : 'plus' }}">
-                            {{ $feat['plan'] === 'ilimitado' ? __('landing.features.plan_unlimited') : __('landing.features.plan_plus') }}
+                        <span class="landing-plan-badge landing-plan-badge--{{ $feat['plan'] === 'plus' ? 'plus' : 'pro' }}">
+                            {{ $feat['plan'] === 'plus' ? __('landing.features.plan_plus') : __('landing.features.plan_pro') }}
                         </span>
                     @endif
                     <div class="w-11 h-11 rounded-xl bg-primary-fixed flex items-center justify-center text-primary mb-4">
@@ -250,7 +250,7 @@
                     @if(!empty($feat['free_note']))
                         <p class="text-label-sm text-primary mt-3 font-medium">{{ $feat['free_note'] }}</p>
                     @elseif(!empty($feat['plan']))
-                        <p class="text-label-sm text-text-muted mt-3">{{ __('landing.features.included_in', ['plan' => $feat['plan'] === 'ilimitado' ? __('landing.features.plan_unlimited') : __('landing.features.plan_plus')]) }}</p>
+                        <p class="text-label-sm text-text-muted mt-3">{{ __('landing.features.included_in', ['plan' => $feat['plan'] === 'plus' ? __('landing.features.plan_plus') : __('landing.features.plan_pro')]) }}</p>
                     @endif
                 </div>
             @endforeach
@@ -427,11 +427,12 @@
         </div>
     </section>
 
-    {{-- Precios (Gratis, Plus, Ilimitado) desde config/plans.php --}}
+    {{-- Precios (Free, Pro, Plus) desde config/plans.php --}}
     @php
         $landingPricingPlans = $landingPricingPlans ?? [];
         $landingPricingComparison = $landingPricingComparison ?? [];
-        $landingPricingTierOrder = $landingPricingTierOrder ?? ['free', 'plus', 'unlimited'];
+        $landingPricingTierOrder = $landingPricingTierOrder ?? ['free', 'pro', 'plus'];
+        $landingFranchisePlan = $landingFranchisePlan ?? null;
     @endphp
     <section id="pricing" class="py-20 md:py-24">
         <div class="text-center mb-12">
@@ -447,7 +448,11 @@
                     <h3 class="font-headline text-headline-md mb-1">{{ $plan['name'] }}</h3>
                     <p class="text-label-sm text-text-muted mb-4">{{ $plan['tagline'] }}</p>
                     <div class="mb-6">
-                        <span class="text-4xl font-bold">{{ $plan['price'] }}</span><span class="text-text-muted">€</span>
+                        @if(($plan['id'] ?? '') === 'franchise' || ($plan['price'] ?? '') === 'A medida')
+                            <span class="text-3xl font-bold">{{ $plan['price'] }}</span>
+                        @else
+                            <span class="text-4xl font-bold">{{ $plan['price'] }}</span><span class="text-text-muted">€</span>
+                        @endif
                         <span class="text-text-muted text-label-md"> {{ $plan['period'] }}</span>
                     </div>
                     <ul class="space-y-3 mb-8 flex-grow text-label-md">
@@ -458,10 +463,31 @@
                             </li>
                         @endforeach
                     </ul>
-                    <a href="{{ $plan['cta_url'] ?? $registerUrl }}" class="w-full {{ !empty($plan['highlight']) ? 'py-4 bg-primary text-on-primary font-semibold hover:opacity-90' : ($plan['id'] === 'unlimited' ? 'py-3 border border-primary text-primary font-semibold hover:bg-primary/5' : 'py-3 border border-border-subtle font-medium hover:bg-surface-container') }} rounded-lg text-center transition-colors">{{ $plan['cta'] }}</a>
+                    <a href="{{ $plan['cta_url'] ?? $registerUrl }}" class="w-full {{ !empty($plan['highlight']) ? 'py-4 bg-primary text-on-primary font-semibold hover:opacity-90' : ($plan['id'] === 'plus' ? 'py-3 border border-primary text-primary font-semibold hover:bg-primary/5' : 'py-3 border border-border-subtle font-medium hover:bg-surface-container') }} rounded-lg text-center transition-colors">{{ $plan['cta'] }}</a>
                 </div>
             @endforeach
         </div>
+
+        @if(!empty($landingFranchisePlan))
+            <div class="mt-8 max-w-3xl mx-auto bg-surface-container-lowest border border-border-subtle rounded-xl p-8 flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+                <div>
+                    <h3 class="font-headline text-headline-md mb-1">{{ $landingFranchisePlan['name'] }}</h3>
+                    <p class="text-label-sm text-text-muted mb-3">{{ $landingFranchisePlan['tagline'] }}</p>
+                    <ul class="space-y-2 text-label-md">
+                        @foreach($landingFranchisePlan['features'] as $feature)
+                            <li class="flex gap-2 items-start">
+                                <span class="material-symbols-outlined text-primary text-[18px] shrink-0">check_circle</span>
+                                <span>{!! $feature !!}</span>
+                            </li>
+                        @endforeach
+                    </ul>
+                </div>
+                <div class="text-center md:text-right shrink-0">
+                    <p class="text-2xl font-bold mb-3">{{ $landingFranchisePlan['price'] }}</p>
+                    <a href="{{ $landingFranchisePlan['cta_url'] }}" class="inline-block py-3 px-6 border border-primary text-primary font-semibold rounded-lg hover:bg-primary/5">{{ $landingFranchisePlan['cta'] }}</a>
+                </div>
+            </div>
+        @endif
 
         @if(count($landingPricingComparison) > 0)
             <div class="mt-16 max-w-5xl mx-auto">

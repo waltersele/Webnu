@@ -36,6 +36,10 @@ class ProductsController extends Controller
             $plans->assertCanUseVideos($request->user());
         }
 
+        if ($request->product_add_image != null) {
+            $plans->assertCanUseProductPhotos($request->user());
+        }
+
         $rules = [
             'product_add_name' => 'required',
             'product_add_price_unit' => 'required',
@@ -45,6 +49,8 @@ class ProductsController extends Controller
         $this->validate($request, $rules);
 
         $section = $this->findOwnedSection($request->get('product_add_section_id'));
+        $company = $section->company;
+        $plans->assertCanAddProduct($request->user(), $company);
 
         $productImagePath = null;
         if ($request->product_add_image != null) {
@@ -112,6 +118,7 @@ class ProductsController extends Controller
         $product->enabled = $request->get('product_modify_enabled') != null;
 
         if ($request->product_modify_image) {
+            $plans->assertCanUseProductPhotos($request->user());
             if ($product->image) {
                 Storage::delete($product->image);
             }

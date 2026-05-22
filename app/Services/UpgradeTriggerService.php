@@ -24,15 +24,16 @@ class UpgradeTriggerService
         $canTranslation = $this->plans->canUseTranslation($user);
         $tourismArea = $company ? $this->isTourismArea($company) : false;
         $foreignSession = $this->isForeignAdminSession($request);
-        $plusPrice = config('plans.tiers.plus.price_label', '9,90 €/mes');
-        $copy = $this->resolvedCopy($plusPrice);
+        $proPrice = config('plans.tiers.pro.price_label', '9,90 €/mes');
+        $copy = $this->resolvedCopy($proPrice);
 
         return [
             'show_video_trigger' => ! $canVideos,
             'show_language_trigger' => ! $canTranslation && ($tourismArea || $foreignSession),
             'tourism_area' => $tourismArea,
             'foreign_session' => $foreignSession,
-            'plus_price' => $plusPrice,
+            'plus_price' => $proPrice,
+            'pro_price' => $proPrice,
             'billing_url' => route('admin.settings'),
             'copy' => $copy,
         ];

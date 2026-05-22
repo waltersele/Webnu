@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Mail\OrderShipped;
+use App\Services\Platform\BillingPriceResolver;
 use App\User;
 use Exception;
 use Illuminate\Http\Request;
@@ -47,7 +48,7 @@ class PaymentController extends Controller
         }
     }
 
-    public function process_subscription(Request $request)
+    public function process_subscription(Request $request, BillingPriceResolver $priceResolver)
     {
         try {
             DB::beginTransaction();
@@ -56,7 +57,9 @@ class PaymentController extends Controller
                 'email' => 'required|email|unique:users',
                 'password' => 'required|string|min:8|confirmed',
                 'payment_method' => 'required|string',
-                'subscription' => 'required|in:1,2',
+                'plan_tier' => 'required|in:pro,plus',
+                'billing_cycle' => 'required|in:monthly,yearly',
+                'tvpik_addon' => 'nullable|in:,screen_1,pack_5',
                 'privacy_policy' => 'accepted',
             ]);
 
@@ -70,16 +73,35 @@ class PaymentController extends Controller
             $user->addPaymentMethod($request->payment_method);
             $user->updateDefaultPaymentMethod($request->payment_method);
 
-            $subscriptionType = (int) $request->subscription;
-            $priceId = $subscriptionType === 1
-                ? config('billing.stripe_prices.monthly')
-                : config('billing.stripe_prices.yearly');
-            $subscriptionName = $subscriptionType === 1
-                ? config('billing.subscription_names.monthly')
-                : config('billing.subscription_names.yearly');
+            $tier = $request->input('plan_tier', 'pro');
+            $cycle = $request->input('billing_cycle', 'monthly');
+            $priceKey = $tier . '_' . $cycle;
+            $priceId = $priceResolver->priceId($priceKey);
+            $subscriptionName = config('billing.subscription_names.' . $priceKey)
+                ?: config('billing.subscription_names.' . $cycle);
+
+            if (! $priceId) {
+                throw new InvalidRequestException('Precio Stripe no configurado para ' . $priceKey . '. Créalo en Plataforma → Facturación o añade STRIPE_PRICE_* al .env.');
+            }
 
             $user->newSubscription($subscriptionName, $priceId)
                 ->create($request->payment_method);
+
+            $addon = $request->input('tvpik_addon');
+            $addonPriceId = $addon ? $priceResolver->priceId('tvpik_' . $addon) : null;
+            if ($addonPriceId) {
+                $addonName = config('billing.subscription_names.tvpik_' . $addon);
+                if ($addonName) {
+                    $user->newSubscription($addonName, $addonPriceId)
+                        ->create($request->payment_method);
+                }
+                if ($addon === 'screen_1') {
+                    $user->tvpik_extra_screens = max((int) $user->tvpik_extra_screens, 1);
+                } elseif ($addon === 'pack_5') {
+                    $user->tvpik_extra_screens = max((int) $user->tvpik_extra_screens, 5);
+                }
+                $user->save();
+            }
 
             DB::commit();
 

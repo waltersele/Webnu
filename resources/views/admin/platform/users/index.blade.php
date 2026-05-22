@@ -40,7 +40,7 @@
                                     {{ $presenter->statusLabel($user) }}
                                 </span>
                             </td>
-                            <td>{{ $presenter->planLabel($user) }}</td>
+                            <td>{{ $presenter->effectivePlanLabel($user) }}</td>
                             <td>{{ $presenter->cardSummary($user) }}</td>
                             <td>{{ $user->created_at->format('d/m/Y') }}</td>
                             <td class="text-end">

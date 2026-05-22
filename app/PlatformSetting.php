@@ -245,7 +245,7 @@ class PlatformSetting extends Model
     {
         $key = static::getValue('sales_handoff_plan_key');
 
-        return $key !== null && $key !== '' ? $key : (string) config('plans.trial_tier', 'plus');
+        return $key !== null && $key !== '' ? $key : (string) config('plans.trial_tier', 'pro');
     }
 
     public static function salesHandoffTrialDays(): int

@@ -13,18 +13,6 @@ Tras configurar el email, ejecuta:
 php artisan db:seed --class=PlatformRolesSeeder
 ```
 
-En local, con `demo@webnu.local`:
-
-```env
-SUPER_ADMIN_EMAILS=demo@webnu.local
-```
-
-Rutas:
-
-- `/admin/platform` — dashboard (MRR, activos, impagados)
-- `/admin/platform/users` — listado de clientes
-- `/admin/platform/users/{id}` — detalle, facturas, acciones
-
 ## Facturación automática (Stripe + Cashier)
 
 Los cobros recurrentes los procesa **Stripe**. La app sincroniza el estado vía **webhook**.
@@ -35,48 +23,72 @@ Los cobros recurrentes los procesa **Stripe**. La app sincroniza el estado vía 
 STRIPE_KEY=pk_...
 STRIPE_SECRET=sk_...
 STRIPE_WEBHOOK_SECRET=whsec_...
+
+# Pro (9,90 €/mes sin IVA)
+STRIPE_PRICE_PRO_MONTHLY=price_...
+STRIPE_PRICE_PRO_YEARLY=price_...
+
+# Plus (19,90 €/mes sin IVA)
+STRIPE_PRICE_PLUS_MONTHLY=price_...
+STRIPE_PRICE_PLUS_YEARLY=price_...
+
+# TVPik add-ons
+STRIPE_PRICE_TVPIK_1=price_...
+STRIPE_PRICE_TVPIK_PACK5=price_...
+
+# Legacy (mapean a Pro si no defines los de arriba)
 STRIPE_PRICE_MONTHLY=price_...
 STRIPE_PRICE_YEARLY=price_...
+
+WEBNU_FRANCHISE_EMAIL=hola@webnu.es
 SUPER_ADMIN_EMAILS=tu@email.com
 ```
 
-### Webhook en producción
+### Planes (`config/plans.php`)
 
-1. Stripe Dashboard → Developers → Webhooks → Add endpoint
-2. URL: `https://tudominio.com/stripe/webhook`
-3. Eventos recomendados (Cashier): `customer.subscription.*`, `invoice.payment_*`, `customer.updated`, `payment_method.attached`
-4. Copia el **Signing secret** a `STRIPE_WEBHOOK_SECRET`
+| Tier | Precio (sin IVA) | Resumen |
+|------|------------------|---------|
+| `free` | 0 € | 2 cartas, 30 platos/carta, 1 scan IA, badge by Webnu |
+| `pro` | 9,90 €/mes | 5 cartas, fotos, vídeos, 3 idiomas, PDF, IA ilimitada |
+| `plus` | 19,90 €/mes | Todo Pro + cartas/idiomas ∞, 1 pantalla TVPik |
+| `franchise` | A medida | Asignación manual en plataforma |
 
-### Webhook en local (Stripe CLI)
+Add-ons TVPik: 1 pantalla 5 €/mes · pack 5 pantallas 20 €/mes (`users.tvpik_extra_screens`).
+
+### Migración de claves legacy
+
+Si en BD quedan `users.plan = plus` o `unlimited` (nombres antiguos):
 
 ```bash
-stripe listen --forward-to http://127.0.0.1:8000/stripe/webhook
+php scripts/migrate-plan-keys.php
 ```
 
-Usa el `whsec_...` que muestra el CLI en tu `.env` local.
+O manualmente: `plus` → `pro`, `unlimited` → `plus`.
 
-### Portal de facturación (cliente)
+Los alias en `plans.tier_aliases` siguen resolviendo valores antiguos en runtime.
 
-Los clientes sin suscripción activa son redirigidos a `/admin/billing`. Desde ahí pueden abrir el **portal de Stripe** para actualizar tarjeta o cambiar plan.
+### Panel superadmin: precios Stripe
 
-### Planes
+Ruta **`/admin/platform/billing`** (menú Plataforma → Facturación):
 
-Configurados en [`config/billing.php`](../config/billing.php):
+- Crear precios en Stripe (Pro, Plus, add-ons TVPik) con un clic.
+- Pegar manualmente un `price_…` existente.
+- Los IDs se guardan en `platform_settings` (prioridad sobre `.env`).
 
-- Mensual: `planqrmensual` — 10 €/mes
-- Anual: `planqranual` — 100 €/año
+### Alta con tarjeta
 
-Alta de nuevos clientes: página [`/welcome`](../resources/views/welcome.blade.php) → `process_subscription`.
+[`/welcome`](../resources/views/welcome.blade.php) → `process_subscription` (plan Pro/Plus, ciclo mensual/anual, add-on TVPik opcional).
 
-## Acceso al panel
+### Cliente en superadmin
 
-El middleware `subscribed` permite el **plan Gratis** con límites (`UserPlanService`). Los clientes con suscripción Stripe activa (`planqrmensual` / `planqranual`) obtienen plan **Plus** vía `subscription_map` en [`config/plans.php`](../config/plans.php).
+**`/admin/platform/users/{id}`**: suscripción Stripe (cancelar/reanudar), facturas, **plan manual** (`users.plan`) y pantallas TVPik extra.
 
-Migración a producción: prioridad cartas/QR en [MIGRACION-PRODUCCION.md](MIGRACION-PRODUCCION.md). Si el cobro es manual (sin Stripe activo), asignad `users.plan` en BD hasta reactivar suscripciones.
+### Acceso al panel
 
-## TVPik (facturación en Webnu)
+El middleware `subscribed` permite **Free** con límites (`UserPlanService`). Suscripciones Stripe activas se mapean en `plans.subscription_map` (p. ej. `planqrmensual` → `pro`).
 
-Los servicios de **pantallas TV / TVPik** se facturan y limitan desde Webnu. TVPik no tiene Stripe propio: consume `GET /api/signage/account`.
+Trial al registrarse: 30 días de **Pro** (`plans.trial_tier`).
 
-Documentación del contrato: **[PLATFORM-BILLING-TVPIK.md](PLATFORM-BILLING-TVPIK.md)**.
+## TVPik
 
+Ver **[PLATFORM-BILLING-TVPIK.md](PLATFORM-BILLING-TVPIK.md)**.

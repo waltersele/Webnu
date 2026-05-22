@@ -91,7 +91,7 @@ trait PreparesLandingPage
     /** @return list<string> */
     protected function landingPricingTierOrder(): array
     {
-        $order = config('landing.pricing_order', ['free', 'plus', 'unlimited']);
+        $order = config('landing.pricing_order', ['free', 'pro', 'plus']);
         $tiers = config('plans.tiers', []);
 
         return array_values(array_filter($order, function ($tierId) use ($tiers) {
@@ -136,10 +136,32 @@ trait PreparesLandingPage
         return $plans;
     }
 
+    /** @return array<string, mixed>|null */
+    protected function buildLandingFranchisePlan(): ?array
+    {
+        if (! isset(config('plans.tiers', [])['franchise'])) {
+            return null;
+        }
+
+        $langKey = 'landing.pricing.franchise';
+        $email = config('landing.franchise_contact_email', 'hola@webnu.es');
+
+        return [
+            'id' => 'franchise',
+            'name' => __("{$langKey}.name"),
+            'tagline' => __("{$langKey}.tagline"),
+            'price' => __("{$langKey}.price"),
+            'period' => __("{$langKey}.period"),
+            'cta' => __("{$langKey}.cta"),
+            'features' => __("{$langKey}.features"),
+            'cta_url' => 'mailto:' . $email . '?subject=' . rawurlencode('Webnu Franquicias'),
+        ];
+    }
+
     /** @return list<array<string, mixed>> */
     protected function buildLandingPricingComparison(): array
     {
-        $rowKeys = ['menus', 'ai_scans', 'videos', 'translation', 'tvpik'];
+        $rowKeys = ['menus', 'products', 'photos', 'ai_scans', 'videos', 'translation', 'pdf', 'tvpik', 'badge'];
         $rows = [];
 
         foreach ($rowKeys as $key) {
@@ -205,10 +227,43 @@ trait PreparesLandingPage
                     'count' => $maxLocales,
                 ]);
 
-            case 'tvpik':
-                return ! empty($tier['tvpik'])
+            case 'products':
+                $maxProducts = $tier['max_products_per_company'] ?? null;
+                if ($maxProducts === null) {
+                    return __('landing.pricing.comparison.unlimited');
+                }
+
+                return trans('landing.pricing.comparison.products_count', [
+                    'count' => $maxProducts,
+                ]);
+
+            case 'photos':
+                return ! empty($tier['product_photos'])
                     ? __('landing.pricing.comparison.yes')
                     : __('landing.pricing.comparison.no');
+
+            case 'pdf':
+                return ! empty($tier['pdf_menu'])
+                    ? __('landing.pricing.comparison.yes')
+                    : __('landing.pricing.comparison.no');
+
+            case 'badge':
+                return ! empty($tier['show_webnu_badge'])
+                    ? __('landing.pricing.comparison.badge_yes')
+                    : __('landing.pricing.comparison.no');
+
+            case 'tvpik':
+                $included = $tier['tvpik_screens_included'] ?? 0;
+                if (! empty($tier['tvpik']) && $included === null) {
+                    return __('landing.pricing.comparison.tvpik_included');
+                }
+                if ((int) $included > 0) {
+                    return trans('landing.pricing.comparison.tvpik_screens', [
+                        'count' => $included,
+                    ]);
+                }
+
+                return __('landing.pricing.comparison.tvpik_addon');
 
             default:
                 return '—';
@@ -283,6 +338,7 @@ trait PreparesLandingPage
             'landingSteps' => __('landing.process.steps'),
             'landingFaq' => $landingFaq,
             'landingPricingPlans' => $this->buildLandingPricingPlans(),
+            'landingFranchisePlan' => $this->buildLandingFranchisePlan(),
             'landingPricingComparison' => $this->buildLandingPricingComparison(),
             'landingPricingTierOrder' => $this->landingPricingTierOrder(),
             'landingCustomizePresets' => __('landing.customize.presets'),

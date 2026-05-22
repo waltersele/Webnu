@@ -6,6 +6,7 @@ use App\Company;
 use App\Http\Controllers\Concerns\PreparesLandingPage;
 use App\PlatformSetting;
 use App\Services\MenuService;
+use App\Services\UserPlanService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
@@ -62,11 +63,18 @@ class PagesController extends Controller
             $viewName = $menuService->themeViewName($company);
             $menuLocaleService = app(\App\Services\MenuLocaleService::class);
             $dailyHighlights = $menuService->dailyHighlightsForCompany($company, $menuLocale);
+            $showWebnuBadge = $company->user
+                ? app(UserPlanService::class)->shouldShowWebnuBadge($company->user)
+                : false;
 
-            return view($viewName, compact('company', 'sections', 'menuLocale', 'menuLocaleService', 'dailyHighlights'));
+            return view($viewName, compact('company', 'sections', 'menuLocale', 'menuLocaleService', 'dailyHighlights', 'showWebnuBadge'));
         }
 
-        return view('menu_pdf', compact('company'));
+        $showWebnuBadge = $company->user
+            ? app(UserPlanService::class)->shouldShowWebnuBadge($company->user)
+            : false;
+
+        return view('menu_pdf', compact('company', 'showWebnuBadge'));
     }
 
     protected function recordMenuView(Company $company, Request $request): void

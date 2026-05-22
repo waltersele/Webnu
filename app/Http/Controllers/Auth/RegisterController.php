@@ -83,6 +83,7 @@ class RegisterController extends Controller
             'plan' => 'free',
             'onboarding_step' => 1,
             'trial_ends_at' => now()->addDays((int) config('plans.trial_days', 30)),
+            'trial_plan_key' => config('plans.trial_tier', 'pro'),
         ]);
 
         $businessName = trim($data['business_name'] ?? '') ?: 'Mi restaurante';

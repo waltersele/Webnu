@@ -20,7 +20,7 @@ class User extends Authenticatable
      * @var array
      */
     protected $fillable = [
-        'name', 'email', 'password', 'plan', 'trial_plan_key', 'onboarding_step', 'onboarding_completed_at',
+        'name', 'email', 'password', 'plan', 'trial_plan_key', 'tvpik_extra_screens', 'onboarding_step', 'onboarding_completed_at',
         'api_token', 'tvpik_api_token', 'tvpik_connected_at', 'tvpik_org_id',
         'stripe_id', 'card_brand', 'card_last_four', 'trial_ends_at',
         'phone', 'legal_name', 'tax_id', 'billing_address', 'billing_postal_code', 'billing_city', 'billing_country',

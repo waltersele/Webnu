@@ -978,10 +978,15 @@
         border-radius: 999px;
         line-height: 1.2;
     }
-    .landing-plan-badge--plus {
+    .landing-plan-badge--pro {
         background: linear-gradient(135deg, #7c3aed 0%, #2563eb 100%);
         color: #fff;
         box-shadow: 0 2px 8px rgba(37, 99, 235, 0.25);
+    }
+    .landing-plan-badge--plus {
+        background: linear-gradient(135deg, #b45309 0%, #ea580c 100%);
+        color: #fff;
+        box-shadow: 0 2px 8px rgba(234, 88, 12, 0.25);
     }
     .landing-plan-badge--unlimited {
         background: linear-gradient(135deg, #b45309 0%, #ea580c 100%);
