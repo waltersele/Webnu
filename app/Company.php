@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Company extends Model
 {
-    protected $fillable = ['name', 'chef_name', 'slug', 'logo', 'background_header', 'address', 'postal_code', 'city', 'province', 'country', 'phone', 'mobile_phone', 'email', 'web', 'whatsapp', 'facebook', 'instagram', 'comments', 'schedule', 'template', 'theme_settings', 'menu_type', 'menu_type_2_pdf', 'enabled', 'reservation', 'user_id', 'sales_rep_user_id', 'sales_converted_at', 'default_locale', 'enabled_locales', 'suggest_translation_upgrade', 'daily_spotlight', 'daily_spotlight_price', 'created_at', 'updated_at'];
+    protected $fillable = ['name', 'chef_name', 'slug', 'logo', 'background_header', 'address', 'postal_code', 'city', 'province', 'country', 'phone', 'mobile_phone', 'email', 'web', 'whatsapp', 'facebook', 'instagram', 'comments', 'schedule', 'template', 'theme_settings', 'menu_type', 'menu_type_2_pdf', 'enabled', 'reservation', 'user_id', 'sales_rep_user_id', 'sales_converted_at', 'default_locale', 'enabled_locales', 'suggest_translation_upgrade', 'daily_spotlight', 'daily_spotlight_price', 'daily_highlights', 'created_at', 'updated_at'];
 
     protected $attributes = [
         'reservation' => false,
@@ -18,6 +18,7 @@ class Company extends Model
     protected $casts = [
         'theme_settings' => 'array',
         'enabled_locales' => 'array',
+        'daily_highlights' => 'array',
         'enabled' => 'boolean',
         'reservation' => 'boolean',
         'suggest_translation_upgrade' => 'boolean',
@@ -120,7 +121,54 @@ class Company extends Model
 
     public function hasDailySpotlight(): bool
     {
-        return trim((string) $this->daily_spotlight) !== '';
+        return count($this->resolvedDailyHighlights()) > 0;
+    }
+
+    /**
+     * @return array<int, array{type: string, label: string, text: string, price: ?string}>
+     */
+    public function resolvedDailyHighlights(): array
+    {
+        $stored = $this->daily_highlights;
+        if (is_array($stored) && count($stored) > 0) {
+            $items = [];
+            foreach ($stored as $item) {
+                if (! is_array($item)) {
+                    continue;
+                }
+                $text = trim((string) ($item['text'] ?? ''));
+                if ($text === '') {
+                    continue;
+                }
+                $type = ($item['type'] ?? 'spotlight') === 'menu_del_dia' ? 'menu_del_dia' : 'spotlight';
+                $defaultLabel = $type === 'menu_del_dia' ? 'Menú del día' : 'Especial de hoy';
+                $label = trim((string) ($item['label'] ?? ''));
+                $price = trim((string) ($item['price'] ?? ''));
+
+                $items[] = [
+                    'type' => $type,
+                    'label' => $label !== '' ? $label : $defaultLabel,
+                    'text' => $text,
+                    'price' => $price !== '' ? $price : null,
+                ];
+            }
+
+            return $items;
+        }
+
+        $legacy = trim((string) $this->daily_spotlight);
+        if ($legacy === '') {
+            return [];
+        }
+
+        $price = trim((string) $this->daily_spotlight_price);
+
+        return [[
+            'type' => 'spotlight',
+            'label' => 'Especial de hoy',
+            'text' => $legacy,
+            'price' => $price !== '' ? $price : null,
+        ]];
     }
 
     public function defaultLocale(): string

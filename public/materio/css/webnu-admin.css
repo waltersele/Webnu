@@ -2,6 +2,15 @@
  * Webnu admin — complementos sobre Materio BS5
  */
 
+.wn-plan-gated--locked {
+  opacity: 0.78;
+  cursor: pointer;
+}
+
+.wn-plan-gated--locked.dropdown-item {
+  color: var(--bs-secondary-color);
+}
+
 /* Botón primario navy (marca) */
 .btn-primary,
 .btn-webnu {

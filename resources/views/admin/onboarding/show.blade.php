@@ -89,12 +89,22 @@
                     <div class="wn-onb-template-layout">
                         <div class="wn-onb-templates" role="listbox" aria-label="Estilos de carta">
                             @foreach($templates as $id => $tpl)
+                                @php
+                                    $onbLocked = isset($templateAccess)
+                                        && ! ($templateAccess['can_use_all'] ?? true)
+                                        && ! in_array($id, $templateAccess['allowed_keys'] ?? [], true)
+                                        && $id !== $selectedTemplate;
+                                @endphp
                                 <button type="button"
-                                    class="wn-onb-template {{ $selectedTemplate === $id ? 'is-selected' : '' }}"
+                                    class="wn-onb-template {{ $selectedTemplate === $id ? 'is-selected' : '' }} {{ $onbLocked ? 'wn-onb-template--locked' : '' }}"
                                     data-template="{{ $id }}"
                                     data-preview-url="{{ $templatePreviewUrls[$id] ?? $initialPreviewUrl }}"
+                                    @if($onbLocked) data-upgrade-trigger="templates" @endif
                                     aria-pressed="{{ $selectedTemplate === $id ? 'true' : 'false' }}">
                                     <span class="wn-onb-template__label">{{ $tpl['label'] }}</span>
+                                    @if($onbLocked)
+                                        @include('admin.partials.plan-pro-badge', ['label' => 'Pro', 'size' => 'xs'])
+                                    @endif
                                 </button>
                             @endforeach
                         </div>
@@ -264,6 +274,9 @@
     var previewLink = document.getElementById('onb-template-preview-link');
     document.querySelectorAll('.wn-onb-template').forEach(function (btn) {
         btn.addEventListener('click', function () {
+            if (btn.classList.contains('wn-onb-template--locked')) {
+                return;
+            }
             document.querySelectorAll('.wn-onb-template').forEach(function (b) {
                 b.classList.remove('is-selected');
                 b.setAttribute('aria-pressed', 'false');

@@ -243,4 +243,5 @@ La facturación unificada **no requiere** SSO. Cuando exista login compartido, e
 - Planes: [`config/plans.php`](../config/plans.php)
 - Stripe Webnu: [`docs/PLATFORM-BILLING.md`](PLATFORM-BILLING.md)
 - Integración técnica TV: [`docs/TVPIK-INTEGRATION.md`](TVPIK-INTEGRATION.md)
+- API workspace TVPik (pantallas, menús, publish): [`docs/TVPIK-WORKSPACE-API.md`](TVPIK-WORKSPACE-API.md)
 - Controlador API: [`app/Http/Controllers/Api/SignageAuthController.php`](../app/Http/Controllers/Api/SignageAuthController.php)

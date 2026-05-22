@@ -30,6 +30,7 @@ class OnboardingController extends Controller
             return redirect()->route('admin.onboarding', ['step' => 3]);
         }
 
+        $templateAccess = $plans->templateAccessForUser($user);
         $templates = collect(config('company_templates.templates', []));
         $templatePreviewUrls = $this->templatePreviewUrls();
         $themePresets = config('company_templates.presets', []);
@@ -43,6 +44,7 @@ class OnboardingController extends Controller
             'step' => $step,
             'maxStep' => self::MAX_STEP,
             'templates' => $templates,
+            'templateAccess' => $templateAccess,
             'templatePreviewUrls' => $templatePreviewUrls,
             'themePresets' => $themePresets,
             'scanPeriod' => $plans->menuScanPeriod($user),
@@ -89,10 +91,16 @@ class OnboardingController extends Controller
                 break;
 
             case 3:
-                $allowed = array_keys(config('company_templates.templates', []));
+                $allowed = $plans->hasAllTemplates($user)
+                    ? array_keys(config('company_templates.templates', []))
+                    : $plans->freeTemplateKeys();
+                if (count($allowed) === 0) {
+                    $allowed = ['basic'];
+                }
                 $data = $request->validate([
                     'template' => 'required|string|in:' . implode(',', $allowed),
                 ]);
+                $plans->assertCanUseTemplate($user, $data['template']);
                 $company->template = $data['template'];
                 $preset = config('company_templates.presets.' . $data['template']);
                 if (is_array($preset)) {

@@ -230,6 +230,21 @@
   border-color: #90caf9;
 }
 
+.wn-template-card--locked {
+  cursor: pointer;
+  opacity: 0.72;
+  position: relative;
+}
+
+.wn-template-card--locked:hover {
+  border-color: var(--bs-primary);
+}
+
+.wn-plan-gated--locked {
+  pointer-events: auto;
+  opacity: 0.85;
+}
+
 .wn-template-card.is-selected {
   border-color: #0074d9;
   box-shadow: 0 0 0 3px rgba(0, 116, 217, 0.15);

@@ -90,6 +90,9 @@
 
   function bindTemplatePicker() {
     $(document).on('click', '.wn-template-card', function (e) {
+      if ($(this).hasClass('wn-template-card--locked')) {
+        return;
+      }
       e.preventDefault();
       var key = $(this).data('template');
       $('#company-template').val(key);

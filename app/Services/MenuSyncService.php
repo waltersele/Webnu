@@ -203,15 +203,17 @@ class MenuSyncService
 
     protected function dailySpotlightPayload(Company $company): ?array
     {
-        $text = trim((string) $company->daily_spotlight);
-        if ($text === '') {
+        $items = $company->resolvedDailyHighlights();
+        if (count($items) === 0) {
             return null;
         }
 
+        $first = $items[0];
+
         return [
-            'label' => 'Especial de hoy',
-            'text' => $text,
-            'price' => trim((string) $company->daily_spotlight_price) ?: null,
+            'label' => $first['label'],
+            'text' => $first['text'],
+            'price' => $first['price'],
         ];
     }
 

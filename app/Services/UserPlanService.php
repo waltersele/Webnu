@@ -442,6 +442,78 @@ class UserPlanService
         return $presentation;
     }
 
+    /** @return string[] */
+    public function freeTemplateKeys(): array
+    {
+        $catalog = array_keys(config('company_templates.templates', []));
+        $configured = config('plans.free_template_keys', []);
+
+        return array_values(array_filter($configured, function ($key) use ($catalog) {
+            return in_array($key, $catalog, true);
+        }));
+    }
+
+    public function hasAllTemplates(User $user): bool
+    {
+        if ($user->isSuperAdmin()) {
+            return true;
+        }
+
+        return $this->planKey($user) !== 'free';
+    }
+
+    public function canUseTemplate(User $user, string $templateKey): bool
+    {
+        if ($this->hasAllTemplates($user)) {
+            return true;
+        }
+
+        return in_array($templateKey, $this->freeTemplateKeys(), true);
+    }
+
+    public function assertCanUseTemplate(User $user, string $templateKey): void
+    {
+        if ($this->canUseTemplate($user, $templateKey)) {
+            return;
+        }
+
+        $label = $this->requiredPlanLabel('templates') ?? 'Pro';
+
+        throw ValidationException::withMessages([
+            'template' => ["Esta plantilla requiere el plan {$label}. Mejora tu suscripción en Ajustes → Plan."],
+        ]);
+    }
+
+    /**
+     * @return array{can_use_all: bool, allowed_keys: string[], locked_keys: string[]}
+     */
+    public function templateAccessForUser(User $user): array
+    {
+        $all = array_keys(config('company_templates.templates', []));
+        $allowed = $this->hasAllTemplates($user)
+            ? $all
+            : $this->freeTemplateKeys();
+
+        return [
+            'can_use_all' => $this->hasAllTemplates($user),
+            'allowed_keys' => $allowed,
+            'locked_keys' => array_values(array_diff($all, $allowed)),
+        ];
+    }
+
+    public function isTemplateLockedForUser(User $user, string $templateKey, ?string $currentTemplate = null): bool
+    {
+        if ($this->canUseTemplate($user, $templateKey)) {
+            return false;
+        }
+
+        if ($currentTemplate !== null && $templateKey === $currentTemplate) {
+            return false;
+        }
+
+        return true;
+    }
+
     /** @return array<string, bool> */
     public function featureFlags(User $user): array
     {
@@ -454,6 +526,7 @@ class UserPlanService
             'menu_scan' => $this->canUseMenuScan($user),
             'multi_company' => $this->maxCompanies($user) === null || $this->maxCompanies($user) > 1,
             'show_webnu_badge' => $this->shouldShowWebnuBadge($user),
+            'all_templates' => $this->hasAllTemplates($user),
         ];
     }
 
@@ -516,6 +589,7 @@ class UserPlanService
                 'translation' => $this->requiredPlanLabel('translation'),
                 'product_photos' => $this->requiredPlanLabel('product_photos'),
                 'pdf_menu' => $this->requiredPlanLabel('pdf_menu'),
+                'templates' => $this->requiredPlanLabel('templates'),
             ],
         ];
     }
@@ -536,6 +610,7 @@ class UserPlanService
             'multi_company' => 'pro',
             'product_photos' => 'pro',
             'pdf_menu' => 'pro',
+            'templates' => 'pro',
             'tvpik' => 'plus',
         ];
 

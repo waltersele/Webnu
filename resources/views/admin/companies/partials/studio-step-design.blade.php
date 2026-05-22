@@ -83,7 +83,19 @@
     <p class="small fw-semibold text-body-secondary mb-2">Plantillas ({{ $allTemplates->count() }})</p>
     <div class="row g-3 mb-3 wn-template-gallery">
         @foreach($allTemplates as $key => $meta)
-            @include('admin.companies.partials.studio-template-card', ['key' => $key, 'meta' => $meta, 'selected' => $currentTemplate === $key])
+            @php
+                $tplLocked = isset($templateAccess)
+                    && ! ($templateAccess['can_use_all'] ?? true)
+                    && ! in_array($key, $templateAccess['allowed_keys'] ?? [], true)
+                    && $key !== $currentTemplate;
+            @endphp
+            @include('admin.companies.partials.studio-template-card', [
+                'key' => $key,
+                'meta' => $meta,
+                'selected' => $currentTemplate === $key,
+                'locked' => $tplLocked,
+                'currentTemplate' => $currentTemplate,
+            ])
         @endforeach
     </div>
 

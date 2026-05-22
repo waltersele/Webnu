@@ -67,7 +67,7 @@ return [
     'templates' => [
         'badge' => 'Biblioteca visual',
         'title' => 'Más de :count plantillas para tu local',
-        'subtitle' => 'Tres vistas previas de ejemplo. En tu panel encontrarás muchas más plantillas — modernas, temáticas y listas para colores, tipografías y logo.',
+        'subtitle' => '5 plantillas en Free; el catálogo completo con Pro. Modernas, temáticas y listas para colores, tipografías y logo.',
         'recommended' => 'Destacada',
         'try_demo' => 'Ver demo',
         'more_title' => 'Y muchas más en tu cuenta',
@@ -323,6 +323,7 @@ return [
             'features' => [
                 '<strong>2 cartas</strong> (2 QR)',
                 '<strong>30 platos</strong> por carta',
+                '<strong>5 plantillas</strong> de carta',
                 'Alérgenos y QR descargable',
                 '<strong>1 escaneo IA</strong>',
                 'Sin fotos, vídeos ni idiomas',
@@ -338,6 +339,7 @@ return [
             'cta' => 'Empezar con Pro',
             'features' => [
                 '<strong>5 cartas</strong> · platos ilimitados',
+                '<strong>Todas las plantillas</strong> de carta',
                 'Fotos y vídeos en platos',
                 'Escaneo IA ilimitado',
                 '<strong>3 idiomas</strong> y PDF de carta',
@@ -405,12 +407,12 @@ return [
         'title' => 'Preguntas frecuentes',
         'items' => [
             ['q' => '¿Cómo funciona el escáner IA?', 'a' => 'Subes foto o PDF de tu carta. Un modelo especializado en gastronomía detecta platos, precios, secciones y alérgenos. Revisas en el panel y publicas.'],
-            ['q' => '¿Qué incluye el plan Free?', 'a' => '2 cartas, 30 platos por carta, alérgenos, QR descargable y 1 escaneo IA. Sin fotos, vídeos ni traducciones. Al registrarte tienes 30 días de Pro gratis (fotos, vídeos, 3 idiomas, PDF). Después vuelves a Free si no suscribes.'],
+            ['q' => '¿Qué incluye el plan Free?', 'a' => '2 cartas, 30 platos por carta, 5 plantillas de diseño, alérgenos, QR descargable y 1 escaneo IA. Sin fotos, vídeos ni traducciones. Al registrarte tienes 30 días de Pro gratis (todas las plantillas, fotos, vídeos, 3 idiomas, PDF). Después vuelves a Free si no suscribes.'],
             ['q' => '¿Puedo cambiar precios desde el móvil?', 'a' => 'Sí. Los cambios son instantáneos para quien escanee el QR. Ideal para productos agotados o menú del día.'],
             ['q' => '¿Qué son los reels en la carta?', 'a' => 'Son vídeos cortos en cada plato de la carta QR: el cliente ve el movimiento sin salir del menú, con una presentación visual y moderna que ayuda a despertar el apetito y vender más.'],
             ['q' => '¿Necesito WiFi en el local para el cliente?', 'a' => 'No. El comensal usa su 4G/5G. La carta está optimizada para señal débil y los vídeos cargan de forma progresiva.'],
             ['q' => '¿Puedo gestionar varios locales?', 'a' => 'Sí. Desde un mismo panel puedes crear y administrar varios negocios, cada uno con su QR y carta independiente. Disponible según tu plan.'],
-            ['q' => '¿Puedo cambiar de plantilla después?', 'a' => 'Por supuesto. En el estudio visual eliges entre nuestra amplia biblioteca de plantillas y ajustas colores, tipografía y logo cuando quieras, sin perder tus platos.'],
+            ['q' => '¿Puedo cambiar de plantilla después?', 'a' => 'Sí. En el estudio visual eliges plantilla y colores cuando quieras. Free incluye 5 diseños; con Pro desbloqueas toda la biblioteca temática sin perder tus platos.'],
             ['q' => '¿Cómo funciona el idioma en la carta?', 'a' => 'Desde Pro activas hasta 3 idiomas extra; con Plus, idiomas ilimitados. Puedes traducir con IA o editar manualmente. Si el navegador del comensal está en otro idioma y lo tienes activo, la carta se abre en ese idioma; también puede elegirlo con el selector al escanear el QR.'],
             ['q' => '¿Cómo funciona TVPik?', 'a' => 'TVPik publica en las TVs del local el contenido que configuras desde Webnu: plantillas de carta completa, plato del día, destacados o vídeos. No es obligatorio mostrar la misma vista que el QR — puedes usar slides, menú del día o recomendaciones. Los cambios de precios y platos en Webnu se sincronizan al instante. Sin HDMI ni Fire Stick.'],
             ['q' => '¿Puedo cancelar o cambiar de plan?', 'a' => 'Sí. Puedes mejorar, bajar o cancelar tu suscripción desde el panel de facturación. El plan gratis sigue disponible sin permanencia.'],

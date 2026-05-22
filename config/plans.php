@@ -8,6 +8,17 @@ return [
     'trial_tier' => 'pro',
 
     /*
+    | Plantillas de carta QR incluidas en Free (el resto requiere Pro o superior).
+    */
+    'free_template_keys' => [
+        'basic',
+        'lumiere',
+        'bistro',
+        'nocturne',
+        'catalogo',
+    ],
+
+    /*
     | Valores legacy en users.plan / trial_plan_key → tier actual.
     */
     'tier_aliases' => [
@@ -63,6 +74,7 @@ return [
                 'product_photos' => true,
                 'pdf_menu' => true,
                 'multi_company' => true,
+                'templates' => true,
             ],
         ],
         'plus' => [

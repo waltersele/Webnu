@@ -67,7 +67,7 @@ return [
     'templates' => [
         'badge' => 'Visual library',
         'title' => 'More than :count templates for your venue',
-        'subtitle' => 'Three sample previews below. Your dashboard includes many more templates — modern, themed and ready for colours, fonts and logo.',
+        'subtitle' => '5 templates on Free; the full library on Pro. Modern, themed and ready for colours, fonts and logo.',
         'recommended' => 'Featured',
         'try_demo' => 'View demo',
         'more_title' => 'And many more in your account',
@@ -323,6 +323,7 @@ return [
             'features' => [
                 '<strong>2 menus</strong> (2 QR)',
                 '<strong>30 dishes</strong> per menu',
+                '<strong>5 menu templates</strong>',
                 'Allergens and downloadable QR',
                 '<strong>1 AI scan</strong>',
                 'No photos, videos or languages',
@@ -338,6 +339,7 @@ return [
             'cta' => 'Start with Pro',
             'features' => [
                 '<strong>5 menus</strong> · unlimited dishes',
+                '<strong>All menu templates</strong>',
                 'Photos and videos on dishes',
                 'Unlimited AI scans',
                 '<strong>3 languages</strong> and menu PDF',
@@ -405,12 +407,12 @@ return [
         'title' => 'Frequently asked questions',
         'items' => [
             ['q' => 'How does the AI scanner work?', 'a' => 'You upload a photo or PDF of your menu. A model specialised in hospitality detects dishes, prices, sections and allergens. You review in the dashboard and publish.'],
-            ['q' => 'What does the free plan include?', 'a' => 'Digital menu with QR, professional templates, real-time changes and 1 successful AI scan (only counts if AI processes your menu correctly). On signup you get 30 days of Plus free (videos, translations and more AI scans). Afterwards you return to Free if you do not subscribe.'],
+            ['q' => 'What does the free plan include?', 'a' => '2 menus, 30 dishes per menu, 5 templates, allergens, downloadable QR and 1 AI scan. No photos, videos or translations. On signup you get 30 days of Pro free (all templates, photos, videos, 3 languages, PDF). Afterwards you return to Free if you do not subscribe.'],
             ['q' => 'Can I change prices from my phone?', 'a' => 'Yes. Changes are instant for anyone scanning the QR. Ideal for sold-out items or set menu of the day.'],
             ['q' => 'What are reels on the menu?', 'a' => 'Short videos on each dish on the QR menu: guests see movement without leaving the menu — a modern presentation that sparks appetite and increases sales.'],
             ['q' => 'Do guests need venue WiFi?', 'a' => 'No. Guests use their 4G/5G. The menu is optimised for weak signal and videos load progressively.'],
             ['q' => 'Can I manage multiple venues?', 'a' => 'Yes. From one dashboard you can create and manage several businesses, each with its own QR and menu. Available depending on your plan.'],
-            ['q' => 'Can I change template later?', 'a' => 'Absolutely. In the visual studio you choose from our template library and adjust colours, typography and logo anytime without losing your dishes.'],
+            ['q' => 'Can I change template later?', 'a' => 'Yes. In the visual studio you pick templates and colours anytime. Free includes 5 designs; Pro unlocks the full themed library without losing your dishes.'],
             ['q' => 'How does language work on the menu?', 'a' => 'From Plus you enable additional languages (English, French, German, Italian, Portuguese, Catalan, Russian…). Translate with AI or edit manually. If the guest\'s browser is in another enabled language, the menu opens in that language; they can also choose via the selector when scanning the QR.'],
             ['q' => 'How does TVPik work?', 'a' => 'TVPik publishes on venue TVs what you configure from Webnu: full menu, dish of the day, highlights or video templates. You do not have to mirror the QR view — slides, set menu and recommendations are supported. Price and dish changes in Webnu sync instantly. No HDMI or Fire Stick.'],
             ['q' => 'Can I cancel or change plan?', 'a' => 'Yes. You can upgrade, downgrade or cancel from the billing panel. The free plan remains available with no lock-in.'],

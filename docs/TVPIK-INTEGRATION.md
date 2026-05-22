@@ -2,6 +2,8 @@
 
 Webnu es la **fuente de verdad** de la carta (secciones, platos, especial del día, vídeos). TVPik **reproduce** en pantallas URLs optimizadas para TV generadas por Webnu.
 
+**Documentación API para el workspace TVPik (conexión, pantallas, plantillas, menús):** **[TVPIK-WORKSPACE-API.md](TVPIK-WORKSPACE-API.md)** — referencia completa para `tvpik-api` / `tvpik-web`.
+
 **Facturación:** Webnu cobra todos los planes (incluido TVPik). TVPik solo consulta permisos — ver **[PLATFORM-BILLING-TVPIK.md](PLATFORM-BILLING-TVPIK.md)**.
 
 ## Flujo del restaurante (hub en Webnu)

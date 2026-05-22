@@ -33,10 +33,12 @@ class CompaniesController extends Controller
         return view('admin.companies.index', compact('companies'));
     }
 
-    public function edit(Company $company)
+    public function edit(Company $company, UserPlanService $plans)
     {
         $this->authorize('view', $company);
 
+        $user = auth()->user();
+        $templateAccess = $plans->templateAccessForUser($user);
         $templates = config('company_templates.templates', []);
         $colorKeys = config('company_templates.color_keys', []);
         $fontKeys = config('company_templates.font_keys', []);
@@ -58,6 +60,7 @@ class CompaniesController extends Controller
         return view('admin.companies.edit', compact(
             'company',
             'templates',
+            'templateAccess',
             'colorKeys',
             'fontKeys',
             'fonts',
@@ -83,10 +86,16 @@ class CompaniesController extends Controller
         );
 
         $userId = auth()->id();
+        $defaultTemplate = 'lumiere';
+        if (! $plans->canUseTemplate($request->user(), $defaultTemplate)) {
+            $freeKeys = $plans->freeTemplateKeys();
+            $defaultTemplate = $freeKeys[0] ?? 'basic';
+        }
+
         $company = Company::create([
             'name' => $request->get('name'),
             'slug' => $slug,
-            'template' => 'lumiere',
+            'template' => $defaultTemplate,
             'menu_type' => 1,
             'enabled' => true,
             'reservation' => false,
@@ -100,7 +109,7 @@ class CompaniesController extends Controller
         return redirect()->route('admin.companies.edit', $company);
     }
 
-    public function update(Company $company, Request $request, CompanySlugService $slugs, CompanyThemeService $themes)
+    public function update(Company $company, Request $request, CompanySlugService $slugs, CompanyThemeService $themes, UserPlanService $plans)
     {
         $this->authorize('update', $company);
 
@@ -108,6 +117,11 @@ class CompaniesController extends Controller
             'name' => 'required',
             'slug' => 'nullable|string|max:64',
         ]);
+
+        $newTemplate = $request->get('template', $company->template ?: 'basic');
+        if ($newTemplate !== ($company->template ?: 'basic')) {
+            $plans->assertCanUseTemplate($request->user(), $newTemplate);
+        }
 
         if ($request->filled('slug')) {
             $customSlug = $slugs->normalize($request->get('slug'));
@@ -137,7 +151,7 @@ class CompaniesController extends Controller
             'comments' => $request->get('comments'),
             'schedule' => $request->get('schedule'),
             'suggest_translation_upgrade' => $request->boolean('suggest_translation_upgrade'),
-            'template' => $request->get('template', $company->template ?: 'basic'),
+            'template' => $newTemplate,
             'theme_settings' => $themes->normalizeFromRequest($request),
             'enabled' => $request->get('enabled') != null,
         ]);
@@ -309,35 +323,60 @@ class CompaniesController extends Controller
         $this->authorize('update', $company);
 
         if ($request->has('clear')) {
+            $company->daily_highlights = null;
             $company->daily_spotlight = null;
             $company->daily_spotlight_price = null;
             $company->save();
 
             return redirect()
                 ->route('admin.sections.index')
-                ->with('flash', 'Especial de hoy quitado de la carta.');
+                ->with('flash', 'Destacados del día quitados de la carta.');
         }
 
         $validated = $request->validate([
-            'daily_spotlight' => ['nullable', 'string', 'max:500'],
-            'daily_spotlight_price' => ['nullable', 'string', 'max:32'],
+            'highlights' => ['nullable', 'array', 'max:3'],
+            'highlights.*.type' => ['required_with:highlights', 'string', 'in:spotlight,menu_del_dia'],
+            'highlights.*.label' => ['nullable', 'string', 'max:80'],
+            'highlights.*.text' => ['nullable', 'string', 'max:2000'],
+            'highlights.*.price' => ['nullable', 'string', 'max:32'],
         ]);
 
-        $text = trim($validated['daily_spotlight'] ?? '');
-        $price = trim(str_replace(',', '.', $validated['daily_spotlight_price'] ?? ''));
-        if ($price !== '' && !preg_match('/^\d+(\.\d{1,2})?$/', $price)) {
-            throw ValidationException::withMessages([
-                'daily_spotlight_price' => ['Indica un precio válido (ej: 12 o 12,50).'],
-            ]);
+        $normalized = [];
+        foreach ($validated['highlights'] ?? [] as $row) {
+            $text = trim((string) ($row['text'] ?? ''));
+            if ($text === '') {
+                continue;
+            }
+            $type = ($row['type'] ?? 'spotlight') === 'menu_del_dia' ? 'menu_del_dia' : 'spotlight';
+            $label = trim((string) ($row['label'] ?? ''));
+            $price = trim(str_replace(',', '.', (string) ($row['price'] ?? '')));
+            if ($price !== '' && ! preg_match('/^\d+(\.\d{1,2})?$/', $price)) {
+                throw ValidationException::withMessages([
+                    'highlights' => ['Indica un precio válido (ej: 12 o 12,50).'],
+                ]);
+            }
+            $normalized[] = [
+                'type' => $type,
+                'label' => $label,
+                'text' => $text,
+                'price' => $price !== '' ? $price : null,
+            ];
         }
 
-        $company->daily_spotlight = $text !== '' ? $text : null;
-        $company->daily_spotlight_price = $price !== '' ? $price : null;
+        $company->daily_highlights = count($normalized) > 0 ? $normalized : null;
+        if (count($normalized) > 0) {
+            $first = $normalized[0];
+            $company->daily_spotlight = $first['text'];
+            $company->daily_spotlight_price = $first['price'];
+        } else {
+            $company->daily_spotlight = null;
+            $company->daily_spotlight_price = null;
+        }
         $company->save();
 
         $message = $company->hasDailySpotlight()
-            ? 'Especial de hoy publicado en la carta.'
-            : 'Especial de hoy quitado de la carta.';
+            ? 'Destacados del día guardados.'
+            : 'Destacados del día quitados de la carta.';
 
         return redirect()
             ->route('admin.sections.index')

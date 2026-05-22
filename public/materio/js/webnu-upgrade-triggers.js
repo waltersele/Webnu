@@ -15,10 +15,14 @@
             }
             return;
         }
-        $('#wn-upgrade-trigger-modal-title').text(block.title || '');
+        var title = block.title || '';
+        if (block.price_label && title.indexOf(block.price_label) === -1) {
+            title = title ? title + ' · ' + block.price_label : block.price_label;
+        }
+        $('#wn-upgrade-trigger-modal-title').text(title);
         $('#wn-upgrade-trigger-modal-body').text(block.body || '');
         var $cta = $('#wn-upgrade-trigger-modal-cta');
-        $cta.text(block.cta || 'Ver plan Plus');
+        $cta.text(block.cta || 'Ver planes');
         if (billingUrl) {
             $cta.attr('href', billingUrl);
         }

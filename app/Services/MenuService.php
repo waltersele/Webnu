@@ -161,19 +161,19 @@ class MenuService
 
     public function dailyHighlightsForCompany(Company $company, ?string $locale = null): array
     {
-        $text = trim((string) $company->daily_spotlight);
-        if ($text === '') {
-            return [];
+        $items = $company->resolvedDailyHighlights();
+        $result = [];
+
+        foreach ($items as $item) {
+            $result[] = [
+                'type' => $item['type'],
+                'label' => $item['label'],
+                'text' => $item['text'],
+                'price' => $item['price'],
+            ];
         }
 
-        $price = trim((string) $company->daily_spotlight_price);
-
-        return [[
-            'type' => 'spotlight',
-            'label' => 'Especial de hoy',
-            'text' => $text,
-            'price' => $price !== '' ? $price : null,
-        ]];
+        return $result;
     }
 
     public function themeViewName(Company $company): string
@@ -224,7 +224,10 @@ class MenuService
         $templates = array_keys(config('company_templates.templates', []));
 
         if ($request->filled('preview_template') && in_array($request->get('preview_template'), $templates, true)) {
-            $company->template = $request->get('preview_template');
+            $previewKey = $request->get('preview_template');
+            if (app(UserPlanService::class)->canUseTemplate($user, $previewKey)) {
+                $company->template = $previewKey;
+            }
         }
 
         $overrides = [];
