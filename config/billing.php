@@ -3,11 +3,11 @@
 return [
 
     /*
-    | Precios Stripe (sin IVA en producto). Crear en Dashboard y copiar IDs al .env.
+    | Precios Stripe (fallback .env). Prioridad: platform_settings → aquí.
     */
     'stripe_prices' => [
-        'pro_monthly' => env('STRIPE_PRICE_PRO_MONTHLY', env('STRIPE_PRICE_MONTHLY', 'price_1Gt02YHiccjFLKWy8NvH4JCU')),
-        'pro_yearly' => env('STRIPE_PRICE_PRO_YEARLY', env('STRIPE_PRICE_YEARLY', 'price_1GstoTHiccjFLKWy98LcWWqu')),
+        'pro_monthly' => env('STRIPE_PRICE_PRO_MONTHLY', env('STRIPE_PRICE_MONTHLY', '')),
+        'pro_yearly' => env('STRIPE_PRICE_PRO_YEARLY', env('STRIPE_PRICE_YEARLY', '')),
         'plus_monthly' => env('STRIPE_PRICE_PLUS_MONTHLY', ''),
         'plus_yearly' => env('STRIPE_PRICE_PLUS_YEARLY', ''),
         'tvpik_screen_1' => env('STRIPE_PRICE_TVPIK_1', ''),
@@ -21,7 +21,6 @@ return [
         'plus_yearly' => 'planqr_plus_anual',
         'tvpik_screen_1' => 'planqr_tvpik_1',
         'tvpik_pack_5' => 'planqr_tvpik_pack5',
-        // Legacy (mapean a pro en config/plans.php)
         'monthly' => 'planqrmensual',
         'yearly' => 'planqranual',
     ],
@@ -36,8 +35,8 @@ return [
     ],
 
     /*
-    | Catálogo para crear precios en Stripe desde /admin/platform/billing.
-    | setting_key → platform_settings; si está vacío, se usa stripe_prices (env).
+    | Catálogo para /admin/platform/billing.
+    | amount_setting_key → importe editable en panel; amount_cents = valor por defecto.
     */
     'price_catalog' => [
         'pro_monthly' => [
@@ -45,6 +44,7 @@ return [
             'product_name' => 'Webnu Pro',
             'product_setting_key' => 'stripe_product_pro',
             'amount_cents' => 990,
+            'amount_setting_key' => 'billing_amount_cents_pro_monthly',
             'interval' => 'month',
             'setting_key' => 'stripe_price_pro_monthly',
         ],
@@ -53,6 +53,7 @@ return [
             'product_name' => 'Webnu Pro',
             'product_setting_key' => 'stripe_product_pro',
             'amount_cents' => 9900,
+            'amount_setting_key' => 'billing_amount_cents_pro_yearly',
             'interval' => 'year',
             'setting_key' => 'stripe_price_pro_yearly',
         ],
@@ -61,6 +62,7 @@ return [
             'product_name' => 'Webnu Plus',
             'product_setting_key' => 'stripe_product_plus',
             'amount_cents' => 1990,
+            'amount_setting_key' => 'billing_amount_cents_plus_monthly',
             'interval' => 'month',
             'setting_key' => 'stripe_price_plus_monthly',
         ],
@@ -69,6 +71,7 @@ return [
             'product_name' => 'Webnu Plus',
             'product_setting_key' => 'stripe_product_plus',
             'amount_cents' => 19900,
+            'amount_setting_key' => 'billing_amount_cents_plus_yearly',
             'interval' => 'year',
             'setting_key' => 'stripe_price_plus_yearly',
         ],
@@ -77,6 +80,7 @@ return [
             'product_name' => 'Webnu TVPik',
             'product_setting_key' => 'stripe_product_tvpik',
             'amount_cents' => 500,
+            'amount_setting_key' => 'billing_amount_cents_tvpik_screen_1',
             'interval' => 'month',
             'setting_key' => 'stripe_price_tvpik_screen_1',
         ],
@@ -85,6 +89,7 @@ return [
             'product_name' => 'Webnu TVPik',
             'product_setting_key' => 'stripe_product_tvpik',
             'amount_cents' => 2000,
+            'amount_setting_key' => 'billing_amount_cents_tvpik_pack_5',
             'interval' => 'month',
             'setting_key' => 'stripe_price_tvpik_pack_5',
         ],

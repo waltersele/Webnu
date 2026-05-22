@@ -146,6 +146,88 @@ class PlatformSettingsService
     /**
      * @param  array<string, mixed>  $data
      */
+    public function integrationsSettingsForForm(): array
+    {
+        return [
+            'stripe_key' => PlatformSetting::stripeKey() ?? '',
+            'stripe_secret_configured' => PlatformSetting::hasStripeSecret(),
+            'stripe_secret_hint' => PlatformSetting::stripeSecretHint(),
+            'stripe_webhook_configured' => PlatformSetting::stripeWebhookSecret() !== null,
+            'stripe_webhook_hint' => PlatformSetting::stripeWebhookHint(),
+            'tvpik_api_url' => PlatformSetting::tvpikApiUrl() ?? '',
+            'tvpik_web_url' => PlatformSetting::tvpikWebUrl(),
+            'tvpik_app_key_configured' => PlatformSetting::tvpikAppKey() !== null,
+            'tvpik_app_key_hint' => PlatformSetting::tvpikAppKeyHint(),
+            'tvpik_stub_screens' => PlatformSetting::tvpikStubScreens(),
+            'digital_signage_app_key_configured' => PlatformSetting::digitalSignageAppKey() !== null,
+            'digital_signage_app_key_hint' => PlatformSetting::digitalSignageAppKeyHint(),
+            'digital_signage_only_enabled' => PlatformSetting::digitalSignageOnlyEnabled(),
+        ];
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     */
+    public function updateIntegrations(array $data): void
+    {
+        if (array_key_exists('stripe_key', $data)) {
+            $key = trim((string) $data['stripe_key']);
+            PlatformSetting::setValue('stripe_key', $key === '' ? null : $key);
+        }
+
+        if (! empty($data['stripe_secret'])) {
+            PlatformSetting::setValue('stripe_secret', trim((string) $data['stripe_secret']));
+        }
+
+        if ($data['clear_stripe_secret'] ?? false) {
+            PlatformSetting::where('key', 'stripe_secret')->delete();
+        }
+
+        if (! empty($data['stripe_webhook_secret'])) {
+            PlatformSetting::setValue('stripe_webhook_secret', trim((string) $data['stripe_webhook_secret']));
+        }
+
+        if ($data['clear_stripe_webhook_secret'] ?? false) {
+            PlatformSetting::where('key', 'stripe_webhook_secret')->delete();
+        }
+
+        if (array_key_exists('tvpik_api_url', $data)) {
+            $url = trim((string) $data['tvpik_api_url']);
+            PlatformSetting::setValue('tvpik_api_url', $url === '' ? null : rtrim($url, '/'));
+        }
+
+        if (array_key_exists('tvpik_web_url', $data)) {
+            $url = trim((string) $data['tvpik_web_url']);
+            PlatformSetting::setValue('tvpik_web_url', $url === '' ? null : rtrim($url, '/'));
+        }
+
+        if (! empty($data['tvpik_app_key'])) {
+            PlatformSetting::setValue('tvpik_app_key', trim((string) $data['tvpik_app_key']));
+        }
+
+        if ($data['clear_tvpik_app_key'] ?? false) {
+            PlatformSetting::where('key', 'tvpik_app_key')->delete();
+        }
+
+        PlatformSetting::setValue(
+            'tvpik_stub_screens',
+            ! empty($data['tvpik_stub_screens']) ? '1' : '0'
+        );
+
+        if (! empty($data['digital_signage_app_key'])) {
+            PlatformSetting::setValue('digital_signage_app_key', trim((string) $data['digital_signage_app_key']));
+        }
+
+        if ($data['clear_digital_signage_app_key'] ?? false) {
+            PlatformSetting::where('key', 'digital_signage_app_key')->delete();
+        }
+
+        PlatformSetting::setValue(
+            'digital_signage_only_enabled',
+            ! empty($data['digital_signage_only_enabled']) ? '1' : '0'
+        );
+    }
+
     public function updateSales(array $data): void
     {
         if (array_key_exists('sales_handoff_plan_key', $data)) {

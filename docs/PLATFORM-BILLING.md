@@ -67,13 +67,17 @@ O manualmente: `plus` → `pro`, `unlimited` → `plus`.
 
 Los alias en `plans.tier_aliases` siguen resolviendo valores antiguos en runtime.
 
-### Panel superadmin: precios Stripe
+### Panel superadmin: claves y precios Stripe
 
-Ruta **`/admin/platform/billing`** (menú Plataforma → Facturación):
+**`/admin/platform/settings`** → Integraciones: `pk_`, `sk_`, `whsec_` (cifrados en BD; prioridad sobre `.env`).
 
-- Crear precios en Stripe (Pro, Plus, add-ons TVPik) con un clic.
-- Pegar manualmente un `price_…` existente.
-- Los IDs se guardan en `platform_settings` (prioridad sobre `.env`).
+**`/admin/platform/billing`** (Plataforma → Facturación):
+
+- Editar importes (€) y guardarlos en `platform_settings`.
+- Crear precios en Stripe (Pro, Plus, TVPik) o pegar un `price_…` existente.
+- **Borrar catálogo local** al cambiar de cuenta Stripe; luego **Crear todos los que falten**.
+- **Recrear** genera un nuevo `price_…` (suscripciones antiguas no cambian solas).
+- Los IDs tienen prioridad sobre `STRIPE_PRICE_*` en `.env` (dejar vacíos en producción).
 
 ### Alta con tarjeta
 

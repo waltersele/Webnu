@@ -18,6 +18,10 @@ class PlatformSetting extends Model
     protected static $encryptedKeys = [
         'gemini_api_key',
         'mail_password',
+        'stripe_secret',
+        'stripe_webhook_secret',
+        'tvpik_app_key',
+        'digital_signage_app_key',
     ];
 
     public static function getValue(string $key, ?string $default = null): ?string
@@ -260,5 +264,141 @@ class PlatformSetting extends Model
         $max = static::getValue('sales_demo_max_photo_products');
 
         return $max !== null && $max !== '' ? max(1, (int) $max) : 2;
+    }
+
+    public static function secretHint(?string $value): ?string
+    {
+        if (! $value || strlen($value) < 8) {
+            return null;
+        }
+
+        return '••••' . substr($value, -4);
+    }
+
+    protected static function secretFromDbOrEnv(string $dbKey, string $envKey): ?string
+    {
+        $fromDb = static::getValue($dbKey);
+        if ($fromDb !== null && trim($fromDb) !== '') {
+            return trim($fromDb);
+        }
+
+        $fromEnv = env($envKey);
+
+        return $fromEnv !== null && $fromEnv !== '' ? trim($fromEnv) : null;
+    }
+
+    public static function stripeKey(): ?string
+    {
+        $fromDb = static::getValue('stripe_key');
+        if ($fromDb !== null && trim($fromDb) !== '') {
+            return trim($fromDb);
+        }
+
+        $fromEnv = env('STRIPE_KEY');
+
+        return $fromEnv !== null && $fromEnv !== '' ? trim($fromEnv) : null;
+    }
+
+    public static function stripeSecret(): ?string
+    {
+        return static::secretFromDbOrEnv('stripe_secret', 'STRIPE_SECRET');
+    }
+
+    public static function stripeWebhookSecret(): ?string
+    {
+        return static::secretFromDbOrEnv('stripe_webhook_secret', 'STRIPE_WEBHOOK_SECRET');
+    }
+
+    public static function hasStripeSecret(): bool
+    {
+        $secret = static::stripeSecret();
+
+        return $secret !== null && $secret !== '';
+    }
+
+    public static function stripeSecretHint(): ?string
+    {
+        return static::secretHint(static::stripeSecret());
+    }
+
+    public static function stripeWebhookHint(): ?string
+    {
+        return static::secretHint(static::stripeWebhookSecret());
+    }
+
+    public static function tvpikApiUrl(): ?string
+    {
+        $fromDb = static::getValue('tvpik_api_url');
+        if ($fromDb !== null && trim($fromDb) !== '') {
+            return rtrim(trim($fromDb), '/');
+        }
+
+        $fromEnv = env('TVPIK_API_URL');
+
+        return $fromEnv !== null && $fromEnv !== '' ? rtrim(trim($fromEnv), '/') : null;
+    }
+
+    public static function tvpikAppKey(): ?string
+    {
+        $fromDb = static::getValue('tvpik_app_key');
+        if ($fromDb !== null && trim($fromDb) !== '') {
+            return trim($fromDb);
+        }
+
+        $fromEnv = env('TVPIK_APP_KEY') ?: env('DIGITAL_SIGNAGE_APP_KEY');
+
+        return $fromEnv !== null && $fromEnv !== '' ? trim($fromEnv) : null;
+    }
+
+    public static function tvpikWebUrl(): string
+    {
+        $fromDb = static::getValue('tvpik_web_url');
+        if ($fromDb !== null && trim($fromDb) !== '') {
+            return rtrim(trim($fromDb), '/');
+        }
+
+        return rtrim((string) env('TVPIK_WEB_URL', 'https://tvpik.es'), '/');
+    }
+
+    public static function tvpikStubScreens(): bool
+    {
+        $fromDb = static::getValue('tvpik_stub_screens');
+        if ($fromDb !== null && $fromDb !== '') {
+            return filter_var($fromDb, FILTER_VALIDATE_BOOLEAN);
+        }
+
+        return filter_var(env('TVPIK_STUB_SCREENS', false), FILTER_VALIDATE_BOOLEAN);
+    }
+
+    public static function tvpikAppKeyHint(): ?string
+    {
+        return static::secretHint(static::tvpikAppKey());
+    }
+
+    public static function digitalSignageAppKey(): ?string
+    {
+        $fromDb = static::getValue('digital_signage_app_key');
+        if ($fromDb !== null && trim($fromDb) !== '') {
+            return trim($fromDb);
+        }
+
+        $fromEnv = env('DIGITAL_SIGNAGE_APP_KEY');
+
+        return $fromEnv !== null && $fromEnv !== '' ? trim($fromEnv) : null;
+    }
+
+    public static function digitalSignageOnlyEnabled(): bool
+    {
+        $fromDb = static::getValue('digital_signage_only_enabled');
+        if ($fromDb !== null && $fromDb !== '') {
+            return filter_var($fromDb, FILTER_VALIDATE_BOOLEAN);
+        }
+
+        return filter_var(env('DIGITAL_SIGNAGE_ONLY_ENABLED', true), FILTER_VALIDATE_BOOLEAN);
+    }
+
+    public static function digitalSignageAppKeyHint(): ?string
+    {
+        return static::secretHint(static::digitalSignageAppKey());
     }
 }

@@ -8,7 +8,9 @@ use App\Observers\ProductObserver;
 use App\Observers\SectionObserver;
 use App\Product;
 use App\Section;
+use App\Services\Platform\PlatformIntegrationsConfigurator;
 use App\Services\Platform\PlatformMailConfigurator;
+use App\Services\Platform\PlatformStripeConfigurator;
 use Illuminate\Support\ServiceProvider;
 use Laravel\Cashier\Cashier;
 
@@ -37,6 +39,8 @@ class AppServiceProvider extends ServiceProvider
         }
 
         $this->app->make(PlatformMailConfigurator::class)->apply();
+        $this->app->make(PlatformStripeConfigurator::class)->apply();
+        $this->app->make(PlatformIntegrationsConfigurator::class)->apply();
 
         Company::observe(CompanyObserver::class);
         Section::observe(SectionObserver::class);

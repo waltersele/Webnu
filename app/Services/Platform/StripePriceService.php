@@ -24,11 +24,14 @@ class StripePriceService
         $rows = [];
         foreach (config('billing.price_catalog', []) as $key => $meta) {
             $priceId = $this->resolver->priceId($key);
+            $amountCents = $this->resolver->amountCents($key);
             $rows[$key] = array_merge($meta, [
                 'key' => $key,
                 'price_id' => $priceId,
                 'configured' => $priceId !== null && $priceId !== '',
-                'display_amount' => number_format(($meta['amount_cents'] ?? 0) / 100, 2, ',', '.') . ' €',
+                'amount_cents' => $amountCents,
+                'amount_eur' => number_format($amountCents / 100, 2, '.', ''),
+                'display_amount' => number_format($amountCents / 100, 2, ',', '.') . ' €',
                 'subscription_name' => config('billing.subscription_names.' . $key),
             ]);
         }
@@ -46,7 +49,7 @@ class StripePriceService
     /**
      * @return array{price_id: string, product_id: string}
      */
-    public function createPrice(string $catalogKey): array
+    public function createPrice(string $catalogKey, bool $force = false): array
     {
         $this->ensureStripe();
 
@@ -56,14 +59,26 @@ class StripePriceService
         }
 
         $existing = $this->resolver->priceId($catalogKey);
-        if ($existing) {
-            return ['price_id' => $existing, 'product_id' => PlatformSetting::getValue($meta['product_setting_key'] ?? '') ?? ''];
+        if ($existing && ! $force) {
+            return [
+                'price_id' => $existing,
+                'product_id' => PlatformSetting::getValue($meta['product_setting_key'] ?? '') ?? '',
+            ];
+        }
+
+        if ($force) {
+            $this->resolver->clearPriceId($catalogKey);
         }
 
         $productId = $this->resolveOrCreateProduct($meta);
+        $amountCents = $this->resolver->amountCents($catalogKey);
+        if ($amountCents <= 0) {
+            throw new \InvalidArgumentException('El importe debe ser mayor que 0.');
+        }
+
         $price = Price::create([
             'product' => $productId,
-            'unit_amount' => (int) $meta['amount_cents'],
+            'unit_amount' => $amountCents,
             'currency' => 'eur',
             'recurring' => [
                 'interval' => $meta['interval'] ?? 'month',
@@ -79,6 +94,21 @@ class StripePriceService
             'price_id' => $price->id,
             'product_id' => $productId,
         ];
+    }
+
+    public function recreatePrice(string $catalogKey): array
+    {
+        return $this->createPrice($catalogKey, true);
+    }
+
+    public function saveAmountCents(string $catalogKey, int $cents): void
+    {
+        $this->resolver->saveAmountCents($catalogKey, $cents);
+    }
+
+    public function clearStripeCatalog(): void
+    {
+        $this->resolver->clearStripeCatalog();
     }
 
     /**
@@ -120,6 +150,9 @@ class StripePriceService
         PlatformSetting::setValue($meta['setting_key'], $priceId);
     }
 
+    /**
+     * @param  array<string, mixed>  $meta
+     */
     protected function resolveOrCreateProduct(array $meta): string
     {
         $productSettingKey = $meta['product_setting_key'] ?? null;
@@ -147,7 +180,7 @@ class StripePriceService
     protected function ensureStripe(): void
     {
         if (! $this->stripeConfigured()) {
-            throw new \RuntimeException('Configura STRIPE_SECRET en .env para crear precios.');
+            throw new \RuntimeException('Configura las claves de Stripe en Plataforma → Configuración → Integraciones.');
         }
 
         Stripe::setApiKey(config('services.stripe.secret'));

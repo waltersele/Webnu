@@ -1,7 +1,7 @@
 @extends('admin.layout')
 
 @section('page_title', 'Configuración de plataforma')
-@section('page_subtitle', 'IA, correo y formularios de contacto')
+@section('page_subtitle', 'Integraciones, IA, correo y contacto')
 
 @section('page_actions')
     <a href="{{ route('admin.platform.dashboard') }}" class="btn btn-outline-secondary btn-sm">Volver</a>
@@ -24,6 +24,131 @@
         <form method="POST" action="{{ route('admin.platform.settings.update') }}" id="platform-settings-form">
             @csrf
             @method('PUT')
+
+            {{-- Integraciones (API keys) --}}
+            <div class="card mb-4">
+                <div class="card-header d-flex flex-wrap justify-content-between align-items-center gap-2">
+                    <h5 class="mb-0">Integraciones (API keys)</h5>
+                    <a href="{{ route('admin.platform.billing.index') }}" class="btn btn-sm btn-outline-primary">Facturación Stripe</a>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted">
+                        Las claves sensibles se guardan cifradas en la base de datos y tienen prioridad sobre el <code>.env</code>.
+                        Tras cambiar de cuenta Stripe, borra el catálogo local en Facturación y vuelve a crear los precios.
+                    </p>
+
+                    <h6 class="text-primary mt-2">Stripe (pagos)</h6>
+                    @if ($integrations['stripe_secret_configured'])
+                        <div class="alert alert-success py-2">
+                            <i class="ri-check-line me-1"></i> Clave secreta configurada
+                            @if ($integrations['stripe_secret_hint'])
+                                <span class="text-muted">({{ $integrations['stripe_secret_hint'] }})</span>
+                            @endif
+                        </div>
+                    @else
+                        <div class="alert alert-warning py-2 mb-3">
+                            Sin <code>STRIPE_SECRET</code>. El checkout y la facturación no funcionarán hasta configurarla aquí o en <code>.env</code>.
+                        </div>
+                    @endif
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label for="stripe_key" class="form-label">Clave publicable (pk_…)</label>
+                            <input type="text" name="stripe_key" id="stripe_key" class="form-control font-monospace"
+                                   value="{{ old('stripe_key', $integrations['stripe_key']) }}" placeholder="pk_test_..." autocomplete="off">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="stripe_secret" class="form-label">Clave secreta (sk_…)</label>
+                            <input type="password" name="stripe_secret" id="stripe_secret" class="form-control font-monospace"
+                                   placeholder="{{ $integrations['stripe_secret_configured'] ? 'Dejar vacío para no cambiar' : 'sk_test_...' }}"
+                                   autocomplete="off">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="stripe_webhook_secret" class="form-label">Webhook signing secret (whsec_…)</label>
+                            <input type="password" name="stripe_webhook_secret" id="stripe_webhook_secret" class="form-control font-monospace"
+                                   placeholder="{{ $integrations['stripe_webhook_configured'] ? 'Dejar vacío para no cambiar (' . ($integrations['stripe_webhook_hint'] ?? '') . ')' : 'whsec_...' }}"
+                                   autocomplete="off">
+                            <div class="form-text">Endpoint: <code>{{ url('stripe/webhook') }}</code></div>
+                        </div>
+                    </div>
+
+                    @if ($integrations['stripe_secret_configured'])
+                        <div class="form-check mb-2">
+                            <input type="checkbox" class="form-check-input" name="clear_stripe_secret" value="1" id="clear_stripe_secret">
+                            <label class="form-check-label text-danger" for="clear_stripe_secret">Eliminar clave secreta guardada</label>
+                        </div>
+                    @endif
+                    @if ($integrations['stripe_webhook_configured'])
+                        <div class="form-check mb-3">
+                            <input type="checkbox" class="form-check-input" name="clear_stripe_webhook_secret" value="1" id="clear_stripe_webhook_secret">
+                            <label class="form-check-label text-danger" for="clear_stripe_webhook_secret">Eliminar webhook secret guardado</label>
+                        </div>
+                    @endif
+
+                    <button type="submit" class="btn btn-outline-primary mb-4"
+                            formaction="{{ route('admin.platform.settings.test-stripe') }}">
+                        <i class="ri-bank-card-line me-1"></i> Probar conexión con Stripe
+                    </button>
+
+                    <hr>
+
+                    <h6 class="text-primary">TVPik (pantallas)</h6>
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label for="tvpik_api_url" class="form-label">URL API TVPik</label>
+                            <input type="url" name="tvpik_api_url" id="tvpik_api_url" class="form-control"
+                                   value="{{ old('tvpik_api_url', $integrations['tvpik_api_url']) }}" placeholder="https://api.tvpik.es">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="tvpik_web_url" class="form-label">URL app TVPik</label>
+                            <input type="url" name="tvpik_web_url" id="tvpik_web_url" class="form-control"
+                                   value="{{ old('tvpik_web_url', $integrations['tvpik_web_url']) }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="tvpik_app_key" class="form-label">App key TVPik</label>
+                            <input type="password" name="tvpik_app_key" id="tvpik_app_key" class="form-control font-monospace"
+                                   placeholder="{{ $integrations['tvpik_app_key_configured'] ? 'Dejar vacío para no cambiar (' . ($integrations['tvpik_app_key_hint'] ?? '') . ')' : 'Clave compartida con TVPik' }}"
+                                   autocomplete="off">
+                        </div>
+                        <div class="col-md-6 d-flex align-items-end">
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input" name="tvpik_stub_screens" value="1" id="tvpik_stub_screens"
+                                       @if(old('tvpik_stub_screens', $integrations['tvpik_stub_screens'])) checked @endif>
+                                <label class="form-check-label" for="tvpik_stub_screens">Pantallas de demostración (desarrollo)</label>
+                            </div>
+                        </div>
+                    </div>
+                    @if ($integrations['tvpik_app_key_configured'])
+                        <div class="form-check mb-3">
+                            <input type="checkbox" class="form-check-input" name="clear_tvpik_app_key" value="1" id="clear_tvpik_app_key">
+                            <label class="form-check-label text-danger" for="clear_tvpik_app_key">Eliminar app key TVPik guardada</label>
+                        </div>
+                    @endif
+
+                    <h6 class="text-primary">Cartelería digital (API /api/signage)</h6>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="digital_signage_app_key" class="form-label">App key cartelería</label>
+                            <input type="password" name="digital_signage_app_key" id="digital_signage_app_key" class="form-control font-monospace"
+                                   placeholder="{{ $integrations['digital_signage_app_key_configured'] ? 'Dejar vacío para no cambiar (' . ($integrations['digital_signage_app_key_hint'] ?? '') . ')' : 'DIGITAL_SIGNAGE_APP_KEY' }}"
+                                   autocomplete="off">
+                        </div>
+                        <div class="col-md-6 d-flex align-items-end">
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input" name="digital_signage_only_enabled" value="1" id="digital_signage_only_enabled"
+                                       @if(old('digital_signage_only_enabled', $integrations['digital_signage_only_enabled'])) checked @endif>
+                                <label class="form-check-label" for="digital_signage_only_enabled">Sincronizar solo productos activos</label>
+                            </div>
+                        </div>
+                    </div>
+                    @if ($integrations['digital_signage_app_key_configured'])
+                        <div class="form-check mt-3">
+                            <input type="checkbox" class="form-check-input" name="clear_digital_signage_app_key" value="1" id="clear_digital_signage_app_key">
+                            <label class="form-check-label text-danger" for="clear_digital_signage_app_key">Eliminar app key cartelería guardada</label>
+                        </div>
+                    @endif
+                </div>
+            </div>
 
             {{-- Escaneo IA --}}
             <div class="card mb-4">

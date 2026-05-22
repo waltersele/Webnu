@@ -5,8 +5,11 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\PlatformSetting;
 use App\Services\MenuScan\GeminiMenuScanProvider;
+use App\Services\Platform\PlatformIntegrationsConfigurator;
 use App\Services\Platform\PlatformMailConfigurator;
 use App\Services\Platform\PlatformSettingsService;
+use App\Services\Platform\PlatformStripeConfigurator;
+use App\Services\Platform\StripeConnectionTester;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 
@@ -23,6 +26,7 @@ class PlatformSettingsController extends Controller
             'recommendedModels' => config('menu_scan.recommended_models', []),
             'mail' => $settings->mailSettingsForForm(),
             'contact' => $settings->contactSettingsForForm(),
+            'integrations' => $settings->integrationsSettingsForForm(),
         ]);
     }
 
@@ -46,6 +50,19 @@ class PlatformSettingsController extends Controller
             'contact_leads_email' => 'required|email|max:255',
             'contact_suggestions_email' => 'required|email|max:255',
             'contact_public_email' => 'required|email|max:255',
+            'stripe_key' => 'nullable|string|max:255',
+            'stripe_secret' => 'nullable|string|max:500',
+            'stripe_webhook_secret' => 'nullable|string|max:500',
+            'clear_stripe_secret' => 'nullable|boolean',
+            'clear_stripe_webhook_secret' => 'nullable|boolean',
+            'tvpik_api_url' => 'nullable|url|max:500',
+            'tvpik_web_url' => 'nullable|url|max:500',
+            'tvpik_app_key' => 'nullable|string|max:500',
+            'clear_tvpik_app_key' => 'nullable|boolean',
+            'tvpik_stub_screens' => 'nullable|boolean',
+            'digital_signage_app_key' => 'nullable|string|max:500',
+            'clear_digital_signage_app_key' => 'nullable|boolean',
+            'digital_signage_only_enabled' => 'nullable|boolean',
         ]);
 
         if ($request->boolean('clear_gemini_key')) {
@@ -77,7 +94,26 @@ class PlatformSettingsController extends Controller
             'contact_public_email',
         ]));
 
+        $settings->updateIntegrations(array_merge($request->only([
+            'stripe_key',
+            'stripe_secret',
+            'stripe_webhook_secret',
+            'tvpik_api_url',
+            'tvpik_web_url',
+            'tvpik_app_key',
+            'digital_signage_app_key',
+        ]), [
+            'clear_stripe_secret' => $request->boolean('clear_stripe_secret'),
+            'clear_stripe_webhook_secret' => $request->boolean('clear_stripe_webhook_secret'),
+            'clear_tvpik_app_key' => $request->boolean('clear_tvpik_app_key'),
+            'clear_digital_signage_app_key' => $request->boolean('clear_digital_signage_app_key'),
+            'tvpik_stub_screens' => $request->boolean('tvpik_stub_screens'),
+            'digital_signage_only_enabled' => $request->boolean('digital_signage_only_enabled'),
+        ]));
+
         app(PlatformMailConfigurator::class)->apply();
+        app(PlatformStripeConfigurator::class)->apply();
+        app(PlatformIntegrationsConfigurator::class)->apply();
 
         return redirect()
             ->route('admin.platform.settings')
@@ -148,5 +184,29 @@ class PlatformSettingsController extends Controller
         return redirect()
             ->route('admin.platform.settings')
             ->with('flash', 'Correo de prueba enviado a ' . $data['test_email'] . '.');
+    }
+
+    public function testStripe(Request $request, StripeConnectionTester $tester, PlatformStripeConfigurator $stripeConfigurator)
+    {
+        $this->authorize('platform.access');
+
+        $secret = $request->filled('stripe_secret')
+            ? trim($request->get('stripe_secret'))
+            : PlatformSetting::stripeSecret();
+
+        if ($request->filled('stripe_key')) {
+            config(['services.stripe.key' => trim($request->get('stripe_key'))]);
+        }
+        if ($secret) {
+            config(['services.stripe.secret' => $secret]);
+        } else {
+            $stripeConfigurator->apply();
+        }
+
+        $result = $tester->test($secret);
+
+        return redirect()
+            ->route('admin.platform.settings')
+            ->with($result['ok'] ? 'flash' : 'flash_warning', $result['message']);
     }
 }

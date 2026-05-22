@@ -39,9 +39,13 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['aut
         Route::put('settings', 'PlatformSettingsController@update')->name('admin.platform.settings.update');
         Route::post('settings/test-gemini', 'PlatformSettingsController@testGemini')->name('admin.platform.settings.test-gemini');
         Route::post('settings/test-mail', 'PlatformSettingsController@testMail')->name('admin.platform.settings.test-mail');
+        Route::post('settings/test-stripe', 'PlatformSettingsController@testStripe')->name('admin.platform.settings.test-stripe');
         Route::get('billing', 'PlatformBillingController@index')->name('admin.platform.billing.index');
         Route::post('billing/create-price', 'PlatformBillingController@createPrice')->name('admin.platform.billing.create-price');
+        Route::post('billing/recreate-price', 'PlatformBillingController@recreatePrice')->name('admin.platform.billing.recreate-price');
+        Route::post('billing/save-amount', 'PlatformBillingController@saveAmount')->name('admin.platform.billing.save-amount');
         Route::post('billing/create-all', 'PlatformBillingController@createAllPrices')->name('admin.platform.billing.create-all');
+        Route::post('billing/clear-catalog', 'PlatformBillingController@clearCatalog')->name('admin.platform.billing.clear-catalog');
         Route::post('billing/save-price-id', 'PlatformBillingController@savePriceId')->name('admin.platform.billing.save-price-id');
         Route::get('users', 'PlatformUsersController@index')->name('admin.platform.users.index');
         Route::get('users/{user}', 'PlatformUsersController@show')->name('admin.platform.users.show');
