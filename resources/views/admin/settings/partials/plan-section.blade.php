@@ -37,7 +37,7 @@
             @else
                 <a href="{{ route('welcome') }}" class="btn btn-primary">Contratar plan</a>
             @endif
-            <a href="{{ route('admin.dashboard') }}" class="btn btn-outline-secondary">Ir al inicio</a>
+            <a href="{{ route('admin.tvpik.index') }}" class="btn btn-outline-secondary">Ir a pantallas</a>
         </div>
     </div>
 </div>

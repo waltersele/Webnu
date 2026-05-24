@@ -1,4 +1,5 @@
 /node_modules
+/menu-capture-worker/node_modules
 /public/hot
 /public/storage
 /storage/*.key

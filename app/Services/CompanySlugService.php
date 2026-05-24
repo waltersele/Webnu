@@ -19,6 +19,8 @@ class CompanySlugService
         'platform',
         'preview',
         'register',
+        'activar',
+        'pre-alta',
         'webnu',
         'www',
     ];

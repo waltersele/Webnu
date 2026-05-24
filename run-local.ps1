@@ -1,6 +1,8 @@
 # Arranca Webnu en local con SQLite (solo vista previa; no usa la BD de producción)
 # PHP 8.1+ recomendado (8.3 ideal). Ajusta la ruta en $PhpCandidates si hace falta.
 $PhpCandidates = @(
+    (Join-Path $PSScriptRoot ".php-runtime\php.exe"),
+    (Join-Path $PSScriptRoot ".php-runtime74\php.exe"),
     "C:\php\php.exe",
     "C:\php83\php.exe",
     "C:\xampp\php\php.exe",

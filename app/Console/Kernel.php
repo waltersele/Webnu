@@ -24,7 +24,8 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        // $schedule->command('inspire')->hourly();
+        $schedule->command('webnu:expire-trials')->dailyAt('02:00');
+        $schedule->command('webnu:purge-stale-pre-alta')->dailyAt('03:00');
     }
 
     /**

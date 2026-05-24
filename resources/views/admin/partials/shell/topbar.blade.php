@@ -11,7 +11,7 @@
 @endphp
 
 <header class="wn-shell-topbar">
-    <a href="{{ route('admin.dashboard') }}" class="wn-shell-topbar__logo">
+    <a href="{{ route('admin.tvpik.index') }}" class="wn-shell-topbar__logo">
         <span class="wn-shell-topbar__logo-dot" aria-hidden="true"></span>
         <span>Webnu</span>
     </a>

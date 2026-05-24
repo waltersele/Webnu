@@ -11,8 +11,13 @@ use Illuminate\Http\Request;
 
 class TvMenuController extends Controller
 {
-    public function show(string $companySlug, ?string $layout, MenuService $menuService, TvMenuPresenter $presenter, Request $request)
-    {
+    public function show(
+        MenuService $menuService,
+        TvMenuPresenter $presenter,
+        Request $request,
+        string $companySlug,
+        ?string $layout = null
+    ) {
         $company = Company::where('slug', $companySlug)->first();
 
         if (! $company || ! $company->enabled) {
@@ -44,7 +49,7 @@ class TvMenuController extends Controller
     /**
      * Ping ligero para modo reproductor: recarga la TV cuando cambia la carta en Webnu.
      */
-    public function sync(string $companySlug, MenuSyncService $menuSync, Request $request)
+    public function sync(MenuSyncService $menuSync, Request $request, string $companySlug)
     {
         $company = Company::where('slug', $companySlug)->where('enabled', true)->first();
 

@@ -10,15 +10,18 @@
         ? route('admin.qrgenerator', $currentCompany)
         : route('admin.companies.index');
 
-    $homeActive = request()->routeIs('admin.dashboard');
+    $screensActive = request()->is('admin/tvpik*')
+        || request()->is('admin/integrations*')
+        || request()->is('admin/signage*')
+        || request()->routeIs('admin.dashboard');
     $menuActive = request()->is('admin/sections*') || request()->is('admin/menu-scan*') || request()->is('admin/products*');
     $qrActive = request()->is('admin/qrgenerator*');
-    $moreActive = request()->is('admin/integrations*') || request()->is('admin/signage*') || request()->is('admin/companies*');
+    $moreActive = request()->is('admin/companies*');
 @endphp
 <nav class="webnu-bottomnav d-lg-none" aria-label="Navegación inferior">
-    <a href="{{ route('admin.dashboard') }}" class="webnu-bottomnav__item {{ $homeActive ? 'is-active' : '' }}">
-        <i class="ti ti-home"></i>
-        <span>Inicio</span>
+    <a href="{{ route('admin.tvpik.index') }}" class="webnu-bottomnav__item {{ $screensActive ? 'is-active' : '' }}">
+        <i class="ti ti-device-tv"></i>
+        <span>Pantallas</span>
     </a>
     <a href="{{ $cartaUrl }}" class="webnu-bottomnav__item {{ $menuActive ? 'is-active' : '' }}">
         <i class="ti ti-tools-kitchen-2"></i>

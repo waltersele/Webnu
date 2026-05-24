@@ -18,12 +18,16 @@
         ? route('admin.sections.index')
         : route('admin.companies.index');
 
+    $screensActive = request()->is('admin/tvpik*')
+        || request()->is('admin/integrations*')
+        || request()->is('admin/signage*')
+        || request()->routeIs('admin.dashboard');
+
     $navItems = [
-        ['key' => 'home', 'label' => 'Inicio', 'icon' => 'ti-home', 'url' => route('admin.dashboard'), 'active' => request()->routeIs('admin.dashboard'), 'enabled' => true],
+        ['key' => 'screens', 'label' => 'Pantallas', 'icon' => 'ti-device-tv', 'url' => route('admin.tvpik.index'), 'active' => $screensActive, 'enabled' => true],
         ['key' => 'menu', 'label' => 'Carta', 'icon' => 'ti-tools-kitchen-2', 'url' => $cartaUrl, 'active' => request()->is('admin/sections*') || request()->is('admin/products*') || request()->is('admin/menu-scan*'), 'enabled' => $hasCompany],
         ['key' => 'qr', 'label' => 'QR', 'icon' => 'ti-qrcode', 'url' => $qrUrl, 'active' => request()->is('admin/qrgenerator*'), 'enabled' => $hasCompany],
-        ['key' => 'tv', 'label' => 'TV', 'icon' => 'ti-device-tv', 'url' => route('admin.tvpik.index'), 'active' => request()->is('admin/tvpik*') || request()->is('admin/integrations*') || request()->is('admin/signage*'), 'enabled' => true],
-        ['key' => 'business', 'label' => 'Mi negocio', 'icon' => 'ti-settings', 'url' => $businessUrl, 'active' => request()->is('admin/companies*') && !request()->routeIs('admin.dashboard'), 'enabled' => true, 'bottom' => true],
+        ['key' => 'business', 'label' => 'Mi negocio', 'icon' => 'ti-settings', 'url' => $businessUrl, 'active' => request()->is('admin/companies*'), 'enabled' => true, 'bottom' => true],
     ];
 @endphp
 

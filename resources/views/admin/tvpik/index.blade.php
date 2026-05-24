@@ -1,7 +1,7 @@
 @extends('admin.layout')
 
-@section('page_title', 'TV / TVPik')
-@section('page_subtitle', 'Publica tu carta en las pantallas del local desde Webnu')
+@section('page_title', 'Pantallas')
+@section('page_subtitle', 'Elige carta y plantilla para cada TV del local')
 
 @section('content')
 @php
@@ -9,33 +9,6 @@
 @endphp
 
 <div class="row g-4">
-    <div class="col-12">
-        <div class="card border-0 bg-primary-subtle">
-            <div class="card-body d-flex flex-wrap gap-3 align-items-start">
-                <span class="avatar avatar-lg">
-                    <span class="avatar-initial rounded bg-primary text-white">
-                        <i class="ti ti-device-tv ti-lg"></i>
-                    </span>
-                </span>
-                <div class="flex-grow-1">
-                    <h5 class="mb-2">Publicar carta en TV</h5>
-                    <p class="text-muted mb-0">
-                        Elige pantalla y plantilla TV (menú completo, plato del día, destacados o vídeos).
-                        TVPik reproduce la URL optimizada para pantalla grande.
-                    </p>
-                </div>
-                @if($company && (int) $company->menu_type === 1)
-                    <form method="POST" action="{{ route('admin.tvpik.publish-all') }}" class="ms-auto">
-                        @csrf
-                        <button type="submit" class="btn btn-outline-primary btn-sm" @if(!$canTvpik) disabled @endif>
-                            <i class="ti ti-refresh me-1"></i> Republicar todas las TVs
-                        </button>
-                    </form>
-                @endif
-            </div>
-        </div>
-    </div>
-
     @if(!$canTvpik)
         <div class="col-12">
             @include('admin.partials.plan-feature-lock', [
@@ -44,77 +17,22 @@
             ])
         </div>
     @else
-        <div class="col-lg-5">
-            <div class="card h-100">
-                <div class="card-header">
-                    <h5 class="card-title mb-0">Conexión TVPik</h5>
-                </div>
-                <div class="card-body">
-                    @if($tvpikConnected)
-                        <p class="text-success mb-3"><i class="ti ti-check me-1"></i> Cuenta conectada</p>
-                        <form method="POST" action="{{ route('admin.tvpik.disconnect') }}" onsubmit="return confirm('¿Desconectar TVPik?');">
-                            @csrf
-                            <button type="submit" class="btn btn-sm btn-label-secondary">Desconectar</button>
-                        </form>
-                    @else
-                        <p class="text-muted small">Pega el token de tu cuenta TVPik (Integraciones → Webnu en la app TVPik).</p>
-                        <form method="POST" action="{{ route('admin.tvpik.connect') }}">
-                            @csrf
-                            <div class="mb-3">
-                                <label class="form-label" for="tvpik_token">Token TVPik</label>
-                                <input type="password" name="tvpik_token" id="tvpik_token" class="form-control font-monospace" required autocomplete="off">
-                                @error('tvpik_token')<div class="text-danger small">{{ $message }}</div>@enderror
-                            </div>
-                            <button type="submit" class="btn btn-primary btn-sm">Conectar</button>
-                        </form>
-                        @if($tvpikWebUrl)
-                            <p class="small text-muted mt-3 mb-0">
-                                <a href="{{ $tvpikWebUrl }}" target="_blank" rel="noopener">Abrir TVPik</a>
-                            </p>
-                        @endif
-                    @endif
-                    @unless($tvpikApiConfigured)
-                        <p class="small text-warning mt-3 mb-0">
-                            <code>TVPIK_API_URL</code> no configurada: verás pantallas de demostración y las URLs se guardan en Webnu.
-                        </p>
-                    @endunless
-                </div>
-            </div>
-        </div>
-
-        <div class="col-lg-7">
-            <div class="card h-100">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="card-title mb-0">Token API Webnu</h5>
-                    <span class="badge bg-label-secondary">TVPik / desarrolladores</span>
-                </div>
-                <div class="card-body">
-                    <div class="input-group mb-2">
-                        <input type="text" class="form-control font-monospace" id="api-token" readonly value="{{ $apiToken }}">
-                        <button type="button" class="btn btn-outline-primary" id="copy-token">Copiar</button>
-                    </div>
-                    <form method="POST" action="{{ route('admin.integrations.regenerate') }}" class="d-inline" onsubmit="return confirm('¿Regenerar token?');">
-                        @csrf
-                        <button type="submit" class="btn btn-sm btn-label-secondary">Regenerar</button>
-                    </form>
-                </div>
-            </div>
-        </div>
-
         @error('publish')
             <div class="col-12"><div class="alert alert-danger">{{ $message }}</div></div>
         @enderror
 
-        @include('admin.tvpik.partials.player-mode-card', [
-            'defaultCompanyId' => $defaultCompanyId,
-            'companies' => $companies,
-            'templates' => $templates,
-        ])
-
         <div class="col-12">
             <div class="card">
-                <div class="card-header">
+                <div class="card-header d-flex flex-wrap justify-content-between align-items-center gap-2">
                     <h5 class="card-title mb-0">Mis pantallas</h5>
+                    @if($company && (int) $company->menu_type === 1)
+                        <form method="POST" action="{{ route('admin.tvpik.publish-all') }}" class="mb-0">
+                            @csrf
+                            <button type="submit" class="btn btn-outline-primary btn-sm">
+                                <i class="ti ti-refresh me-1"></i> Republicar todas
+                            </button>
+                        </form>
+                    @endif
                 </div>
                 <div class="card-body">
                     @if($screensError)
@@ -202,8 +120,71 @@
             </div>
         </div>
 
+        @include('admin.tvpik.partials.player-mode-card', [
+            'defaultCompanyId' => $defaultCompanyId,
+            'companies' => $companies,
+            'templates' => $templates,
+        ])
+
         <div class="col-12">
-            <details class="card" open>
+            <details class="card">
+                <summary class="card-header" style="cursor:pointer;">
+                    <h5 class="card-title mb-0 d-inline">Conexión TVPik y token API</h5>
+                </summary>
+                <div class="card-body">
+                    <div class="row g-4">
+                        <div class="col-lg-5">
+                            <h6 class="mb-3">Conexión TVPik</h6>
+                            @if($tvpikConnected)
+                                <p class="text-success mb-3"><i class="ti ti-check me-1"></i> Cuenta conectada</p>
+                                <form method="POST" action="{{ route('admin.tvpik.disconnect') }}" onsubmit="return confirm('¿Desconectar TVPik?');">
+                                    @csrf
+                                    <button type="submit" class="btn btn-sm btn-label-secondary">Desconectar</button>
+                                </form>
+                            @else
+                                <p class="text-muted small">Pega el token de tu cuenta TVPik (Integraciones → Webnu en la app TVPik).</p>
+                                <form method="POST" action="{{ route('admin.tvpik.connect') }}">
+                                    @csrf
+                                    <div class="mb-3">
+                                        <label class="form-label" for="tvpik_token">Token TVPik</label>
+                                        <input type="password" name="tvpik_token" id="tvpik_token" class="form-control font-monospace" required autocomplete="off">
+                                        @error('tvpik_token')<div class="text-danger small">{{ $message }}</div>@enderror
+                                    </div>
+                                    <button type="submit" class="btn btn-primary btn-sm">Conectar</button>
+                                </form>
+                                @if($tvpikWebUrl)
+                                    <p class="small text-muted mt-3 mb-0">
+                                        <a href="{{ $tvpikWebUrl }}" target="_blank" rel="noopener">Abrir TVPik</a>
+                                    </p>
+                                @endif
+                            @endif
+                            @unless($tvpikApiConfigured)
+                                <p class="small text-warning mt-3 mb-0">
+                                    <code>TVPIK_API_URL</code> no configurada: verás pantallas de demostración y las URLs se guardan en Webnu.
+                                </p>
+                            @endunless
+                        </div>
+                        <div class="col-lg-7">
+                            <h6 class="mb-3 d-flex align-items-center gap-2">
+                                Token API Webnu
+                                <span class="badge bg-label-secondary">TVPik / desarrolladores</span>
+                            </h6>
+                            <div class="input-group mb-2">
+                                <input type="text" class="form-control font-monospace" id="api-token" readonly value="{{ $apiToken }}">
+                                <button type="button" class="btn btn-outline-primary" id="copy-token">Copiar</button>
+                            </div>
+                            <form method="POST" action="{{ route('admin.integrations.regenerate') }}" class="d-inline" onsubmit="return confirm('¿Regenerar token?');">
+                                @csrf
+                                <button type="submit" class="btn btn-sm btn-label-secondary">Regenerar</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </details>
+        </div>
+
+        <div class="col-12">
+            <details class="card">
                 <summary class="card-header" style="cursor:pointer;">
                     <h5 class="card-title mb-0 d-inline">Plantillas TV disponibles</h5>
                 </summary>

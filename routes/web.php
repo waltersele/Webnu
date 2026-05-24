@@ -16,6 +16,12 @@ Route::post(
     '\Laravel\Cashier\Http\Controllers\WebhookController@handleWebhook'
 );
 
+Route::get('pre-alta/{slug}', 'PreAltaPreviewController@show')->name('pre-alta.preview');
+Route::get('pre-alta/media/{id}', 'PreAltaPreviewController@media')->name('pre-alta.media')->where('id', '[0-9]+');
+
+Route::get('activar/{token}', 'PreAltaClaimController@show')->name('pre-alta.claim.show')->where('token', '[a-fA-F0-9]{64}');
+Route::post('activar/{token}', 'PreAltaClaimController@store')->name('pre-alta.claim.store')->where('token', '[a-fA-F0-9]{64}');
+
 Route::get('carta/{companySlug}', 'PagesController@see_menu')->name('see_menu');
 Route::get('tv/{companySlug}/sync.json', 'TvMenuController@sync')->name('tv.sync');
 Route::get('tv/{companySlug}', 'TvMenuController@show')->name('tv.show');
