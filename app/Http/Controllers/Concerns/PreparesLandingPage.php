@@ -158,118 +158,6 @@ trait PreparesLandingPage
         ];
     }
 
-    /** @return list<array<string, mixed>> */
-    protected function buildLandingPricingComparison(): array
-    {
-        $rowKeys = ['menus', 'products', 'photos', 'ai_scans', 'videos', 'translation', 'pdf', 'tvpik', 'badge'];
-        $rows = [];
-
-        foreach ($rowKeys as $key) {
-            $values = [];
-            foreach ($this->landingPricingTierOrder() as $tierId) {
-                $values[$tierId] = $this->landingPricingComparisonCell($tierId, $key);
-            }
-            $rows[] = [
-                'key' => $key,
-                'label' => __("landing.pricing.comparison.rows.{$key}"),
-                'values' => $values,
-            ];
-        }
-
-        return $rows;
-    }
-
-    protected function landingPricingComparisonCell(string $tierId, string $row): string
-    {
-        $tier = config("plans.tiers.{$tierId}", []);
-
-        switch ($row) {
-            case 'menus':
-                if (($tier['max_companies'] ?? 1) === null) {
-                    return __('landing.pricing.comparison.menus_unlimited');
-                }
-
-                return trans_choice(
-                    'landing.pricing.comparison.menus_count',
-                    (int) $tier['max_companies'],
-                    ['count' => $tier['max_companies']]
-                );
-
-            case 'ai_scans':
-                if (($tier['menu_scans'] ?? 0) === null) {
-                    return __('landing.pricing.comparison.unlimited');
-                }
-                if (($tier['menu_scans_period'] ?? '') === 'lifetime') {
-                    return trans('landing.pricing.comparison.scans_lifetime', [
-                        'count' => $tier['menu_scans'],
-                    ]);
-                }
-
-                return trans('landing.pricing.comparison.scans_monthly', [
-                    'count' => $tier['menu_scans'],
-                ]);
-
-            case 'videos':
-                return ! empty($tier['videos'])
-                    ? __('landing.pricing.comparison.yes')
-                    : __('landing.pricing.comparison.no');
-
-            case 'translation':
-                if (empty($tier['translation'])) {
-                    return __('landing.pricing.comparison.no');
-                }
-                $maxLocales = $tier['translation_max_locales'] ?? null;
-                if ($maxLocales === null) {
-                    return __('landing.pricing.comparison.translation_unlimited');
-                }
-
-                return trans('landing.pricing.comparison.translation_locales', [
-                    'count' => $maxLocales,
-                ]);
-
-            case 'products':
-                $maxProducts = $tier['max_products_per_company'] ?? null;
-                if ($maxProducts === null) {
-                    return __('landing.pricing.comparison.unlimited');
-                }
-
-                return trans('landing.pricing.comparison.products_count', [
-                    'count' => $maxProducts,
-                ]);
-
-            case 'photos':
-                return ! empty($tier['product_photos'])
-                    ? __('landing.pricing.comparison.yes')
-                    : __('landing.pricing.comparison.no');
-
-            case 'pdf':
-                return ! empty($tier['pdf_menu'])
-                    ? __('landing.pricing.comparison.yes')
-                    : __('landing.pricing.comparison.no');
-
-            case 'badge':
-                return ! empty($tier['show_webnu_badge'])
-                    ? __('landing.pricing.comparison.badge_yes')
-                    : __('landing.pricing.comparison.no');
-
-            case 'tvpik':
-                $included = $tier['tvpik_screens_included'] ?? 0;
-                if (! empty($tier['tvpik']) && $included === null) {
-                    return __('landing.pricing.comparison.tvpik_included');
-                }
-                if ((int) $included > 0) {
-                    return trans('landing.pricing.comparison.tvpik_screens', [
-                        'count' => $included,
-                    ]);
-                }
-
-                return __('landing.pricing.comparison.tvpik_addon');
-
-            default:
-                return '—';
-        }
-    }
-
     /** @return array<string, mixed> */
     protected function landingViewData(Request $request): array
     {
@@ -339,7 +227,6 @@ trait PreparesLandingPage
             'landingFaq' => $landingFaq,
             'landingPricingPlans' => $this->buildLandingPricingPlans(),
             'landingFranchisePlan' => $this->buildLandingFranchisePlan(),
-            'landingPricingComparison' => $this->buildLandingPricingComparison(),
             'landingPricingTierOrder' => $this->landingPricingTierOrder(),
             'landingCustomizePresets' => __('landing.customize.presets'),
             'landingReelVideo' => asset('img/demo/' . $steakFile),

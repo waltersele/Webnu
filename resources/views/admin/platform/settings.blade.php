@@ -21,6 +21,55 @@
             o desde Gestión comercial.
         </div>
 
+        {{-- Marca: logos, isotipo, favicon, OG --}}
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Marca</h5>
+            </div>
+            <div class="card-body">
+                <p class="text-muted mb-3">
+                    Sube tus logotipos y los archivos de identidad de la plataforma. Se usarán en el panel, las cartas y los emails.
+                </p>
+                <div class="row g-4">
+                    @foreach ($brandAssets as $key => $asset)
+                        <div class="col-md-6">
+                            <div class="border rounded p-3 h-100">
+                                <div class="d-flex align-items-start gap-3 mb-2">
+                                    <div class="bg-light border rounded d-flex align-items-center justify-content-center" style="width:96px;height:96px;flex-shrink:0;overflow:hidden;">
+                                        <img src="{{ $asset['url'] }}" alt="{{ $asset['label'] }}" style="max-width:100%;max-height:100%;object-fit:contain;">
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <h6 class="mb-1">{{ $asset['label'] }}</h6>
+                                        <p class="small text-muted mb-1">{{ $asset['recommended_size'] }}</p>
+                                        @if ($asset['has_custom'])
+                                            <span class="badge bg-success">Personalizado</span>
+                                        @else
+                                            <span class="badge bg-secondary">Por defecto</span>
+                                        @endif
+                                    </div>
+                                </div>
+                                <form method="POST" action="{{ route('admin.platform.settings.brand.upload', $key) }}" enctype="multipart/form-data" class="mb-2">
+                                    @csrf
+                                    <div class="input-group input-group-sm">
+                                        <input type="file" name="file" accept="{{ $asset['accept'] }}" class="form-control" required>
+                                        <button type="submit" class="btn btn-primary">Subir</button>
+                                    </div>
+                                </form>
+                                @if ($asset['has_custom'])
+                                    <form method="POST" action="{{ route('admin.platform.settings.brand.delete', $key) }}"
+                                          onsubmit="return confirm('¿Restablecer este recurso al valor por defecto?');">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn btn-link btn-sm text-danger p-0">Eliminar y usar el por defecto</button>
+                                    </form>
+                                @endif
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+        </div>
+
         <form method="POST" action="{{ route('admin.platform.settings.update') }}" id="platform-settings-form">
             @csrf
             @method('PUT')

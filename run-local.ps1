@@ -27,20 +27,29 @@ if (-not (Test-Path $CaPem)) {
 }
 $env:SSL_CERT_FILE = $CaPem
 $env:CURL_CA_BUNDLE = $CaPem
-# Inyectar rutas CA en php-local.ini (Guzzle / Gemini)
-$iniContent = Get-Content $Ini -Raw -ErrorAction SilentlyContinue
-if ($iniContent -notmatch 'curl\.cainfo') {
-    Add-Content -Path $Ini -Value "`nopenssl.cafile = `"$CaPem`"`ncurl.cainfo = `"$CaPem`"`n"
-} else {
-    $iniContent = $iniContent -replace 'openssl\.cafile\s*=.*', "openssl.cafile = `"$CaPem`""
-    $iniContent = $iniContent -replace 'curl\.cainfo\s*=.*', "curl.cainfo = `"$CaPem`""
-    Set-Content -Path $Ini -Value $iniContent -NoNewline
-}
 
 if (-not $Php) {
     Write-Host "No se encontró PHP 8.1+. Instala PHP 8.3 o ajusta PhpCandidates en run-local.ps1." -ForegroundColor Red
     exit 1
 }
+
+# Resolver carpeta de extensiones del PHP detectado (XAMPP, php-runtime, etc.)
+$ExtDir = Join-Path (Split-Path $Php) 'ext'
+if (-not (Test-Path $ExtDir)) {
+    Write-Host "Aviso: no existe $ExtDir; las extensiones PHP no cargarán." -ForegroundColor Yellow
+}
+
+# Inyectar rutas CA y extension_dir en php-local.ini (Guzzle / Gemini / PDO)
+$iniContent = Get-Content $Ini -Raw -ErrorAction SilentlyContinue
+if ($iniContent -notmatch 'curl\.cainfo') {
+    Add-Content -Path $Ini -Value "`nopenssl.cafile = `"$CaPem`"`ncurl.cainfo = `"$CaPem`"`n"
+    $iniContent = Get-Content $Ini -Raw -ErrorAction SilentlyContinue
+} else {
+    $iniContent = $iniContent -replace 'openssl\.cafile\s*=.*', "openssl.cafile = `"$CaPem`""
+    $iniContent = $iniContent -replace 'curl\.cainfo\s*=.*', "curl.cainfo = `"$CaPem`""
+}
+$iniContent = $iniContent -replace 'extension_dir\s*=.*', "extension_dir = `"$ExtDir`""
+Set-Content -Path $Ini -Value $iniContent -NoNewline
 
 $phpVersion = & $Php -r "echo PHP_VERSION;"
 Write-Host "PHP: $Php ($phpVersion)" -ForegroundColor Cyan

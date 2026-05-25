@@ -11,13 +11,23 @@ use App\Services\Platform\PlatformSettingsService;
 use App\Services\Platform\PlatformStripeConfigurator;
 use App\Services\Platform\StripeConnectionTester;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
 
 class PlatformSettingsController extends Controller
 {
     public function edit(PlatformSettingsService $settings)
     {
         $this->authorize('platform.access');
+
+        $brandAssets = [];
+        foreach (self::brandAssetKeys() as $key => $meta) {
+            $brandAssets[$key] = array_merge($meta, [
+                'url' => PlatformSetting::brandUrl($key),
+                'has_custom' => PlatformSetting::getValue('brand_' . $key . '_path') !== null,
+            ]);
+        }
 
         return view('admin.platform.settings', [
             'geminiConfigured' => $settings->hasGeminiApiKey(),
@@ -27,7 +37,95 @@ class PlatformSettingsController extends Controller
             'mail' => $settings->mailSettingsForForm(),
             'contact' => $settings->contactSettingsForForm(),
             'integrations' => $settings->integrationsSettingsForForm(),
+            'brandAssets' => $brandAssets,
         ]);
+    }
+
+    /**
+     * @return array<string, array{label: string, recommended_size: string, accept: string}>
+     */
+    public static function brandAssetKeys(): array
+    {
+        return [
+            'logo' => [
+                'label' => 'Logotipo (texto + isotipo)',
+                'recommended_size' => 'PNG/SVG, máx 1 MB. Ideal 400×120 px.',
+                'accept' => 'image/png,image/jpeg,image/svg+xml,image/webp',
+            ],
+            'isotipo' => [
+                'label' => 'Isotipo (solo símbolo)',
+                'recommended_size' => 'PNG/SVG cuadrado, máx 1 MB. Ideal 512×512 px.',
+                'accept' => 'image/png,image/jpeg,image/svg+xml,image/webp',
+            ],
+            'favicon' => [
+                'label' => 'Favicon',
+                'recommended_size' => 'PNG 32×32 o 64×64. Máx 256 KB.',
+                'accept' => 'image/png,image/x-icon,image/svg+xml',
+            ],
+            'og' => [
+                'label' => 'Open Graph (compartir en redes)',
+                'recommended_size' => 'PNG/JPG 1200×630. Máx 1 MB.',
+                'accept' => 'image/png,image/jpeg,image/webp',
+            ],
+        ];
+    }
+
+    public function uploadBrandAsset(Request $request, string $key)
+    {
+        $this->authorize('platform.access');
+
+        if (! array_key_exists($key, self::brandAssetKeys())) {
+            abort(404);
+        }
+
+        $request->validate([
+            'file' => 'required|file|mimes:png,jpg,jpeg,svg,webp,ico|max:1024',
+        ]);
+
+        $file = $request->file('file');
+        $extension = strtolower($file->getClientOriginalExtension() ?: $file->extension() ?: 'png');
+        $extension = preg_replace('/[^a-z0-9]/', '', $extension) ?: 'png';
+
+        $targetDir = public_path('img/brand');
+        if (! is_dir($targetDir)) {
+            File::makeDirectory($targetDir, 0755, true);
+        }
+
+        foreach (File::glob($targetDir . DIRECTORY_SEPARATOR . $key . '.*') as $existing) {
+            @unlink($existing);
+        }
+
+        $filename = $key . '.' . $extension;
+        $file->move($targetDir, $filename);
+
+        $relativePath = 'img/brand/' . $filename . '?v=' . substr((string) Str::uuid(), 0, 8);
+        PlatformSetting::setValue('brand_' . $key . '_path', $relativePath);
+
+        return redirect()
+            ->route('admin.platform.settings')
+            ->with('flash', 'Recurso de marca «' . self::brandAssetKeys()[$key]['label'] . '» actualizado.');
+    }
+
+    public function deleteBrandAsset(string $key)
+    {
+        $this->authorize('platform.access');
+
+        if (! array_key_exists($key, self::brandAssetKeys())) {
+            abort(404);
+        }
+
+        $targetDir = public_path('img/brand');
+        if (is_dir($targetDir)) {
+            foreach (File::glob($targetDir . DIRECTORY_SEPARATOR . $key . '.*') as $existing) {
+                @unlink($existing);
+            }
+        }
+
+        PlatformSetting::setValue('brand_' . $key . '_path', null);
+
+        return redirect()
+            ->route('admin.platform.settings')
+            ->with('flash', 'Recurso de marca restablecido al valor por defecto.');
     }
 
     public function update(Request $request, PlatformSettingsService $settings)

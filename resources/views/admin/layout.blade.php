@@ -51,6 +51,16 @@
 <body>
 @include('admin.partials.allergen-sprite')
 
+@if(session()->has('impersonator_id'))
+    <div class="wn-impersonate-banner" style="position:sticky;top:0;z-index:1080;background:linear-gradient(90deg,#fbbf24,#f59e0b);color:#1f2937;padding:.5rem 1rem;text-align:center;font-weight:600;box-shadow:0 2px 8px rgba(0,0,0,.12);display:flex;justify-content:center;align-items:center;gap:.75rem;flex-wrap:wrap;">
+        <span><i class="ri-user-shared-line"></i> Estás operando como <strong>{{ auth()->user()->email ?? '—' }}</strong>.</span>
+        <form method="POST" action="{{ route('admin.platform.users.stop-impersonating') }}" style="margin:0;">
+            @csrf
+            <button type="submit" class="btn btn-sm btn-dark" style="padding:.25rem .75rem;">Volver a mi cuenta</button>
+        </form>
+    </div>
+@endif
+
 @if($useClientShell)
 <div class="wn-shell-app">
     @include('admin.partials.shell.topbar')
