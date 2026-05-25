@@ -27,8 +27,9 @@ class AdminController extends Controller
             return redirect()->route('admin.companies.index');
         }
 
-        $profileSteps = $wizard->stepsFor($user, $company);
-        $profileProgress = $wizard->progress($user, $company);
+        $profileGroups   = $wizard->groupsFor($user, $company);
+        $profileSteps    = array_merge($profileGroups['account_steps'], $profileGroups['card_steps']);
+        $profileProgress = $profileGroups['overall_progress'];
         $showProfileWizard = $wizard->shouldShow($user, $company);
 
         return view('admin.dashboard', [
@@ -44,8 +45,9 @@ class AdminController extends Controller
                 'canMenuScan' => true,
                 'canTvpik' => false,
             ],
-            'profileSteps' => $profileSteps,
-            'profileProgress' => $profileProgress,
+            'profileGroups'    => $profileGroups,
+            'profileSteps'     => $profileSteps,
+            'profileProgress'  => $profileProgress,
             'showProfileWizard' => $showProfileWizard,
         ]);
     }

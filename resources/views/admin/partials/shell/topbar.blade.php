@@ -9,6 +9,14 @@
     $billingUrl = ($planFeatures['billing_url'] ?? null) ?: route('admin.settings');
     $showTrial = !empty($planPresentation['trial_active']) && ($planPresentation['trial_days_remaining'] ?? null) !== null;
     $logoHomeUrl = $hasCompany ? route('admin.sections.index') : route('admin.companies.index');
+    $planKey = $planPresentation['key'] ?? 'free';
+    $planLabel = $planPresentation['label'] ?? 'Gratis';
+    $planBadgeClass = match($planKey) {
+        'plus'      => 'bg-label-primary',
+        'unlimited' => 'bg-label-success',
+        default     => 'bg-label-secondary',
+    };
+    $hasActivePaidPlan = $user && $user->hasActiveSubscription();
 @endphp
 
 <header class="wn-shell-topbar">
@@ -87,10 +95,23 @@
             <button type="button" class="wn-shell-avatar" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Cuenta">
                 {{ $initial }}
             </button>
-            <ul class="dropdown-menu dropdown-menu-end">
-                <li class="px-3 py-2">
+            <ul class="dropdown-menu dropdown-menu-end" style="min-width:220px">
+                <li class="px-3 pt-2 pb-1">
                     <div class="fw-medium">{{ $user->name ?? '' }}</div>
-                    <div class="small text-muted">{{ $user->email ?? '' }}</div>
+                    <div class="small text-muted mb-2">{{ $user->email ?? '' }}</div>
+                    <div class="d-flex align-items-center gap-2 flex-wrap">
+                        <span class="badge {{ $planBadgeClass }}">{{ $planLabel }}</span>
+                        @if($showTrial)
+                            <small class="text-muted">
+                                {{ $planPresentation['trial_days_remaining'] }} {{ ($planPresentation['trial_days_remaining'] ?? 0) === 1 ? 'día' : 'días' }} restantes
+                            </small>
+                        @endif
+                    </div>
+                    @if(! $hasActivePaidPlan)
+                        <a href="{{ $billingUrl }}" class="d-block mt-2 small fw-medium text-primary text-decoration-none">
+                            Mejorar plan <i class="ti ti-arrow-right" style="font-size:12px"></i>
+                        </a>
+                    @endif
                 </li>
                 <li><hr class="dropdown-divider"></li>
                 <li>

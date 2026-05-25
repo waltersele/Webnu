@@ -18,9 +18,17 @@ class TvMenuController extends Controller
         string $companySlug,
         ?string $layout = null
     ) {
-        $company = Company::where('slug', $companySlug)->first();
+        $company = Company::where('slug', $companySlug)->with('user')->first();
 
-        if (! $company || ! $company->enabled) {
+        if (! $company) {
+            abort(404);
+        }
+
+        $isOwnerPreview = $request->boolean('preview')
+            && auth()->check()
+            && (int) optional($company->user)->id === (int) auth()->id();
+
+        if (! $company->enabled && ! $isOwnerPreview) {
             abort(404);
         }
 

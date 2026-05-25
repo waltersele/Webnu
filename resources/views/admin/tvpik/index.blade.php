@@ -10,11 +10,24 @@
 
 <div class="row g-4">
     @if(!$canTvpik)
+        {{-- CTA de upgrade --}}
         <div class="col-12">
-            @include('admin.partials.plan-feature-lock', [
-                'feature' => 'tvpik',
-                'message' => 'Publica tu carta en pantallas TV con Plus (1 pantalla incluida) o add-on TVPik en Pro.',
-            ])
+            <div class="card border-0 shadow-sm wn-tvpik-upgrade-cta">
+                <div class="card-body d-flex flex-wrap align-items-center gap-3">
+                    <div class="wn-tvpik-upgrade-cta__icon">
+                        <i class="ti ti-device-tv"></i>
+                    </div>
+                    <div class="flex-grow-1">
+                        <h5 class="mb-1">Pantallas TV</h5>
+                        <p class="text-muted mb-0 small">
+                            Muestra tu carta en cualquier TV del local en tiempo real. Disponible en el plan <strong>Plus</strong> (1 pantalla incluida) o como add-on en Pro.
+                        </p>
+                    </div>
+                    <a href="{{ route('admin.settings') }}#plan" class="btn btn-primary flex-shrink-0">
+                        <i class="ti ti-crown me-1"></i> Ver planes
+                    </a>
+                </div>
+            </div>
         </div>
     @else
         @error('publish')
@@ -125,12 +138,109 @@
             'companies' => $companies,
             'templates' => $templates,
         ])
+    @endif
 
-        <div class="col-12">
-            <details class="card">
-                <summary class="card-header" style="cursor:pointer;">
-                    <h5 class="card-title mb-0 d-inline">Conexión TVPik y token API</h5>
-                </summary>
+    {{-- Galería de plantillas TV: siempre visible (demo bloqueada si sin plan) --}}
+    <div class="col-12">
+        <div class="card wn-tvpik-gallery-wrap {{ !$canTvpik ? 'wn-tvpik-gallery-wrap--locked' : '' }}">
+            <div class="card-header d-flex align-items-center gap-2">
+                <h5 class="card-title mb-0">Plantillas TV disponibles</h5>
+                @if(!$canTvpik)
+                    <span class="badge bg-label-warning ms-auto">
+                        <i class="ti ti-lock me-1"></i> Requiere plan Plus
+                    </span>
+                @endif
+            </div>
+            <div class="card-body">
+                @if(!$canTvpik)
+                    <p class="text-muted small mb-4">
+                        Así se vería tu carta en las pantallas del local. Activa el plan Plus para empezar.
+                    </p>
+                @else
+                    <p class="text-muted small mb-3">
+                        Cada plantilla genera una URL distinta para la pantalla. Usa la miniatura como referencia y abre la vista previa con tu carta actual.
+                    </p>
+                @endif
+                <div class="row g-3">
+                    @foreach($templates as $key => $tpl)
+                        @php
+                            $thumb = $tpl['thumbnail'] ?? ('img/tvpik/previews/' . ($tpl['layout'] ?? $key) . '.svg');
+                            $previewCompany = $company ?? $companies->firstWhere('id', $defaultCompanyId);
+                            $previewSlug = $previewCompany ? $previewCompany->slug : null;
+                        @endphp
+                        <div class="col-md-6 col-lg-3">
+                            <article class="wn-tvpik-template-card {{ !$canTvpik ? 'wn-tvpik-template-card--locked' : '' }}">
+                                <div class="wn-tvpik-template-card__thumb">
+                                    <img src="{{ asset($thumb) }}" alt="{{ $tpl['label'] }}" width="320" height="180" loading="lazy">
+                                    <span class="wn-tvpik-template-card__badge">
+                                        <i class="ti {{ $tpl['icon'] ?? 'ti-layout' }}"></i>
+                                        {{ $tpl['label'] }}
+                                    </span>
+                                    @if(!$canTvpik)
+                                        <div class="wn-tvpik-template-card__lock-overlay">
+                                            <i class="ti ti-lock"></i>
+                                        </div>
+                                    @endif
+                                </div>
+                                <div class="wn-tvpik-template-card__body">
+                                    <h6 class="wn-tvpik-template-card__title">{{ $tpl['label'] }}</h6>
+                                    <p class="wn-tvpik-template-card__desc">{{ $tpl['description'] }}</p>
+                                    @if(!empty($tpl['duration_hint']))
+                                        <p class="wn-tvpik-template-card__hint">{{ $tpl['duration_hint'] }}</p>
+                                    @endif
+                                    <div class="wn-tvpik-template-card__actions">
+                                        @if(!$canTvpik)
+                                            <a href="{{ route('admin.settings') }}#plan" class="btn btn-sm btn-outline-primary">
+                                                <i class="ti ti-crown me-1"></i> Activar plan
+                                            </a>
+                                        @elseif($defaultCompanyId)
+                                            <form method="GET"
+                                                  action="{{ route('admin.tvpik.preview') }}"
+                                                  target="_blank"
+                                                  class="d-inline">
+                                                <input type="hidden" name="company_id" value="{{ $defaultCompanyId }}">
+                                                <input type="hidden" name="template_key" value="{{ $key }}">
+                                                <button type="submit" class="btn btn-primary btn-sm">
+                                                    <i class="ti ti-eye me-1"></i> Vista previa
+                                                </button>
+                                            </form>
+                                            <form method="GET"
+                                                  action="{{ route('admin.tvpik.player') }}"
+                                                  target="_blank"
+                                                  class="d-inline">
+                                                <input type="hidden" name="company_id" value="{{ $defaultCompanyId }}">
+                                                <input type="hidden" name="template_key" value="{{ $key }}">
+                                                <button type="submit" class="btn btn-outline-primary btn-sm">
+                                                    <i class="ti ti-cast me-1"></i> Reproductor
+                                                </button>
+                                            </form>
+                                            @if($previewSlug)
+                                            <a href="{{ route('tv.show.layout', ['companySlug' => $previewSlug, 'layout' => $tpl['layout'] ?? $key]) }}"
+                                               class="btn btn-outline-secondary btn-sm"
+                                               target="_blank"
+                                               rel="noopener">
+                                                <i class="ti ti-external-link me-1"></i> URL TV
+                                            </a>
+                                            @endif
+                                        @else
+                                            <span class="text-muted small">Selecciona un negocio para previsualizar.</span>
+                                        @endif
+                                    </div>
+                                </div>
+                            </article>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @if($canTvpik)
+    <div class="col-12">
+        <details class="card">
+            <summary class="card-header" style="cursor:pointer;">
+                <h5 class="card-title mb-0 d-inline">Conexión TVPik y token API</h5>
+            </summary>
                 <div class="card-body">
                     <div class="row g-4">
                         <div class="col-lg-5">
@@ -255,15 +365,42 @@
                             </div>
                         @endforeach
                     </div>
-                </div>
-            </details>
         </div>
-    @endif
+        </details>
+        </div>
+    @endif {{-- canTvpik --}}
 </div>
 @endsection
 
 @push('styles')
     <link rel="stylesheet" href="{{ asset('adminlte/css/webnu-tvpik.css') }}">
+    <style>
+    /* CTA upgrade */
+    .wn-tvpik-upgrade-cta {
+        border-left: 4px solid var(--wn-primary, #004ac6) !important;
+    }
+    .wn-tvpik-upgrade-cta__icon {
+        width: 52px; height: 52px;
+        border-radius: 14px;
+        background: var(--wn-primary-container, #e6f0ff);
+        color: var(--wn-primary, #004ac6);
+        display: flex; align-items: center; justify-content: center;
+        font-size: 26px; flex-shrink: 0;
+    }
+
+    /* Lock overlay en miniatura de plantilla */
+    .wn-tvpik-template-card__thumb { position: relative; }
+    .wn-tvpik-template-card__lock-overlay {
+        position: absolute; inset: 0;
+        background: rgba(15, 23, 42, 0.48);
+        display: flex; align-items: center; justify-content: center;
+        font-size: 28px; color: #fff;
+        border-radius: inherit;
+    }
+    .wn-tvpik-template-card--locked {
+        opacity: 0.85;
+    }
+    </style>
 @endpush
 
 @push('scripts')
