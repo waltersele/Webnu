@@ -155,11 +155,17 @@ fi
 
 # ---------- Pull del repo --------------------------------------------------- #
 say "Sincronizando $REPO_ROOT con $REPO_REMOTE/$REPO_BRANCH"
-PREV_SHA=""
-[[ -f "$STATE_FILE" ]] && PREV_SHA="$(cat "$STATE_FILE")"
+PREV_SHA_RAW=""
+[[ -f "$STATE_FILE" ]] && PREV_SHA_RAW="$(tr -d '[:space:]' < "$STATE_FILE")"
 
-if [[ -z "$PREV_SHA" ]]; then
-    PREV_SHA="$(cd "$REPO_ROOT" && git rev-parse HEAD 2>/dev/null || echo "")"
+if [[ -z "$PREV_SHA_RAW" ]]; then
+    PREV_SHA_RAW="$(cd "$REPO_ROOT" && git rev-parse HEAD 2>/dev/null || echo "")"
+fi
+
+# Normalizar a SHA largo (40 chars) para que la comparación sea estable.
+PREV_SHA=""
+if [[ -n "$PREV_SHA_RAW" ]]; then
+    PREV_SHA="$(cd "$REPO_ROOT" && git rev-parse --verify "${PREV_SHA_RAW}^{commit}" 2>/dev/null || echo "")"
 fi
 
 run "cd $REPO_ROOT && git fetch --quiet $REPO_REMOTE && git reset --hard $REPO_REMOTE/$REPO_BRANCH"
