@@ -126,12 +126,8 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['aut
     Route::get('qrgenerator/{company}', 'QrController@qrgenerator')->name('admin.qrgenerator');
     Route::get('menu-print/{company}', 'MenuPrintController@printPdf')->name('admin.menu-print');
 
-    Route::get('integrations', function () {
-        return redirect()->route('admin.tvpik.index', [], 301);
-    })->name('admin.integrations.index');
-    Route::get('signage', function () {
-        return redirect()->route('admin.tvpik.index', [], 301);
-    })->name('admin.signage.index');
+    Route::redirect('integrations', '/admin/tvpik', 301)->name('admin.integrations.index');
+    Route::redirect('signage', '/admin/tvpik', 301)->name('admin.signage.index');
     Route::post('signage/token', 'SignageIntegrationController@regenerateToken')->name('admin.signage.regenerate');
     Route::post('integrations/token', 'SignageIntegrationController@regenerateToken')->name('admin.integrations.regenerate');
 

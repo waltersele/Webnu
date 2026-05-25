@@ -81,6 +81,8 @@ Límites en `config/plans.php` y `App\Services\UserPlanService`.
 | [docs/ONBOARDING-FREEMIUM.md](docs/ONBOARDING-FREEMIUM.md) | Onboarding, middleware, migración `plan` |
 | [docs/MENU-SCAN.md](docs/MENU-SCAN.md) | Gemini, Tesseract, flujo de importación |
 | [docs/PLATFORM-BILLING.md](docs/PLATFORM-BILLING.md) | Stripe, webhooks, panel plataforma |
+| [docs/deploy.md](docs/deploy.md) | **Despliegue diario a producción** (script, rollback, troubleshooting) |
+| [docs/deploy-migrations.md](docs/deploy-migrations.md) | Despliegue con foco en migraciones de BD |
 | [docs/MIGRACION-PRODUCCION.md](docs/MIGRACION-PRODUCCION.md) | Despliegue prod, backup, QR/slugs |
 | [docs/TVPIK-INTEGRATION.md](docs/TVPIK-INTEGRATION.md) | Publicar carta en TV desde Webnu |
 | [docs/PLATFORM-BILLING-TVPIK.md](docs/PLATFORM-BILLING-TVPIK.md) | Webnu cobra; TVPik consulta permisos (API) |
@@ -105,11 +107,27 @@ Incluye campos `users.plan`, `onboarding_step`, `onboarding_completed_at` (usuar
 - **Landing React (legacy):** `resources/js/landing/` — compilar con `npm run dev` / `npm run production` si se retoma
 - **Onboarding:** `public/css/webnu-onboarding.css`, `public/js/webnu-onboarding.js`
 
-## Importante en despliegues
+## Despliegue en producción
 
-- No reemplazar `.env` ni `public/.htaccess` al subir builds.
+Flujo del día a día (resumen). Guía completa en **[docs/deploy.md](docs/deploy.md)**.
+
+```bash
+# En tu equipo
+git push origin main
+
+# En el servidor (cPanel + SSH)
+ssh wwwwebnu@webnu.es
+cd /home/wwwwebnu/public_html/webnu.es
+./scripts/deploy.sh
+```
+
+El script `scripts/deploy.sh` hace `git fetch`, calcula los ficheros cambiados desde el último deploy, hace `mysqldump` automático, `rsync` quirúrgico, `composer dump-autoload --ignore-platform-reqs`, `migrate --force`, ejecuta los seeders production-safe nuevos y refresca cachés. Soporta `--dry-run`, `--rollback`, `--skip-migrate`, `--skip-backup`, `--no-down` y `--full-rsync`.
+
+**Importante**:
+- No reemplazar `.env`, `public/.htaccess`, `public/img/`, `vendor/`, `composer.{json,lock}` ni `storage/` al subir builds (el script los excluye).
 - Configurar `GEMINI_API_KEY` o clave en Plataforma → Escaneo IA.
 - `SUPER_ADMIN_EMAILS` para acceso al panel plataforma.
+- Mientras el server siga en PHP 7.4, **no ejecutes `composer install`** (el `composer.json` apunta a PHP ^8.1).
 
 ## Licencia
 
