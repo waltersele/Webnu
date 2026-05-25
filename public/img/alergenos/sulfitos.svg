@@ -1,1 +1,12 @@
-<?xml version="1.0" encoding="UTF-8"?><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" role="img" aria-hidden="true"><circle cx="24" cy="24" r="24" fill="#78909C"/><text x="24" y="30" font-family="Inter,Arial,sans-serif" font-size="13" font-weight="700" fill="#ffffff" text-anchor="middle">Su</text></svg>
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" role="img" aria-hidden="true">
+  <title>Sulfitos</title>
+  <g stroke="#4A1F3E" stroke-width="1" stroke-linejoin="round" fill="none">
+    <path d="M7 3h10"/>
+    <path d="M8 3l1 5a3 3 0 0 0 6 0l1-5"/>
+    <path d="M12 11v7"/>
+    <path d="M9 21h6"/>
+  </g>
+  <path d="M8.5 5h7" stroke="#4A1F3E" stroke-width="0.7" fill="none"/>
+  <path d="M9 4l1 4a2 2 0 0 0 4 0l1-4z" fill="#7C2D5E" stroke="#4A1F3E" stroke-width="0.6"/>
+</svg>

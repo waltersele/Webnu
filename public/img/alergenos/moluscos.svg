@@ -1,1 +1,17 @@
-<?xml version="1.0" encoding="UTF-8"?><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" role="img" aria-hidden="true"><circle cx="24" cy="24" r="24" fill="#AB47BC"/><text x="24" y="30" font-family="Inter,Arial,sans-serif" font-size="13" font-weight="700" fill="#ffffff" text-anchor="middle">Mo</text></svg>
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" role="img" aria-hidden="true">
+  <title>Moluscos</title>
+  <g fill="#F2B7A0" stroke="#7A3A24" stroke-width="0.9" stroke-linejoin="round">
+    <path d="M3 18c.5-7 4-13 9-13s8.5 6 9 13c-3 1.5-6 2-9 2s-6-.5-9-2z"/>
+  </g>
+  <g fill="none" stroke="#7A3A24" stroke-width="0.7" stroke-linecap="round">
+    <path d="M12 5v14"/>
+    <path d="M8 6.5l-2 13"/>
+    <path d="M16 6.5l2 13"/>
+    <path d="M10 5.5l-1 14"/>
+    <path d="M14 5.5l1 14"/>
+    <path d="M6 9.5l-2.5 9"/>
+    <path d="M18 9.5l2.5 9"/>
+  </g>
+  <ellipse cx="12" cy="5" rx="2" ry="0.8" fill="#7A3A24"/>
+</svg>

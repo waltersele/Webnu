@@ -1,1 +1,16 @@
-<?xml version="1.0" encoding="UTF-8"?><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" role="img" aria-hidden="true"><circle cx="24" cy="24" r="24" fill="#FDD835"/><text x="24" y="30" font-family="Inter,Arial,sans-serif" font-size="13" font-weight="700" fill="#ffffff" text-anchor="middle">Mo</text></svg>
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" role="img" aria-hidden="true">
+  <title>Mostaza</title>
+  <g stroke="#7A5A0F" stroke-width="0.9" stroke-linejoin="round">
+    <rect x="8" y="3" width="8" height="2.5" rx="0.5" fill="#A07D1A"/>
+    <path d="M7.5 6h9l-.5 13.5A1.5 1.5 0 0 1 14.5 21h-5A1.5 1.5 0 0 1 8 19.5z" fill="#E8B83A"/>
+    <rect x="9" y="9.5" width="6" height="3.5" rx="0.4" fill="#FFF8DC" stroke-width="0.7"/>
+  </g>
+  <g fill="#7A5A0F">
+    <circle cx="10.2" cy="11.2" r="0.5"/>
+    <circle cx="12" cy="11.2" r="0.5"/>
+    <circle cx="13.8" cy="11.2" r="0.5"/>
+    <circle cx="11.1" cy="12.4" r="0.5"/>
+    <circle cx="12.9" cy="12.4" r="0.5"/>
+  </g>
+</svg>

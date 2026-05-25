@@ -1,1 +1,13 @@
-<?xml version="1.0" encoding="UTF-8"?><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" role="img" aria-hidden="true"><circle cx="24" cy="24" r="24" fill="#A1887F"/><text x="24" y="30" font-family="Inter,Arial,sans-serif" font-size="13" font-weight="700" fill="#ffffff" text-anchor="middle">Ca</text></svg>
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" role="img" aria-hidden="true">
+  <title>Cacahuetes</title>
+  <g fill="#D9A878" stroke="#7A4A1D" stroke-width="1" stroke-linejoin="round">
+    <path d="M12 3.5c2 0 3.5 1.6 3.5 3.6 0 1.2-.6 2.2-1.4 2.9.8.7 1.4 1.7 1.4 2.9v3.5c0 2.2-1.6 4-3.5 4s-3.5-1.8-3.5-4V12.9c0-1.2.6-2.2 1.4-2.9-.8-.7-1.4-1.7-1.4-2.9 0-2 1.5-3.6 3.5-3.6z"/>
+  </g>
+  <g fill="none" stroke="#7A4A1D" stroke-width="0.6" stroke-linecap="round">
+    <path d="M10 6.5c.6.5 1.4.8 2 .8s1.4-.3 2-.8"/>
+    <path d="M10 9.5c.6.5 1.4.8 2 .8s1.4-.3 2-.8"/>
+    <path d="M10 13c.6.5 1.4.8 2 .8s1.4-.3 2-.8"/>
+    <path d="M10 16c.6.5 1.4.8 2 .8s1.4-.3 2-.8"/>
+  </g>
+</svg>

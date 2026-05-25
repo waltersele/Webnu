@@ -113,9 +113,11 @@ body.wn-theme-nocturne {
   background: #0f172a;
 }
 
-.wn-card-overlay__media img,
-.wn-card-overlay__media video,
-.wn-card-overlay__media .wn-card-reel {
+.wn-card-overlay__media > img,
+.wn-card-overlay__media > video,
+.wn-card-overlay__media > .wn-card-reel,
+.wn-card-overlay__media > .wn-card-media-link > img,
+.wn-card-overlay__media > .wn-card-media-link > video {
   width: 100%;
   min-height: 220px;
   max-height: 280px;

@@ -472,14 +472,19 @@
   min-height: 0;
 }
 
-.wn-modern-card__media img {
+.wn-modern-card__media > img,
+.wn-modern-card__media > video,
+.wn-modern-card__media > .wn-card-reel,
+.wn-modern-card__media > .wn-card-media-link > img,
+.wn-modern-card__media > .wn-card-media-link > video {
   width: 100%;
   height: 100%;
   object-fit: cover;
   display: block;
 }
 
-.wn-modern-card--stacked .wn-modern-card__media img {
+.wn-modern-card--stacked .wn-modern-card__media > img,
+.wn-modern-card--stacked .wn-modern-card__media > .wn-card-media-link > img {
   min-height: 100%;
 }
 

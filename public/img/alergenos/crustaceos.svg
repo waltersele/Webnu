@@ -1,1 +1,15 @@
-<?xml version="1.0" encoding="UTF-8"?><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" role="img" aria-hidden="true"><circle cx="24" cy="24" r="24" fill="#E85D4C"/><text x="24" y="30" font-family="Inter,Arial,sans-serif" font-size="13" font-weight="700" fill="#ffffff" text-anchor="middle">Cr</text></svg>
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" role="img" aria-hidden="true">
+  <title>Crustáceos</title>
+  <g fill="#E07A5F" stroke="#9C3F2A" stroke-width="0.8" stroke-linejoin="round">
+    <path d="M4 13c0-3 2.5-5 5.5-5h6c1.5 0 2.5 1 2.5 2.3 0 1-.7 1.7-1.7 1.7H10c-1.7 0-3 1.3-3 3 0 1 .5 1.6 1.5 1.6h7"/>
+    <path d="M17 12.8l3 1.4-2 1.6 1.6 1.7-2.4.4z"/>
+    <circle cx="16" cy="11" r="0.7" fill="#3A1A12" stroke="none"/>
+  </g>
+  <g fill="none" stroke="#9C3F2A" stroke-width="1" stroke-linecap="round">
+    <path d="M16 10c1-2 2.5-3 4-3"/>
+    <path d="M16 10c2-1 3.5-1 5 0"/>
+    <path d="M11 16l-1 3"/>
+    <path d="M14 16l0 3"/>
+  </g>
+</svg>

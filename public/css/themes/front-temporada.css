@@ -129,9 +129,11 @@ body.wn-theme-temporada {
   overflow: hidden;
 }
 
-.wn-card-temporada__media img,
-.wn-card-temporada__media video,
-.wn-card-temporada__media .wn-card-reel {
+.wn-card-temporada__media > img,
+.wn-card-temporada__media > video,
+.wn-card-temporada__media > .wn-card-reel,
+.wn-card-temporada__media > .wn-card-media-link > img,
+.wn-card-temporada__media > .wn-card-media-link > video {
   width: 100%;
   height: 100%;
   object-fit: cover;

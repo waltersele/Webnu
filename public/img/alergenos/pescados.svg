@@ -1,1 +1,10 @@
-<?xml version="1.0" encoding="UTF-8"?><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" role="img" aria-hidden="true"><circle cx="24" cy="24" r="24" fill="#1E88E5"/><text x="24" y="30" font-family="Inter,Arial,sans-serif" font-size="13" font-weight="700" fill="#ffffff" text-anchor="middle">Pe</text></svg>
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" role="img" aria-hidden="true">
+  <title>Pescados</title>
+  <g fill="#5BA8C9" stroke="#1F5E7A" stroke-width="0.9" stroke-linejoin="round">
+    <path d="M3 12c2-3 5-5 9-5s7 2 9 5c-2 3-5 5-9 5s-7-2-9-5z"/>
+    <path d="M21 12l2.5-3v6z" transform="translate(-3 0)"/>
+  </g>
+  <circle cx="16" cy="11" r="0.9" fill="#0F2E3D"/>
+  <path d="M11 12c1-1 2-1 3 0" fill="none" stroke="#1F5E7A" stroke-width="0.8" stroke-linecap="round"/>
+</svg>
