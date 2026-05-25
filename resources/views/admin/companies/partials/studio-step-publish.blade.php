@@ -46,7 +46,7 @@
                     autocomplete="off"
                     spellcheck="false"
                 >
-                <a href="{{ route('see_menu', $company->slug) }}" target="_blank" rel="noopener" class="btn btn-primary">Abrir</a>
+                <a href="{{ $company->publicUrl() }}" target="_blank" rel="noopener" class="btn btn-primary">Abrir</a>
             </div>
             @error('slug')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
             <p class="text-muted small mb-0">Solo minúsculas, números y guiones. Cambiarla invalida QR ya impresos con la URL anterior.</p>

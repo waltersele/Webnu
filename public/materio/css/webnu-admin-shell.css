@@ -10,8 +10,8 @@
   --wn-shell-primary-light: #e6f1fb;
   --wn-shell-text: #0f172a;
   --wn-shell-muted: #64748b;
-  --wn-shell-topbar-h: 56px;
-  --wn-shell-sidebar-w: 72px;
+  --wn-shell-topbar-h: 48px;
+  --wn-shell-sidebar-w: 232px;
 }
 
 body.wn-shell-body {
@@ -45,8 +45,8 @@ body.wn-shell-body .content-wrapper {
   border-bottom: 0.5px solid var(--wn-shell-border);
   display: flex;
   align-items: center;
-  padding: 0 20px 0 calc(var(--wn-shell-sidebar-w) + 16px);
-  gap: 16px;
+  padding: 0 16px 0 calc(var(--wn-shell-sidebar-w) + 16px);
+  gap: 12px;
   z-index: 110;
 }
 
@@ -76,6 +76,45 @@ body.wn-shell-body .content-wrapper {
   background: var(--wn-shell-primary);
 }
 
+.wn-shell-logo {
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.wn-shell-logo--mark {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+  border-radius: 6px;
+}
+
+.wn-shell-logo--wordmark {
+  height: 24px;
+  width: auto;
+  object-fit: contain;
+}
+
+.wn-shell-topbar__url {
+  align-items: center;
+  gap: 6px;
+  font-size: 12.5px;
+  color: var(--wn-shell-text-muted, #64748b);
+  text-decoration: none;
+  border-radius: 8px;
+  padding: 4px 10px;
+  transition: background 120ms ease, color 120ms ease;
+}
+
+.wn-shell-topbar__url:hover,
+.wn-shell-topbar__url:focus {
+  color: var(--wn-shell-text);
+  background: var(--wn-shell-primary-light, rgba(0, 74, 198, 0.08));
+}
+
+.wn-shell-topbar__url i {
+  font-size: 14px;
+}
+
 .wn-shell-topbar__center {
   display: flex;
   align-items: center;
@@ -87,13 +126,14 @@ body.wn-shell-body .content-wrapper {
 .wn-shell-business-pill {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  background: var(--wn-shell-primary-light);
-  color: var(--wn-shell-primary-dark);
-  font-size: 12px;
+  gap: 8px;
+  background: var(--wn-shell-surface);
+  color: var(--wn-shell-text);
+  border: 1px solid var(--wn-shell-border);
+  font-size: 13px;
   font-weight: 500;
-  padding: 4px 12px;
-  border-radius: 20px;
+  padding: 3px 12px;
+  border-radius: 999px;
   max-width: 100%;
   white-space: nowrap;
   overflow: hidden;
@@ -101,10 +141,10 @@ body.wn-shell-body .content-wrapper {
 }
 
 .wn-shell-business-pill__dot {
-  width: 6px;
-  height: 6px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
-  background: #16a34a;
+  background: var(--wn-success, #16a34a);
   flex-shrink: 0;
 }
 
@@ -154,11 +194,11 @@ a.wn-shell-trial-badge:hover {
 }
 
 .wn-shell-topbar__plan-btn {
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 500;
   color: #fff;
   background: var(--wn-shell-primary);
-  padding: 7px 14px;
+  padding: 5px 12px;
   border-radius: 8px;
   text-decoration: none;
   white-space: nowrap;
@@ -170,8 +210,8 @@ a.wn-shell-trial-badge:hover {
 }
 
 .wn-shell-topbar__menu-btn {
-  width: 40px;
-  height: 40px;
+  width: 32px;
+  height: 32px;
   border: 0.5px solid var(--wn-shell-border);
   border-radius: 8px;
   background: var(--wn-shell-surface);
@@ -183,14 +223,14 @@ a.wn-shell-trial-badge:hover {
 }
 
 .wn-shell-avatar {
-  width: 36px;
-  height: 36px;
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
   border: none;
   background: var(--wn-shell-primary);
   color: #fff;
-  font-size: 14px;
-  font-weight: 500;
+  font-size: 12.5px;
+  font-weight: 600;
   cursor: pointer;
 }
 
@@ -204,10 +244,11 @@ a.wn-shell-trial-badge:hover {
   border-right: 0.5px solid var(--wn-shell-border);
   display: flex;
   flex-direction: column;
-  align-items: center;
-  padding: 12px 0;
+  align-items: stretch;
+  padding: 14px 12px;
   gap: 4px;
   z-index: 100;
+  overflow-y: auto;
 }
 
 .wn-shell-sidebar__spacer {
@@ -215,20 +256,32 @@ a.wn-shell-trial-badge:hover {
   min-height: 8px;
 }
 
-.wn-shell-nav {
-  width: 52px;
-  min-height: 52px;
-  border-radius: 12px;
+.wn-shell-sidebar__footer {
   display: flex;
   flex-direction: column;
+  gap: 2px;
+  padding-top: 8px;
+  margin-top: 4px;
+  border-top: 0.5px solid var(--wn-shell-border);
+}
+
+.wn-shell-nav {
+  width: 100%;
+  min-height: 40px;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: row;
   align-items: center;
-  justify-content: center;
-  gap: 4px;
+  justify-content: flex-start;
+  gap: 12px;
+  padding: 9px 12px;
+  text-align: left;
   text-decoration: none;
-  color: var(--wn-shell-muted);
+  color: var(--wn-shell-text);
   border: none;
   background: transparent;
   cursor: pointer;
+  font-weight: 500;
   transition: background 0.15s, color 0.15s;
 }
 
@@ -237,9 +290,11 @@ a.wn-shell-trial-badge:hover {
 }
 
 .wn-shell-nav__label {
-  font-size: 9px;
+  font-size: 14px;
   font-weight: 500;
-  letter-spacing: 0.02em;
+  letter-spacing: 0;
+  flex: 1 1 auto;
+  min-width: 0;
 }
 
 .wn-shell-nav:hover {
@@ -250,11 +305,121 @@ a.wn-shell-trial-badge:hover {
 .wn-shell-nav.is-active {
   background: var(--wn-shell-primary-light);
   color: var(--wn-shell-primary);
+  font-weight: 600;
+}
+
+.wn-shell-nav.is-active .wn-shell-nav__icon {
+  color: var(--wn-shell-primary);
 }
 
 .wn-shell-nav.is-disabled {
   opacity: 0.4;
   cursor: not-allowed;
+}
+
+.wn-shell-nav__icon {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+}
+
+.wn-shell-nav__lock {
+  position: absolute;
+  right: -6px;
+  bottom: -4px;
+  background: #f59e0b;
+  color: #fff;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1.5px solid var(--wn-shell-surface, #fff);
+  font-size: 8px;
+}
+
+.wn-shell-nav__lock i {
+  font-size: 8px;
+}
+
+.wn-shell-nav__badge {
+  position: static;
+  margin-left: auto;
+  background: var(--wn-warning, #f59e0b);
+  color: #fff;
+  font-size: 10.5px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 999px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  display: inline-flex;
+  align-items: center;
+}
+
+.wn-shell-nav.is-locked {
+  color: var(--wn-shell-muted);
+  opacity: 0.85;
+}
+
+.wn-shell-nav.is-locked .wn-shell-nav__icon {
+  color: var(--wn-shell-muted);
+}
+
+.wn-shell-nav.is-locked:hover {
+  background: var(--wn-shell-bg);
+  color: var(--wn-shell-primary);
+  opacity: 1;
+}
+
+.wn-shell-nav.is-locked:hover .wn-shell-nav__icon {
+  color: var(--wn-shell-primary);
+}
+
+.wn-shell-offcanvas-link.is-locked {
+  opacity: 0.85;
+}
+
+.wn-shell-offcanvas-badge {
+  display: inline-flex;
+  align-items: center;
+  background: #fef3c7;
+  color: #b45309;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 999px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.webnu-bottomnav__icon-wrap {
+  position: relative;
+  display: inline-flex;
+}
+
+.webnu-bottomnav__lock {
+  position: absolute;
+  right: -8px;
+  bottom: -4px;
+  background: #f59e0b;
+  color: #fff;
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 7px;
+  border: 1.5px solid #fff;
+}
+
+.webnu-bottomnav__lock i {
+  font-size: 7px;
 }
 
 .wn-shell-main {
@@ -275,12 +440,23 @@ a.wn-shell-trial-badge:hover {
   margin-right: auto;
 }
 
-.wn-shell-main:not(.wn-shell-main--dashboard) > .row,
-.wn-shell-main:not(.wn-shell-main--dashboard) > .wn-shell-page-header {
+.wn-shell-main:not(.wn-shell-main--dashboard) > * {
   max-width: 1200px;
   width: 100%;
   margin-left: auto;
   margin-right: auto;
+}
+
+.wn-shell-main:not(.wn-shell-main--dashboard) > .modal,
+.wn-shell-main:not(.wn-shell-main--dashboard) > .offcanvas,
+.wn-shell-main:not(.wn-shell-main--dashboard) > .toast-container,
+.wn-shell-main:not(.wn-shell-main--dashboard) > script,
+.wn-shell-main:not(.wn-shell-main--dashboard) > style,
+.wn-shell-main:not(.wn-shell-main--dashboard) > template {
+  max-width: none;
+  width: auto;
+  margin-left: 0;
+  margin-right: 0;
 }
 
 .wn-shell-main .container-xxl {
@@ -289,7 +465,7 @@ a.wn-shell-trial-badge:hover {
 }
 
 .wn-shell-page-header {
-  margin-bottom: 24px;
+  margin-bottom: 12px;
 }
 
 .wn-shell-page-header h1 {
@@ -452,4 +628,222 @@ body.wn-shell-body .webnu-bottomnav__item i {
 
 body.wn-shell-body .webnu-bottomnav__item.is-active {
   color: var(--wn-shell-primary);
+}
+
+/* ---- Submenu "Mis cartas" en el sidebar desktop ---- */
+.wn-shell-nav-group {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  width: 100%;
+  gap: 2px;
+}
+
+.wn-shell-nav-group .wn-shell-nav--parent {
+  background: transparent;
+  color: var(--wn-shell-text);
+}
+
+.wn-shell-nav-group.is-active-group .wn-shell-nav--parent {
+  background: var(--wn-shell-primary-light);
+  color: var(--wn-shell-primary);
+  font-weight: 600;
+}
+
+.wn-shell-nav-group.is-active-group .wn-shell-nav--parent .wn-shell-nav__icon {
+  color: var(--wn-shell-primary);
+}
+
+.wn-shell-subnav {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  width: 100%;
+  margin: 0;
+  padding: 4px 4px 6px 40px;
+  background: transparent;
+  border-radius: 0;
+  gap: 2px;
+}
+
+.wn-shell-subnav__form {
+  margin: 0;
+  width: 100%;
+}
+
+.wn-shell-subnav__item {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 10px;
+  width: 100%;
+  padding: 6px 10px;
+  border: 0;
+  background: transparent;
+  border-radius: 8px;
+  color: var(--wn-shell-text);
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  text-align: left;
+}
+
+.wn-shell-subnav__item:hover {
+  background: var(--wn-shell-bg);
+  color: var(--wn-shell-text);
+}
+
+.wn-shell-subnav__item.is-current {
+  background: var(--wn-shell-bg);
+  color: var(--wn-shell-text);
+  font-weight: 600;
+}
+
+.wn-shell-subnav__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: var(--wn-success, #16a34a);
+  transition: background 0.15s;
+}
+
+.wn-shell-subnav__dot.is-off {
+  background: var(--wn-danger, #dc2626);
+}
+
+.wn-shell-subnav__name {
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.2;
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: left;
+}
+
+.wn-shell-subnav__item.is-current .wn-shell-subnav__name {
+  font-weight: 600;
+}
+
+.wn-shell-subnav__add {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 7px 10px;
+  margin-top: 4px;
+  border: 1px solid var(--wn-shell-primary);
+  border-radius: 8px;
+  color: var(--wn-shell-primary);
+  background: transparent;
+  font-size: 12.5px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background 0.15s;
+}
+
+.wn-shell-subnav__add:hover {
+  background: var(--wn-shell-primary-light);
+}
+
+.wn-shell-subnav__add i {
+  font-size: 15px;
+}
+
+.wn-shell-subnav__add.is-locked {
+  border-color: var(--wn-warning, #f59e0b);
+  color: var(--wn-warning, #f59e0b);
+}
+
+.wn-shell-subnav__add.is-locked:hover {
+  background: rgba(245, 158, 11, 0.08);
+}
+
+/* ---- Submenu en el offcanvas móvil ---- */
+.wn-shell-offcanvas-subnav {
+  display: flex;
+  flex-direction: column;
+  background: var(--wn-shell-bg);
+  border-bottom: 0.5px solid var(--wn-shell-border);
+  padding: 6px 12px 6px 28px;
+  gap: 2px;
+}
+
+.wn-shell-offcanvas-sublink {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border: 0;
+  background: transparent;
+  color: var(--wn-shell-text);
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  text-align: left;
+  border-radius: 8px;
+  transition: background 0.15s;
+  width: 100%;
+}
+
+.wn-shell-offcanvas-sublink:hover {
+  background: var(--wn-shell-surface);
+}
+
+.wn-shell-offcanvas-sublink.is-current {
+  background: var(--wn-shell-primary-light);
+  color: var(--wn-shell-primary);
+}
+
+.wn-shell-offcanvas-sublink__form {
+  margin: 0;
+  width: 100%;
+}
+
+.wn-shell-offcanvas-sublink__dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--wn-success, #16a34a);
+  flex-shrink: 0;
+  transition: background 0.15s, box-shadow 0.15s;
+}
+
+.wn-shell-offcanvas-sublink__dot.is-off {
+  background: var(--wn-danger, #dc2626);
+}
+
+.wn-shell-offcanvas-sublink.is-current .wn-shell-offcanvas-sublink__dot.is-on {
+  box-shadow: 0 0 0 2px rgba(22, 163, 74, 0.22);
+}
+
+.wn-shell-offcanvas-sublink.is-current .wn-shell-offcanvas-sublink__dot.is-off {
+  box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.22);
+}
+
+.wn-shell-offcanvas-sublink--add {
+  border: 1px solid var(--wn-shell-primary);
+  color: var(--wn-shell-primary);
+  font-weight: 600;
+  justify-content: center;
+  margin-top: 4px;
+}
+
+.wn-shell-offcanvas-sublink--add:hover {
+  background: var(--wn-shell-primary-light);
+}
+
+.wn-shell-offcanvas-sublink--add.is-locked {
+  border-color: var(--wn-warning, #f59e0b);
+  color: var(--wn-warning, #f59e0b);
+}
+
+.wn-shell-offcanvas-sublink--add.is-locked:hover {
+  background: rgba(245, 158, 11, 0.08);
 }

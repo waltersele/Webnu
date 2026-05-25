@@ -13,7 +13,7 @@ use Illuminate\Http\Request;
 
 class TranslationController extends Controller
 {
-    public function edit(Company $company, MenuTranslationService $translations, UserPlanService $plans, MenuLocaleService $locales)
+    public function edit(MenuTranslationService $translations, UserPlanService $plans, MenuLocaleService $locales, Company $company)
     {
         $this->authorize('update', $company);
 
@@ -34,11 +34,11 @@ class TranslationController extends Controller
             'maxExtraLocales' => $plans->maxTranslationLocales($user),
             'planLabel' => $plans->tier($user)['label'] ?? 'Gratis',
             'billingUrl' => route('admin.settings'),
-            'publicUrl' => route('see_menu', $company->slug),
+            'publicUrl' => $company->publicUrl(),
         ]);
     }
 
-    public function updateLocales(Request $request, Company $company, MenuTranslationService $translations, UserPlanService $plans)
+    public function updateLocales(Request $request, MenuTranslationService $translations, UserPlanService $plans, Company $company)
     {
         $this->authorize('update', $company);
 
@@ -56,7 +56,7 @@ class TranslationController extends Controller
             ->with('flash', 'Idiomas actualizados.');
     }
 
-    public function generate(Request $request, Company $company, MenuTranslationService $translations)
+    public function generate(Request $request, MenuTranslationService $translations, Company $company)
     {
         $this->authorize('update', $company);
 
@@ -72,7 +72,7 @@ class TranslationController extends Controller
             ->with('flash', "Traducción completada ({$job->items_done} elementos) al " . strtoupper($validated['locale']) . '.');
     }
 
-    public function updateSection(Request $request, Company $company, Section $section, MenuTranslationService $translations)
+    public function updateSection(Request $request, MenuTranslationService $translations, Company $company, Section $section)
     {
         $this->authorize('update', $company);
         abort_unless((int) $section->company_id === (int) $company->id, 404);
@@ -94,7 +94,7 @@ class TranslationController extends Controller
         return back()->with('flash', 'Sección guardada.');
     }
 
-    public function updateProduct(Request $request, Company $company, Product $product, MenuTranslationService $translations)
+    public function updateProduct(Request $request, MenuTranslationService $translations, Company $company, Product $product)
     {
         $product->load('section');
         $this->authorize('update', $company);

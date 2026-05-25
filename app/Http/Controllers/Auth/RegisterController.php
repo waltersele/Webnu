@@ -76,8 +76,11 @@ class RegisterController extends Controller
      */
     protected function create(array $data)
     {
+        $businessName = trim($data['business_name'] ?? '') ?: 'Mi restaurante';
+
         $user = User::create([
             'name' => $data['name'],
+            'slug' => User::generateUniqueSlug($businessName ?: $data['name']),
             'email' => $data['email'],
             'password' => Hash::make($data['password']),
             'plan' => 'free',
@@ -86,7 +89,6 @@ class RegisterController extends Controller
             'trial_plan_key' => config('plans.trial_tier', 'pro'),
         ]);
 
-        $businessName = trim($data['business_name'] ?? '') ?: 'Mi restaurante';
         $slug = app(CompanySlugService::class)->generateFromName($businessName);
 
         $company = Company::create([

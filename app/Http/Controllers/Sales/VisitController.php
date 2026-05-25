@@ -41,7 +41,7 @@ class VisitController extends Controller
             'photoSlotsRemaining' => $photoSlotsRemaining,
             'hasMenu' => $hasMenu,
             'progressStep' => $progressStep,
-            'menuUrl' => route('see_menu', $visit->slug) . '?sales_demo=1',
+            'menuUrl' => $visit->publicUrl(['sales_demo' => 1]),
             'importUrl' => route('sales.menu-scan.create', $visit->id),
         ]);
     }
@@ -50,9 +50,6 @@ class VisitController extends Controller
     {
         $visit = $leads->findActiveLeadFor(auth()->user(), $company->id);
 
-        return redirect()->route('see_menu', [
-            'companySlug' => $visit->slug,
-            'sales_demo' => 1,
-        ]);
+        return redirect($visit->publicUrl(['sales_demo' => 1]));
     }
 }

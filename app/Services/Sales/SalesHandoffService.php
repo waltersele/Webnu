@@ -51,6 +51,7 @@ class SalesHandoffService
 
             $restaurant = User::create([
                 'name' => $prospectName,
+                'slug' => User::generateUniqueSlug($prospectName),
                 'email' => $email,
                 'password' => Hash::make($password),
                 'plan' => 'free',

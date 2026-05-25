@@ -98,7 +98,7 @@ class ExportCompaniesInventory extends Command
                 $company->enabled ? '1' : '0',
                 $company->template ?? '',
                 $company->user_id,
-                route('see_menu', $company->slug),
+                $company->publicUrl(),
                 $sectionsCount,
                 $productsCount,
                 $logoPath,

@@ -10,42 +10,85 @@
             <p class="text-muted small mb-0">
                 {{ $totalCount }} {{ $totalCount === 1 ? 'plato' : 'platos' }}
                 @if ($section->enabled)
-                    &bull; Visibles en web: {{ $visibleCount }}
+                    &middot; Visibles en web: {{ $visibleCount }}
                 @endif
             </p>
         </div>
-        <button type="button"
-                class="btn btn-sm btn-link text-primary product-add-btn px-2"
-                section-id="{{ $section->id }}"
-                data-bs-toggle="modal"
-                data-bs-target="#modal-add-product">
-            <i class="ri ri-add-line"></i> Añadir plato
-        </button>
+        <div class="dropdown">
+            <button type="button"
+                    class="btn btn-icon btn-text-secondary wn-section-kebab"
+                    data-bs-toggle="dropdown"
+                    aria-expanded="false"
+                    aria-label="Acciones de sección">
+                <i class="ri ri-more-2-fill"></i>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end">
+                <li>
+                    <button type="button" class="dropdown-item modify-section-btn"
+                            data-id="{{ $section->id }}" data-name="{{ $section->name }}"
+                            data-enabled="{{ $section->enabled }}"
+                            data-bs-toggle="modal" data-bs-target="#modal-modify-section">
+                        <i class="ri ri-pencil-line me-2"></i> Editar sección
+                    </button>
+                </li>
+                <li>
+                    <button type="button" class="dropdown-item text-danger delete-section-btn"
+                            data-id="{{ $section->id }}" data-bs-toggle="modal" data-bs-target="#modal-delete-section">
+                        <i class="ri ri-delete-bin-line me-2"></i> Eliminar sección
+                    </button>
+                </li>
+            </ul>
+        </div>
         <button type="button" class="btn btn-sm btn-icon btn-text-secondary webnu-section-toggle" aria-label="Mostrar u ocultar">
             <i class="ri ri-arrow-down-s-line"></i>
         </button>
     </div>
 
     <div class="webnu-section-card__body card-body pt-3">
-        {{-- Vista cuadr�cula --}}
+        {{-- Vista cuadrícula --}}
         <div class="webnu-menu-grid-view">
-            <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-3 sortable-product"
-                 section-id="{{ $section->id }}"
-                 data-token="{{ csrf_token() }}">
-                @forelse ($section->products as $product)
-                    @include('admin.sections.partials.menu-product-card', ['product' => $product, 'section' => $section])
-                @empty
-                    <div class="col-12">
-                        <p class="text-center text-muted py-4 mb-0">No hay platos en esta sección.</p>
-                    </div>
-                @endforelse
-            </div>
+            @if ($section->products->isEmpty())
+                <div class="wn-empty-state">
+                    <i class="ri ri-restaurant-2-line"></i>
+                    <h6>Aún no hay platos en esta sección</h6>
+                    <p class="mb-0 small">Empieza añadiendo tu primer plato para que tus clientes lo vean.</p>
+                    <button type="button"
+                            class="btn btn-primary product-add-btn"
+                            section-id="{{ $section->id }}"
+                            data-bs-toggle="modal"
+                            data-bs-target="#modal-add-product">
+                        <i class="ri ri-add-line me-1"></i> Añadir primer plato
+                    </button>
+                </div>
+            @else
+                <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-3 sortable-product"
+                     section-id="{{ $section->id }}"
+                     data-token="{{ csrf_token() }}">
+                    @foreach ($section->products as $product)
+                        @include('admin.sections.partials.menu-product-card', ['product' => $product, 'section' => $section])
+                    @endforeach
+                </div>
+            @endif
         </div>
 
         {{-- Vista lista --}}
-        <div class="webnu-menu-list-view d-none">
-            <div class="table-responsive text-nowrap">
-                <table class="table table-hover mb-0">
+        <div class="webnu-menu-list-view">
+            @if ($section->products->isEmpty())
+                <div class="wn-empty-state">
+                    <i class="ri ri-restaurant-2-line"></i>
+                    <h6>Aún no hay platos en esta sección</h6>
+                    <p class="mb-0 small">Empieza añadiendo tu primer plato para que tus clientes lo vean.</p>
+                    <button type="button"
+                            class="btn btn-primary product-add-btn"
+                            section-id="{{ $section->id }}"
+                            data-bs-toggle="modal"
+                            data-bs-target="#modal-add-product">
+                        <i class="ri ri-add-line me-1"></i> Añadir primer plato
+                    </button>
+                </div>
+            @else
+            <div class="table-responsive">
+                <table class="table table-hover mb-0 align-middle">
                     <thead>
                         <tr>
                             <th style="width: 2.5rem;"></th>
@@ -57,29 +100,33 @@
                         </tr>
                     </thead>
                     <tbody class="table-border-bottom-0 sortable-product" section-id="{{ $section->id }}" data-token="{{ csrf_token() }}">
-                        @forelse ($section->products as $product)
-                            <tr id="{{ $product->id }}">
+                        @foreach ($section->products as $product)
+                            <tr id="{{ $product->id }}"
+                                class="wn-list-row"
+                                data-edit-url="{{ route('admin.products.edit', $product) }}"
+                                role="link"
+                                tabindex="0">
                                 <td class="align-middle">
                                     <i class="ri ri-draggable icon-18px text-muted webnu-drag-handle"></i>
                                 </td>
                                 <td class="align-middle">
                                     <div class="d-flex align-items-center gap-3">
                                         @if ($product->image)
-                                            <img src="{{ asset('img/' . $product->image) }}" alt="" class="rounded flex-shrink-0" width="42" height="42" style="object-fit: cover;">
+                                            <img src="{{ asset('img/' . $product->image) }}" alt="" class="wn-list-thumb">
                                         @else
-                                            <span class="avatar avatar-sm flex-shrink-0">
-                                                <span class="avatar-initial rounded bg-label-secondary"><i class="ri ri-restaurant-2-line"></i></span>
+                                            <span class="wn-list-thumb wn-list-thumb--placeholder">
+                                                <i class="ri ri-restaurant-2-line"></i>
                                             </span>
                                         @endif
                                         <div class="min-w-0">
-                                            <span class="fw-medium d-inline-flex flex-wrap align-items-center gap-2 text-truncate">
+                                            <span class="wn-list-product-name d-inline-flex flex-wrap align-items-center gap-2">
                                                 <span class="text-truncate">{{ $product->name }}</span>
                                                 @if ($product->highlight)
                                                     @include('admin.sections.partials.product-highlight-badge', ['highlight' => $product->highlight, 'size' => 'sm'])
                                                 @endif
                                             </span>
                                             @if ($product->description)
-                                                <small class="text-muted text-truncate d-block">{{ Str::limit($product->description, 60) }}</small>
+                                                <span class="wn-list-product-desc text-truncate">{{ Str::limit($product->description, 80) }}</span>
                                             @endif
                                         </div>
                                     </div>
@@ -103,7 +150,7 @@
                                             @endforeach
                                         </div>
                                     @else
-                                        <span class="text-muted small">�</span>
+                                        <span class="text-muted small">&mdash;</span>
                                     @endif
                                 </td>
                                 <td class="align-middle text-end text-nowrap">
@@ -117,35 +164,20 @@
                                     </button>
                                 </td>
                             </tr>
-                        @empty
-                            <tr><td colspan="6" class="text-center text-muted py-4">No hay platos.</td></tr>
-                        @endforelse
+                        @endforeach
                     </tbody>
                 </table>
             </div>
+            @endif
         </div>
 
-        <div class="d-flex flex-wrap justify-content-end gap-2 mt-3 pt-3 border-top">
-            <div class="dropdown">
-                <button type="button" class="btn btn-sm btn-label-secondary dropdown-toggle" data-bs-toggle="dropdown">SecciÓn</button>
-                <ul class="dropdown-menu dropdown-menu-end">
-                    <li>
-                        <button type="button" class="dropdown-item modify-section-btn"
-                                data-id="{{ $section->id }}" data-name="{{ $section->name }}"
-                                data-enabled="{{ $section->enabled }}"
-                                data-bs-toggle="modal" data-bs-target="#modal-modify-section">
-                            <i class="ri ri-settings-3-line me-2"></i> Editar sección
-                        </button>
-                    </li>
-                    <li>
-                        <button type="button" class="dropdown-item text-danger delete-section-btn"
-                                data-id="{{ $section->id }}" data-bs-toggle="modal" data-bs-target="#modal-delete-section">
-                            <i class="ri ri-delete-bin-line me-2"></i> Eliminar sección
-                        </button>
-                    </li>
-                </ul>
-            </div>
-        </div>
+        {{-- CTA pie: Añadir plato --}}
+        <button type="button"
+                class="wn-section-add-product product-add-btn"
+                section-id="{{ $section->id }}"
+                data-bs-toggle="modal"
+                data-bs-target="#modal-add-product">
+            <i class="ri ri-add-line"></i> Añadir plato a {{ $section->name }}
+        </button>
     </div>
 </article>
-

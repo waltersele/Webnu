@@ -32,6 +32,7 @@ class SalesRepProvisioningService
         return DB::transaction(function () use ($name, $email, $sendAccessEmail) {
             $user = User::create([
                 'name' => $name,
+                'slug' => User::generateUniqueSlug($name),
                 'email' => $email,
                 'password' => Hash::make(Str::random(32)),
                 'plan' => 'free',

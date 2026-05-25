@@ -48,7 +48,7 @@
         </li>
         @if ($currentCompany)
         <li class="menu-item">
-            <a href="{{ route('see_menu', $currentCompany->slug) }}" class="menu-link" target="_blank" rel="noopener">
+            <a href="{{ $currentCompany->publicUrl() }}" class="menu-link" target="_blank" rel="noopener">
                 <i class="menu-icon icon-base ri ri-external-link-line"></i>
                 <div>Ver carta pública</div>
             </a>
@@ -116,7 +116,7 @@
         @if (!empty($selected_company) && !empty($available_companies))
         <div class="webnu-menu-company mb-3">
             <label for="company_selection">Negocio</label>
-            <form method="POST" action="{{ route('admin.companies.changecompany', '0') }}" id="company-selection-form">
+            <form method="POST" action="{{ route('admin.companies.changecompany') }}" id="company-selection-form">
                 @csrf
                 <select name="company_selection" id="company_selection" class="form-select form-select-sm">
                     @foreach ($available_companies as $company)

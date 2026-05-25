@@ -4,7 +4,27 @@
 @section('page_subtitle', 'Gestiona secciones y platos de ' . $company->name)
 
 @section('page_actions')
-    <iframe src="{{ route('see_menu', $company->slug) }}" style="display:none" name="printMenu"></iframe>
+    <iframe src="{{ $company->publicUrl() }}" style="display:none" name="printMenu"></iframe>
+
+    <div class="wn-page-status {{ $company->enabled ? 'is-published' : 'is-draft' }}" data-company-toggle-scope>
+        <label class="wn-page-status__toggle" title="{{ $company->enabled ? 'Despublicar carta' : 'Publicar carta' }}">
+            <input type="checkbox"
+                   class="wn-page-status__input"
+                   data-company-toggle
+                   data-url="{{ route('admin.companies.toggle-enabled', $company) }}"
+                   data-token="{{ csrf_token() }}"
+                   data-label-on="Publicada"
+                   data-label-off="Borrador"
+                   data-sub-on="Visible para tus clientes"
+                   data-sub-off="No accesible públicamente"
+                   {{ $company->enabled ? 'checked' : '' }}>
+            <span class="wn-page-status__switch" aria-hidden="true"></span>
+            <span class="wn-page-status__text">
+                <strong data-company-toggle-status>{{ $company->enabled ? 'Publicada' : 'Borrador' }}</strong>
+                <small data-company-toggle-sub>{{ $company->enabled ? 'Visible para tus clientes' : 'No accesible públicamente' }}</small>
+            </span>
+        </label>
+    </div>
 @endsection
 
 @section('content')
@@ -23,8 +43,53 @@
         <button type="button" class="btn btn-sm btn-primary" data-upgrade-trigger="translation">Activar idiomas (Pro)</button>
     </div>
 @endif
-@include('admin.sections.partials.menu-toolbar', ['company' => $company])
-@include('admin.sections.partials.menu-page-content')
+
+<div class="wn-mi-carta" data-mi-carta>
+    <nav class="wn-tab-bar" role="tablist" aria-label="Secciones de Mi Carta">
+        <button type="button"
+                class="wn-tab-bar__btn is-active"
+                data-tab-target="platos"
+                role="tab"
+                aria-selected="true"
+                aria-controls="wn-tab-platos"
+                title="Platos de la carta">
+            <i class="ri ri-restaurant-2-line"></i>
+            <span class="wn-tab-bar__label">Platos de la carta</span>
+        </button>
+        <button type="button"
+                class="wn-tab-bar__btn"
+                data-tab-target="personalizacion"
+                role="tab"
+                aria-selected="false"
+                aria-controls="wn-tab-personalizacion"
+                title="Personalización">
+            <i class="ri ri-palette-line"></i>
+            <span class="wn-tab-bar__label">Personalización</span>
+        </button>
+        <button type="button"
+                class="wn-tab-bar__btn"
+                data-tab-target="compartir"
+                role="tab"
+                aria-selected="false"
+                aria-controls="wn-tab-compartir"
+                title="Compartir y opciones">
+            <i class="ri ri-share-forward-line"></i>
+            <span class="wn-tab-bar__label">Compartir y opciones</span>
+        </button>
+    </nav>
+
+    <section id="wn-tab-platos" class="wn-tab-panel is-active" data-tab="platos" role="tabpanel" aria-labelledby="wn-tab-platos">
+        @include('admin.sections.partials.menu-page-content')
+    </section>
+
+    <section id="wn-tab-personalizacion" class="wn-tab-panel" data-tab="personalizacion" role="tabpanel" aria-labelledby="wn-tab-personalizacion">
+        @include('admin.sections.partials.tabs.personalize', ['company' => $company])
+    </section>
+
+    <section id="wn-tab-compartir" class="wn-tab-panel" data-tab="compartir" role="tabpanel" aria-labelledby="wn-tab-compartir">
+        @include('admin.sections.partials.tabs.share', ['company' => $company])
+    </section>
+</div>
 
 <div class="webnu-menu-modals">
         <div class="modal fade" id="modal-add-section">
@@ -257,11 +322,11 @@
 })();
 
 function setMenuTypePanels(isCustom) {
+    // Con la nueva UI por pestañas mantenemos siempre visible el panel de platos.
+    // Solo alternamos la visibilidad del bloque PDF (sub-bloque dentro de Personalización).
     if (isCustom) {
-        $('#custom-menu').show();
         $('#pdf-menu').hide();
     } else {
-        $('#custom-menu').hide();
         $('#pdf-menu').show();
     }
 }

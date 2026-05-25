@@ -65,6 +65,7 @@ class PaymentController extends Controller
 
             $user = User::create([
                 'name' => $request->email,
+                'slug' => User::generateUniqueSlug($request->email),
                 'email' => $request->email,
                 'password' => Hash::make($request->password),
             ]);

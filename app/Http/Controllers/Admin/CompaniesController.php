@@ -19,21 +19,26 @@ class CompaniesController extends Controller
 {
     public function index()
     {
-        $query = Company::where('user_id', auth()->id());
+        $user = auth()->user();
+        $query = Company::where('user_id', $user->id);
 
-        if (auth()->user()->isSalesRep() && ! auth()->user()->isSuperAdmin()) {
+        if ($user->isSalesRep() && ! $user->isSuperAdmin()) {
             $query->where(function ($q) {
                 $q->whereNull('sales_rep_user_id')
                     ->orWhereNotNull('sales_converted_at');
             });
         }
 
-        $companies = $query->latest('updated_at')->get();
+        $companies = $query->withCount('sections')->latest('updated_at')->get();
 
-        return view('admin.companies.index', compact('companies'));
+        $plans = app(UserPlanService::class);
+        $maxCompanies = $plans->maxCompanies($user);
+        $canCreateCompany = $plans->canCreateCompany($user);
+
+        return view('admin.companies.index', compact('companies', 'maxCompanies', 'canCreateCompany'));
     }
 
-    public function edit(Company $company, UserPlanService $plans)
+    public function edit(UserPlanService $plans, Company $company)
     {
         $this->authorize('view', $company);
 
@@ -45,10 +50,7 @@ class CompaniesController extends Controller
         $fonts = config('company_templates.fonts', []);
         $themeSettings = $company->resolvedThemeSettings();
         $themePresets = config('company_templates.presets', []);
-        $previewUrl = route('see_menu', [
-            'companySlug' => $company->slug,
-            'studio_preview' => 1,
-        ]);
+        $previewUrl = $company->publicUrl(['studio_preview' => 1]);
 
         $templateLabels = collect($templates)->mapWithKeys(function ($meta, $key) {
             return [$key => $meta['label'] ?? $key];
@@ -109,7 +111,7 @@ class CompaniesController extends Controller
         return redirect()->route('admin.companies.edit', $company);
     }
 
-    public function update(Company $company, Request $request, CompanySlugService $slugs, CompanyThemeService $themes, UserPlanService $plans)
+    public function update(Request $request, CompanySlugService $slugs, CompanyThemeService $themes, UserPlanService $plans, Company $company)
     {
         $this->authorize('update', $company);
 
@@ -277,7 +279,33 @@ class CompaniesController extends Controller
 
         Cookie::queue(Cookie::forever('selected_company', $company->id));
 
+        $redirectAfter = $request->get('redirect_after');
+        if ($redirectAfter && str_starts_with($redirectAfter, '/admin/')) {
+            return redirect($redirectAfter);
+        }
+
         return redirect()->route('admin.dashboard');
+    }
+
+    public function toggleEnabled(Request $request, Company $company)
+    {
+        $this->authorize('update', $company);
+
+        $enabled = $request->boolean('enabled');
+        $company->enabled = $enabled;
+        $company->save();
+
+        if ($request->expectsJson() || $request->ajax()) {
+            return response()->json([
+                'ok' => true,
+                'enabled' => (bool) $company->enabled,
+                'company_id' => $company->id,
+            ]);
+        }
+
+        return back()->with('flash', $enabled
+            ? 'Carta «' . $company->name . '» publicada.'
+            : 'Carta «' . $company->name . '» despublicada.');
     }
 
     protected function validatedBrandImage(string $field): UploadedFile
@@ -318,7 +346,7 @@ class CompaniesController extends Controller
         return $file;
     }
 
-    public function updateDailyHighlights(Request $request, Company $company, UserPlanService $plans)
+    public function updateDailyHighlights(Request $request, UserPlanService $plans, Company $company)
     {
         $this->authorize('update', $company);
 

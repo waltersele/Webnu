@@ -14,8 +14,8 @@
 /* Botón primario navy (marca) */
 .btn-primary,
 .btn-webnu {
-  background: linear-gradient(90deg, #000529 0%, #002055 45%, #0074d9 100%) !important;
-  border: none !important;
+  background: var(--wn-primary, #004ac6) !important;
+  border: 1px solid var(--wn-primary, #004ac6) !important;
   color: #fff !important;
 }
 
@@ -23,8 +23,9 @@
 .btn-primary:focus,
 .btn-webnu:hover,
 .btn-webnu:focus {
+  background: var(--wn-primary-dark, #003899) !important;
+  border-color: var(--wn-primary-dark, #003899) !important;
   color: #fff !important;
-  opacity: 0.92;
 }
 
 /* Selector alérgenos */
@@ -152,16 +153,80 @@
 }
 
 /* Vista cuadrícula / lista */
-.webnu-menu-view--grid .webnu-menu-list-view {
-  display: none !important;
+.webnu-menu-list-view {
+  display: none;
 }
 
+.webnu-menu-grid-view {
+  display: block;
+}
+
+#sortable-section.webnu-menu-view--list .webnu-menu-grid-view,
 .webnu-menu-view--list .webnu-menu-grid-view {
   display: none !important;
 }
 
+#sortable-section.webnu-menu-view--list .webnu-menu-list-view,
 .webnu-menu-view--list .webnu-menu-list-view {
   display: block !important;
+  animation: webnuMenuViewFade 140ms ease;
+}
+
+#sortable-section.webnu-menu-view--grid .webnu-menu-grid-view,
+.webnu-menu-view--grid .webnu-menu-grid-view {
+  display: block !important;
+  animation: webnuMenuViewFade 140ms ease;
+}
+
+@keyframes webnuMenuViewFade {
+  from { opacity: 0; transform: translateY(-2px); }
+  to   { opacity: 1; transform: none; }
+}
+
+.webnu-menu-view-toggle .btn {
+  transition: background-color 120ms ease, color 120ms ease;
+}
+
+.webnu-menu-view-toggle .btn.is-active {
+  box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.25);
+}
+
+.wn-menu-toolbar {
+  background: var(--bs-body-bg, #fff);
+  border: 1px solid var(--bs-border-color, #e5e7eb);
+  border-radius: 10px;
+  padding: 10px 12px;
+}
+
+.wn-menu-actions {
+  min-width: 280px;
+  padding: 8px 0;
+}
+
+.wn-menu-actions .dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  padding: 8px 14px;
+}
+
+.wn-menu-actions .dropdown-item i {
+  font-size: 16px;
+  color: var(--wn-shell-primary, #004ac6);
+}
+
+.wn-menu-actions__group-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--wn-shell-muted, #94a3b8);
+  padding: 6px 14px 2px;
+}
+
+.wn-menu-actions .dropdown-divider {
+  margin: 6px 0;
 }
 
 .webnu-dish-card {
@@ -535,8 +600,8 @@
 }
 
 .webnu-add-section-btn {
-  border-width: 2px !important;
-  border-style: dashed !important;
+  border-width: 1.5px !important;
+  border-style: solid !important;
   font-weight: 600;
 }
 

@@ -1,6 +1,6 @@
 @php
-    $shareUrl = $shareUrl ?? (isset($company) ? route('see_menu', $company->slug) : '');
-    $sharePath = $sharePath ?? (isset($company) ? 'webnu.es/carta/' . $company->slug : '');
+    $shareUrl = $shareUrl ?? (isset($company) ? $company->publicUrl() : '');
+    $sharePath = $sharePath ?? (isset($company) ? 'webnu.es/' . $company->publicPath() : '');
     $shareTitle = $shareTitle ?? (isset($company) ? $company->name : 'Mi carta');
     $compact = !empty($compact);
 @endphp

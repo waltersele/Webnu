@@ -17,7 +17,7 @@
     $scanUrl = $canScan ? route('admin.menu-scan.create') : route('admin.sections.index');
     $qrUrl = $company ? route('admin.qrgenerator', $company) : route('admin.companies.index');
     $printUrl = $company ? route('admin.menu-print', $company) : route('admin.companies.index');
-    $menuUrl = $company ? route('see_menu', $company->slug) : '#';
+    $menuUrl = $company ? $company->publicUrl() : '#';
     $sectionsUrl = $company ? route('admin.sections.index') : route('admin.companies.index');
 @endphp
 
@@ -28,32 +28,9 @@
             <p>Tu carta ha recibido {{ number_format($d['menuViews'] ?? 0, 0, ',', '.') }} {{ ($d['menuViews'] ?? 0) === 1 ? 'visita' : 'visitas' }} (total acumulado)</p>
         </div>
 
-        <div class="wn-dash-next">
-            <div class="wn-dash-next__icon">
-                <i class="ti {{ $next['icon'] ?? 'ti-camera' }}"></i>
-            </div>
-            <div class="wn-dash-next__text">
-                <strong>{{ $next['title'] ?? 'Siguiente paso' }}</strong>
-                <span>{{ $next['subtitle'] ?? '' }}</span>
-            </div>
-            <a href="{{ $next['ctaUrl'] ?? $sectionsUrl }}" class="wn-dash-next__btn">
-                @if(($next['key'] ?? '') === 'import_dishes')
-                    <i class="ti ti-sparkles"></i>
-                @endif
-                {{ $next['cta'] ?? 'Continuar' }}
-            </a>
-        </div>
-
-        <div class="wn-dash-progress" role="progressbar" aria-valuenow="{{ $completed }}" aria-valuemin="0" aria-valuemax="4" aria-label="Progreso de configuración">
-            @foreach(['account', 'business', 'dishes', 'qr'] as $i => $stepKey)
-                @php
-                    $isDone = !empty($progress[$stepKey]);
-                    $isActive = !$isDone && ($i === $completed);
-                @endphp
-                <div class="wn-dash-progress__seg {{ $isDone ? 'is-done' : '' }} {{ $isActive ? 'is-active' : '' }}" title="Paso {{ $i + 1 }}"></div>
-            @endforeach
-            <span class="wn-dash-progress__label">Paso {{ min(4, max(1, $currentStep)) }} de 4</span>
-        </div>
+        @if(! empty($showProfileWizard))
+            @include('admin.partials.profile-wizard')
+        @endif
 
         <p class="wn-dash-section-title">¿Qué quieres hacer?</p>
         <div class="wn-dash-actions">
@@ -113,30 +90,20 @@
                 <i class="ti ti-qrcode"></i>
             </div>
             <div class="wn-dash-qr__info">
-                <p class="wn-dash-qr__url">{{ $d['publicPath'] ?? ('webnu.es/carta/' . $company->slug) }}</p>
+                <p class="wn-dash-qr__url">{{ $d['publicPath'] ?? ('webnu.es/' . $company->publicPath()) }}</p>
                 <div class="wn-dash-qr__meta">
                     @if(!empty($d['isPublished']))
                         <span class="wn-dash-qr__status">Publicada</span>
+                    @else
+                        <span class="wn-dash-qr__status wn-dash-qr__status--draft">Borrador</span>
                     @endif
                     <span>Plantilla {{ $d['templateLabel'] ?? '—' }}</span>
                 </div>
             </div>
             <div class="wn-dash-qr__actions">
                 <button type="button" class="wn-dash-btn-secondary" data-bs-toggle="modal" data-bs-target="#modal-share-menu">
-                    <i class="ti ti-share"></i> Compartir carta
+                    <i class="ti ti-share"></i> Compartir
                 </button>
-                <a href="{{ $qrUrl }}" target="_blank" rel="noopener" class="wn-dash-btn-secondary">
-                    <i class="ti ti-download"></i> Descargar QR
-                </a>
-                @if($company)
-                <a href="https://api.qrserver.com/v1/create-qr-code/?size=400x400&data={{ urlencode(route('see_menu', $company->slug)) }}"
-                   target="_blank" rel="noopener" class="wn-dash-btn-secondary" title="Alternativa si el PDF no abre">
-                    <i class="ti ti-photo"></i> QR imagen
-                </a>
-                @endif
-                <a href="{{ $d['publicUrl'] ?? $menuUrl }}" target="_blank" rel="noopener" class="wn-dash-btn-secondary">
-                    <i class="ti ti-external-link"></i> Ver carta
-                </a>
             </div>
         </div>
 

@@ -203,7 +203,7 @@
         <img src="{{ \App\PlatformSetting::brandUrl('logo') }}" alt="Webnu">
         <div class="menu-pdf-header__meta">
             <p class="menu-pdf-header__title">{{ $company->name }}</p>
-            <p class="menu-pdf-header__url">{{ url('/carta/' . $company->slug) }}</p>
+            <p class="menu-pdf-header__url">{{ $company->publicUrl() }}</p>
         </div>
     </header>
 

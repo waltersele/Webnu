@@ -34,15 +34,31 @@ class PagesController extends Controller
         return redirect()->route('home', [], 301);
     }
 
-    public function see_menu($companySlug, MenuService $menuService, Request $request)
+    public function see_menu(MenuService $menuService, Request $request, $ownerSlug, $companySlug = null)
     {
-        $company = Company::where('slug', $companySlug)->with('user')->first();
+        // Compatibilidad: si solo se recibe un argumento (uso legacy directo),
+        // tratamos el primero como companySlug y dejamos ownerSlug a null.
+        if ($companySlug === null) {
+            $companySlug = $ownerSlug;
+            $ownerSlug = null;
+        }
+
+        $query = Company::where('slug', $companySlug);
+        if ($ownerSlug !== null && $companySlug !== 'demo') {
+            $query->whereHas('user', function ($q) use ($ownerSlug) {
+                $q->where('slug', $ownerSlug);
+            });
+        }
+        $company = $query->with('user')->first();
 
         if (! $company) {
             abort(404);
         }
 
-        if (! $company->enabled && ! $request->boolean('studio_preview') && ! $request->boolean('sales_demo')) {
+        $previewToken = $request->get('preview_token');
+        $validPreviewToken = $previewToken && $company->isValidPreviewToken($previewToken);
+
+        if (! $company->enabled && ! $request->boolean('studio_preview') && ! $request->boolean('sales_demo') && ! $validPreviewToken) {
             abort(404);
         }
 
@@ -68,6 +84,10 @@ class PagesController extends Controller
                 : false;
 
             return view($viewName, compact('company', 'sections', 'menuLocale', 'menuLocaleService', 'dailyHighlights', 'showWebnuBadge'));
+        }
+
+        if ($company->menu_type != 2 || empty($company->menu_type_2_pdf)) {
+            abort(404);
         }
 
         $showWebnuBadge = $company->user
@@ -165,8 +185,14 @@ class PagesController extends Controller
             'email' => 'required|email',
             'name' => 'required|string|max:255',
             'phone' => 'required|string|max:50',
-            'company_email' => 'required|email',
+            'company_email' => 'nullable|email',
+            'date' => 'nullable|date',
+            'hour' => 'nullable|string|max:20',
         ]);
+
+        if (empty($data['company_email'])) {
+            return back()->with('table-reservation-failure', 'Este restaurante no tiene email de contacto configurado.');
+        }
 
         try {
             Mail::send('emails.table-reservation-message', $data, function ($message) use ($data) {

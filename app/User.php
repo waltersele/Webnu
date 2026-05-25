@@ -20,7 +20,8 @@ class User extends Authenticatable
      * @var array
      */
     protected $fillable = [
-        'name', 'email', 'password', 'plan', 'trial_plan_key', 'tvpik_extra_screens', 'onboarding_step', 'onboarding_completed_at',
+        'name', 'slug', 'email', 'password', 'plan', 'trial_plan_key', 'tvpik_extra_screens', 'onboarding_step', 'onboarding_completed_at',
+        'profile_wizard_dismissed_at',
         'api_token', 'tvpik_api_token', 'tvpik_connected_at', 'tvpik_org_id',
         'stripe_id', 'card_brand', 'card_last_four', 'trial_ends_at',
         'manual_plan_key', 'manual_plan_until', 'manual_plan_note',
@@ -46,6 +47,7 @@ class User extends Authenticatable
         'trial_ends_at' => 'datetime',
         'manual_plan_until' => 'datetime',
         'onboarding_completed_at' => 'datetime',
+        'profile_wizard_dismissed_at' => 'datetime',
         'tvpik_connected_at' => 'datetime',
     ];
 
@@ -86,6 +88,42 @@ class User extends Authenticatable
     public function companies()
     {
         return $this->hasMany(Company::class);
+    }
+
+    public function resolveSlug(): string
+    {
+        if (!empty($this->slug)) {
+            return $this->slug;
+        }
+
+        $newSlug = self::generateUniqueSlug($this->name ?: ($this->legal_name ?: ('user-' . ($this->id ?? 'tmp'))), $this->id);
+        $this->slug = $newSlug;
+
+        if ($this->exists && $this->id) {
+            \Illuminate\Support\Facades\DB::table($this->getTable())
+                ->where('id', $this->id)
+                ->update(['slug' => $newSlug]);
+        }
+
+        return $newSlug;
+    }
+
+    public static function generateUniqueSlug(?string $source, ?int $ignoreId = null): string
+    {
+        $base = \Illuminate\Support\Str::slug((string) $source);
+        if ($base === '') {
+            $base = 'user-' . ($ignoreId ?: \Illuminate\Support\Str::random(6));
+        }
+        $base = substr($base, 0, 110);
+
+        $candidate = $base;
+        $i = 2;
+        while (self::where('slug', $candidate)
+            ->when($ignoreId, function ($q) use ($ignoreId) { $q->where('id', '!=', $ignoreId); })
+            ->exists()) {
+            $candidate = $base . '-' . $i++;
+        }
+        return $candidate;
     }
 
     public function isSuperAdmin(): bool

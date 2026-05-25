@@ -13,7 +13,7 @@
         @if (!empty($selected_company) && !empty($available_companies))
         <div class="mb-4">
             <label class="form-label small text-muted text-uppercase fw-semibold" for="company_selection">Establecimiento</label>
-            <form method="POST" action="{{ route('admin.companies.changecompany', '0') }}" id="company-selection-form">
+            <form method="POST" action="{{ route('admin.companies.changecompany') }}" id="company-selection-form">
                 @csrf
                 <select name="company_selection" id="company_selection" class="form-select">
                     @foreach ($available_companies as $company)
@@ -32,7 +32,7 @@
                 <i class="fas fa-plug text-primary"></i> Integraciones
             </a>
             @if ($currentCompany)
-            <a href="{{ route('see_menu', $currentCompany->slug) }}" class="list-group-item list-group-item-action d-flex align-items-center gap-2" target="_blank" rel="noopener">
+            <a href="{{ $currentCompany->publicUrl() }}" class="list-group-item list-group-item-action d-flex align-items-center gap-2" target="_blank" rel="noopener">
                 <i class="fas fa-external-link-alt text-primary"></i> Ver carta pública
             </a>
             @endif

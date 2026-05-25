@@ -33,9 +33,15 @@ class MenuService
     {
         $locale = $locale ?: $company->defaultLocale();
 
-        $sections = Section::with(['products.allergens', 'translations', 'products.translations'])
+        $sections = Section::with([
+                'products' => fn ($q) => $q->where('enabled', true),
+                'products.allergens',
+                'products.translations',
+                'translations',
+            ])
             ->orderBy('order')
             ->where('company_id', $company->id)
+            ->where('enabled', true)
             ->get();
 
         $sections = $sections->map(function ($section) use ($locale, $company) {

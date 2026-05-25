@@ -22,7 +22,28 @@ Route::get('pre-alta/media/{id}', 'PreAltaPreviewController@media')->name('pre-a
 Route::get('activar/{token}', 'PreAltaClaimController@show')->name('pre-alta.claim.show')->where('token', '[a-fA-F0-9]{64}');
 Route::post('activar/{token}', 'PreAltaClaimController@store')->name('pre-alta.claim.store')->where('token', '[a-fA-F0-9]{64}');
 
-Route::get('carta/{companySlug}', 'PagesController@see_menu')->name('see_menu');
+// Legacy URL pública -> redirect 301 a la nueva URL jerárquica.
+// Para 'demo' y cartas sin user asociado servimos directamente el controlador
+// (mantiene compatibilidad con previews de plantillas y QRs antiguos).
+Route::get('carta/{companySlug}', function ($companySlug) {
+    if ($companySlug === 'demo' || strpos($companySlug, 'demo') === 0) {
+        return app(\App\Http\Controllers\PagesController::class)
+            ->see_menu(app(\App\Services\MenuService::class), request(), null, $companySlug);
+    }
+
+    $company = \App\Company::where('slug', $companySlug)->with('user')->first();
+    if (!$company) {
+        abort(404);
+    }
+    $ownerSlug = optional($company->user)->resolveSlug();
+    if (!$ownerSlug) {
+        return app(\App\Http\Controllers\PagesController::class)
+            ->see_menu(app(\App\Services\MenuService::class), request(), null, $companySlug);
+    }
+    $qs = request()->getQueryString();
+    return redirect(url($ownerSlug . '/' . $company->slug) . ($qs ? '?' . $qs : ''), 301);
+})->name('see_menu.legacy');
+
 Route::get('tv/{companySlug}/sync.json', 'TvMenuController@sync')->name('tv.sync');
 Route::get('tv/{companySlug}', 'TvMenuController@show')->name('tv.show');
 Route::get('tv/{companySlug}/{layout}', 'TvMenuController@show')->name('tv.show.layout');
@@ -98,6 +119,7 @@ Route::post('admin/stop-impersonating', 'Admin\\PlatformUsersController@stopImpe
 
 Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['auth', 'subscribed', 'onboarding.complete', 'selected.company']], function () {
     Route::get('/', 'AdminController@index')->name('admin.dashboard');
+    Route::post('profile-wizard/dismiss', 'ProfileWizardController@dismiss')->name('admin.profile-wizard.dismiss');
     Route::get('companies', 'CompaniesController@index')->name('admin.companies.index');
     Route::post('companies', 'CompaniesController@store')->name('admin.companies.store');
     Route::get('companies/{company}', 'CompaniesController@edit')->name('admin.companies.edit');
@@ -109,6 +131,7 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['aut
     Route::put('companies/{company}/languages/sections/{section}', 'TranslationController@updateSection')->name('admin.companies.languages.section');
     Route::put('companies/{company}/languages/products/{product}', 'TranslationController@updateProduct')->name('admin.companies.languages.product');
     Route::delete('companies', 'CompaniesController@delete')->name('admin.companies.delete');
+    Route::patch('companies/{company}/toggle-enabled', 'CompaniesController@toggleEnabled')->name('admin.companies.toggle-enabled');
     Route::post('companies/{company}/logo', 'CompaniesController@storelogo')->name('admin.companies.storelogo');
     Route::delete('companies/{company}/deletelogo', 'CompaniesController@deletelogo')->name('admin.companies.deletelogo');
     Route::post('companies/{company}/header', 'CompaniesController@storeheader')->name('admin.companies.storeheader');
@@ -194,3 +217,11 @@ Route::get('password/request', 'Auth\ForgotPasswordController@showLinkRequestFor
 Route::post('password/email', 'Auth\ForgotPasswordController@sendResetLinkEmail')->name('password.email');
 Route::get('password/reset/{token}', 'Auth\ResetPasswordController@showResetForm')->name('password.reset');
 Route::post('password/reset', 'Auth\ResetPasswordController@reset')->name('password.update');
+
+// IMPORTANT: catch-all jerárquico de la URL pública {owner-slug}/{company-slug}.
+// Debe ir AL FINAL para no capturar admin/, login/, register/, carta/, tv/, etc.
+// Si añades futuras rutas con 2 segmentos planos, declaralas ANTES de esto.
+Route::get('{ownerSlug}/{companySlug}', 'PagesController@see_menu')
+    ->where('ownerSlug', '[a-z0-9][a-z0-9-]*')
+    ->where('companySlug', '[a-z0-9][a-z0-9-]*')
+    ->name('see_menu');

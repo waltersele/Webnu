@@ -33,7 +33,7 @@ class VisitDesignController extends Controller
             'presets' => $presets,
             'colorKeys' => $colorKeys,
             'resolvedTheme' => $resolved,
-            'previewUrl' => route('see_menu', $visit->slug),
+            'previewUrl' => $visit->publicUrl(),
         ]);
     }
 

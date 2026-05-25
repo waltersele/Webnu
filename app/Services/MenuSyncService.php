@@ -31,7 +31,7 @@ class MenuSyncService
                 'menu_type' => (int) $company->menu_type,
                 'template' => $company->template,
                 'sync_version' => $this->syncVersion($company),
-                'public_url' => route('see_menu', $company->slug),
+                'public_url' => $company->publicUrl(),
                 'api_url' => url('/api/signage/menus/' . $company->slug),
                 'tv_urls' => $this->tvUrls($company),
             ];
@@ -165,7 +165,7 @@ class MenuSyncService
             'header_url' => $company->background_header
                 ? $this->assetUrl($company->background_header)
                 : null,
-            'public_url' => route('see_menu', $company->slug),
+            'public_url' => $company->publicUrl(),
         ];
     }
 
@@ -198,7 +198,7 @@ class MenuSyncService
     {
         $urls = $this->tvUrls($company);
 
-        return $urls[$templateKey] ?? $urls['default'] ?? route('see_menu', $company->slug);
+        return $urls[$templateKey] ?? $urls['default'] ?? $company->publicUrl();
     }
 
     protected function dailySpotlightPayload(Company $company): ?array

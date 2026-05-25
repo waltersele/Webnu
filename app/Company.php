@@ -205,6 +205,44 @@ class Company extends Model
     {
         return count($this->publicLocales()) > 1;
     }
+
+    /**
+     * URL pública de la carta. Si el user no tiene slug (caso degenerado o
+     * migración aún no aplicada), cae en la ruta legacy /carta/{companySlug}.
+     * Read-only: no dispara persistencia.
+     */
+    public function publicUrl(array $extra = []): string
+    {
+        $ownerSlug = optional($this->user)->slug;
+        if ($ownerSlug && $this->slug) {
+            return route('see_menu', array_merge([$ownerSlug, $this->slug], $extra));
+        }
+        return route('see_menu.legacy', array_merge([$this->slug], $extra));
+    }
+
+    /** Path relativo para mostrar (ej: "casa-maria/menu-de-verano"). */
+    public function publicPath(): string
+    {
+        $ownerSlug = optional($this->user)->slug;
+        if ($ownerSlug && $this->slug) {
+            return $ownerSlug . '/' . $this->slug;
+        }
+        return 'carta/' . ($this->slug ?? '');
+    }
+
+    /**
+     * Token HMAC para previsualizar la carta aunque esté deshabilitada.
+     * Se usa con ?preview_token=xxx en la URL pública.
+     */
+    public function previewToken(): string
+    {
+        return substr(hash_hmac('sha256', (string) $this->id, config('app.key')), 0, 32);
+    }
+
+    public function isValidPreviewToken(string $token): bool
+    {
+        return hash_equals($this->previewToken(), $token);
+    }
 }
 
 

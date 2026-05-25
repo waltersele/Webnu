@@ -234,7 +234,7 @@ trait PreparesLandingPage
             'templateCount' => $templateCount,
             'userDisplayName' => $userDisplayName,
             'settingsUrl' => route('admin.settings'),
-            'panelUrl' => route('admin.tvpik.index'),
+            'panelUrl' => route('admin.dashboard'),
             'logoutUrl' => route('logout'),
         ];
     }

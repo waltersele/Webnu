@@ -25,11 +25,15 @@
 
     @if($useClientShell)
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+        <link rel="stylesheet" href="{{ asset('materio/vendor/fonts/iconify-icons.css') }}">
         <link rel="stylesheet" href="{{ asset('materio/vendor/css/core.css') }}">
         <link rel="stylesheet" href="{{ asset('materio/css/webnu-theme.css') }}">
+        <link rel="stylesheet" href="{{ asset('materio/css/webnu-admin-tokens.css') }}">
         <link rel="stylesheet" href="{{ asset('materio/css/webnu-admin-shell.css') }}">
         <link rel="stylesheet" href="{{ asset('materio/css/webnu-admin.css') }}">
         <link rel="stylesheet" href="{{ asset('materio/css/webnu-dashboard.css') }}">
+        <link rel="stylesheet" href="{{ asset('materio/css/webnu-onboarding-anim.css') }}">
+        <link rel="stylesheet" href="{{ asset('materio/css/webnu-wizard.css') }}">
     @else
         <link rel="stylesheet" href="{{ asset('materio/vendor/fonts/iconify-icons.css') }}">
         <link rel="stylesheet" href="{{ asset('materio/vendor/libs/node-waves/node-waves.css') }}">
@@ -169,6 +173,14 @@
 @endphp
 @if($shareMenuCompany)
     @include('admin.partials.share-menu-modal', ['company' => $shareMenuCompany])
+@endif
+@if($useClientShell && !empty($selected_company) && !empty($available_companies))
+    @php
+        $qrModalCurrent = $available_companies->firstWhere('id', (int) $selected_company);
+    @endphp
+    @if($qrModalCurrent)
+        @include('admin.partials.qr-modal', ['currentCompany' => $qrModalCurrent])
+    @endif
 @endif
 @stack('scripts')
 @if($useClientShell)

@@ -77,6 +77,7 @@ class PreAltaClaimService
 
             $user = User::create([
                 'name' => $credentials['name'],
+                'slug' => User::generateUniqueSlug($locked->restaurant_name ?: $credentials['name']),
                 'email' => $credentials['email'],
                 'password' => Hash::make($credentials['password']),
                 'plan' => 'free',

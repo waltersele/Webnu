@@ -54,7 +54,7 @@ class MenuPrintController extends Controller
         $html = $logoHtml
             . '<h1 style="text-align:center;font-size:22px;margin-bottom:4px;">' . e($company->name) . '</h1>'
             . '<p style="text-align:center;font-size:10px;color:#666;margin-bottom:16px;">'
-            . e(route('see_menu', $company->slug))
+            . e($company->publicUrl())
             . '</p>';
 
         foreach ($sections as $section) {

@@ -66,7 +66,7 @@ class MenuLocaleService
     {
         $query = array_merge($query, ['lang' => $locale]);
 
-        return route('see_menu', array_merge(['companySlug' => $company->slug], $query));
+        return $company->publicUrl($query);
     }
 
     /** @return string[] */

@@ -14,6 +14,22 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@4.6.0/fonts/remixicon.css">
     <link rel="stylesheet" href="{{ asset('css/webnu-onboarding.css') }}">
+    <link rel="stylesheet" href="{{ asset('materio/css/webnu-onboarding-anim.css') }}">
+    <style>
+        .wn-onb-step__visual {
+            margin: 0 auto 18px;
+            max-width: 360px;
+        }
+        .wn-onb-card--hero .wn-onb-step__visual {
+            margin-top: -8px;
+        }
+        @media (max-width: 575.98px) {
+            .wn-onb-step__visual {
+                max-width: 280px;
+                margin-bottom: 12px;
+            }
+        }
+    </style>
 </head>
 <body class="wn-onb-body">
 @yield('content')

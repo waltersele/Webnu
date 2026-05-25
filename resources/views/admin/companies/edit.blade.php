@@ -4,7 +4,7 @@
 @section('page_subtitle', 'Configura nombre, contacto, diseño y publicación de tu carta')
 
 @section('page_actions')
-    <a href="{{ route('see_menu', $company->slug) }}" target="_blank" rel="noopener" class="btn btn-outline-primary btn-sm">
+    <a href="{{ $company->publicUrl() }}" target="_blank" rel="noopener" class="btn btn-outline-primary btn-sm">
         <i class="ri-eye-line me-1"></i> Ver carta
     </a>
     <a href="{{ route('admin.companies.languages', $company) }}" class="btn btn-outline-primary btn-sm">

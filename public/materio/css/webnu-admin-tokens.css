@@ -1,0 +1,735 @@
+/* Webnu admin design tokens — alineados con la landing */
+:root {
+  --wn-primary: #004ac6;
+  --wn-primary-dark: #003899;
+  --wn-primary-soft: #4070d9;
+  --wn-primary-container: #e6f0ff;
+  --wn-on-primary: #ffffff;
+
+  --wn-success: #16a34a;
+  --wn-warning: #f59e0b;
+  --wn-danger: #dc2626;
+
+  --wn-surface: #ffffff;
+  --wn-surface-container-lowest: #fdfdff;
+  --wn-surface-container-low: #f7f8fb;
+  --wn-surface-container: #f1f3f9;
+  --wn-surface-container-high: #e9ecf4;
+
+  --wn-border-subtle: #e5e7eb;
+  --wn-border-strong: #cbd5e1;
+
+  --wn-text: #0f172a;
+  --wn-text-muted: #64748b;
+  --wn-text-soft: #94a3b8;
+
+  --wn-radius-card: 14px;
+  --wn-radius-input: 10px;
+  --wn-radius-pill: 999px;
+
+  --wn-shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.04);
+  --wn-shadow-md: 0 4px 16px rgba(15, 23, 42, 0.06);
+  --wn-shadow-lg: 0 10px 30px rgba(15, 23, 42, 0.08);
+
+  --wn-space-1: 0.25rem;
+  --wn-space-2: 0.5rem;
+  --wn-space-3: 0.75rem;
+  --wn-space-4: 1rem;
+  --wn-space-5: 1.5rem;
+  --wn-space-6: 2rem;
+
+  --wn-font-headline: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  --wn-font-body: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+}
+
+/* Tipografía base del shell admin alineada con la landing */
+.wn-shell-app .wn-shell-page-header h1 {
+  font-family: var(--wn-font-headline);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--wn-text);
+}
+
+.wn-shell-app .wn-shell-page-header p {
+  color: var(--wn-text-muted);
+  font-size: 14px;
+}
+
+/* Botones primary con peso y radio alineados */
+.wn-shell-app .btn-primary,
+.wn-shell-app .btn-outline-primary {
+  border-radius: var(--wn-radius-input);
+  font-weight: 600;
+}
+
+.wn-shell-app .btn-primary {
+  background-color: var(--wn-primary);
+  border-color: var(--wn-primary);
+}
+
+.wn-shell-app .btn-primary:hover,
+.wn-shell-app .btn-primary:focus {
+  background-color: var(--wn-primary-dark);
+  border-color: var(--wn-primary-dark);
+}
+
+.wn-shell-app .btn-outline-primary {
+  border-color: var(--wn-primary);
+  color: var(--wn-primary);
+}
+
+.wn-shell-app .btn-outline-primary:hover {
+  background-color: var(--wn-primary);
+  color: var(--wn-on-primary);
+}
+
+/* Tab bar reutilizable */
+.wn-tab-bar {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px;
+  background: var(--wn-surface-container-low);
+  border: 1px solid var(--wn-border-subtle);
+  border-radius: var(--wn-radius-pill);
+  margin: 0 0 18px;
+  max-width: 100%;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.wn-tab-bar::-webkit-scrollbar {
+  display: none;
+}
+
+.wn-tab-bar__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 18px;
+  border: 0;
+  background: transparent;
+  color: var(--wn-text-muted);
+  font-family: var(--wn-font-body);
+  font-weight: 500;
+  font-size: 14px;
+  border-radius: var(--wn-radius-pill);
+  cursor: pointer;
+  transition: background 140ms ease, color 140ms ease, box-shadow 140ms ease;
+  white-space: nowrap;
+}
+
+.wn-tab-bar__btn i {
+  font-size: 16px;
+}
+
+.wn-tab-bar__btn:hover {
+  color: var(--wn-text);
+}
+
+.wn-tab-bar__btn.is-active {
+  background: var(--wn-surface);
+  color: var(--wn-primary);
+  box-shadow: var(--wn-shadow-sm);
+  font-weight: 600;
+}
+
+.wn-tab-bar__btn:focus-visible {
+  outline: 2px solid var(--wn-primary);
+  outline-offset: 2px;
+}
+
+@media (max-width: 767.98px) {
+  .wn-tab-bar {
+    display: flex;
+    width: 100%;
+  }
+  .wn-tab-bar__btn {
+    flex: 1 1 0;
+    justify-content: center;
+    padding: 9px 10px;
+    font-size: 13px;
+    min-width: 0;
+  }
+  .wn-tab-bar__btn .wn-tab-bar__label {
+    display: none;
+  }
+  .wn-tab-bar__btn i {
+    font-size: 18px;
+  }
+  .wn-tab-bar__btn.is-active {
+    flex: 2 1 0;
+    padding: 9px 14px;
+  }
+  .wn-tab-bar__btn.is-active .wn-tab-bar__label {
+    display: inline;
+    font-size: 13px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+/* Tab panels */
+.wn-tab-panel {
+  display: none;
+}
+
+.wn-tab-panel.is-active {
+  display: block;
+  animation: wnTabFade 180ms ease;
+}
+
+@keyframes wnTabFade {
+  from { opacity: 0; transform: translateY(2px); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* Segmented control (vista grid/lista) */
+.wn-view-switch {
+  display: inline-flex;
+  background: var(--wn-surface-container-low);
+  border: 1px solid var(--wn-border-subtle);
+  border-radius: var(--wn-radius-pill);
+  padding: 3px;
+}
+
+.wn-view-switch__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border: 0;
+  background: transparent;
+  color: var(--wn-text-muted);
+  font-size: 13px;
+  font-weight: 500;
+  border-radius: var(--wn-radius-pill);
+  cursor: pointer;
+  transition: background 120ms ease, color 120ms ease;
+  white-space: nowrap;
+}
+
+.wn-view-switch__btn i {
+  font-size: 16px;
+}
+
+.wn-view-switch__btn:hover {
+  color: var(--wn-text);
+}
+
+.wn-view-switch__btn.is-active {
+  background: var(--wn-primary);
+  color: var(--wn-on-primary);
+  box-shadow: var(--wn-shadow-sm);
+}
+
+.wn-view-switch__btn:focus-visible {
+  outline: 2px solid var(--wn-primary);
+  outline-offset: 2px;
+}
+
+@media (max-width: 575.98px) {
+  .wn-view-switch__btn .wn-view-switch__label {
+    display: none;
+  }
+}
+
+/* Cards refinadas */
+.wn-shell-app .webnu-section-card {
+  border-radius: var(--wn-radius-card) !important;
+  border: 1px solid var(--wn-border-subtle) !important;
+  box-shadow: var(--wn-shadow-sm) !important;
+  background: var(--wn-surface);
+}
+
+.wn-shell-app .webnu-section-card__header {
+  background: transparent !important;
+  border-bottom: 1px solid var(--wn-border-subtle);
+  padding: 16px 18px !important;
+}
+
+.wn-shell-app .webnu-section-card .card-title {
+  font-family: var(--wn-font-headline);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  font-size: 18px;
+}
+
+.wn-shell-app .webnu-dish-card {
+  border-radius: var(--wn-radius-card);
+  border: 1px solid var(--wn-border-subtle);
+  box-shadow: var(--wn-shadow-sm);
+  transition: box-shadow 160ms ease, transform 160ms ease;
+}
+
+.wn-shell-app .webnu-dish-card:hover {
+  box-shadow: var(--wn-shadow-md);
+  transform: translateY(-1px);
+}
+
+/* CTA "+ Añadir plato" / "+ Añadir sección" - pie de sección */
+.wn-section-add-product {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  margin-top: 16px;
+  padding: 14px;
+  border: 1.5px solid var(--wn-primary);
+  background: transparent;
+  color: var(--wn-primary);
+  font-weight: 600;
+  font-size: 14px;
+  border-radius: var(--wn-radius-card);
+  cursor: pointer;
+  transition: background 140ms ease, border-color 140ms ease;
+}
+
+.wn-section-add-product:hover,
+.wn-section-add-product:focus {
+  background: var(--wn-primary-container);
+  border-color: var(--wn-primary-dark);
+  color: var(--wn-primary-dark);
+}
+
+.wn-section-add-product i {
+  font-size: 18px;
+}
+
+/* Filas clickables en vista de lista de platos */
+.wn-list-row {
+  cursor: pointer;
+  transition: background 140ms ease;
+}
+
+.wn-list-row:hover {
+  background: var(--wn-surface-container-low, #f7f8fb);
+}
+
+.wn-list-row:focus-visible {
+  outline: 2px solid var(--wn-primary, #004ac6);
+  outline-offset: -2px;
+}
+
+.wn-add-section-cta {
+  composes: wn-section-add-product;
+}
+
+.wn-shell-app .webnu-add-section-btn {
+  border: 1.5px solid var(--wn-primary);
+  border-radius: var(--wn-radius-card);
+  color: var(--wn-primary);
+  background: transparent;
+  font-weight: 600;
+  padding: 14px;
+  transition: background 140ms ease;
+}
+
+.wn-shell-app .webnu-add-section-btn:hover {
+  background: var(--wn-primary-container);
+  color: var(--wn-primary-dark);
+}
+
+/* Empty state platos */
+.wn-empty-state {
+  text-align: center;
+  padding: 28px 16px;
+  border: 1px solid var(--wn-border-subtle);
+  border-radius: var(--wn-radius-card);
+  background: var(--wn-surface-container-low);
+  color: var(--wn-text-muted);
+}
+
+.wn-empty-state i {
+  font-size: 36px;
+  display: block;
+  margin-bottom: 10px;
+  color: var(--wn-text-soft);
+}
+
+.wn-empty-state h6 {
+  color: var(--wn-text);
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.wn-empty-state .btn {
+  margin-top: 12px;
+}
+
+/* Switch publicar/borrador prominente en el page-header (sections/index, etc.) */
+.wn-page-status {
+  display: inline-flex;
+  align-items: stretch;
+  border: 1px solid var(--wn-border-subtle);
+  border-radius: 999px;
+  background: var(--wn-surface-container-low);
+  padding: 4px;
+  transition: background 0.18s ease, border-color 0.18s ease;
+}
+
+.wn-page-status.is-published {
+  background: rgba(34, 197, 94, 0.08);
+  border-color: rgba(34, 197, 94, 0.35);
+}
+
+.wn-page-status.is-draft {
+  background: rgba(239, 68, 68, 0.06);
+  border-color: rgba(239, 68, 68, 0.35);
+}
+
+.wn-page-status__toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 14px 6px 6px;
+  cursor: pointer;
+  margin: 0;
+  user-select: none;
+}
+
+.wn-page-status__input { display: none; }
+
+.wn-page-status__switch {
+  position: relative;
+  width: 40px;
+  height: 22px;
+  border-radius: 999px;
+  background: #cbd5e1;
+  transition: background 0.18s ease;
+  flex: 0 0 auto;
+}
+
+.wn-page-status__switch::after {
+  content: '';
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #fff;
+  top: 2px;
+  left: 2px;
+  transition: transform 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.18);
+}
+
+.wn-page-status__input:checked ~ .wn-page-status__switch {
+  background: #22c55e;
+}
+
+.wn-page-status__input:checked ~ .wn-page-status__switch::after {
+  transform: translateX(18px);
+}
+
+.wn-page-status__text {
+  display: inline-flex;
+  flex-direction: column;
+  line-height: 1.1;
+}
+
+.wn-page-status__text strong {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--wn-text);
+}
+
+.wn-page-status__text small {
+  font-size: 11px;
+  color: var(--wn-text-muted);
+}
+
+/* Lista de platos: thumb 56px */
+.wn-shell-app .webnu-section-card .table thead th {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--wn-text-soft);
+  font-weight: 600;
+  background: var(--wn-surface-container-lowest);
+  border-bottom: 1px solid var(--wn-border-subtle);
+  padding: 10px 14px;
+}
+
+.wn-shell-app .webnu-section-card .table td {
+  padding: 14px;
+  border-color: var(--wn-border-subtle);
+  vertical-align: middle;
+}
+
+.wn-shell-app .webnu-section-card .table tr:hover td {
+  background: var(--wn-surface-container-lowest);
+}
+
+.wn-list-thumb {
+  width: 56px;
+  height: 56px;
+  border-radius: 10px;
+  object-fit: cover;
+  display: block;
+  background: var(--wn-surface-container);
+  border: 1px solid var(--wn-border-subtle);
+  flex-shrink: 0;
+}
+
+.wn-list-thumb--placeholder {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--wn-text-soft);
+  font-size: 22px;
+}
+
+.wn-list-product-name {
+  font-weight: 600;
+  font-size: 15px;
+  color: var(--wn-text);
+  line-height: 1.3;
+}
+
+.wn-list-product-desc {
+  font-size: 12.5px;
+  color: var(--wn-text-muted);
+  line-height: 1.4;
+  margin-top: 2px;
+  display: block;
+}
+
+/* Compartir y opciones — cards CTA grandes */
+.wn-share-card {
+  border: 1px solid var(--wn-border-subtle);
+  border-radius: var(--wn-radius-card);
+  background: var(--wn-surface);
+  padding: 22px;
+  transition: box-shadow 160ms ease, transform 160ms ease, border-color 160ms ease;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  text-decoration: none;
+  color: inherit;
+}
+
+.wn-share-card:hover {
+  box-shadow: var(--wn-shadow-md);
+  transform: translateY(-2px);
+  border-color: var(--wn-primary-soft);
+  color: inherit;
+}
+
+.wn-share-card__icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--wn-primary-container);
+  color: var(--wn-primary);
+  font-size: 22px;
+}
+
+.wn-share-card__title {
+  font-family: var(--wn-font-headline);
+  font-weight: 600;
+  font-size: 16px;
+  margin: 0;
+  color: var(--wn-text);
+}
+
+.wn-share-card__desc {
+  font-size: 13.5px;
+  color: var(--wn-text-muted);
+  line-height: 1.5;
+  margin: 0;
+  flex-grow: 1;
+}
+
+.wn-share-card__cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--wn-primary);
+  font-weight: 600;
+  font-size: 13.5px;
+  margin-top: 4px;
+}
+
+.wn-share-card.is-locked .wn-share-card__icon {
+  background: var(--wn-surface-container);
+  color: var(--wn-text-soft);
+}
+
+.wn-share-card__plan {
+  display: inline-flex;
+  align-items: center;
+  background: #fef3c7;
+  color: #b45309;
+  font-size: 10.5px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 999px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-left: auto;
+}
+
+/* Personalización panel */
+.wn-personalize-panel {
+  display: grid;
+  gap: 18px;
+}
+
+.wn-personalize-card {
+  border: 1px solid var(--wn-border-subtle);
+  border-radius: var(--wn-radius-card);
+  background: var(--wn-surface);
+  box-shadow: var(--wn-shadow-sm);
+  padding: 20px;
+}
+
+.wn-personalize-card h6 {
+  font-family: var(--wn-font-headline);
+  font-weight: 600;
+  color: var(--wn-text);
+  margin-bottom: 4px;
+}
+
+.wn-personalize-card .text-muted {
+  color: var(--wn-text-muted) !important;
+  font-size: 13px;
+}
+
+/* ---- QR modal ---- */
+.wn-qr-modal .modal-content {
+  border-radius: var(--wn-radius-card);
+  border: 1px solid var(--wn-border-subtle);
+}
+
+.wn-qr-modal .modal-header {
+  border-bottom: 1px solid var(--wn-border-subtle);
+  padding: 16px 20px;
+}
+
+.wn-qr-modal .modal-title {
+  font-family: var(--wn-font-headline);
+  font-weight: 700;
+  font-size: 17px;
+  color: var(--wn-text);
+}
+
+.wn-qr-modal__tabs {
+  display: flex;
+  gap: 6px;
+  background: var(--wn-surface-container-low);
+  border: 1px solid var(--wn-border-subtle);
+  border-radius: var(--wn-radius-pill);
+  padding: 4px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.wn-qr-modal__tabs::-webkit-scrollbar { display: none; }
+
+.wn-qr-modal__tab {
+  flex: 1 1 auto;
+  padding: 7px 14px;
+  border: 0;
+  background: transparent;
+  border-radius: var(--wn-radius-pill);
+  color: var(--wn-text-muted);
+  font-weight: 600;
+  font-size: 13px;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background 140ms ease, color 140ms ease;
+}
+
+.wn-qr-modal__tab.is-active {
+  background: var(--wn-primary);
+  color: #fff;
+}
+
+.wn-qr-modal__panel {
+  display: none;
+}
+
+.wn-qr-modal__panel.is-active {
+  display: block;
+}
+
+.wn-qr-modal__art {
+  display: flex;
+  justify-content: center;
+  padding: 12px 0 16px;
+}
+
+.wn-qr-modal__img {
+  width: 240px;
+  height: 240px;
+  max-width: 100%;
+  border: 1px solid var(--wn-border-subtle);
+  border-radius: 12px;
+  background: #fff;
+  padding: 8px;
+  box-shadow: var(--wn-shadow-sm);
+}
+
+.wn-qr-modal__url {
+  margin-bottom: 14px;
+}
+
+.wn-qr-modal__url-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--wn-text-muted);
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.wn-qr-modal__url-input {
+  font-size: 13px;
+  font-family: ui-monospace, "SFMono-Regular", Consolas, monospace;
+  color: var(--wn-text);
+}
+
+.wn-qr-modal__copy.is-copied {
+  background: var(--wn-success);
+  border-color: var(--wn-success);
+  color: #fff;
+}
+
+.wn-qr-modal__actions {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.wn-qr-modal__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 8px;
+  font-size: 13.5px;
+  font-weight: 600;
+  border-radius: 10px;
+}
+
+.wn-qr-modal__btn i {
+  font-size: 16px;
+}
+
+@media (max-width: 480px) {
+  .wn-qr-modal__img {
+    width: 200px;
+    height: 200px;
+  }
+  .wn-qr-modal__btn {
+    font-size: 12.5px;
+    padding: 9px 6px;
+  }
+}

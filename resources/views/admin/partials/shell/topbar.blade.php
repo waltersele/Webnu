@@ -8,18 +8,24 @@
     $planPresentation = $planPresentation ?? app(\App\Services\UserPlanService::class)->planPresentation($user);
     $billingUrl = ($planFeatures['billing_url'] ?? null) ?: route('admin.settings');
     $showTrial = !empty($planPresentation['trial_active']) && ($planPresentation['trial_days_remaining'] ?? null) !== null;
+    $logoHomeUrl = $hasCompany ? route('admin.sections.index') : route('admin.companies.index');
 @endphp
 
 <header class="wn-shell-topbar">
-    <a href="{{ route('admin.tvpik.index') }}" class="wn-shell-topbar__logo">
-        <span class="wn-shell-topbar__logo-dot" aria-hidden="true"></span>
-        <span>Webnu</span>
+    <a href="{{ $logoHomeUrl }}" class="wn-shell-topbar__logo" aria-label="Ir a Mi carta">
+        <img src="{{ asset('adminlte/img/isotipo-color.png') }}"
+             alt=""
+             class="wn-shell-logo wn-shell-logo--mark d-md-none"
+             width="28" height="28">
+        <img src="{{ asset('adminlte/img/logo-color.png') }}"
+             alt="Webnu"
+             class="wn-shell-logo wn-shell-logo--wordmark d-none d-md-inline">
     </a>
 
     <div class="wn-shell-topbar__center">
         @if($hasCompany && $currentCompany)
             @if($available_companies->count() > 1)
-                <form method="POST" action="{{ route('admin.companies.changecompany', '0') }}" class="wn-shell-business-form" id="wn-topbar-company-form">
+                <form method="POST" action="{{ route('admin.companies.changecompany') }}" class="wn-shell-business-form" id="wn-topbar-company-form">
                     @csrf
                     <label class="visually-hidden" for="wn-topbar-company-select">Negocio activo</label>
                     <select name="company_selection" id="wn-topbar-company-select" class="wn-shell-business-select" onchange="this.form.submit()">
@@ -36,15 +42,14 @@
                     {{ $currentCompany->name }}
                 </div>
             @endif
-            <span class="wn-shell-topbar__url d-none d-md-inline">webnu.es/carta/{{ $currentCompany->slug }}</span>
-            <button type="button"
-                    class="wn-shell-topbar__share-btn d-none d-md-inline-flex"
-                    data-bs-toggle="modal"
-                    data-bs-target="#modal-share-menu"
-                    title="Compartir carta">
-                <i class="ti ti-share" aria-hidden="true"></i>
-                <span class="visually-hidden">Compartir carta</span>
-            </button>
+            <a href="{{ $currentCompany->publicUrl() }}"
+               target="_blank"
+               rel="noopener"
+               class="wn-shell-topbar__url d-none d-md-inline-flex"
+               title="Abrir carta pública">
+                <i class="ti ti-external-link" aria-hidden="true"></i>
+                <span>webnu.es/{{ $currentCompany->publicPath() }}</span>
+            </a>
         @else
             <span class="wn-shell-topbar__hint">Sin negocio activo</span>
         @endif

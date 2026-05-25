@@ -13,7 +13,7 @@
     @if (!empty($selected_company) && !empty($available_companies))
     <div class="webnu-sidebar__company">
         <label for="company_selection_desktop">Establecimiento</label>
-        <form method="POST" action="{{ route('admin.companies.changecompany', '0') }}" id="company-selection-form-desktop">
+        <form method="POST" action="{{ route('admin.companies.changecompany') }}" id="company-selection-form-desktop">
             @csrf
             <select name="company_selection" id="company_selection_desktop" class="form-select form-select-sm">
                 @foreach ($available_companies as $company)
@@ -36,7 +36,7 @@
             <i class="fas fa-utensils"></i> Carta
         </a>
         @if ($currentCompany)
-        <a href="{{ route('see_menu', $currentCompany->slug) }}" class="webnu-sidebar__link" target="_blank" rel="noopener">
+        <a href="{{ $currentCompany->publicUrl() }}" class="webnu-sidebar__link" target="_blank" rel="noopener">
             <i class="fas fa-external-link-alt"></i> Ver carta pública
         </a>
         @endif

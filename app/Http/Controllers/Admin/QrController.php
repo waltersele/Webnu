@@ -19,12 +19,13 @@ class QrController extends Controller
     {
         $this->authorize('view', $company);
 
-        $menuUrl = route('see_menu', $company->slug);
+        $menuUrl = $company->publicUrl();
+        $forceDownload = $request->boolean('download');
 
         // Si el usuario pide PNG explícitamente, o si el PDF falla en runtime,
         // entregamos un QR como imagen PNG (más robusto y sin depender de GD ricos).
         if ($request->query('format') === 'png') {
-            return $this->renderPngFallback($menuUrl, $company);
+            return $this->renderPngFallback($menuUrl, $company, null, $forceDownload);
         }
 
         try {
@@ -63,7 +64,11 @@ class QrController extends Controller
 
             $filename = 'carta-qr-' . preg_replace('/[^a-z0-9\-]+/i', '-', $company->slug) . '.pdf';
 
-            return $this->inlinePdfResponse($pdf, $filename);
+            if ($forceDownload && method_exists($this, 'downloadPdfResponse')) {
+                return $this->downloadPdfResponse($pdf, $filename);
+            }
+
+            return $this->inlinePdfResponse($pdf, $filename, $forceDownload);
         } catch (Throwable $e) {
             Log::warning('QR PDF generation failed, devolviendo PNG de respaldo', [
                 'company_id' => $company->id,
@@ -72,7 +77,7 @@ class QrController extends Controller
                 'trace_first' => $e->getTraceAsString() ? substr($e->getTraceAsString(), 0, 800) : null,
             ]);
 
-            return $this->renderPngFallback($menuUrl, $company, $e->getMessage());
+            return $this->renderPngFallback($menuUrl, $company, $e->getMessage(), $forceDownload);
         }
     }
 
@@ -80,7 +85,7 @@ class QrController extends Controller
      * Devuelve el QR como PNG, sin depender de TCPDF/PDF.
      * Si todo falla, redirige con un mensaje claro.
      */
-    protected function renderPngFallback(string $menuUrl, Company $company, ?string $errorContext = null)
+    protected function renderPngFallback(string $menuUrl, Company $company, ?string $errorContext = null, bool $forceDownload = false)
     {
         try {
             if (! class_exists(TCPDF2DBarcode::class)) {
@@ -95,11 +100,12 @@ class QrController extends Controller
             }
 
             $filename = 'carta-qr-' . preg_replace('/[^a-z0-9\-]+/i', '-', $company->slug) . '.png';
+            $disposition = ($forceDownload ? 'attachment' : 'inline') . '; filename="' . $filename . '"';
 
             return response($png, 200)
                 ->header('Content-Type', 'image/png')
-                ->header('Content-Disposition', 'inline; filename="' . $filename . '"')
-                ->header('Cache-Control', 'no-store, no-cache, must-revalidate');
+                ->header('Content-Disposition', $disposition)
+                ->header('Cache-Control', 'public, max-age=300');
         } catch (Throwable $e) {
             Log::error('QR PNG fallback failed', [
                 'company_id' => $company->id,

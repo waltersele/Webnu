@@ -47,7 +47,7 @@
                 <li class="nav-item">
                     <div class="mb-3">
                         <label class="current-company-label">Negocio actual</label>
-                        <form role="form" method="POST" action="{{ route('admin.companies.changecompany', '0') }}" id="company-selection-form">
+                        <form role="form" method="POST" action="{{ route('admin.companies.changecompany') }}" id="company-selection-form">
                             {{ csrf_field() }}
                             <div class="input-group">
                                 <select class="custom-select" name="company_selection" id="company_selection">

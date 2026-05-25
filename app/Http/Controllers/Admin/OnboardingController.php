@@ -34,15 +34,25 @@ class OnboardingController extends Controller
         $templates = collect(config('company_templates.templates', []));
         $templatePreviewUrls = $this->templatePreviewUrls();
         $themePresets = config('company_templates.presets', []);
-        $publicUrl = route('see_menu', $company->slug);
+        $publicUrl = $company->publicUrl();
         $qrImageUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=220x220&margin=12&data=' . urlencode($publicUrl);
         $planPresentation = $plans->planPresentation($user);
+
+        $stepAnimationMap = [
+            1 => 'welcome',
+            2 => 'business-name',
+            3 => 'template',
+            4 => 'languages',
+            5 => 'menu-scan',
+            6 => 'publish',
+        ];
 
         return view('admin.onboarding.show', [
             'user' => $user,
             'company' => $company,
             'step' => $step,
             'maxStep' => self::MAX_STEP,
+            'stepAnimationMap' => $stepAnimationMap,
             'templates' => $templates,
             'templateAccess' => $templateAccess,
             'templatePreviewUrls' => $templatePreviewUrls,
@@ -72,6 +82,7 @@ class OnboardingController extends Controller
         $company = $this->primaryCompany($user);
         $this->authorize('update', $company);
 
+        $request->validate(['step' => 'required|integer|between:1,6']);
         $step = (int) $request->get('step');
 
         switch ($step) {
@@ -131,13 +142,30 @@ class OnboardingController extends Controller
                     $translations->updateCompanyLocales($company, $user, $locales);
 
                     if ($request->boolean('generate_ai')) {
+                        $hasProducts = $company->sections()
+                            ->whereHas('products')
+                            ->exists();
+
+                        if (! $hasProducts) {
+                            return redirect()
+                                ->route('admin.onboarding', ['step' => 4])
+                                ->withErrors(['locales' => 'Añade al menos un plato antes de usar la traducción automática.']);
+                        }
+
                         foreach ($locales as $locale) {
                             try {
                                 $translations->translateCompany($company, $user, $locale);
                             } catch (\Throwable $e) {
+                                \Log::error('Onboarding AI translation failed', [
+                                    'user_id' => $user->id,
+                                    'company_id' => $company->id,
+                                    'locale' => $locale,
+                                    'error' => $e->getMessage(),
+                                ]);
+
                                 return redirect()
                                     ->route('admin.onboarding', ['step' => 4])
-                                    ->withErrors(['locales' => 'No se pudo traducir a ' . strtoupper($locale) . ': ' . $e->getMessage()]);
+                                    ->withErrors(['locales' => 'No se pudo generar la traducción automática. Inténtalo de nuevo más tarde.']);
                             }
                         }
                     }
@@ -232,7 +260,8 @@ class OnboardingController extends Controller
         $urls = [];
         foreach (config('company_templates.templates', []) as $id => $tpl) {
             $slug = $tpl['preview_slug'] ?? $fallbackSlugs[$id] ?? 'demo';
-            $urls[$id] = route('see_menu', $slug);
+            // Demos no tienen user asociado: usamos la URL legacy /carta/{slug}
+            $urls[$id] = route('see_menu.legacy', $slug);
         }
 
         return $urls;

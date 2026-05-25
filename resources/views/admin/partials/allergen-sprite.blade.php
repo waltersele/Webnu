@@ -26,7 +26,7 @@
             <path fill="currentColor" d="M8 8c-2 0-3.5 2-3.5 4.5S6 17 8 17c1.5 0 2.8-.8 3.5-2 .7 1.2 2 2 3.5 2 2 0 3.5-2 3.5-4.5S17 8 15 8c-1.5 0-2.8.8-3.5 2C11.8 8.8 10.5 8 8 8z"/>
         </symbol>
         <symbol id="allergen-soja" viewBox="0 0 24 24">
-            <path fill="currentColor" d="M12 3C9 6 7 9 7 12s2 6 5 9 5-3 5-6-2-6-5-9-5-6-2-9-5-3zm0 4c1.5 2 2.5 4.5 2.5 5.5S13.5 16 12 18c-1.5-2-2.5-4.5-2.5-5.5S10.5 9 12 7z"/>
+            <path fill="currentColor" d="M12 3C8.5 3 6 6 6 10s2.5 7 6 7 6-3 6-7-2.5-7-6-7zm0 2c2.4 0 4 2.2 4 5s-1.6 5-4 5-4-2.2-4-5 1.6-5 4-5zm0 2c-1.2 0-2 1.3-2 3s.8 3 2 3 2-1.3 2-3-.8-3-2-3z"/>
         </symbol>
         <symbol id="allergen-apio" viewBox="0 0 24 24">
             <path fill="currentColor" d="M12 2v4M10 6h4M11 6v14h2V6M9 10h6M9 14h6M12 20v2"/>

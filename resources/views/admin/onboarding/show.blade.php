@@ -38,6 +38,9 @@
         <section class="wn-onb-step {{ $step === 1 ? 'is-active' : '' }}" data-onb-step="1">
             <div class="wn-onb-card wn-onb-card--hero">
                 <div class="wn-onb-confetti" aria-hidden="true"></div>
+                <div class="wn-onb-step__visual">
+                    @include('admin.onboarding.animations.welcome')
+                </div>
                 <span class="wn-onb-eyebrow">Bienvenido, {{ explode(' ', $user->name)[0] }}</span>
                 <h1>Tu carta digital en <em>minutos</em></h1>
                 <p class="wn-onb-lead">Vamos a dejar lista la carta de <strong>{{ $company->name }}</strong>. Son {{ $maxStep }} pasos rápidos: diseño, idiomas y QR.</p>
@@ -59,6 +62,9 @@
         {{-- Paso 2: Nombre --}}
         <section class="wn-onb-step {{ $step === 2 ? 'is-active' : '' }}" data-onb-step="2">
             <div class="wn-onb-card">
+                <div class="wn-onb-step__visual">
+                    @include('admin.onboarding.animations.business-name')
+                </div>
                 <span class="wn-onb-step-num">Paso 2 de {{ $maxStep }}</span>
                 <h2>¿Cómo se llama tu negocio?</h2>
                 <p>Aparecerá en la carta y en el código QR.</p>
@@ -75,10 +81,13 @@
         {{-- Paso 3: Plantilla --}}
         @php
             $selectedTemplate = old('template', $company->template ?: 'lumiere');
-            $initialPreviewUrl = $templatePreviewUrls[$selectedTemplate] ?? $templatePreviewUrls['lumiere'] ?? route('see_menu', 'demo');
+            $initialPreviewUrl = $templatePreviewUrls[$selectedTemplate] ?? $templatePreviewUrls['lumiere'] ?? route('see_menu.legacy', 'demo');
         @endphp
         <section class="wn-onb-step {{ $step === 3 ? 'is-active' : '' }}" data-onb-step="3">
             <div class="wn-onb-card wn-onb-card--wide">
+                <div class="wn-onb-step__visual">
+                    @include('admin.onboarding.animations.template')
+                </div>
                 <span class="wn-onb-step-num">Paso 3 de {{ $maxStep }}</span>
                 <h2>Elige el estilo de tu carta</h2>
                 <p>Puedes cambiarlo después en el estudio visual. Selecciona un estilo y mira el ejemplo en vivo.</p>
@@ -125,6 +134,9 @@
         {{-- Paso 4: Idiomas --}}
         <section class="wn-onb-step {{ $step === 4 ? 'is-active' : '' }}" data-onb-step="4">
             <div class="wn-onb-card wn-onb-card--wide">
+                <div class="wn-onb-step__visual">
+                    @include('admin.onboarding.animations.languages')
+                </div>
                 <span class="wn-onb-step-num">Paso 4 de {{ $maxStep }}</span>
                 <h2>¿Carta para turistas internacionales?</h2>
                 <p>Activa idiomas extra y genera traducciones con IA. Tus clientes eligen idioma al escanear el QR.</p>
@@ -180,6 +192,9 @@
         {{-- Paso 5: Carta --}}
         <section class="wn-onb-step {{ $step === 5 ? 'is-active' : '' }}" data-onb-step="5">
             <div class="wn-onb-card wn-onb-card--wide">
+                <div class="wn-onb-step__visual">
+                    @include('admin.onboarding.animations.menu-scan')
+                </div>
                 <span class="wn-onb-step-num">Paso 5 de {{ $maxStep }}</span>
                 <h2>¿Cómo quieres crear tu carta?</h2>
                 <div class="wn-onb-choice-grid">
@@ -218,6 +233,9 @@
         {{-- Paso 6: Publicar --}}
         <section class="wn-onb-step {{ $step === 6 ? 'is-active' : '' }}" data-onb-step="6">
             <div class="wn-onb-card wn-onb-card--finish">
+                <div class="wn-onb-step__visual">
+                    @include('admin.onboarding.animations.publish')
+                </div>
                 <span class="wn-onb-step-num">Paso 6 de {{ $maxStep }}</span>
                 <h2>¡Tu carta está casi lista!</h2>
                 <p>Publica y comparte el QR con tus clientes.</p>
@@ -272,9 +290,11 @@
 <script>
     var previewIframe = document.getElementById('onb-template-iframe');
     var previewLink = document.getElementById('onb-template-preview-link');
+    var billingUrl = @json($billingUrl);
     document.querySelectorAll('.wn-onb-template').forEach(function (btn) {
         btn.addEventListener('click', function () {
             if (btn.classList.contains('wn-onb-template--locked')) {
+                window.location.href = billingUrl;
                 return;
             }
             document.querySelectorAll('.wn-onb-template').forEach(function (b) {
