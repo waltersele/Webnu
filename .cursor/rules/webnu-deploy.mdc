@@ -1,0 +1,69 @@
+---
+description: Convención de despliegue de Webnu — distingue subir a GitHub de desplegar a producción
+alwaysApply: true
+---
+
+# Webnu — Subir a GitHub vs. Desplegar a producción
+
+Dos intents claros del usuario que NO son lo mismo. Léelo siempre que vayas a hacer commit, push o deploy.
+
+## "sube a github" / "push" / "guarda" / "commit y push"
+
+**Solo Git. NO toca producción.**
+
+1. `git status` para revisar.
+2. `git add` solo de los ficheros relevantes (excluir lo de la sección "Nunca subir").
+3. `git commit -m "tipo: mensaje claro"` (feat / fix / chore / docs / refactor).
+4. `git push origin <rama-actual>` (normalmente `main`, salvo en `upgrade/laravel-10`).
+5. Termina ahí. NO conectes a webnu.es. NO ejecutes `deploy.sh`.
+
+## "despliega" / "sube a producción" / "sube a web" / "publica" / "actualiza webnu.es"
+
+**Implica que los cambios deben llegar al sitio live.**
+
+1. Primero el push (como arriba).
+2. Después, **imprime el comando de SSH listo para copiar** (el usuario lo ejecuta él):
+
+   ```bash
+   ssh wwwwebnu@webnu.es "cd /home/wwwwebnu/public_html/webnu.es && ./scripts/deploy.sh"
+   ```
+
+3. Recuerda que si falla puede revertir con:
+
+   ```bash
+   ssh wwwwebnu@webnu.es "cd /home/wwwwebnu/public_html/webnu.es && ./scripts/deploy.sh --rollback"
+   ```
+
+4. NO ejecutes `ssh` tú mismo desde el agente — el usuario lo pega en su terminal.
+
+## Mapa rápido del despliegue
+
+- Repo GitHub: `https://github.com/waltersele/Webnu`
+- Rama producción: `main`
+- Rama upgrade pendiente (NO desplegar): `upgrade/laravel-10`
+- Host: `webnu.es` (cPanel, PHP 7.4, MySQL)
+- Usuario SSH: `wwwwebnu`
+- Clon mirror en server: `/home/wwwwebnu/webnu-deploy/`
+- Sitio live: `/home/wwwwebnu/public_html/webnu.es/`
+- Script: `scripts/deploy.sh` (idempotente, con `--dry-run`, `--rollback`, `--skip-migrate`, `--skip-backup`, `--no-down`, `--full-rsync`).
+- Documentación: `docs/deploy.md`.
+
+## Nunca subir (excluir de cualquier `git add`)
+
+- `.env`, `.env.*`
+- `php-local.ini`, `run-local.ps1` (este último sí se versiona, pero ojo con cambios locales)
+- `vendor/`, `node_modules/`
+- `public/img/` cuando contiene uploads recientes de clientes (revisar siempre `git status`)
+- `storage/logs/`, `storage/framework/`, `storage/backups/`
+- Cualquier archivo con credenciales o tokens
+
+## Cambios en `composer.json`
+
+Mientras producción siga en **PHP 7.4**, NO modificar `composer.json` en `main`. El `composer.json` actual ya declara `php: ^8.1`; producción funciona porque el `vendor/` instalado es anterior y nadie ha vuelto a hacer `composer install`. Cualquier cambio de dependencias va a `upgrade/laravel-10`.
+
+## Mensaje de commit
+
+- Idioma: español (a menos que el usuario diga lo contrario).
+- Formato: `tipo(scope): descripción breve` + cuerpo opcional con bullets.
+- Tipos: `feat`, `fix`, `chore`, `docs`, `refactor`, `perf`, `style`, `test`.
+- NO añadir co-authored-by ni firmas automáticas salvo que el usuario lo pida.
