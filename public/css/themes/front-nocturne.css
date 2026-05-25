@@ -206,6 +206,68 @@ body.wn-theme-nocturne {
   cursor: pointer;
 }
 
+/* Sin foto/vídeo: tarjeta compacta (solo texto, precio, alérgenos) */
+.wn-card-overlay--text-only {
+  cursor: pointer;
+}
+
+.wn-card-overlay--text-only .wn-card-overlay__body {
+  padding: 1rem 1.1rem 1.05rem;
+}
+
+.wn-card-overlay--text-only .wn-card-overlay__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.65rem;
+  margin-bottom: 0.35rem;
+}
+
+.wn-card-overlay--text-only .wn-card-overlay__head-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.wn-card-overlay--text-only .wn-card-overlay__title {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--wn-text);
+  letter-spacing: -0.02em;
+}
+
+.wn-card-overlay--text-only .wn-card-overlay__desc {
+  margin: 0 0 0.5rem;
+  font-size: 0.875rem;
+  line-height: 1.45;
+  color: var(--wn-text-muted);
+  display: block;
+  -webkit-line-clamp: unset;
+  overflow: visible;
+}
+
+.wn-card-overlay--text-only .wn-card-overlay__prices {
+  margin-bottom: 0.35rem;
+}
+
+.wn-card-overlay--text-only .wn-card-overlay__prices .wn-price-item {
+  color: var(--wn-accent) !important;
+}
+
+.wn-card-overlay--text-only .wn-card-overlay__open--inline {
+  position: static;
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--wn-primary);
+}
+
+.wn-card-overlay--text-only .wn-card-overlay__badge--inline {
+  margin-bottom: 0.35rem;
+}
+
 /* Apiladas (resto de platos) */
 .wn-theme-nocturne .wn-modern-card--stacked {
   border: 1px solid rgba(255, 255, 255, 0.07);
@@ -238,6 +300,14 @@ body.wn-theme-nocturne {
 .wn-theme-nocturne .wn-modern-card__detail-btn {
   background: rgba(255, 255, 255, 0.08);
   color: var(--wn-primary);
+}
+
+.wn-theme-nocturne .wn-modern-card--no-media.wn-modern-card--stacked {
+  display: block;
+}
+
+.wn-theme-nocturne .wn-modern-card--no-media .wn-modern-card__body {
+  width: 100%;
 }
 
 @media (max-width: 640px) {

@@ -1,8 +1,14 @@
 <?php
 
+/**
+ * Relleno sintético en cartas públicas (solo si los flags están en true).
+ * En producción: dejar fill_missing_* en false para mostrar solo fotos/vídeos reales del cliente.
+ * Vista previa del estudio (?studio_preview=1) puede usar sample_menu sin activar estos flags.
+ */
 return [
-    'fill_missing_images' => true,
-    'fill_missing_videos' => true,
+    'fill_missing_images' => false,
+    'fill_missing_videos' => false,
+    'fill_missing_allergens' => false,
 
     'sample_images' => [
         'productos/brasa-gazpacho.jpg',
@@ -26,9 +32,6 @@ return [
 
     'video_every_n_products' => 2,
 
-    'fill_missing_allergens' => true,
-
-    /** Platos de ejemplo en vista previa del estudio cuando la carta aún no tiene productos. */
     'sample_menu' => [
         [
             'name' => 'Entrantes',

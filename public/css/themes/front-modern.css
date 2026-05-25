@@ -432,8 +432,21 @@
   background: rgba(0, 0, 0, 0.04);
 }
 
+.wn-modern-card--no-media.wn-modern-card--stacked,
+.wn-modern-card--no-media.wn-modern-card--horizontal {
+  display: block;
+}
+
+.wn-modern-card--no-media.wn-modern-card--horizontal {
+  display: flex;
+}
+
 .wn-modern-card--stacked .wn-modern-card__media {
   aspect-ratio: 4 / 3;
+}
+
+.wn-modern-card--stacked.wn-modern-card--no-media .wn-modern-card__media {
+  display: none;
 }
 
 .wn-modern-card--stacked .wn-modern-card__media:has(.wn-card-reel) {

@@ -262,11 +262,16 @@ class MenuService
             return $sections;
         }
 
+        $fillImages = (bool) config('menu_demo.fill_missing_images', false);
+        $fillAllergens = (bool) config('menu_demo.fill_missing_allergens', false);
+        $fillVideos = (bool) config('menu_demo.fill_missing_videos', false);
+
+        if (! $fillImages && ! $fillVideos && ! $fillAllergens) {
+            return $sections;
+        }
+
         $sampleImages = config('menu_demo.sample_images', []);
-        $fillImages = (bool) config('menu_demo.fill_missing_images', true);
-        $fillAllergens = (bool) config('menu_demo.fill_missing_allergens', true);
         $sampleVideos = config('menu_demo.sample_videos', []);
-        $fillVideos = (bool) config('menu_demo.fill_missing_videos', true);
         $videoEvery = max(1, (int) config('menu_demo.video_every_n_products', 2));
         $imageIndex = 0;
         $videoIndex = 0;
