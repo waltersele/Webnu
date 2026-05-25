@@ -23,6 +23,7 @@ class User extends Authenticatable
         'name', 'email', 'password', 'plan', 'trial_plan_key', 'tvpik_extra_screens', 'onboarding_step', 'onboarding_completed_at',
         'api_token', 'tvpik_api_token', 'tvpik_connected_at', 'tvpik_org_id',
         'stripe_id', 'card_brand', 'card_last_four', 'trial_ends_at',
+        'manual_plan_key', 'manual_plan_until', 'manual_plan_note',
         'phone', 'legal_name', 'tax_id', 'billing_address', 'billing_postal_code', 'billing_city', 'billing_country',
     ];
 
@@ -43,6 +44,7 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
         'trial_ends_at' => 'datetime',
+        'manual_plan_until' => 'datetime',
         'onboarding_completed_at' => 'datetime',
         'tvpik_connected_at' => 'datetime',
     ];

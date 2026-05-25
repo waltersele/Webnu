@@ -318,7 +318,7 @@ class CompaniesController extends Controller
         return $file;
     }
 
-    public function updateDailyHighlights(Request $request, Company $company)
+    public function updateDailyHighlights(Request $request, Company $company, UserPlanService $plans)
     {
         $this->authorize('update', $company);
 
@@ -340,6 +340,10 @@ class CompaniesController extends Controller
             'highlights.*.text' => ['nullable', 'string', 'max:2000'],
             'highlights.*.price' => ['nullable', 'string', 'max:32'],
         ]);
+
+        if (! empty($validated['highlights'])) {
+            $plans->assertCanUseChefSuggestions(auth()->user());
+        }
 
         $normalized = [];
         foreach ($validated['highlights'] ?? [] as $row) {

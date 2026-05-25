@@ -9,6 +9,15 @@
 
 @section('page_actions')
     <a href="{{ route('admin.platform.users.index') }}" class="btn btn-outline-secondary btn-sm">Volver al listado</a>
+    @if ($user->id !== auth()->id())
+        <form method="POST" action="{{ route('admin.platform.users.impersonate', $user) }}" class="d-inline"
+              onsubmit="return confirm('¿Entrar como {{ $user->email }}? Verás el panel como si fueras este usuario.');">
+            @csrf
+            <button type="submit" class="btn btn-warning btn-sm">
+                <i class="ri-user-shared-line"></i> Entrar como este usuario
+            </button>
+        </form>
+    @endif
 @endsection
 
 @section('content')
@@ -70,14 +79,14 @@
                 <form method="POST" action="{{ route('admin.platform.users.update-billing', $user) }}" class="border rounded p-3 mb-3 bg-light">
                     @csrf
                     @method('PUT')
-                    <p class="small fw-semibold mb-2">Plan manual (sin Stripe / transferencia / franquicia)</p>
+                    <p class="small fw-semibold mb-2">Plan base (Stripe / transferencia / franquicia)</p>
                     <div class="row g-2">
                         <div class="col-sm-6">
                             <label class="form-label small mb-0" for="plan">Plan</label>
                             <select name="plan" id="plan" class="form-select form-select-sm">
                                 @foreach ($planTiers as $key => $tier)
                                     @if (empty($tier['contact_only']))
-                                        <option value="{{ $key }}" @if(($user->plan ?? 'free') === $key || ($effectivePlanKey === $key && ! $user->hasActiveSubscription())) selected @endif>
+                                        <option value="{{ $key }}" @if(($user->plan ?? 'free') === $key || ($effectivePlanKey === $key && ! $user->hasActiveSubscription() && empty($planPresentation['manual_active']))) selected @endif>
                                             {{ $tier['label'] ?? $key }}
                                         </option>
                                     @endif
@@ -89,6 +98,53 @@
                             <label class="form-label small mb-0" for="tvpik_extra_screens">Pantallas TVPik extra</label>
                             <input type="number" min="0" max="100" name="tvpik_extra_screens" id="tvpik_extra_screens" class="form-control form-control-sm" value="{{ (int) ($user->tvpik_extra_screens ?? 0) }}">
                         </div>
+                    </div>
+
+                    <hr class="my-3">
+                    <p class="small fw-semibold mb-1">Cortesía / regalo (plan manual con fecha)</p>
+                    <p class="small text-muted mb-2">Asigna un plan superior temporalmente. Cuando llegue la fecha, vuelve al plan base de arriba automáticamente.</p>
+                    <div class="row g-2">
+                        <div class="col-sm-4">
+                            <label class="form-label small mb-0" for="manual_plan_key">Plan cortesía</label>
+                            <select name="manual_plan_key" id="manual_plan_key" class="form-select form-select-sm">
+                                <option value="">— Sin cortesía —</option>
+                                @foreach ($planTiers as $key => $tier)
+                                    @if (empty($tier['contact_only']))
+                                        <option value="{{ $key }}" @if(($user->manual_plan_key ?? '') === $key) selected @endif>
+                                            {{ $tier['label'] ?? $key }}
+                                        </option>
+                                    @endif
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="col-sm-4">
+                            <label class="form-label small mb-0" for="manual_plan_until">Válido hasta</label>
+                            <input type="date" name="manual_plan_until" id="manual_plan_until" class="form-control form-control-sm"
+                                   value="{{ $user->manual_plan_until ? $user->manual_plan_until->format('Y-m-d') : '' }}"
+                                   min="{{ now()->addDay()->format('Y-m-d') }}">
+                            <small class="text-muted">Vacío = sin caducidad</small>
+                        </div>
+                        <div class="col-sm-4">
+                            <label class="form-label small mb-0" for="manual_plan_note">Motivo (interno)</label>
+                            <input type="text" name="manual_plan_note" id="manual_plan_note" maxlength="1000" class="form-control form-control-sm"
+                                   value="{{ old('manual_plan_note', $user->manual_plan_note ?? '') }}"
+                                   placeholder="Ej: regalo onboarding, prueba prolongada…">
+                        </div>
+                        @if (! empty($planPresentation['manual_active']))
+                            <div class="col-12">
+                                <div class="alert alert-warning small mb-0 py-2">
+                                    <strong>Activo ahora:</strong> {{ $planTiers[$user->manual_plan_key]['label'] ?? $user->manual_plan_key }}
+                                    @if (! empty($planPresentation['manual_until_formatted']))
+                                        hasta {{ $planPresentation['manual_until_formatted'] }}
+                                        @if (! is_null($planPresentation['manual_days_remaining']))
+                                            ({{ $planPresentation['manual_days_remaining'] }} d. restantes)
+                                        @endif
+                                    @else
+                                        (sin fecha límite)
+                                    @endif
+                                </div>
+                            </div>
+                        @endif
                         <div class="col-12">
                             <button type="submit" class="btn btn-sm btn-primary">Guardar plan</button>
                         </div>

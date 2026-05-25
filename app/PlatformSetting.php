@@ -230,6 +230,11 @@ class PlatformSetting extends Model
     /** URL pública de un asset de marca (clave en config platform.brand). */
     public static function brandUrl(string $key = 'logo'): string
     {
+        $custom = static::getValue('brand_' . $key . '_path');
+        if (is_string($custom) && $custom !== '') {
+            return asset($custom);
+        }
+
         $paths = config('platform.brand', []);
         $path = $paths[$key] ?? $paths['logo'] ?? 'adminlte/img/logo-color.png';
 
@@ -239,6 +244,14 @@ class PlatformSetting extends Model
     /** Ruta absoluta en disco para PDF/QR (misma clave que brandUrl). */
     public static function brandPath(string $key = 'logo'): string
     {
+        $custom = static::getValue('brand_' . $key . '_path');
+        if (is_string($custom) && $custom !== '') {
+            $clean = preg_replace('/\?.*$/', '', $custom);
+            if (is_string($clean) && $clean !== '') {
+                return public_path($clean);
+            }
+        }
+
         $paths = config('platform.brand', []);
         $path = $paths[$key] ?? $paths['logo'] ?? 'adminlte/img/logo-color.png';
 

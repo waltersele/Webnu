@@ -26,6 +26,7 @@ class Kernel extends ConsoleKernel
     {
         $schedule->command('webnu:expire-trials')->dailyAt('02:00');
         $schedule->command('webnu:purge-stale-pre-alta')->dailyAt('03:00');
+        $schedule->command('webnu:send-subscription-reminders --days=3')->dailyAt('09:00');
     }
 
     /**

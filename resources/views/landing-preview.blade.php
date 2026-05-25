@@ -38,7 +38,6 @@
         <a class="text-text-muted hover:text-primary transition-colors text-label-md" href="#pricing">{{ __('landing.nav.pricing') }}</a>
     </div>
     <div class="flex items-center gap-3">
-        @include('partials.pwa-landing-badge')
         @include('landing.partials.language-selector')
         @if($isLoggedIn)
             @include('landing.partials.user-menu')
@@ -431,7 +430,6 @@
     {{-- Precios (Free, Pro, Plus) desde config/plans.php --}}
     @php
         $landingPricingPlans = $landingPricingPlans ?? [];
-        $landingPricingComparison = $landingPricingComparison ?? [];
         $landingPricingTierOrder = $landingPricingTierOrder ?? ['free', 'pro', 'plus'];
         $landingFranchisePlan = $landingFranchisePlan ?? null;
     @endphp
@@ -486,34 +484,6 @@
                 <div class="text-center md:text-right shrink-0">
                     <p class="text-2xl font-bold mb-3">{{ $landingFranchisePlan['price'] }}</p>
                     <a href="{{ $landingFranchisePlan['cta_url'] }}" class="inline-block py-3 px-6 border border-primary text-primary font-semibold rounded-lg hover:bg-primary/5">{{ $landingFranchisePlan['cta'] }}</a>
-                </div>
-            </div>
-        @endif
-
-        @if(count($landingPricingComparison) > 0)
-            <div class="mt-16 max-w-5xl mx-auto">
-                <h3 class="text-center font-headline text-headline-md mb-6">{{ __('landing.pricing.comparison.title') }}</h3>
-                <div class="overflow-x-auto rounded-xl border border-border-subtle bg-surface-container-lowest">
-                    <table class="w-full text-left text-label-md border-collapse min-w-[36rem]">
-                        <thead>
-                            <tr class="bg-surface-container">
-                                <th class="p-4 border-b border-border-subtle w-2/5"></th>
-                                @foreach($landingPricingPlans as $plan)
-                                    <th class="p-4 border-b border-border-subtle text-center font-headline text-headline-sm {{ !empty($plan['highlight']) ? 'text-primary' : '' }}">{{ $plan['name'] }}</th>
-                                @endforeach
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach($landingPricingComparison as $row)
-                                <tr class="hover:bg-surface-container/50">
-                                    <td class="p-4 border-b border-border-subtle font-medium">{{ $row['label'] }}</td>
-                                    @foreach($landingPricingTierOrder as $tierId)
-                                        <td class="p-4 border-b border-border-subtle text-center text-text-muted">{{ $row['values'][$tierId] ?? '—' }}</td>
-                                    @endforeach
-                                </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
                 </div>
             </div>
         @endif
@@ -631,6 +601,5 @@
 </div>
 
 <script src="{{ asset('js/landing-preview.js') }}"></script>
-@include('partials.pwa-landing-scripts')
 </body>
 </html>

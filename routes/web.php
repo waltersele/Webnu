@@ -46,6 +46,14 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['aut
         Route::match(['post', 'put'], 'settings/test-gemini', 'PlatformSettingsController@testGemini')->name('admin.platform.settings.test-gemini');
         Route::match(['post', 'put'], 'settings/test-mail', 'PlatformSettingsController@testMail')->name('admin.platform.settings.test-mail');
         Route::match(['post', 'put'], 'settings/test-stripe', 'PlatformSettingsController@testStripe')->name('admin.platform.settings.test-stripe');
+        Route::post('settings/brand/{key}', 'PlatformSettingsController@uploadBrandAsset')
+            ->name('admin.platform.settings.brand.upload')
+            ->where('key', 'logo|isotipo|favicon|og')
+            ->middleware('throttle:30,1');
+        Route::delete('settings/brand/{key}', 'PlatformSettingsController@deleteBrandAsset')
+            ->name('admin.platform.settings.brand.delete')
+            ->where('key', 'logo|isotipo|favicon|og')
+            ->middleware('throttle:30,1');
         Route::get('billing', 'PlatformBillingController@index')->name('admin.platform.billing.index');
         Route::post('billing/create-price', 'PlatformBillingController@createPrice')->name('admin.platform.billing.create-price');
         Route::post('billing/recreate-price', 'PlatformBillingController@recreatePrice')->name('admin.platform.billing.recreate-price');
@@ -78,8 +86,15 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['aut
         Route::post('users/{user}/revoke-sales-rep', 'PlatformSalesController@revokeSalesRep')
             ->name('admin.platform.users.revoke-sales-rep')
             ->middleware('throttle:30,1');
+        Route::post('users/{user}/impersonate', 'PlatformUsersController@impersonate')
+            ->name('admin.platform.users.impersonate')
+            ->middleware('throttle:30,1');
     });
 });
+
+Route::post('admin/stop-impersonating', 'Admin\\PlatformUsersController@stopImpersonating')
+    ->name('admin.platform.users.stop-impersonating')
+    ->middleware(['auth']);
 
 Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['auth', 'subscribed', 'onboarding.complete', 'selected.company']], function () {
     Route::get('/', 'AdminController@index')->name('admin.dashboard');

@@ -16,6 +16,13 @@ class UserPlanService
             return 'plus';
         }
 
+        if ($this->manualPlanIsActive($user)) {
+            $manualTier = $this->resolveTierKey((string) $user->manual_plan_key);
+            if ($this->tierExists($manualTier)) {
+                return $manualTier;
+            }
+        }
+
         if ($user->onGenericTrial()) {
             $trialTier = $this->resolveTierKey($user->trial_plan_key ?: config('plans.trial_tier', 'pro'));
 
@@ -39,6 +46,33 @@ class UserPlanService
         $plan = $this->resolveTierKey($user->plan ?? config('plans.default', 'free'));
 
         return $this->tierExists($plan) ? $plan : config('plans.default', 'free');
+    }
+
+    public function manualPlanIsActive(User $user): bool
+    {
+        $key = $user->manual_plan_key ?? null;
+        if (! is_string($key) || $key === '') {
+            return false;
+        }
+
+        if (! $this->tierExists($this->resolveTierKey($key))) {
+            return false;
+        }
+
+        $until = $user->manual_plan_until ?? null;
+        if ($until === null) {
+            return true;
+        }
+
+        if (is_string($until)) {
+            try {
+                $until = \Illuminate\Support\Carbon::parse($until);
+            } catch (\Throwable $e) {
+                return false;
+            }
+        }
+
+        return $until->isFuture();
     }
 
     public function tier(User $user): array
@@ -162,6 +196,26 @@ class UserPlanService
         }
 
         return (bool) ($this->tier($user)['pdf_menu'] ?? false);
+    }
+
+    public function canUseChefSuggestions(User $user): bool
+    {
+        if ($user->isSuperAdmin()) {
+            return true;
+        }
+
+        return (bool) ($this->tier($user)['chef_suggestions'] ?? false);
+    }
+
+    public function assertCanUseChefSuggestions(User $user): void
+    {
+        if ($this->canUseChefSuggestions($user)) {
+            return;
+        }
+
+        throw ValidationException::withMessages([
+            'highlights' => 'Las sugerencias del chef están disponibles desde el plan Pro (' . $this->proPriceLabel() . ').',
+        ]);
     }
 
     public function shouldShowWebnuBadge(User $user): bool
@@ -415,9 +469,31 @@ class UserPlanService
             'trial_days_remaining' => null,
             'trial_ends_at' => null,
             'trial_ends_at_formatted' => null,
+            'manual_active' => false,
+            'manual_until' => null,
+            'manual_until_formatted' => null,
+            'manual_days_remaining' => null,
         ];
 
         if ($user->isSuperAdmin()) {
+            return $presentation;
+        }
+
+        if ($this->manualPlanIsActive($user)) {
+            $presentation['manual_active'] = true;
+            $presentation['manual_until'] = $user->manual_plan_until;
+            $presentation['manual_until_formatted'] = $user->manual_plan_until
+                ? $user->manual_plan_until->format('d/m/Y')
+                : null;
+            $presentation['manual_days_remaining'] = $user->manual_plan_until
+                ? max(0, (int) now()->diffInDays($user->manual_plan_until, false))
+                : null;
+            if ($user->manual_plan_until) {
+                $presentation['label'] = ($tier['label'] ?? 'Plan') . ' · manual (hasta ' . $user->manual_plan_until->format('d/m/Y') . ')';
+            } else {
+                $presentation['label'] = ($tier['label'] ?? 'Plan') . ' · manual';
+            }
+
             return $presentation;
         }
 
@@ -521,6 +597,7 @@ class UserPlanService
             'videos' => $this->canUseVideos($user),
             'product_photos' => $this->canUseProductPhotos($user),
             'pdf_menu' => $this->canUsePdfMenu($user),
+            'chef_suggestions' => $this->canUseChefSuggestions($user),
             'translation' => $this->canUseTranslation($user),
             'tvpik' => $this->canUseTvpik($user),
             'menu_scan' => $this->canUseMenuScan($user),
@@ -575,6 +652,7 @@ class UserPlanService
                 'multi_company' => $features['multi_company'],
                 'product_photos' => $features['product_photos'],
                 'pdf_menu' => $features['pdf_menu'],
+                'chef_suggestions' => $features['chef_suggestions'],
             ],
             'limits' => [
                 'max_companies' => $this->maxCompanies($user),
@@ -590,6 +668,7 @@ class UserPlanService
                 'product_photos' => $this->requiredPlanLabel('product_photos'),
                 'pdf_menu' => $this->requiredPlanLabel('pdf_menu'),
                 'templates' => $this->requiredPlanLabel('templates'),
+                'chef_suggestions' => $this->requiredPlanLabel('chef_suggestions'),
             ],
         ];
     }
@@ -611,6 +690,7 @@ class UserPlanService
             'product_photos' => 'pro',
             'pdf_menu' => 'pro',
             'templates' => 'pro',
+            'chef_suggestions' => 'pro',
             'tvpik' => 'plus',
         ];
 

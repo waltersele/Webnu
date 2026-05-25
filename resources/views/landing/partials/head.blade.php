@@ -12,28 +12,7 @@
     <link rel="alternate" hreflang="x-default" href="{{ $homeUrl }}?lang={{ config('landing.fallback_locale', 'en') }}"/>
 @endisset
 <link rel="icon" type="image/png" href="{{ \App\PlatformSetting::brandUrl('favicon') }}"/>
-<link rel="manifest" href="{{ asset('manifest.webmanifest') }}">
 <meta name="theme-color" content="#004ac6">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Webnu">
-<link rel="apple-touch-icon" href="{{ asset('img/pwa/icon-192.png') }}">
-<style>
-    .landing-pwa-install.is-ready,
-    .landing-pwa-install.wn-pwa-installable {
-        display: inline-flex !important;
-        animation: landing-pwa-pulse 2s ease-in-out 3;
-    }
-    @keyframes landing-pwa-pulse {
-        0%, 100% { box-shadow: 0 0 0 0 rgba(0, 74, 198, 0.35); }
-        50% { box-shadow: 0 0 0 6px rgba(0, 74, 198, 0); }
-    }
-    .wn-shell-topbar__pwa-btn.wn-pwa-installable {
-        border-color: #378add;
-        background: #eff6ff;
-        box-shadow: 0 0 0 2px rgba(55, 138, 221, 0.25);
-    }
-</style>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.2.3/css/flag-icons.min.css"/>
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
