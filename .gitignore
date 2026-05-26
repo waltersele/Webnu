@@ -21,6 +21,7 @@ yarn-error.log
 .php-runtime/
 .php-runtime74/
 composer.phar
+composer.lock.bak
 .vscode/
 /database/database.sqlite
 

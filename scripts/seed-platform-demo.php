@@ -11,7 +11,7 @@ require __DIR__ . '/../vendor/autoload.php';
 $app = require_once __DIR__ . '/../bootstrap/app.php';
 $app->make(Illuminate\Contracts\Console\Kernel::class)->bootstrap();
 
-require_once __DIR__ . '/../database/seeds/PlatformRolesSeeder.php';
+require_once __DIR__ . '/../database/seeders/PlatformRolesSeeder.php';
 
 use App\Company;
 use App\User;
@@ -156,7 +156,7 @@ if (! is_array(config('platform.super_admin_emails')) || count(config('platform.
     config(['platform.super_admin_emails' => ['demo@webnu.local']]);
 }
 
-$seeder = new PlatformRolesSeeder();
+$seeder = new \Database\Seeders\PlatformRolesSeeder();
 $seeder->run();
 
 $salesRep = User::updateOrCreate(

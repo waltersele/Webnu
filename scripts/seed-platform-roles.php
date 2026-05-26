@@ -10,9 +10,9 @@ require __DIR__ . '/../vendor/autoload.php';
 $app = require_once __DIR__ . '/../bootstrap/app.php';
 $app->make(Illuminate\Contracts\Console\Kernel::class)->bootstrap();
 
-require_once __DIR__ . '/../database/seeds/PlatformRolesSeeder.php';
+require_once __DIR__ . '/../database/seeders/PlatformRolesSeeder.php';
 
-$seeder = new PlatformRolesSeeder();
+$seeder = new \Database\Seeders\PlatformRolesSeeder();
 $seeder->run();
 
 echo "Roles de plataforma listos.\n";
