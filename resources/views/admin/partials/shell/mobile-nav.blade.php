@@ -23,6 +23,8 @@
         || request()->is('admin/signage*');
 
     $canUseTvpik = isset($planFeatures['tvpik']) ? (bool) $planFeatures['tvpik'] : true;
+
+    $homeActive = request()->routeIs('admin.dashboard');
 @endphp
 
 <div class="offcanvas offcanvas-start wn-shell-offcanvas" tabindex="-1" id="wnShellNavOffcanvas" aria-labelledby="wnShellNavOffcanvasLabel">
@@ -35,11 +37,17 @@
     </div>
     <div class="offcanvas-body p-0">
         <nav class="wn-shell-offcanvas-nav" aria-label="Navegación">
+            {{-- Inicio (dashboard) --}}
+            <a href="{{ route('admin.dashboard') }}"
+               class="wn-shell-offcanvas-link {{ $homeActive ? 'is-active' : '' }}">
+                <i class="ti ti-home"></i>
+                <span class="flex-grow-1">Inicio</span>
+            </a>
+
             {{-- Mis cartas con subitems --}}
             @if($hasCompany)
                 <a href="{{ $cartaUrl }}"
-                   class="wn-shell-offcanvas-link wn-shell-offcanvas-link--parent {{ request()->is('admin/companies*') ? 'is-active' : '' }}"
-                   data-bs-dismiss="offcanvas">
+                   class="wn-shell-offcanvas-link wn-shell-offcanvas-link--parent {{ request()->is('admin/companies*') ? 'is-active' : '' }}">
                     <i class="ti ti-tools-kitchen-2"></i>
                     <span class="flex-grow-1">Mis cartas</span>
                 </a>
@@ -54,8 +62,7 @@
                             @endphp
                             @if($isCurrent)
                                 <a href="{{ route('admin.sections.index') }}"
-                                   class="wn-shell-offcanvas-sublink is-current"
-                                   data-bs-dismiss="offcanvas">
+                                   class="wn-shell-offcanvas-sublink is-current">
                                     <span class="wn-shell-offcanvas-sublink__dot {{ $dotClass }}" aria-hidden="true"></span>
                                     <span>{{ $cmp->name }}</span>
                                     <small class="text-muted ms-auto me-1">{{ $statusLabel }}</small>
@@ -77,8 +84,7 @@
                         @endforeach
 
                         <a href="{{ $companiesIndexUrl }}"
-                           class="wn-shell-offcanvas-sublink wn-shell-offcanvas-sublink--add {{ ! $canCreateCompany ? 'is-locked' : '' }}"
-                           data-bs-dismiss="offcanvas">
+                           class="wn-shell-offcanvas-sublink wn-shell-offcanvas-sublink--add {{ ! $canCreateCompany ? 'is-locked' : '' }}">
                             <i class="ti {{ $canCreateCompany ? 'ti-plus' : 'ti-crown' }}"></i>
                             <span>{{ $canCreateCompany ? 'Añadir carta' : 'Añadir carta con Pro' }}</span>
                         </a>
@@ -88,6 +94,44 @@
                 <span class="wn-shell-offcanvas-link is-disabled">
                     <i class="ti ti-tools-kitchen-2"></i>
                     <span>Mis cartas</span>
+                </span>
+            @endif
+
+            {{-- Menús con subitems --}}
+            @if($hasCompany)
+                <a href="{{ route('admin.menus.index') }}"
+                   class="wn-shell-offcanvas-link wn-shell-offcanvas-link--parent {{ request()->is('admin/menus*') ? 'is-active' : '' }}">
+                    <i class="ti ti-bowl-spoon"></i>
+                    <span class="flex-grow-1">Menús</span>
+                </a>
+
+                @if(!empty($available_menus) && $available_menus->count())
+                    <div class="wn-shell-offcanvas-subnav" role="list">
+                        @foreach($available_menus as $m)
+                            @php
+                                $isCurrentMenu = request()->is('admin/menus/' . $m->id . '/edit');
+                                $menuDotClass = $m->enabled ? 'is-on' : 'is-off';
+                                $menuStatusLabel = $m->enabled ? 'Activo' : 'Borrador';
+                            @endphp
+                            <a href="{{ route('admin.menus.edit', $m->id) }}"
+                               class="wn-shell-offcanvas-sublink {{ $isCurrentMenu ? 'is-current' : '' }}">
+                                <span class="wn-shell-offcanvas-sublink__dot {{ $menuDotClass }}" aria-hidden="true"></span>
+                                <span>{{ $m->name }}</span>
+                                <small class="text-muted ms-auto me-1">{{ $menuStatusLabel }}</small>
+                                @if($isCurrentMenu)<i class="ti ti-check"></i>@endif
+                            </a>
+                        @endforeach
+                        <a href="{{ route('admin.menus.index') }}#new"
+                           class="wn-shell-offcanvas-sublink wn-shell-offcanvas-sublink--add">
+                            <i class="ti ti-plus"></i>
+                            <span>Crear menú</span>
+                        </a>
+                    </div>
+                @endif
+            @else
+                <span class="wn-shell-offcanvas-link is-disabled">
+                    <i class="ti ti-bowl-spoon"></i>
+                    <span>Menús</span>
                 </span>
             @endif
 
@@ -110,8 +154,7 @@
 
             {{-- Pantallas --}}
             <a href="{{ route('admin.tvpik.index') }}"
-               class="wn-shell-offcanvas-link {{ $screensActive ? 'is-active' : '' }} {{ ! $canUseTvpik ? 'is-locked' : '' }}"
-               data-bs-dismiss="offcanvas">
+               class="wn-shell-offcanvas-link {{ $screensActive ? 'is-active' : '' }} {{ ! $canUseTvpik ? 'is-locked' : '' }}">
                 <i class="ti ti-device-tv"></i>
                 <span class="flex-grow-1">Pantallas</span>
                 @if(! $canUseTvpik)
@@ -121,8 +164,7 @@
 
             {{-- Mi negocio --}}
             <a href="{{ $settingsUrl }}"
-               class="wn-shell-offcanvas-link {{ request()->is('admin/companies*') ? 'is-active' : '' }}"
-               data-bs-dismiss="offcanvas">
+               class="wn-shell-offcanvas-link {{ request()->is('admin/companies*') ? 'is-active' : '' }}">
                 <i class="ti ti-settings"></i>
                 <span class="flex-grow-1">Mi negocio</span>
             </a>

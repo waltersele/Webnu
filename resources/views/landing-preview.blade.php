@@ -13,14 +13,15 @@
     $logoutUrl = $logoutUrl ?? route('logout');
     $contactPublicEmail = $contactPublicEmail ?? 'hello@webnu.es';
     $demoUrl = url('/carta/demo?lang=en');
-    $heroHooks = $heroHooks ?? __('landing.hero.hooks');
     $demoShowcases = $demoShowcases ?? [];
     $tvpikSlides = $tvpikSlides ?? [];
     $templateCount = $templateCount ?? 14;
     $landingReelVideo = $landingReelVideo ?? asset('img/demo/reel-grill-chicken.mp4');
     $landingStats = __('landing.stats');
-    if (!empty($templateCount)) {
-        $landingStats[2]['value'] = $templateCount . '+';
+    // Garantizamos siempre 20+ plantillas para no parecer escasos
+    // aunque el catálogo real tenga menos en un momento dado.
+    if (isset($landingStats[2])) {
+        $landingStats[2]['value'] = max(20, (int) $templateCount) . '+';
     }
 @endphp
 
@@ -32,7 +33,6 @@
         <a class="text-text-muted hover:text-primary transition-colors text-label-md" href="#demos-carta">{{ __('landing.nav.examples') }}</a>
         <a class="text-text-muted hover:text-primary transition-colors text-label-md" href="#funciones">{{ __('landing.nav.features') }}</a>
         <a class="text-text-muted hover:text-primary transition-colors text-label-md" href="#reels">{{ __('landing.nav.reels') }}</a>
-        <a class="text-text-muted hover:text-primary transition-colors text-label-md" href="#tv-menus">{{ __('landing.nav.tv_menus') }}</a>
         <a class="text-text-muted hover:text-primary transition-colors text-label-md" href="#tvpik">{{ __('landing.nav.tvpik') }}</a>
         <a class="text-text-muted hover:text-primary transition-colors text-label-md" href="#process">{{ __('landing.nav.scan') }}</a>
         <a class="text-text-muted hover:text-primary transition-colors text-label-md" href="#pricing">{{ __('landing.nav.pricing') }}</a>
@@ -48,108 +48,151 @@
 </nav>
 
 <main class="max-w-container-max mx-auto px-margin-mobile md:px-gutter">
-    {{-- Hero — Webnu carta digital; TVPik como extra --}}
-    <section id="inicio" class="py-16 md:py-24 grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-16 items-center">
-        <div class="space-y-8">
-            <div class="flex flex-wrap gap-3">
-                <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-surface-container-high border border-outline-variant text-label-sm text-primary">
-                    <span class="material-symbols-outlined text-[16px]">psychology</span>
-                    {{ __('landing.hero.badge_scan') }}
+    {{-- Hero — Webnu carta digital. Doble texto rotativo en azul + mockup móvil. --}}
+    @php
+        $businessCycle = (array) __('landing.hero.business_cycle');
+        $featureCycle = (array) __('landing.hero.feature_cycle');
+        $businessFirst = $businessCycle[0] ?? 'restaurante';
+        $featureFirst = $featureCycle[0] ?? 'traduce automáticamente';
+        // Palabra/frase más larga de cada set — la usamos como measure invisible
+        // para reservar el ancho del wrapper y evitar saltos del texto vecino.
+        $businessLongest = collect($businessCycle)->sortByDesc(fn ($w) => mb_strlen($w))->first() ?? $businessFirst;
+        $featureLongest = collect($featureCycle)->sortByDesc(fn ($w) => mb_strlen($w))->first() ?? $featureFirst;
+        $phoneHero = asset('img/productos/cocktail-negroni.jpg');
+    @endphp
+    <section id="inicio" class="pt-8 pb-12 md:py-24 grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-16 items-center">
+        <div class="space-y-5 md:space-y-7">
+            <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-label-sm font-bold uppercase tracking-wider text-primary">
+                <span class="material-symbols-outlined text-[16px]">bolt</span>
+                {{ __('landing.hero.badge_pill') }}
+            </span>
+            <h1 class="font-headline text-[2.25rem] sm:text-headline-xl md:text-[3.25rem] text-on-surface leading-[1.1] md:leading-[1.08]">
+                {{ __('landing.hero.title_lead') }}
+                <span class="hero-cycle hero-cycle--typewriter" data-cycle="business" data-cycle-mode="typewriter" data-cycle-items='@json($businessCycle)'>
+                    <span class="hero-cycle__measure" aria-hidden="true">{{ $businessLongest }}</span>
+                    <span class="hero-cycle__layer">
+                        <span class="hero-cycle__text">{{ $businessFirst }}</span><span class="hero-cycle__cursor" aria-hidden="true"></span>
+                    </span>
                 </span>
-                <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-surface-container-high border border-outline-variant text-label-sm text-primary">
-                    <span class="material-symbols-outlined text-[16px]">qr_code_2</span>
-                    {{ __('landing.hero.badge_qr') }}
+                {{ __('landing.hero.title_tail') }}
+            </h1>
+            <p class="text-body-lg md:text-headline-sm text-text-muted">
+                {{ __('landing.hero.platform_lead') }}
+                <span class="hero-cycle hero-cycle--slide hero-cycle--feature" data-cycle="feature" data-cycle-mode="slide" data-cycle-items='@json($featureCycle)'>
+                    <span class="hero-cycle__measure" aria-hidden="true">{{ $featureLongest }}</span>
+                    <span class="hero-cycle__item is-active">{{ $featureFirst }}</span>
                 </span>
-                <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-surface-container-high border border-outline-variant text-label-sm text-primary">
-                    <span class="material-symbols-outlined text-[16px]">translate</span>
-                    {{ __('landing.hero.badge_lang') }}
-                </span>
-                <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-500/10 border border-orange-500/25 text-label-sm text-orange-800">
-                    <span class="material-symbols-outlined text-[16px]">tv</span>
-                    {{ __('landing.hero.badge_tvpik') }}
-                </span>
-            </div>
-            <h1
-                id="hero-headline"
-                class="font-headline text-headline-xl text-on-surface leading-tight min-h-[3.6em] md:min-h-[2.4em]"
-                data-hooks='@json($heroHooks)'
-            >{{ $heroHooks[0] }}</h1>
-            <p class="text-body-lg text-text-muted max-w-lg">
-                {{ __('landing.hero.subtitle') }}
+            </p>
+            <p class="text-body-md text-text-muted max-w-xl">
+                {{ __('landing.hero.description_short') }}
             </p>
             <div class="flex flex-wrap items-center gap-4">
                 @if($isLoggedIn)
-                    <a href="{{ $panelUrl }}" class="inline-flex items-center gap-2 px-8 py-4 bg-primary text-on-primary text-label-md rounded-lg hover:opacity-90 transition-opacity font-semibold">
+                    <a href="{{ $panelUrl }}" class="inline-flex items-center gap-2 px-7 py-4 bg-primary text-on-primary text-label-md rounded-lg hover:opacity-90 transition-opacity font-semibold">
                         {{ __('landing.hero.logged_cta') }} <span class="material-symbols-outlined text-[20px]">dashboard</span>
                     </a>
                 @else
-                    <a href="{{ $registerUrl }}" class="inline-flex items-center gap-2 px-8 py-4 bg-primary text-on-primary text-label-md rounded-lg hover:opacity-90 transition-opacity font-semibold">
-                        {{ __('landing.hero.signup_cta') }} <span class="material-symbols-outlined text-[20px]">arrow_forward</span>
+                    <a href="{{ $registerUrl }}" class="inline-flex items-center gap-2 px-7 py-4 bg-primary text-on-primary text-label-md rounded-lg hover:opacity-90 transition-opacity font-semibold">
+                        {{ __('landing.hero.cta_main_short') }} <span class="material-symbols-outlined text-[20px]">arrow_forward</span>
                     </a>
                 @endif
-                <a href="#demos-carta" class="text-label-md text-primary font-medium hover:underline inline-flex items-center gap-1">
-                    {{ __('landing.hero.cta_demos') }} <span class="material-symbols-outlined text-[18px]">open_in_new</span>
+                <a href="#demos-carta" class="inline-flex items-center gap-2 px-6 py-4 rounded-lg bg-surface-container-lowest border border-border-subtle text-label-md text-on-surface font-semibold hover:border-primary/40 hover:text-primary transition-colors">
+                    <span class="material-symbols-outlined text-[20px]">play_circle</span>
+                    {{ __('landing.hero.cta_demos_short') }}
                 </a>
             </div>
-            <div class="flex items-center gap-4">
+            <div class="flex items-center gap-4 pt-2">
                 <div class="flex -space-x-3">
-                    <span class="w-11 h-11 rounded-full border-2 border-surface bg-primary-container flex items-center justify-center text-on-primary text-label-sm font-bold">QR</span>
-                    <span class="w-11 h-11 rounded-full border-2 border-surface bg-surface-container flex items-center justify-center text-primary text-label-sm font-bold">IA</span>
-                    <span class="w-11 h-11 rounded-full border-2 border-surface bg-surface-container-high flex items-center justify-center text-primary text-label-sm font-bold">+</span>
+                    <span class="w-10 h-10 rounded-full border-2 border-surface bg-primary-container flex items-center justify-center text-on-primary text-label-sm font-bold">QR</span>
+                    <span class="w-10 h-10 rounded-full border-2 border-surface bg-surface-container flex items-center justify-center text-primary text-label-sm font-bold">IA</span>
+                    <span class="w-10 h-10 rounded-full border-2 border-surface bg-surface-container-high flex items-center justify-center text-primary text-label-sm font-bold">+</span>
                 </div>
                 <span class="text-label-md text-text-muted">{{ __('landing.hero.social_proof') }}</span>
             </div>
         </div>
 
-        <div class="space-y-4">
-            <div class="bg-surface-container-lowest border border-border-subtle p-8 rounded-xl shadow-sm">
-                @if($isLoggedIn)
-                    <div class="mb-6">
-                        <h3 class="font-headline text-headline-md text-on-surface">{{ __('landing.hero.logged_title') }}</h3>
-                        <p class="mt-2 text-label-sm text-text-muted">{{ __('landing.hero.logged_desc') }}</p>
+        {{-- Mockup móvil con cocktail Negroni + chips flotantes --}}
+        <div class="hero-phone-stage relative mx-auto w-full max-w-[360px]">
+            <div class="hero-phone" aria-hidden="true">
+                <div class="hero-phone__notch"></div>
+                <div class="hero-phone__status">
+                    <span class="hero-phone__status-time">9:41</span>
+                    <span class="hero-phone__status-icons">
+                        <span class="material-symbols-outlined">network_wifi</span>
+                        <span class="material-symbols-outlined">battery_full</span>
+                    </span>
+                </div>
+                <figure class="hero-phone__hero">
+                    <img src="{{ $phoneHero }}" alt="" loading="lazy" />
+                    <figcaption>
+                        <span class="hero-phone__hero-name">{{ __('landing.hero.phone_brand') }}</span>
+                        <span class="hero-phone__hero-tag">{{ __('landing.hero.phone_subtitle') }}</span>
+                    </figcaption>
+                </figure>
+                <div class="hero-phone__body">
+                    <div class="hero-phone__section-head">
+                        <span class="hero-phone__section-title">{{ __('landing.hero.phone_section') }}</span>
+                        <span class="hero-phone__lang-chip">
+                            <span class="material-symbols-outlined">translate</span>
+                            {{ __('landing.hero.phone_lang_chip') }}
+                        </span>
                     </div>
-                    <a href="{{ $panelUrl }}" class="w-full py-4 bg-primary text-on-primary text-label-md rounded-lg hover:opacity-90 transition-opacity font-semibold flex items-center justify-center gap-2">
-                        {{ __('landing.hero.logged_cta') }} <span class="material-symbols-outlined text-[20px]">dashboard</span>
-                    </a>
-                @else
-                    <div class="mb-6">
-                        <h3 class="font-headline text-headline-md text-on-surface">{{ __('landing.hero.signup_title') }}</h3>
-                        <p class="mt-2 text-label-sm text-text-muted">{{ __('landing.hero.signup_desc') }}</p>
-                    </div>
-                    <form action="{{ $registerUrl }}" method="GET" class="space-y-4">
-                        <div>
-                            <label class="text-label-md text-on-surface-variant block mb-1">{{ __('landing.hero.email_label') }}</label>
-                            <input name="email" required class="w-full px-4 py-3 rounded-lg border border-border-subtle focus:ring-2 focus:ring-primary focus:border-primary outline-none" placeholder="{{ __('landing.hero.email_placeholder') }}" type="email" autocomplete="email"/>
+                    <article class="hero-phone__item">
+                        <div class="hero-phone__item-media">
+                            <img src="{{ $phoneHero }}" alt="" loading="lazy" />
+                            <span class="hero-phone__item-play" aria-hidden="true">
+                                <span class="material-symbols-outlined">play_arrow</span>
+                            </span>
                         </div>
-                        <button type="submit" class="w-full py-4 bg-primary text-on-primary text-label-md rounded-lg hover:opacity-90 transition-opacity font-semibold flex items-center justify-center gap-2">
-                            {{ __('landing.hero.signup_cta') }} <span class="material-symbols-outlined text-[20px]">arrow_forward</span>
-                        </button>
-                        <p class="text-center text-label-sm text-text-muted">{{ __('landing.hero.signup_note') }}</p>
-                    </form>
-                @endif
+                        <div class="hero-phone__item-body">
+                            <p class="hero-phone__item-name">{{ __('landing.hero.phone_item1_name') }}</p>
+                            <p class="hero-phone__item-desc">{{ __('landing.hero.phone_item1_desc') }}</p>
+                        </div>
+                    </article>
+                    <article class="hero-phone__item">
+                        <div class="hero-phone__item-media hero-phone__item-media--placeholder"></div>
+                        <div class="hero-phone__item-body">
+                            <div class="hero-phone__item-row">
+                                <p class="hero-phone__item-name">{{ __('landing.hero.phone_item2_name') }}</p>
+                                <span class="hero-phone__item-price">{{ __('landing.hero.phone_item2_price') }}</span>
+                            </div>
+                            <p class="hero-phone__item-desc">{{ __('landing.hero.phone_item2_desc') }}</p>
+                        </div>
+                    </article>
+                </div>
             </div>
-            @include('landing.partials.hero-addon-tvpik', ['tvpikSlides' => $tvpikSlides])
+            <div class="hero-phone-chip hero-phone-chip--ticket" aria-hidden="true">
+                <span class="hero-phone-chip__icon"><span class="material-symbols-outlined">trending_up</span></span>
+                <span class="hero-phone-chip__body">
+                    <span class="hero-phone-chip__label">{{ __('landing.hero.phone_ticket_label') }}</span>
+                    <span class="hero-phone-chip__value">{{ __('landing.hero.phone_ticket_value') }}</span>
+                </span>
+            </div>
+            <div class="hero-phone-chip hero-phone-chip--scan" aria-hidden="true">
+                <span class="hero-phone-chip__icon hero-phone-chip__icon--accent"><span class="material-symbols-outlined">bolt</span></span>
+                <span>{{ __('landing.hero.phone_chip_scan') }}</span>
+            </div>
+            <div class="hero-phone-chip hero-phone-chip--translation" aria-hidden="true">
+                <span class="hero-phone-chip__icon hero-phone-chip__icon--accent"><span class="material-symbols-outlined">translate</span></span>
+                <span>{{ __('landing.hero.phone_chip_translation') }}</span>
+            </div>
         </div>
     </section>
 
-    {{-- Métricas --}}
-    <section class="py-12 border-y border-border-subtle mb-16">
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
-            @foreach($landingStats as $stat)
-                <div><div class="text-headline-lg font-headline text-primary">{{ $stat['value'] }}</div><div class="text-label-md text-text-muted">{{ $stat['label'] }}</div></div>
-            @endforeach
-        </div>
-    </section>
-
-    {{-- 3 cartas demo premium --}}
-    <section id="demos-carta" class="py-20 md:py-24">
-        <div class="text-center mb-14">
-            <span class="inline-block bg-primary/10 text-primary px-3 py-1 rounded-full text-label-sm font-bold uppercase tracking-wider mb-3">{{ __('landing.demos.badge') }}</span>
+    {{-- Cartas reales + Estudio visual unificados --}}
+    <section id="demos-carta" class="py-12 md:py-24">
+        <div class="text-center mb-12 max-w-3xl mx-auto">
+            <span class="inline-flex items-center gap-2 bg-primary/10 text-primary px-3 py-1 rounded-full text-label-sm font-bold uppercase tracking-wider mb-3">
+                <span>{{ __('landing.demos.badge') }}</span>
+                <span aria-hidden="true" class="opacity-40">·</span>
+                <span>{{ __('landing.customize.badge') }}</span>
+            </span>
             <h2 class="font-headline text-headline-xl mb-4">{{ __('landing.demos.title') }}</h2>
-            <p class="text-body-lg text-text-muted max-w-2xl mx-auto">
+            <p class="text-body-lg text-text-muted">
                 {{ __('landing.demos.subtitle') }}
             </p>
         </div>
+
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
             @foreach($demoShowcases as $demo)
                 <article class="rounded-2xl border-2 {{ $demo['accent'] }} overflow-hidden flex flex-col hover:shadow-lg transition-shadow">
@@ -173,10 +216,11 @@
                 </article>
             @endforeach
         </div>
-    </section>
 
-    <section class="py-20 md:py-24 border-t border-border-subtle">
-        <div id="personalizable" class="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center max-w-5xl mx-auto" data-customize-presets='@json($landingCustomizePresets ?? [])'>
+        {{-- Mini bloque "estudio visual": prueba a personalizar en vivo --}}
+        <div id="personalizable"
+             class="mt-12 md:mt-16 grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)] gap-10 lg:gap-14 items-center max-w-5xl mx-auto"
+             data-customize-presets='@json($landingCustomizePresets ?? [])'>
             <div class="landing-customize-wrap order-2 lg:order-1">
                 <div id="customize-phone" class="landing-customize-phone" aria-hidden="true">
                     <div class="landing-customize-phone__status">
@@ -209,61 +253,105 @@
                     </div>
                 </div>
             </div>
-            <div class="space-y-6 order-1 lg:order-2">
-                <span class="inline-block bg-primary/10 text-primary px-3 py-1 rounded-full text-label-sm font-bold uppercase tracking-wider">{{ __('landing.customize.badge') }}</span>
-                <h3 class="font-headline text-headline-lg">{{ __('landing.customize.title') }}</h3>
-                <p class="text-body-lg text-text-muted">
-                    {{ __('landing.customize.desc') }}
-                </p>
-                <ul class="space-y-3 text-label-md text-text-muted">
+
+            <div class="space-y-5 order-1 lg:order-2">
+                <h3 class="font-headline text-headline-md md:text-headline-lg">{{ __('landing.customize.title') }}</h3>
+                <p class="text-body-md text-text-muted">{{ __('landing.customize.desc') }}</p>
+                <ul class="grid grid-cols-1 gap-2 text-label-md text-text-muted">
                     @foreach(__('landing.customize.bullets') as $bullet)
-                        <li class="flex gap-3 items-start"><span class="material-symbols-outlined text-primary text-[20px] shrink-0">check_circle</span>{{ $bullet }}</li>
+                        <li class="flex gap-2 items-start">
+                            <span class="material-symbols-outlined text-primary text-[18px] shrink-0">check_circle</span>
+                            <span>{{ $bullet }}</span>
+                        </li>
                     @endforeach
                 </ul>
-                <a href="#inicio" class="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-primary text-on-primary text-label-md font-semibold hover:opacity-90 transition-opacity">
+                <a href="#inicio" class="inline-flex items-center gap-2 px-5 py-3 rounded-lg bg-primary text-on-primary text-label-md font-semibold hover:opacity-90 transition-opacity">
                     {{ __('landing.customize.cta') }} <span class="material-symbols-outlined text-[20px]">arrow_forward</span>
                 </a>
             </div>
         </div>
     </section>
 
-    {{-- Funciones para el día a día --}}
-    <section id="funciones" class="py-20 md:py-24 mb-8">
-        <div class="text-center mb-14">
-            <span class="inline-block bg-primary/10 text-primary px-3 py-1 rounded-full text-label-sm font-bold uppercase tracking-wider mb-3">{{ __('landing.features.badge') }}</span>
-            <h2 class="font-headline text-headline-xl mb-4">{{ __('landing.features.title') }}</h2>
-            <p class="text-body-lg text-text-muted max-w-2xl mx-auto">{{ __('landing.features.subtitle') }}</p>
-        </div>
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            @foreach($landingFeatures ?? [] as $feat)
-                <div class="relative bg-surface-container-lowest border border-border-subtle rounded-xl p-6 hover:border-primary/30 hover:shadow-md transition-all {{ !empty($feat['plan']) ? 'landing-feat--premium' : '' }}">
-                    @if(!empty($feat['plan']))
-                        <span class="landing-plan-badge landing-plan-badge--{{ $feat['plan'] === 'plus' ? 'plus' : 'pro' }}">
-                            {{ $feat['plan'] === 'plus' ? __('landing.features.plan_plus') : __('landing.features.plan_pro') }}
-                        </span>
-                    @endif
-                    <div class="w-11 h-11 rounded-xl bg-primary-fixed flex items-center justify-center text-primary mb-4">
-                        <span class="material-symbols-outlined text-[24px]">{{ $feat['icon'] }}</span>
-                    </div>
-                    <h3 class="font-headline text-headline-md mb-2">{{ $feat['t'] }}</h3>
-                    <p class="text-label-md text-text-muted leading-relaxed">{{ $feat['d'] }}</p>
-                    @if(!empty($feat['free_note']))
-                        <p class="text-label-sm text-primary mt-3 font-medium">{{ $feat['free_note'] }}</p>
-                    @elseif(!empty($feat['plan']))
-                        <p class="text-label-sm text-text-muted mt-3">{{ __('landing.features.included_in', ['plan' => $feat['plan'] === 'plus' ? __('landing.features.plan_plus') : __('landing.features.plan_pro')]) }}</p>
-                    @endif
-                </div>
-            @endforeach
-        </div>
-        <div class="mt-12 bg-surface-container border border-border-subtle rounded-2xl p-8 md:p-10 flex flex-col md:flex-row gap-8 items-start md:items-center">
-            <div class="w-14 h-14 rounded-2xl bg-primary-container text-on-primary flex items-center justify-center shrink-0">
-                <span class="material-symbols-outlined text-[28px]">forum</span>
+    {{-- Funciones · slider compacto, las más llamativas primero --}}
+    <section id="funciones" class="py-12 md:py-20 mb-4">
+        <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-3 mb-6">
+            <div class="max-w-2xl">
+                <span class="inline-block bg-primary/10 text-primary px-3 py-1 rounded-full text-label-sm font-bold uppercase tracking-wider mb-3">{{ __('landing.features.badge') }}</span>
+                <h2 class="font-headline text-headline-lg md:text-headline-xl mb-2">{{ __('landing.features.title') }}</h2>
+                <p class="text-body-md text-text-muted">{{ __('landing.features.subtitle') }}</p>
             </div>
-            <div class="flex-1 space-y-2">
-                <h3 class="font-headline text-headline-md">{{ __('landing.features.feedback_title') }}</h3>
-                <p class="text-body-md text-text-muted max-w-2xl">
-                    {{ __('landing.features.feedback_desc') }}
-                </p>
+            <span class="hidden md:inline-flex items-center gap-1 text-label-sm text-text-muted">
+                <span class="material-symbols-outlined text-[18px]">swipe</span>
+                {{ __('landing.features.swipe_hint') }}
+            </span>
+        </div>
+
+        @php $featuresList = $landingFeatures ?? []; @endphp
+
+        <div class="wn-feat-slider-wrap" data-feat-slider>
+            <button type="button"
+                    class="wn-feat-slider__arrow wn-feat-slider__arrow--prev"
+                    data-feat-prev
+                    aria-label="{{ __('landing.features.nav_prev') }}"
+                    aria-controls="wn-feat-slider">
+                <span class="material-symbols-outlined">chevron_left</span>
+            </button>
+
+            <div id="wn-feat-slider" class="wn-feat-slider" role="list" data-feat-track>
+                @foreach($featuresList as $i => $feat)
+                    @php
+                        $isHighlight = ! empty($feat['highlight']);
+                        $planLabel = ! empty($feat['plan'])
+                            ? ($feat['plan'] === 'plus' ? __('landing.features.plan_plus') : __('landing.features.plan_pro'))
+                            : null;
+                    @endphp
+                    <article role="listitem"
+                             class="wn-feat-card {{ $isHighlight ? 'wn-feat-card--highlight' : '' }}"
+                             data-feat-slide="{{ $i }}">
+                        @if($planLabel)
+                            <span class="wn-feat-card__plan">{{ $planLabel }}</span>
+                        @endif
+                        <span class="wn-feat-card__icon">
+                            <span class="material-symbols-outlined text-[20px]">{{ $feat['icon'] }}</span>
+                        </span>
+                        <h3 class="wn-feat-card__title">{{ $feat['t'] }}</h3>
+                        <p class="wn-feat-card__desc">{{ $feat['d'] }}</p>
+                        @if(! empty($feat['free_note']))
+                            <span class="text-label-sm font-semibold {{ $isHighlight ? 'text-white/90' : 'text-secondary-container' }} mt-1">{{ $feat['free_note'] }}</span>
+                        @endif
+                    </article>
+                @endforeach
+            </div>
+
+            <button type="button"
+                    class="wn-feat-slider__arrow wn-feat-slider__arrow--next"
+                    data-feat-next
+                    aria-label="{{ __('landing.features.nav_next') }}"
+                    aria-controls="wn-feat-slider">
+                <span class="material-symbols-outlined">chevron_right</span>
+            </button>
+        </div>
+
+        @if(count($featuresList) > 1)
+            <div class="wn-feat-slider__dots" role="tablist" aria-label="{{ __('landing.features.nav_dots') }}" data-feat-dots>
+                @foreach($featuresList as $i => $feat)
+                    <button type="button"
+                            class="wn-feat-slider__dot {{ $i === 0 ? 'is-active' : '' }}"
+                            data-feat-dot="{{ $i }}"
+                            role="tab"
+                            aria-selected="{{ $i === 0 ? 'true' : 'false' }}"
+                            aria-label="{{ $feat['t'] }}"></button>
+                @endforeach
+            </div>
+        @endif
+
+        <div class="mt-10 bg-surface-container border border-border-subtle rounded-2xl p-6 md:p-8 flex flex-col md:flex-row gap-6 items-start md:items-center">
+            <div class="w-12 h-12 rounded-2xl bg-primary-container text-on-primary flex items-center justify-center shrink-0">
+                <span class="material-symbols-outlined text-[24px]">forum</span>
+            </div>
+            <div class="flex-1 space-y-1">
+                <h3 class="font-headline text-headline-sm md:text-headline-md">{{ __('landing.features.feedback_title') }}</h3>
+                <p class="text-body-md text-text-muted max-w-2xl">{{ __('landing.features.feedback_desc') }}</p>
             </div>
             <button type="button" id="suggestion-open" class="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-primary text-on-primary text-label-md font-semibold hover:opacity-90 transition-opacity shrink-0 whitespace-nowrap">
                 <span class="material-symbols-outlined text-[20px]">lightbulb</span>
@@ -273,7 +361,7 @@
     </section>
 
     {{-- Reels --}}
-    <section id="reels" class="py-20 md:py-24">
+    <section id="reels" class="py-12 md:py-24">
         <div class="text-center mb-14">
             <h2 class="font-headline text-headline-xl mb-4">{{ __('landing.reels.title') }}</h2>
             <p class="text-body-lg text-text-muted max-w-2xl mx-auto">
@@ -352,13 +440,24 @@
         </div>
     </section>
 
-    @include('landing.partials.tv-wall-section')
-
     @include('landing.partials.tvpik-section', ['tvpikSlides' => $tvpikSlides])
 
-    {{-- Testimonios --}}
-    <section class="py-16 mb-8">
-        <h2 class="text-center font-headline text-headline-xl mb-12">{{ __('landing.testimonials.title') }}</h2>
+    {{-- Reseñas + métricas unificadas --}}
+    <section class="py-12 md:py-16 mb-4 md:mb-8">
+        <div class="text-center mb-10 md:mb-12">
+            <h2 class="font-headline text-headline-xl">{{ __('landing.testimonials.title') }}</h2>
+            @if(! empty($landingStats))
+                <ul class="mt-8 grid grid-cols-2 md:grid-cols-4 gap-x-6 gap-y-6 max-w-4xl mx-auto" aria-label="Métricas">
+                    @foreach($landingStats as $stat)
+                        <li class="flex flex-col items-center gap-1">
+                            <span class="font-headline text-headline-lg text-primary leading-none">{{ $stat['value'] }}</span>
+                            <span class="text-label-md text-text-muted">{{ $stat['label'] }}</span>
+                        </li>
+                    @endforeach
+                </ul>
+            @endif
+        </div>
+
         <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
             @foreach($landingTestimonials ?? [] as $t)
                 <div class="bg-surface-container-lowest p-8 rounded-xl border border-border-subtle">
@@ -373,57 +472,84 @@
         </div>
     </section>
 
-    {{-- Escaneo IA + 3 pasos --}}
-    <section id="process" class="py-20 md:py-24">
-        <div class="text-center mb-12">
+    {{-- Escaneo IA — unificado en 3 pasos reales --}}
+    @php
+        $steps = $landingSteps ?? [];
+        $asideBullets = (array) __('landing.process.aside_bullets');
+    @endphp
+    <section id="process" class="py-12 md:py-20">
+        <div class="text-center mb-10 md:mb-12 max-w-3xl mx-auto">
             <span class="inline-block bg-primary/10 text-primary px-3 py-1 rounded-full text-label-sm font-bold uppercase tracking-wider mb-3">{{ __('landing.process.badge') }}</span>
-            <h2 class="font-headline text-headline-xl">{{ __('landing.process.title') }}</h2>
-            <p class="text-body-lg text-text-muted mt-3 max-w-2xl mx-auto">{{ __('landing.process.subtitle') }} <span class="text-primary font-medium">{{ __('landing.process.plus_note') }}</span></p>
+            <h2 class="font-headline text-headline-lg md:text-headline-xl">{{ __('landing.process.title') }}</h2>
+            <p class="text-body-md text-text-muted mt-2">{{ __('landing.process.subtitle') }} <span class="text-primary font-semibold">{{ __('landing.process.plus_note') }}</span></p>
         </div>
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-14 items-center max-w-5xl mx-auto mb-16">
-            <div class="landing-scan-demo" aria-hidden="true">
-                <div class="landing-scan-demo__frame">
-                    <p class="landing-scan-demo__section">{{ __('landing.process.scan_demo.section_starters') }}</p>
-                    <div class="landing-scan-demo__row"><span>{{ __('landing.process.scan_demo.item1') }}</span><strong>{{ __('landing.process.scan_demo.price1') }}</strong></div>
-                    <div class="landing-scan-demo__row"><span>{{ __('landing.process.scan_demo.item2') }}</span><strong>{{ __('landing.process.scan_demo.price2') }}</strong></div>
-                    <p class="landing-scan-demo__section landing-scan-demo__section--spaced">{{ __('landing.process.scan_demo.section_mains') }}</p>
-                    <div class="landing-scan-demo__row"><span>{{ __('landing.process.scan_demo.item3') }}</span><strong>{{ __('landing.process.scan_demo.price3') }}</strong></div>
-                    <div class="landing-scan-demo__row"><span>{{ __('landing.process.scan_demo.item4') }}</span><strong>{{ __('landing.process.scan_demo.price4') }}</strong></div>
-                    <div class="landing-scan-demo__scanline" aria-hidden="true"></div>
-                </div>
-                <p class="landing-scan-demo__badge">
-                    <span class="material-symbols-outlined text-[18px]">description</span>
-                    {{ __('landing.process.scan_demo.detected') }}
-                </p>
-            </div>
-            <p class="sr-only">{{ __('landing.process.scan_demo.aria') }}</p>
-            <div>
-                <h3 class="font-headline text-headline-md mb-2">{{ __('landing.process.paths_title') }}</h3>
-                <p class="text-body-md text-text-muted mb-6">{{ __('landing.process.paths_subtitle') }}</p>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
-                    <a href="#inicio" class="landing-scan-path-btn landing-scan-path-btn--primary">
-                        <span class="material-symbols-outlined text-[22px]">photo_camera</span>
-                        {{ __('landing.process.cta_scan') }}
-                    </a>
-                    <a href="#inicio" class="landing-scan-path-btn landing-scan-path-btn--primary">
-                        <span class="material-symbols-outlined text-[22px]">upload_file</span>
-                        {{ __('landing.process.cta_upload') }}
-                    </a>
-                </div>
-                <p class="text-label-sm text-text-muted">{{ __('landing.process.cta_note') }}</p>
-            </div>
-        </div>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-12 relative max-w-5xl mx-auto">
-            <div class="hidden md:block absolute top-12 left-1/4 right-1/4 h-0.5 border-t-2 border-dashed border-outline-variant -z-10"></div>
-            @foreach($landingSteps ?? [] as $step)
-                <div class="text-center space-y-4">
-                    <div class="w-16 h-16 rounded-2xl bg-primary-container text-on-primary flex items-center justify-center mx-auto">
-                        <span class="material-symbols-outlined text-[32px]">{{ $step['icon'] }}</span>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-6 lg:gap-10 relative max-w-6xl mx-auto">
+            <div class="hidden md:block absolute top-7 left-[16.66%] right-[16.66%] h-0.5 border-t-2 border-dashed border-outline-variant -z-10" aria-hidden="true"></div>
+
+            {{-- Paso 1: Foto o PDF con demo del escaneo --}}
+            @if(! empty($steps[0]))
+                <div class="text-center md:text-left space-y-4">
+                    <div class="w-14 h-14 rounded-2xl bg-primary text-on-primary flex items-center justify-center mx-auto md:mx-0 shadow-sm">
+                        <span class="material-symbols-outlined text-[28px]">{{ $steps[0]['icon'] }}</span>
                     </div>
-                    <h3 class="font-headline text-headline-md">{{ $step['t'] }}</h3>
-                    <p class="text-text-muted px-2">{{ $step['d'] }}</p>
+                    <div>
+                        <h3 class="font-headline text-headline-sm mb-1.5">{{ $steps[0]['t'] }}</h3>
+                        <p class="text-body-md text-text-muted">{{ $steps[0]['d'] }}</p>
+                    </div>
+                    <div class="landing-scan-demo landing-scan-demo--compact" aria-hidden="true">
+                        <div class="landing-scan-demo__frame">
+                            <p class="landing-scan-demo__section">{{ __('landing.process.scan_demo.section_starters') }}</p>
+                            <div class="landing-scan-demo__row"><span>{{ __('landing.process.scan_demo.item1') }}</span><strong>{{ __('landing.process.scan_demo.price1') }}</strong></div>
+                            <div class="landing-scan-demo__row"><span>{{ __('landing.process.scan_demo.item2') }}</span><strong>{{ __('landing.process.scan_demo.price2') }}</strong></div>
+                            <p class="landing-scan-demo__section landing-scan-demo__section--spaced">{{ __('landing.process.scan_demo.section_mains') }}</p>
+                            <div class="landing-scan-demo__row"><span>{{ __('landing.process.scan_demo.item3') }}</span><strong>{{ __('landing.process.scan_demo.price3') }}</strong></div>
+                            <div class="landing-scan-demo__row"><span>{{ __('landing.process.scan_demo.item4') }}</span><strong>{{ __('landing.process.scan_demo.price4') }}</strong></div>
+                            <div class="landing-scan-demo__scanline" aria-hidden="true"></div>
+                        </div>
+                    </div>
+                    <p class="sr-only">{{ __('landing.process.scan_demo.aria') }}</p>
                 </div>
-            @endforeach
+            @endif
+
+            {{-- Paso 2: Procesado IA con viñetas "¿Qué hace la IA?" --}}
+            @if(! empty($steps[1]))
+                <div class="text-center md:text-left space-y-4">
+                    <div class="w-14 h-14 rounded-2xl bg-primary text-on-primary flex items-center justify-center mx-auto md:mx-0 shadow-sm">
+                        <span class="material-symbols-outlined text-[28px]">{{ $steps[1]['icon'] }}</span>
+                    </div>
+                    <div>
+                        <h3 class="font-headline text-headline-sm mb-1.5">{{ $steps[1]['t'] }}</h3>
+                        <p class="text-body-md text-text-muted">{{ $steps[1]['d'] }}</p>
+                    </div>
+                    @if(! empty($asideBullets))
+                        <ul class="wn-scan-aside__list wn-scan-aside__list--inline">
+                            @foreach($asideBullets as $bullet)
+                                <li><span class="material-symbols-outlined">check_circle</span><span>{{ $bullet }}</span></li>
+                            @endforeach
+                        </ul>
+                    @endif
+                </div>
+            @endif
+
+            {{-- Paso 3: Listo para servir con CTA principal --}}
+            @if(! empty($steps[2]))
+                <div class="text-center md:text-left space-y-4">
+                    <div class="w-14 h-14 rounded-2xl bg-primary text-on-primary flex items-center justify-center mx-auto md:mx-0 shadow-sm">
+                        <span class="material-symbols-outlined text-[28px]">{{ $steps[2]['icon'] }}</span>
+                    </div>
+                    <div>
+                        <h3 class="font-headline text-headline-sm mb-1.5">{{ $steps[2]['t'] }}</h3>
+                        <p class="text-body-md text-text-muted">{{ $steps[2]['d'] }}</p>
+                    </div>
+                    <a href="{{ $isLoggedIn ? $panelUrl : $registerUrl }}" class="wn-scan-cta wn-scan-cta--block" id="scan-main-cta">
+                        <span class="wn-scan-cta__icon"><span class="material-symbols-outlined text-[20px]">photo_camera</span></span>
+                        <span>{{ __('landing.process.cta_main') }}</span>
+                        <span class="material-symbols-outlined text-[22px]">arrow_forward</span>
+                    </a>
+                    <p class="text-label-sm text-text-muted">{{ __('landing.process.cta_main_note') }}</p>
+                </div>
+            @endif
         </div>
     </section>
 
@@ -433,36 +559,50 @@
         $landingPricingTierOrder = $landingPricingTierOrder ?? ['free', 'pro', 'plus'];
         $landingFranchisePlan = $landingFranchisePlan ?? null;
     @endphp
-    <section id="pricing" class="py-20 md:py-24">
+    <section id="pricing" class="py-12 md:py-24">
         <div class="text-center mb-12">
             <h2 class="font-headline text-headline-xl mb-4">{{ __('landing.pricing.title') }}</h2>
             <p class="text-body-lg text-text-muted max-w-2xl mx-auto">{{ __('landing.pricing.subtitle') }}</p>
         </div>
-        <div class="grid grid-cols-1 md:grid-cols-{{ max(1, count($landingPricingPlans)) }} gap-8 items-stretch max-w-5xl mx-auto">
+        @php
+            $planCount = max(1, count($landingPricingPlans));
+            $gridCols = $planCount >= 4
+                ? 'sm:grid-cols-2 lg:grid-cols-4'
+                : ($planCount === 3 ? 'md:grid-cols-3' : 'md:grid-cols-' . $planCount);
+        @endphp
+        <div class="grid grid-cols-1 {{ $gridCols }} gap-5 md:gap-6 items-stretch max-w-6xl mx-auto">
             @foreach($landingPricingPlans as $plan)
-                <div class="bg-surface-container-lowest {{ !empty($plan['highlight']) ? 'border-2 border-primary md:-translate-y-2 shadow-lg' : 'border border-border-subtle' }} p-8 rounded-xl flex flex-col relative">
-                    @if(!empty($plan['badge']))
-                        <span class="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-on-primary px-4 py-1 rounded-full text-label-sm font-semibold whitespace-nowrap">{{ $plan['badge'] }}</span>
+                @php
+                    $isHighlight = ! empty($plan['highlight']);
+                    $isFranchise = ($plan['id'] ?? '') === 'franchise' || ($plan['price'] ?? '') === 'A medida';
+                @endphp
+                <div class="bg-surface-container-lowest {{ $isHighlight ? 'border-2 border-primary-container lg:-translate-y-2 shadow-lg' : 'border border-border-subtle' }} p-6 md:p-7 rounded-2xl flex flex-col relative">
+                    @if(! empty($plan['badge']))
+                        <span class="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary-container text-on-primary px-4 py-1 rounded-full text-label-sm font-semibold whitespace-nowrap shadow">{{ $plan['badge'] }}</span>
                     @endif
-                    <h3 class="font-headline text-headline-md mb-1">{{ $plan['name'] }}</h3>
-                    <p class="text-label-sm text-text-muted mb-4">{{ $plan['tagline'] }}</p>
-                    <div class="mb-6">
-                        @if(($plan['id'] ?? '') === 'franchise' || ($plan['price'] ?? '') === 'A medida')
-                            <span class="text-3xl font-bold">{{ $plan['price'] }}</span>
+                    <span class="text-label-sm uppercase tracking-wider font-bold text-text-muted">{{ strtoupper($plan['name']) }}</span>
+                    <div class="mt-2 mb-1">
+                        @if($isFranchise)
+                            <span class="font-headline text-[2rem] font-bold">{{ $plan['price'] }}</span>
                         @else
-                            <span class="text-4xl font-bold">{{ $plan['price'] }}</span><span class="text-text-muted">€</span>
+                            <span class="font-headline text-[2.5rem] leading-none font-extrabold">{{ $plan['price'] }}</span><span class="text-text-muted text-headline-sm font-semibold">€</span>
                         @endif
-                        <span class="text-text-muted text-label-md"> {{ $plan['period'] }}</span>
                     </div>
-                    <ul class="space-y-3 mb-8 flex-grow text-label-md">
+                    <p class="text-label-sm text-text-muted mb-3">{{ $plan['period'] }}</p>
+                    <p class="text-body-md text-text-muted mb-5 leading-relaxed">{{ $plan['tagline'] }}</p>
+                    <ul class="space-y-2 mb-6 flex-grow text-body-md">
                         @foreach($plan['features'] as $feature)
+                            @php
+                                $plainFeature = trim(strip_tags($feature));
+                                $isNegative = (bool) preg_match('/^(sin|no\s|without|no\s+)/i', $plainFeature);
+                            @endphp
                             <li class="flex gap-2 items-start">
-                                <span class="material-symbols-outlined text-primary text-[20px] shrink-0">check_circle</span>
-                                <span>{!! $feature !!}</span>
+                                <span class="material-symbols-outlined text-[18px] shrink-0 {{ $isNegative ? 'text-text-muted' : 'text-success-green' }}" style="font-variation-settings: 'FILL' 1;">{{ $isNegative ? 'close' : 'check_circle' }}</span>
+                                <span class="{{ $isNegative ? 'text-text-muted' : '' }}">{!! $feature !!}</span>
                             </li>
                         @endforeach
                     </ul>
-                    <a href="{{ $plan['cta_url'] ?? $registerUrl }}" class="w-full {{ !empty($plan['highlight']) ? 'py-4 bg-primary text-on-primary font-semibold hover:opacity-90' : ($plan['id'] === 'plus' ? 'py-3 border border-primary text-primary font-semibold hover:bg-primary/5' : 'py-3 border border-border-subtle font-medium hover:bg-surface-container') }} rounded-lg text-center transition-colors">{{ $plan['cta'] }}</a>
+                    <a href="{{ $plan['cta_url'] ?? $registerUrl }}" class="w-full rounded-lg text-center text-label-md font-semibold transition-colors {{ $isHighlight ? 'py-3 bg-primary-container text-on-primary hover:opacity-90' : 'py-3 border border-border-subtle hover:bg-surface-container' }}">{{ $plan['cta'] }}</a>
                 </div>
             @endforeach
         </div>
@@ -492,8 +632,8 @@
     </section>
 
     {{-- FAQ --}}
-    <section class="py-16 max-w-3xl mx-auto">
-        <h2 class="text-center font-headline text-headline-xl mb-10">{{ __('landing.faq.title') }}</h2>
+    <section class="py-12 md:py-16 max-w-3xl mx-auto">
+        <h2 class="text-center font-headline text-headline-xl mb-8 md:mb-10">{{ __('landing.faq.title') }}</h2>
         <div class="space-y-3">
             @foreach($landingFaq ?? [] as $i => $faq)
                 <div class="faq-item border border-border-subtle rounded-xl overflow-hidden {{ $i === 0 ? 'faq-open' : '' }}">
@@ -510,8 +650,8 @@
     </section>
 
     {{-- CTA final --}}
-    <section id="contacto" class="py-16 mb-20">
-        <div class="bg-primary rounded-[2rem] p-10 md:p-16 text-center text-on-primary relative overflow-hidden">
+    <section id="contacto" class="py-12 md:py-16 mb-12 md:mb-20">
+        <div class="bg-primary rounded-[2rem] p-8 md:p-16 text-center text-on-primary relative overflow-hidden">
             <div class="absolute top-0 right-0 w-72 h-72 bg-white/10 rounded-full -mr-24 -mt-24 blur-3xl"></div>
             <h2 class="font-headline text-headline-xl mb-6 relative z-10">{{ __('landing.cta.title') }}</h2>
             <p class="text-body-lg mb-8 opacity-90 max-w-xl mx-auto relative z-10">{{ __('landing.cta.subtitle') }}</p>
@@ -539,7 +679,6 @@
                     <li><a href="#funciones" class="hover:text-primary">{{ __('landing.nav.features') }}</a></li>
                     <li><a href="#demos-carta" class="hover:text-primary">{{ __('landing.nav.examples') }}</a></li>
                     <li><a href="#reels" class="hover:text-primary">{{ __('landing.nav.reels') }}</a></li>
-                    <li><a href="#tv-menus" class="hover:text-primary">{{ __('landing.nav.tv_menus') }}</a></li>
                     <li><a href="#tvpik" class="hover:text-primary">{{ __('landing.nav.tvpik') }}</a></li>
                     <li><a href="#process" class="hover:text-primary">{{ __('landing.nav.scan') }}</a></li>
                     <li><a href="#pricing" class="hover:text-primary">{{ __('landing.nav.pricing') }}</a></li>

@@ -54,7 +54,13 @@
             </div>
             <ol class="wn-wizard-steps">
                 @foreach($accountSteps as $step)
-                    <li class="wn-wizard-step {{ $step['is_done'] ? 'is-done' : '' }}">
+                    <li class="wn-wizard-step {{ $step['is_done'] ? 'is-done' : '' }}"
+                        @if($step['is_done'])
+                            role="button"
+                            tabindex="0"
+                            aria-expanded="false"
+                            data-wizard-step-toggle
+                        @endif>
                         <span class="wn-wizard-step__check" aria-hidden="true">
                             @if($step['is_done'])
                                 <i class="ri ri-check-line"></i>
@@ -76,9 +82,15 @@
                                 {{ $step['cta_label'] }} <i class="ri ri-arrow-right-line"></i>
                             </a>
                         @else
-                            <span class="wn-wizard-step__done-pill">
-                                <i class="ri ri-check-line"></i> Hecho
-                            </span>
+                            <div class="wn-wizard-step__done-actions">
+                                <span class="wn-wizard-step__done-pill">
+                                    <i class="ri ri-check-line"></i> Hecho
+                                </span>
+                                <a href="{{ $step['cta_url'] }}" class="wn-wizard-step__cta wn-wizard-step__cta--secondary">
+                                    Editar <i class="ri ri-arrow-right-line"></i>
+                                </a>
+                                <i class="ri ri-arrow-down-s-line wn-wizard-step__chevron" aria-hidden="true"></i>
+                            </div>
                         @endif
                     </li>
                 @endforeach
@@ -98,7 +110,13 @@
             </div>
             <ol class="wn-wizard-steps">
                 @foreach($cardSteps as $step)
-                    <li class="wn-wizard-step {{ $step['is_done'] ? 'is-done' : '' }}">
+                    <li class="wn-wizard-step {{ $step['is_done'] ? 'is-done' : '' }}"
+                        @if($step['is_done'])
+                            role="button"
+                            tabindex="0"
+                            aria-expanded="false"
+                            data-wizard-step-toggle
+                        @endif>
                         <span class="wn-wizard-step__check" aria-hidden="true">
                             @if($step['is_done'])
                                 <i class="ri ri-check-line"></i>
@@ -120,9 +138,15 @@
                                 {{ $step['cta_label'] }} <i class="ri ri-arrow-right-line"></i>
                             </a>
                         @else
-                            <span class="wn-wizard-step__done-pill">
-                                <i class="ri ri-check-line"></i> Hecho
-                            </span>
+                            <div class="wn-wizard-step__done-actions">
+                                <span class="wn-wizard-step__done-pill">
+                                    <i class="ri ri-check-line"></i> Hecho
+                                </span>
+                                <a href="{{ $step['cta_url'] }}" class="wn-wizard-step__cta wn-wizard-step__cta--secondary">
+                                    Editar <i class="ri ri-arrow-right-line"></i>
+                                </a>
+                                <i class="ri ri-arrow-down-s-line wn-wizard-step__chevron" aria-hidden="true"></i>
+                            </div>
                         @endif
                     </li>
                 @endforeach
@@ -167,6 +191,112 @@
     padding: 1px 8px;
     border-radius: 999px;
 }
+
+/* Pasos completados: colapsados y atenuados, click para expandir */
+.wn-wizard-step.is-done {
+    opacity: .55;
+    padding-top: 8px;
+    padding-bottom: 8px;
+    cursor: pointer;
+    transition: opacity .2s ease, padding .2s ease, background-color .2s ease;
+    border-radius: 6px;
+}
+.wn-wizard-step.is-done:hover {
+    opacity: .85;
+    background-color: rgba(15, 23, 42, 0.03);
+}
+.wn-wizard-step.is-done:focus-visible {
+    opacity: .9;
+    outline: none;
+    box-shadow: inset 0 0 0 2px rgba(0, 74, 198, 0.25);
+}
+.wn-wizard-step.is-done .wn-wizard-step__title {
+    font-size: 13.5px;
+}
+.wn-wizard-step.is-done .wn-wizard-step__desc { display: none; }
+.wn-wizard-step.is-done .wn-wizard-step__art { display: none; }
+.wn-wizard-step.is-done .wn-wizard-step__cta--secondary { display: none; }
+
+.wn-wizard-step__done-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
+.wn-wizard-step__chevron {
+    font-size: 18px;
+    opacity: .55;
+    transition: transform .2s ease, opacity .2s ease;
+    pointer-events: none;
+}
+.wn-wizard-step.is-done:hover .wn-wizard-step__chevron { opacity: .85; }
+
+.wn-wizard-step.is-done.is-expanded {
+    opacity: 1;
+    padding-top: 14px;
+    padding-bottom: 14px;
+    background-color: rgba(15, 23, 42, 0.02);
+}
+.wn-wizard-step.is-done.is-expanded .wn-wizard-step__title {
+    font-size: 15px;
+}
+.wn-wizard-step.is-done.is-expanded .wn-wizard-step__desc { display: block; }
+.wn-wizard-step.is-done.is-expanded .wn-wizard-step__cta--secondary {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    font-size: 13px;
+    background: transparent;
+    color: var(--wn-primary, #004ac6);
+    border: 1px solid var(--wn-primary, #004ac6);
+    border-radius: 8px;
+    text-decoration: none;
+    transition: background-color .15s ease, color .15s ease;
+}
+.wn-wizard-step.is-done.is-expanded .wn-wizard-step__cta--secondary:hover {
+    background: var(--wn-primary, #004ac6);
+    color: #fff;
+    transform: none;
+}
+.wn-wizard-step.is-done.is-expanded .wn-wizard-step__chevron {
+    transform: rotate(180deg);
+    opacity: .85;
+}
 </style>
+@endpush
+
+@push('scripts')
+<script>
+(function () {
+    function toggle(el) {
+        var expanded = el.classList.toggle('is-expanded');
+        el.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+    }
+    function bind() {
+        var steps = document.querySelectorAll('[data-wizard-step-toggle]');
+        steps.forEach(function (el) {
+            if (el.dataset.wizardBound === '1') return;
+            el.dataset.wizardBound = '1';
+            el.addEventListener('click', function (e) {
+                if (e.target.closest('a, button')) return;
+                toggle(el);
+            });
+            el.addEventListener('keydown', function (e) {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    toggle(el);
+                }
+            });
+        });
+    }
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', bind);
+    } else {
+        bind();
+    }
+})();
+</script>
 @endpush
 @endonce

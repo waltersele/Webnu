@@ -51,9 +51,11 @@ class TranslationController extends Controller
         $locales = $validated['locales'] ?? [];
         $translations->updateCompanyLocales($company, $request->user(), $locales);
 
-        return redirect()
-            ->route('admin.companies.languages', $company)
-            ->with('flash', 'Idiomas actualizados.');
+        $target = $request->input('redirect_to') === 'sections'
+            ? route('admin.sections.index') . '#tab-traducciones'
+            : route('admin.companies.languages', $company);
+
+        return redirect()->to($target)->with('flash', 'Idiomas actualizados.');
     }
 
     public function generate(Request $request, MenuTranslationService $translations, Company $company)
@@ -67,8 +69,11 @@ class TranslationController extends Controller
 
         $job = $translations->translateCompany($company, $request->user(), $validated['locale']);
 
-        return redirect()
-            ->route('admin.companies.languages', $company)
+        $target = $request->input('redirect_to') === 'sections'
+            ? route('admin.sections.index') . '#tab-traducciones'
+            : route('admin.companies.languages', $company);
+
+        return redirect()->to($target)
             ->with('flash', "Traducción completada ({$job->items_done} elementos) al " . strtoupper($validated['locale']) . '.');
     }
 

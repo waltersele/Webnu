@@ -46,6 +46,11 @@ class Product extends Model
         return $this->hasMany(ProductTranslation::class);
     }
 
+    public function menuItems()
+    {
+        return $this->hasMany(MenuItem::class);
+    }
+
     public function getImageUrlAttribute()
     {
         return $this->image ? url('img/' . ltrim($this->image, '/')) : null;

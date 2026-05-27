@@ -25,7 +25,8 @@ class TvpikPublishService
         string $screenId,
         string $screenName,
         string $templateKey,
-        ?string $galleryId = null
+        ?string $galleryId = null,
+        ?int $menuId = null
     ): TvpikScreenLink {
         $templates = config('tvpik_templates.templates', []);
         if (! isset($templates[$templateKey])) {
@@ -33,6 +34,10 @@ class TvpikPublishService
         }
 
         $publishUrl = $this->menuSync->tvUrlForTemplate($company, $templateKey);
+        if ($menuId) {
+            $separator = str_contains($publishUrl, '?') ? '&' : '?';
+            $publishUrl .= $separator . 'menu=' . $menuId;
+        }
         $syncVersion = $this->menuSync->syncVersion($company);
 
         $link = TvpikScreenLink::updateOrCreate(
@@ -45,6 +50,7 @@ class TvpikPublishService
                 'tvpik_screen_name' => $screenName,
                 'tvpik_gallery_id' => $galleryId,
                 'template_key' => $templateKey,
+                'menu_id' => $menuId,
             ]
         );
 
@@ -88,7 +94,8 @@ class TvpikPublishService
                 $link->tvpik_screen_id,
                 $link->tvpik_screen_name ?? $link->tvpik_screen_id,
                 $link->template_key,
-                $link->tvpik_gallery_id
+                $link->tvpik_gallery_id,
+                $link->menu_id
             );
             $count++;
         }
@@ -119,7 +126,8 @@ class TvpikPublishService
                     $link->tvpik_screen_id,
                     $link->tvpik_screen_name ?? $link->tvpik_screen_id,
                     $link->template_key,
-                    $link->tvpik_gallery_id
+                    $link->tvpik_gallery_id,
+                    $link->menu_id
                 );
             } catch (\Throwable $e) {
                 Log::warning('TVPik auto-sync skipped', ['link_id' => $link->id, 'error' => $e->getMessage()]);

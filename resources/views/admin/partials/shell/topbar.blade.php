@@ -8,7 +8,7 @@
     $planPresentation = $planPresentation ?? app(\App\Services\UserPlanService::class)->planPresentation($user);
     $billingUrl = ($planFeatures['billing_url'] ?? null) ?: route('admin.settings');
     $showTrial = !empty($planPresentation['trial_active']) && ($planPresentation['trial_days_remaining'] ?? null) !== null;
-    $logoHomeUrl = $hasCompany ? route('admin.sections.index') : route('admin.companies.index');
+    $logoHomeUrl = route('admin.dashboard');
     $planKey = $planPresentation['key'] ?? 'free';
     $planLabel = $planPresentation['label'] ?? 'Gratis';
     $planBadgeClass = match($planKey) {
@@ -20,7 +20,10 @@
 @endphp
 
 <header class="wn-shell-topbar">
-    <a href="{{ $logoHomeUrl }}" class="wn-shell-topbar__logo" aria-label="Ir a Mi carta">
+    <button type="button" class="wn-shell-topbar__menu-btn wn-shell-topbar__menu-btn--leading d-lg-none" data-bs-toggle="offcanvas" data-bs-target="#wnShellNavOffcanvas" aria-label="Abrir menú">
+        <i class="ti ti-menu-2"></i>
+    </button>
+    <a href="{{ $logoHomeUrl }}" class="wn-shell-topbar__logo" aria-label="Ir al inicio">
         <img src="{{ asset('adminlte/img/isotipo-color.png') }}"
              alt=""
              class="wn-shell-logo wn-shell-logo--mark d-md-none"
@@ -88,9 +91,6 @@
                 @include('admin.partials.pwa-install', ['variant' => 'dropdown'])
             </div>
         </div>
-        <button type="button" class="wn-shell-topbar__menu-btn d-lg-none" data-bs-toggle="offcanvas" data-bs-target="#wnShellNavOffcanvas" aria-label="Abrir menú">
-            <i class="ti ti-menu-2"></i>
-        </button>
         <div class="dropdown">
             <button type="button" class="wn-shell-avatar" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Cuenta">
                 {{ $initial }}

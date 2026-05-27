@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Allergen;
 use App\Company;
+use App\Http\Controllers\Concerns\BuildsCompanyStudioPayload;
 use App\Http\Controllers\Controller;
 use App\Product;
 use App\Section;
@@ -15,7 +16,9 @@ use Illuminate\Support\Facades\Cookie;
 
 class SectionsController extends Controller
 {
-    public function index(MenuService $menuService)
+    use BuildsCompanyStudioPayload;
+
+    public function index(MenuService $menuService, UserPlanService $plans)
     {
         $company = $this->selectedCompany();
 
@@ -28,7 +31,12 @@ class SectionsController extends Controller
         app(AllergenCatalogService::class)->sync();
         $allergens = Allergen::orderBy('name')->get();
 
-        return view('admin.sections.index', compact('sections', 'allergens', 'company'));
+        $studio = $this->studioPayload($company, $plans);
+
+        return view('admin.sections.index', array_merge(
+            compact('sections', 'allergens', 'company'),
+            $studio
+        ));
     }
 
     public function create()

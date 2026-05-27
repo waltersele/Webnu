@@ -404,8 +404,8 @@ a.wn-shell-trial-badge:hover {
 
 .webnu-bottomnav__lock {
   position: absolute;
-  right: -8px;
-  bottom: -4px;
+  top: 6px;
+  right: calc(50% - 18px);
   background: #f59e0b;
   color: #fff;
   width: 13px;
@@ -416,6 +416,7 @@ a.wn-shell-trial-badge:hover {
   justify-content: center;
   font-size: 7px;
   border: 1.5px solid #fff;
+  pointer-events: none;
 }
 
 .webnu-bottomnav__lock i {
@@ -552,7 +553,16 @@ a.wn-shell-trial-badge:hover {
 
 @media (max-width: 991.98px) {
   .wn-shell-topbar {
-    padding-left: 16px;
+    padding-left: 12px;
+    padding-right: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .wn-shell-topbar__menu-btn--leading {
+    order: 0;
+    margin-right: 4px;
   }
 
   .wn-shell-topbar__logo {
@@ -561,7 +571,19 @@ a.wn-shell-trial-badge:hover {
     height: auto;
     border: none;
     padding: 0;
-    margin-right: 4px;
+    margin: 0 0 0 auto;
+    order: 10;
+  }
+
+  .wn-shell-topbar__center {
+    order: 5;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .wn-shell-topbar__right {
+    order: 8;
+    margin-left: 0;
   }
 
   /* Solo ocultar la barra lateral fija; la del offcanvas sigue visible */
@@ -606,6 +628,7 @@ body.wn-shell-body .webnu-bottomnav {
 }
 
 body.wn-shell-body .webnu-bottomnav__item {
+  position: relative;
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -620,6 +643,14 @@ body.wn-shell-body .webnu-bottomnav__item {
   border: none;
   background: transparent;
   cursor: pointer;
+  pointer-events: auto;
+  z-index: 1;
+  -webkit-tap-highlight-color: rgba(0, 74, 198, 0.12);
+}
+
+body.wn-shell-body .webnu-bottomnav__item > i,
+body.wn-shell-body .webnu-bottomnav__item > span {
+  pointer-events: none;
 }
 
 body.wn-shell-body .webnu-bottomnav__item i {
@@ -628,6 +659,10 @@ body.wn-shell-body .webnu-bottomnav__item i {
 
 body.wn-shell-body .webnu-bottomnav__item.is-active {
   color: var(--wn-shell-primary);
+}
+
+body.wn-shell-body .webnu-bottomnav__item.is-locked {
+  opacity: 0.95;
 }
 
 /* ---- Submenu "Mis cartas" en el sidebar desktop ---- */

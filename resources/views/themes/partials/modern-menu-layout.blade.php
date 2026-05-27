@@ -76,9 +76,7 @@
         <section class="wn-menu-hero wn-menu-hero--dark wn-menu-hero--bleed" style="--wn-hero-image: url('{{ $heroBgUrl }}')">
             <div class="wn-menu-hero__overlay wn-menu-hero__overlay--bleed">
                 <div class="wn-menu-hero__brand">
-                    @if($company->logo)
-                        <img class="wn-menu-hero__logo-inline" src="{{ asset('img/'.$company->logo) }}" alt="{{ $company->name }}">
-                    @endif
+                    @include('themes.partials.logo-chip', ['company' => $company])
                     <div class="wn-menu-hero__brand-text">
                         @if($company->chef_name)
                             <p class="wn-menu-hero__eyebrow">{{ strtoupper($company->chef_name) }}</p>
@@ -102,11 +100,13 @@
             <div class="wn-menu-hero__overlay wn-menu-hero__overlay--bleed wn-menu-hero__overlay--{{ $heroMode }}">
                 <div class="wn-menu-hero__brand">
                     @if($heroMode === 'circle')
-                        <div class="wn-menu-hero__logo-ring">
-                            <img src="{{ $company->logo ? asset('img/'.$company->logo) : \App\PlatformSetting::brandUrl('logo') }}" alt="{{ $company->name }}">
-                        </div>
-                    @elseif($company->logo)
-                        <img class="wn-menu-hero__logo-inline" src="{{ asset('img/'.$company->logo) }}" alt="{{ $company->name }}">
+                        @include('themes.partials.logo-chip', [
+                            'company' => $company,
+                            'shape' => 'circle',
+                            'fallbackUrl' => \App\PlatformSetting::brandUrl('logo'),
+                        ])
+                    @else
+                        @include('themes.partials.logo-chip', ['company' => $company])
                     @endif
                     <div class="wn-menu-hero__brand-text">
                         <h1 class="wn-menu-hero__title wn-menu-hero__title--compact">{{ $company->name }}</h1>

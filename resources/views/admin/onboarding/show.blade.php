@@ -12,7 +12,9 @@
 
     <div class="wn-onb__top-bar">
         <header class="wn-onb__top">
-            <a href="{{ route('home') }}" class="wn-onb__logo">Webnu<span>.es</span></a>
+            <a href="{{ route('home') }}" class="wn-onb__logo" aria-label="Webnu">
+                <img src="{{ \App\PlatformSetting::brandUrl('logo') }}" alt="Webnu" class="wn-onb__logo-img">
+            </a>
             <div class="wn-onb__plan-badge">
                 <i class="ri-gift-line"></i> {{ $planPresentation['label'] ?? ($plan['label'] ?? 'Gratis') }}
                 @if(!empty($planPresentation['trial_active']))
@@ -81,7 +83,7 @@
         {{-- Paso 3: Plantilla --}}
         @php
             $selectedTemplate = old('template', $company->template ?: 'lumiere');
-            $initialPreviewUrl = $templatePreviewUrls[$selectedTemplate] ?? $templatePreviewUrls['lumiere'] ?? route('see_menu.legacy', 'demo');
+            $initialPreviewUrl = $templatePreviewUrls[$selectedTemplate] ?? $templatePreviewUrls['lumiere'] ?? route('public.hub', ['slug' => 'demo']);
         @endphp
         <section class="wn-onb-step {{ $step === 3 ? 'is-active' : '' }}" data-onb-step="3">
             <div class="wn-onb-card wn-onb-card--wide">
@@ -259,7 +261,7 @@
                     </div>
                 </div>
                 <div class="wn-onb-pwa mt-4">
-                    @include('admin.partials.pwa-install', ['variant' => 'compact'])
+                    @include('admin.partials.pwa-install-onboarding')
                 </div>
             </div>
         </section>

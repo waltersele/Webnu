@@ -1,17 +1,43 @@
+@php
+    $canPhotos = isset($planFeatures['photos']) ? (bool) $planFeatures['photos'] : true;
+    $canVideos = isset($planFeatures['videos']) ? (bool) $planFeatures['videos'] : false;
+@endphp
 <div class="col webnu-product-col" id="{{ $product->id }}">
     <article class="card h-100 webnu-dish-card">
-        <div class="webnu-dish-card__media">
+        <div class="webnu-dish-card__media"
+             data-product-media
+             data-product-id="{{ $product->id }}"
+             data-upload-image-url="{{ route('admin.products.upload_image', $product) }}"
+             data-upload-video-url="{{ route('admin.products.upload_video', $product) }}"
+             data-token="{{ csrf_token() }}">
             @if ($product->highlight)
                 <div class="webnu-dish-card__badge">
                     @include('admin.sections.partials.product-highlight-badge', ['highlight' => $product->highlight])
                 </div>
             @endif
             @if ($product->image)
-                <img src="{{ asset('img/' . $product->image) }}" alt="" class="webnu-dish-card__img">
+                <img src="{{ asset('img/' . $product->image) }}" alt="" class="webnu-dish-card__img" data-product-image>
             @else
-                <div class="webnu-dish-card__img webnu-dish-card__img--placeholder">
-                    <i class="ri ri-restaurant-2-line"></i>
+                <div class="webnu-dish-card__img webnu-dish-card__img--placeholder webnu-dish-card__placeholder" data-product-placeholder>
+                    <i class="ri ri-restaurant-2-line webnu-dish-card__placeholder-icon"></i>
+                    <div class="webnu-dish-card__placeholder-actions">
+                        <button type="button" class="webnu-dish-card__add-media" data-add-media="image" title="Añadir foto">
+                            <i class="ri ri-image-add-line"></i>
+                            <span>Añadir foto</span>
+                        </button>
+                        <button type="button" class="webnu-dish-card__add-media" data-add-media="video" title="Añadir vídeo"{{ $canVideos ? '' : ' data-locked="1"' }}>
+                            <i class="ri ri-video-add-line"></i>
+                            <span>Añadir vídeo</span>
+                            @if(!$canVideos)<span class="webnu-dish-card__media-lock"><i class="ri ri-vip-crown-line"></i></span>@endif
+                        </button>
+                    </div>
+                    <div class="webnu-dish-card__media-loading" data-media-loading hidden>
+                        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                        Subiendo…
+                    </div>
                 </div>
+                <input type="file" accept="image/*" capture="environment" class="visually-hidden" data-product-image-input>
+                <input type="file" accept="video/*" capture="environment" class="visually-hidden" data-product-video-input>
             @endif
         </div>
         <div class="card-body d-flex flex-column pb-2">

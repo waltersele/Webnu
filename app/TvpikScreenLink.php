@@ -13,6 +13,7 @@ class TvpikScreenLink extends Model
         'tvpik_screen_name',
         'tvpik_gallery_id',
         'template_key',
+        'menu_id',
         'published_url',
         'sync_version',
         'last_synced_at',
@@ -31,6 +32,11 @@ class TvpikScreenLink extends Model
     public function company()
     {
         return $this->belongsTo(Company::class);
+    }
+
+    public function menu()
+    {
+        return $this->belongsTo(Menu::class);
     }
 
     public function templateMeta(): ?array

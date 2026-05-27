@@ -89,7 +89,7 @@ class RegisterController extends Controller
             'trial_plan_key' => config('plans.trial_tier', 'pro'),
         ]);
 
-        $slug = app(CompanySlugService::class)->generateFromName($businessName);
+        $slug = app(CompanySlugService::class)->generateFromName($businessName, null, null, $user->slug);
 
         $company = Company::create([
             'name' => $businessName,

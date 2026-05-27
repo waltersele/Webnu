@@ -76,6 +76,16 @@
             <i class="ri ri-share-forward-line"></i>
             <span class="wn-tab-bar__label">Compartir y opciones</span>
         </button>
+        <button type="button"
+                class="wn-tab-bar__btn"
+                data-tab-target="traducciones"
+                role="tab"
+                aria-selected="false"
+                aria-controls="wn-tab-traducciones"
+                title="Traducciones">
+            <i class="ri ri-translate-2"></i>
+            <span class="wn-tab-bar__label">Traducciones</span>
+        </button>
     </nav>
 
     <section id="wn-tab-platos" class="wn-tab-panel is-active" data-tab="platos" role="tabpanel" aria-labelledby="wn-tab-platos">
@@ -88,6 +98,10 @@
 
     <section id="wn-tab-compartir" class="wn-tab-panel" data-tab="compartir" role="tabpanel" aria-labelledby="wn-tab-compartir">
         @include('admin.sections.partials.tabs.share', ['company' => $company])
+    </section>
+
+    <section id="wn-tab-traducciones" class="wn-tab-panel" data-tab="traducciones" role="tabpanel" aria-labelledby="wn-tab-traducciones">
+        @include('admin.sections.partials.tabs.translations', ['company' => $company])
     </section>
 </div>
 
@@ -223,6 +237,23 @@
     <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
      <!-- Toastr -->
     <link rel="stylesheet" href="{{asset('adminlte/plugins/toastr/toastr.min.css')}}">
+
+    @if((int) $company->menu_type === 1 && isset($fonts))
+        <link rel="stylesheet" href="{{ asset('materio/css/webnu-company-studio.css') }}">
+        @php
+            $studioFontFamilies = [];
+            foreach ($fonts as $fontMeta) {
+                $family = str_replace(' ', '+', $fontMeta['family'] ?? 'Inter');
+                $weights = $fontMeta['weights'] ?? '400;600;700';
+                $studioFontFamilies[] = 'family=' . $family . ':wght@' . $weights;
+            }
+        @endphp
+        @if(count($studioFontFamilies))
+            <link rel="preconnect" href="https://fonts.googleapis.com">
+            <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+            <link href="https://fonts.googleapis.com/css2?{{ implode('&', $studioFontFamilies) }}&display=swap" rel="stylesheet">
+        @endif
+    @endif
 @endpush
 
 
@@ -602,7 +633,7 @@ $(function(){
     //$('.sortable-section').sortable();
     $('#sortable-section').sortable({
         axis: 'y',
-        handle: '.webnu-menu-section__drag',
+        handle: '.webnu-section-drag-handle',
         update: function (event, ui) {
             var newSectionOrder = $(this).sortable('toArray').toString();
             let token = $(this).attr('data-token');
@@ -670,7 +701,109 @@ $(function(){
     });
 });
 
+// ---- Subida inline de foto/vídeo desde la card del plato ----
+(function () {
+    document.addEventListener('click', function (e) {
+        var btn = e.target.closest('[data-add-media]');
+        if (!btn) return;
+        var media = btn.closest('[data-product-media]');
+        if (!media) return;
+
+        if (btn.getAttribute('data-locked') === '1') {
+            if (typeof toastr !== 'undefined') {
+                toastr.warning('Los vídeos están disponibles en planes de pago.');
+            }
+            return;
+        }
+
+        var type = btn.getAttribute('data-add-media');
+        var sel = type === 'video' ? '[data-product-video-input]' : '[data-product-image-input]';
+        var input = media.querySelector(sel);
+        if (input) input.click();
+    });
+
+    function uploadFile(media, file, type) {
+        var url = media.getAttribute(type === 'video' ? 'data-upload-video-url' : 'data-upload-image-url');
+        var token = media.getAttribute('data-token');
+        if (!url || !token) return;
+
+        var loading = media.querySelector('[data-media-loading]');
+        if (loading) loading.hidden = false;
+
+        var fd = new FormData();
+        fd.append(type === 'video' ? 'video' : 'image', file);
+        fd.append('_token', token);
+
+        fetch(url, {
+            method: 'POST',
+            body: fd,
+            credentials: 'same-origin',
+            headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' }
+        })
+        .then(function (r) {
+            return r.json().then(function (j) { return { ok: r.ok, json: j }; });
+        })
+        .then(function (res) {
+            if (loading) loading.hidden = true;
+            if (res.ok && res.json && res.json.success) {
+                if (typeof toastr !== 'undefined') {
+                    toastr.success(type === 'video' ? 'Vídeo subido correctamente.' : 'Foto subida correctamente.');
+                }
+                if (type === 'video') {
+                    window.location.reload();
+                    return;
+                }
+                var img = document.createElement('img');
+                img.className = 'webnu-dish-card__img';
+                img.setAttribute('data-product-image', '');
+                img.src = res.json.image_url || '';
+                img.alt = '';
+                var placeholder = media.querySelector('[data-product-placeholder]');
+                if (placeholder) placeholder.replaceWith(img);
+                var inImage = media.querySelector('[data-product-image-input]');
+                if (inImage) inImage.remove();
+                var inVideo = media.querySelector('[data-product-video-input]');
+                if (inVideo) inVideo.remove();
+            } else {
+                var msg = (res.json && (res.json.message || (res.json.errors && Object.values(res.json.errors)[0][0])))
+                    || 'No se pudo subir el archivo.';
+                if (typeof toastr !== 'undefined') toastr.error(msg);
+            }
+        })
+        .catch(function () {
+            if (loading) loading.hidden = true;
+            if (typeof toastr !== 'undefined') toastr.error('Error de red al subir el archivo.');
+        });
+    }
+
+    document.addEventListener('change', function (e) {
+        var input = e.target.closest('[data-product-image-input], [data-product-video-input]');
+        if (!input || !input.files || !input.files[0]) return;
+        var media = input.closest('[data-product-media]');
+        if (!media) return;
+        var type = input.hasAttribute('data-product-video-input') ? 'video' : 'image';
+        uploadFile(media, input.files[0], type);
+    });
+})();
+
 </script>
+
+@if((int) $company->menu_type === 1 && isset($templateLabels, $themePresets, $previewUrl))
+    <script>
+        window.WebnuCompanyStudio = window.WebnuCompanyStudio || {
+            companyId: {{ $company->id }},
+            csrf: '{{ csrf_token() }}',
+            previewUrl: @json($previewUrl),
+            activeStep: 'design',
+            themePresets: @json($themePresets),
+            templateLabels: @json($templateLabels),
+            steps: ['design'],
+            logoUrl: @json($company->logo ? '/img/' . $company->logo : null),
+            headerUrl: @json($company->background_header ? '/img/' . $company->background_header : null),
+        };
+    </script>
+    <script src="{{ asset('materio/js/webnu-company-studio.js') }}"></script>
+@endif
 
 @endpush
 

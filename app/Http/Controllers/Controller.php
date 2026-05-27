@@ -42,6 +42,9 @@ class Controller extends BaseController
                 View::share('upgradeTriggers', app(\App\Services\UpgradeTriggerService::class)
                     ->contextFor($this->user, $selectedCompany, $request));
                 View::share('available_companies', $companies);
+                View::share('available_menus', $selectedCompany
+                    ? $selectedCompany->menus()->orderBy('position')->get(['id', 'company_id', 'name', 'slug', 'enabled', 'position'])
+                    : collect());
                 View::share('planPresentation', $plans->planPresentation($this->user));
 
                 if ($selectedId && $companies->contains('id', (int) $selectedId)) {

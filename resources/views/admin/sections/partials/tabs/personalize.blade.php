@@ -3,10 +3,6 @@
     $plans = app(\App\Services\UserPlanService::class);
     $user = auth()->user();
     $canTvpik = $pf['tvpik'] ?? $plans->canUseTvpik($user);
-    $hasAllTemplates = $pf['all_templates'] ?? $plans->hasAllTemplates($user);
-    $templateKey = $company->template ?: 'basic';
-    $templateLabel = config('company_templates.templates.' . $templateKey . '.label', 'Básica');
-    $templateLocked = ! $hasAllTemplates && $plans->isTemplateLockedForUser($user, $templateKey, $templateKey);
     $tvpikLinksCount = $canTvpik
         ? \App\TvpikScreenLink::where('company_id', $company->id)->count()
         : 0;
@@ -78,27 +74,35 @@
         </div>
     @endif
 
-    <div class="row g-3">
-        <div class="col-lg-6">
-            <div class="wn-personalize-card h-100 d-flex flex-column">
-                <h6 class="mb-1"><i class="ri ri-palette-line text-primary me-1"></i> Plantilla de diseño</h6>
-                <p class="text-muted small mb-3">Personaliza colores, tipografías y estilo visual.</p>
-                <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mt-auto">
-                    <div>
-                        <strong class="d-block">{{ $templateLabel }}</strong>
-                        @if($templateLocked)
-                            <span class="small">@include('admin.partials.plan-pro-badge', ['label' => 'Pro', 'size' => 'xs'])</span>
-                        @else
-                            <span class="text-muted small">Plantilla actual</span>
-                        @endif
-                    </div>
-                    <a href="{{ route('admin.companies.edit', ['company' => $company, 'step' => 'design']) }}" class="btn btn-outline-primary btn-sm">
-                        <i class="ri ri-paint-brush-line me-1"></i> Personalizar
-                    </a>
-                </div>
-            </div>
-        </div>
+    @if((int) $company->menu_type === 1 && isset($templates, $colorKeys, $fontKeys, $fonts, $themeSettings, $themePresets, $previewUrl))
+        <div class="wn-personalize-card">
+            <h6 class="mb-1"><i class="ri ri-palette-line text-primary me-1"></i> Diseño de la carta</h6>
+            <p class="text-muted small mb-3">Plantilla, colores y tipografías de <strong>{{ $company->name }}</strong>. La vista previa se actualiza al instante.</p>
 
+            <form method="POST" action="{{ route('admin.companies.update', $company) }}" id="company-studio-form">
+                @csrf
+                @method('PUT')
+                <input type="hidden" name="studio_step" id="studio-step-input" value="design">
+
+                <div class="row g-4 wn-studio-layout wn-studio-layout--embedded">
+                    <div class="col-lg-7">
+                        @include('admin.companies.partials.studio-step-design', ['asStudioStep' => false])
+                    </div>
+                    <div class="col-lg-5">
+                        @include('admin.companies.partials.studio-preview')
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-end mt-3">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="ri-save-line me-1"></i> Guardar diseño
+                    </button>
+                </div>
+            </form>
+        </div>
+    @endif
+
+    <div class="row g-3">
         <div class="col-lg-6">
             <div class="wn-personalize-card h-100 d-flex flex-column">
                 <h6 class="mb-1"><i class="ti ti-device-tv text-primary me-1"></i> Pantallas TV (TVPik)</h6>

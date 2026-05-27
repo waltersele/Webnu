@@ -119,6 +119,13 @@ trait PreparesLandingPage
                 $badge = null;
             }
 
+            if ($tierId === 'franchise') {
+                $email = config('landing.franchise_contact_email', 'hola@webnu.es');
+                $ctaUrl = 'mailto:' . $email . '?subject=' . rawurlencode('Webnu Franquicias');
+            } else {
+                $ctaUrl = route('register');
+            }
+
             $plans[] = [
                 'id' => $tierId,
                 'highlight' => $tierId === $highlight,
@@ -129,7 +136,7 @@ trait PreparesLandingPage
                 'badge' => $tierId === $highlight ? $badge : null,
                 'cta' => __("{$langKey}.cta"),
                 'features' => __("{$langKey}.features"),
-                'cta_url' => route('register'),
+                'cta_url' => $ctaUrl,
             ];
         }
 
@@ -140,6 +147,11 @@ trait PreparesLandingPage
     protected function buildLandingFranchisePlan(): ?array
     {
         if (! isset(config('plans.tiers', [])['franchise'])) {
+            return null;
+        }
+
+        // Evita duplicado si franchise ya forma parte del grid principal.
+        if (in_array('franchise', $this->landingPricingTierOrder(), true)) {
             return null;
         }
 
@@ -189,17 +201,41 @@ trait PreparesLandingPage
             ]);
         }
 
+        // 5 plantillas TV curadas: hero, tapas, daily, video, menu.
+        // Cada slide trae sus propias imágenes (la principal y, opcionalmente,
+        // miniaturas para tapas), apuntando a assets existentes.
+        $rawSlides = __('landing.tvpik.slides') ?: [];
+        $kindImages = [
+            'hero'  => asset('img/productos/brasa-solomillo.jpg'),
+            'tapas' => asset('img/productos/brasa-burrata.jpg'),
+            'daily' => asset('img/productos/brasa-burrata.jpg'),
+            'video' => asset('img/productos/brasa-brownie.jpg'),
+            'menu'  => asset('img/productos/cocktail-negroni.jpg'),
+        ];
+        $tapasImages = [
+            asset('img/productos/brasa-burrata.jpg'),
+            asset('img/productos/brasa-solomillo.jpg'),
+            asset('img/productos/brasa-brownie.jpg'),
+        ];
         $tvpikSlides = [];
-        foreach (__('landing.tvpik.slides') as $i => $slide) {
-            $images = [
-                asset('img/productos/brasa-solomillo.jpg'),
-                asset('img/productos/brasa-burrata.jpg'),
-                asset('img/productos/cocktail-negroni.jpg'),
-                asset('img/productos/brasa-brownie.jpg'),
-            ];
-            $tvpikSlides[] = array_merge($slide, [
-                'image' => $images[$i] ?? $images[0],
-            ]);
+        foreach ($rawSlides as $slide) {
+            $kind = $slide['kind'] ?? 'hero';
+            $slide['kind'] = $kind;
+            $slide['image'] = $kindImages[$kind] ?? reset($kindImages);
+
+            if ($kind === 'tapas' && ! empty($slide['items']) && is_array($slide['items'])) {
+                foreach ($slide['items'] as $idx => $item) {
+                    if (! isset($item['image'])) {
+                        $slide['items'][$idx]['image'] = $tapasImages[$idx] ?? $tapasImages[0];
+                    }
+                }
+            }
+
+            if ($kind === 'video') {
+                $slide['video_poster'] = $slide['image'];
+            }
+
+            $tvpikSlides[] = $slide;
         }
 
         $steakFile = config('demo_media.videos.steak.file', 'reel-grill-chicken.mp4');
@@ -218,7 +254,6 @@ trait PreparesLandingPage
         return [
             'locale' => $locale,
             'landingLocales' => config('landing.locales', []),
-            'heroHooks' => __('landing.hero.hooks'),
             'demoShowcases' => $demoShowcases,
             'tvpikSlides' => $tvpikSlides,
             'landingFeatures' => __('landing.features.items'),

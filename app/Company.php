@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Company extends Model
 {
-    protected $fillable = ['name', 'chef_name', 'slug', 'logo', 'background_header', 'address', 'postal_code', 'city', 'province', 'country', 'phone', 'mobile_phone', 'email', 'web', 'whatsapp', 'facebook', 'instagram', 'comments', 'schedule', 'template', 'theme_settings', 'menu_type', 'menu_type_2_pdf', 'enabled', 'reservation', 'user_id', 'sales_rep_user_id', 'sales_converted_at', 'default_locale', 'enabled_locales', 'suggest_translation_upgrade', 'daily_spotlight', 'daily_spotlight_price', 'daily_highlights', 'created_at', 'updated_at'];
+    protected $fillable = ['name', 'chef_name', 'slug', 'logo', 'logo_luminance', 'logo_has_solid_bg', 'logo_dominant_hex', 'logo_chip_variant', 'background_header', 'address', 'postal_code', 'city', 'province', 'country', 'phone', 'mobile_phone', 'email', 'web', 'whatsapp', 'facebook', 'instagram', 'comments', 'schedule', 'template', 'theme_settings', 'menu_type', 'menu_type_2_pdf', 'combine_menus', 'enabled', 'reservation', 'user_id', 'sales_rep_user_id', 'sales_converted_at', 'default_locale', 'enabled_locales', 'suggest_translation_upgrade', 'daily_spotlight', 'daily_spotlight_price', 'daily_highlights', 'created_at', 'updated_at'];
 
     protected $attributes = [
         'reservation' => false,
@@ -20,9 +20,12 @@ class Company extends Model
         'enabled_locales' => 'array',
         'daily_highlights' => 'array',
         'enabled' => 'boolean',
+        'combine_menus' => 'boolean',
         'reservation' => 'boolean',
         'suggest_translation_upgrade' => 'boolean',
         'sales_converted_at' => 'datetime',
+        'logo_luminance' => 'float',
+        'logo_has_solid_bg' => 'boolean',
     ];
 
     public function themeColor(string $key): string
@@ -68,6 +71,11 @@ class Company extends Model
     public function section()
     {
         return $this->sections();
+    }
+
+    public function menus()
+    {
+        return $this->hasMany(Menu::class)->orderBy('position');
     }
 
     public function user()
@@ -217,15 +225,15 @@ class Company extends Model
         if ($ownerSlug && $this->slug) {
             return route('see_menu', array_merge([$ownerSlug, $this->slug], $extra));
         }
-        return route('see_menu.legacy', array_merge([$this->slug], $extra));
+        return route('public.hub', array_merge(['slug' => $this->slug], $extra));
     }
 
-    /** Path relativo para mostrar (ej: "casa-maria/menu-de-verano"). */
+    /** Path relativo para mostrar (ej: "carta/casa-maria/menu-de-verano"). */
     public function publicPath(): string
     {
         $ownerSlug = optional($this->user)->slug;
         if ($ownerSlug && $this->slug) {
-            return $ownerSlug . '/' . $this->slug;
+            return 'carta/' . $ownerSlug . '/' . $this->slug;
         }
         return 'carta/' . ($this->slug ?? '');
     }

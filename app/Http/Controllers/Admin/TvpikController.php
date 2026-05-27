@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Company;
 use App\Http\Controllers\Controller;
+use App\Menu;
 use App\Services\MenuSyncService;
 use App\Services\Tvpik\TvpikApiClient;
 use App\Services\Tvpik\TvpikPublishService;
@@ -53,6 +54,14 @@ class TvpikController extends Controller
         $templates = config('tvpik_templates.templates', []);
         $menus = $menuSync->companiesPayload($user->id);
 
+        $companies = $user->companies()->orderBy('name')->get();
+        $menusByCompany = Menu::where('enabled', true)
+            ->whereIn('company_id', $companies->pluck('id'))
+            ->orderBy('position')
+            ->orderBy('id')
+            ->get()
+            ->groupBy('company_id');
+
         return view('admin.tvpik.index', [
             'canTvpik' => $canTvpik,
             'apiToken' => $user->api_token,
@@ -65,8 +74,9 @@ class TvpikController extends Controller
             'links' => $links,
             'templates' => $templates,
             'menus' => $menus,
+            'menusByCompany' => $menusByCompany,
             'company' => $company,
-            'companies' => $user->companies()->orderBy('name')->get(),
+            'companies' => $companies,
             'planFeatures' => $plans->featureFlags($user),
         ]);
     }
@@ -126,6 +136,7 @@ class TvpikController extends Controller
             'company_id' => 'required|integer',
             'template_key' => ['required', 'string', Rule::in(array_keys(config('tvpik_templates.templates', [])))],
             'gallery_id' => 'nullable|string|max:64',
+            'menu_id' => 'nullable|integer|exists:menus,id',
         ]);
 
         $user = auth()->user();
@@ -135,6 +146,16 @@ class TvpikController extends Controller
             return back()->withErrors(['company_id' => 'Solo las cartas digitales pueden publicarse en TV.']);
         }
 
+        $menuId = null;
+        if (! empty($validated['menu_id'])) {
+            $menu = Menu::where('id', $validated['menu_id'])
+                ->where('company_id', $company->id)
+                ->first();
+            if ($menu) {
+                $menuId = $menu->id;
+            }
+        }
+
         try {
             $publishService->publishScreen(
                 $user,
@@ -142,7 +163,8 @@ class TvpikController extends Controller
                 $validated['screen_id'],
                 $validated['screen_name'] ?? $validated['screen_id'],
                 $validated['template_key'],
-                $validated['gallery_id'] ?? null
+                $validated['gallery_id'] ?? null,
+                $menuId
             );
         } catch (\Throwable $e) {
             return back()->withErrors(['publish' => $e->getMessage()]);
@@ -178,17 +200,23 @@ class TvpikController extends Controller
         $validated = $request->validate([
             'company_id' => 'required|integer',
             'template_key' => ['required', 'string', Rule::in(array_keys(config('tvpik_templates.templates', [])))],
+            'menu_id' => 'nullable|integer',
         ]);
 
         $company = Company::where('user_id', auth()->id())->findOrFail($validated['company_id']);
         $template = config('tvpik_templates.templates.' . $validated['template_key']);
         $layout = $template['layout'] ?? 'menu';
 
-        return redirect()->route('tv.show.layout', [
+        $params = [
             'companySlug' => $company->slug,
             'layout' => $layout,
             'preview' => 1,
-        ]);
+        ];
+        if (! empty($validated['menu_id'])) {
+            $params['menu'] = (int) $validated['menu_id'];
+        }
+
+        return redirect()->route('tv.show.layout', $params);
     }
 
     /**
@@ -200,17 +228,23 @@ class TvpikController extends Controller
         $validated = $request->validate([
             'company_id' => 'required|integer',
             'template_key' => ['required', 'string', Rule::in(array_keys(config('tvpik_templates.templates', [])))],
+            'menu_id' => 'nullable|integer',
         ]);
 
         $company = Company::where('user_id', auth()->id())->findOrFail($validated['company_id']);
         $template = config('tvpik_templates.templates.' . $validated['template_key']);
         $layout = $template['layout'] ?? 'menu';
 
-        return redirect()->route('tv.show.layout', [
+        $params = [
             'companySlug' => $company->slug,
             'layout' => $layout,
             'player' => 1,
-        ]);
+        ];
+        if (! empty($validated['menu_id'])) {
+            $params['menu'] = (int) $validated['menu_id'];
+        }
+
+        return redirect()->route('tv.show.layout', $params);
     }
 
     protected function authorizeTvpik(): void

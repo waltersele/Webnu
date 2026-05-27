@@ -1,7 +1,7 @@
 @extends('admin.layout')
 
 @section('page_title', $company->name)
-@section('page_subtitle', 'Configura nombre, contacto, diseño y publicación de tu carta')
+@section('page_subtitle', 'Configura nombre, contacto y publicación de tu carta')
 
 @section('page_actions')
     <a href="{{ $company->publicUrl() }}" target="_blank" rel="noopener" class="btn btn-outline-primary btn-sm">
@@ -18,10 +18,12 @@
 @section('content')
 @php
     $activeStep = request('step', 'identity');
+    if ($activeStep === 'design') {
+        $activeStep = 'identity';
+    }
     $steps = [
         'identity' => ['label' => 'Identidad', 'icon' => 'ri-store-2-line'],
         'contact' => ['label' => 'Contacto', 'icon' => 'ri-map-pin-line'],
-        'design' => ['label' => 'Diseño', 'icon' => 'ri-palette-line'],
         'publish' => ['label' => 'Publicación', 'icon' => 'ri-rocket-line'],
     ];
 @endphp
@@ -31,8 +33,8 @@
     @method('PUT')
     <input type="hidden" name="studio_step" id="studio-step-input" value="{{ $activeStep }}">
 
-    <div class="row g-4 wn-studio-layout">
-        <div class="col-lg-7 col-xl-8">
+    <div class="row g-4 wn-studio-layout wn-studio-layout--no-preview">
+        <div class="col-12">
             <div class="card border-0 shadow-sm wn-studio-card">
                 <div class="card-body pb-0 pt-3">
                     <nav class="wn-studio-stepper" role="tablist" aria-label="Pasos del estudio">
@@ -51,7 +53,6 @@
                 <div class="card-body pt-3">
                     @include('admin.companies.partials.studio-step-identity')
                     @include('admin.companies.partials.studio-step-contact')
-                    @include('admin.companies.partials.studio-step-design')
                     @include('admin.companies.partials.studio-step-publish')
                 </div>
                 <div class="card-footer wn-studio-footer border-0">
@@ -78,10 +79,6 @@
                     </div>
                 </div>
             </div>
-        </div>
-
-        <div class="col-lg-5 col-xl-4">
-            @include('admin.companies.partials.studio-preview')
         </div>
     </div>
 </form>

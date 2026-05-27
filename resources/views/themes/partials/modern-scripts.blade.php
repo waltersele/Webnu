@@ -85,3 +85,4 @@ $(function () {
     }
 });
 </script>
+<script src="{{ asset('js/webnu-logo-autocontrast.js') }}" defer></script>

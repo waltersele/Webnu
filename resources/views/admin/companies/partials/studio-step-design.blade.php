@@ -4,9 +4,10 @@
     $allTemplates = collect($templates)->sortBy(function ($meta, $key) {
         return [!empty($meta['recommended']) ? 0 : 1, $meta['label'] ?? $key];
     });
+    $asStudioStep = $asStudioStep ?? true;
 @endphp
 
-<div class="wn-studio-step d-none" data-step="design">
+<div class="wn-studio-step {{ $asStudioStep ? 'd-none' : '' }}" data-step="design">
     <div class="mb-3">
         <h5 class="fw-semibold mb-1">Diseño de la carta</h5>
         <p class="text-muted small mb-0">Ajusta colores y tipografías arriba; elige una plantilla abajo. La vista previa de la derecha se actualiza al instante.</p>

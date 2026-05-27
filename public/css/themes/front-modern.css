@@ -961,6 +961,68 @@
   object-fit: cover;
 }
 
+/* --- Logo chip adaptativo -------------------------------------------------
+ * Sustituye al uso directo de .wn-menu-hero__logo-inline / __logo-ring.
+ * El fondo (--bg-light | --bg-dark | --bg-glass) se decide al subir el logo
+ * en función de la luminancia detectada, y el JS de fallback lo asigna en
+ * cliente para logos legacy sin metadatos.
+ * --------------------------------------------------------------------------*/
+.wn-menu-hero__logo-chip {
+  width: 88px;
+  height: 88px;
+  border-radius: 22px;
+  padding: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-bottom: 0;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.28);
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.wn-menu-hero__logo-chip img {
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+}
+
+.wn-menu-hero__logo-chip--circle {
+  border-radius: 50%;
+}
+
+.wn-menu-hero__logo-chip--bg-light {
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.wn-menu-hero__logo-chip--bg-dark {
+  background: rgba(15, 15, 15, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+}
+
+.wn-menu-hero__logo-chip--bg-glass {
+  background: rgba(255, 255, 255, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+}
+
+@media (min-width: 768px) {
+  .wn-menu-hero__logo-chip {
+    width: 104px;
+    height: 104px;
+    border-radius: 26px;
+  }
+  .wn-menu-hero__logo-chip--circle {
+    border-radius: 50%;
+  }
+}
+
 .wn-menu-hero__title--compact {
   margin: 0 0 0.15rem;
   font-size: clamp(1.25rem, 4.5vw, 1.65rem);

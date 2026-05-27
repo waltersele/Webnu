@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Company;
+use App\Menu;
 use App\Services\MenuSyncService;
 use App\Services\Tv\TvTemplateRegistry;
 use Illuminate\Support\Collection;
@@ -45,6 +46,9 @@ class TvMenuPresenter
         $isPlayerMode = request()->boolean('player');
         $menuSync = app(MenuSyncService::class);
 
+        $menus = $this->menusData($company);
+        $activeMenu = $this->resolveActiveMenu($company, $menus);
+
         return [
             'company' => $company,
             'layout' => $layout,
@@ -61,6 +65,8 @@ class TvMenuPresenter
             'featured' => $featured,
             'videos' => $videos,
             'spotlight' => $this->spotlightData($company),
+            'menus' => $menus,
+            'activeMenu' => $activeMenu,
             'logoUrl' => $company->logo ? url('img/' . ltrim($company->logo, '/')) : null,
             'headerUrl' => $company->background_header
                 ? url('img/' . ltrim($company->background_header, '/'))
@@ -68,6 +74,54 @@ class TvMenuPresenter
             'accent' => $settings['primary'] ?? '#004ac6',
             'isPreview' => request()->boolean('preview'),
         ];
+    }
+
+    protected function menusData(Company $company): Collection
+    {
+        return $company->menus()
+            ->where('enabled', true)
+            ->with([
+                'sections' => function ($q) {
+                    $q->orderBy('position');
+                },
+                'sections.items' => function ($q) {
+                    $q->orderBy('position');
+                },
+                'sections.items.product',
+            ])
+            ->orderBy('position')
+            ->get();
+    }
+
+    protected function resolveActiveMenu(Company $company, Collection $menus): ?Menu
+    {
+        $requested = request()->query('menu');
+        if ($requested && ctype_digit((string) $requested)) {
+            $match = $menus->firstWhere('id', (int) $requested);
+            if ($match) {
+                return $match;
+            }
+        }
+
+        return null;
+    }
+
+    public function menuHeroImage(Menu $menu): ?string
+    {
+        if (! empty($menu->image)) {
+            return $menu->imageUrl();
+        }
+
+        foreach ($menu->sections as $section) {
+            foreach ($section->items as $item) {
+                $img = $item->imageUrl();
+                if ($img) {
+                    return $img;
+                }
+            }
+        }
+
+        return null;
     }
 
     protected function spotlightData(Company $company): ?array

@@ -87,13 +87,35 @@
                                             </div>
                                             <div class="mb-3">
                                                 <label class="form-label small">Plantilla TV</label>
-                                                <select name="template_key" class="form-select form-select-sm" required>
+                                                <select name="template_key" class="form-select form-select-sm" required data-tvpik-template-select>
                                                     @foreach($templates as $key => $tpl)
-                                                        <option value="{{ $key }}" {{ ($link && $link->template_key === $key) ? 'selected' : '' }}>
+                                                        <option value="{{ $key }}"
+                                                                {{ ($link && $link->template_key === $key) ? 'selected' : '' }}
+                                                                data-supports-menu="{{ ! empty($tpl['supports_menu_selector']) ? '1' : '0' }}">
                                                             {{ $tpl['label'] }}
                                                         </option>
                                                     @endforeach
                                                 </select>
+                                            </div>
+                                            @php
+                                                $supportsMenuPicker = isset($templates[$link?->template_key ?? ''])
+                                                    && ! empty($templates[$link?->template_key ?? '']['supports_menu_selector']);
+                                            @endphp
+                                            <div class="mb-3 {{ $supportsMenuPicker ? '' : 'd-none' }}" data-tvpik-menu-picker>
+                                                <label class="form-label small">Menú a mostrar</label>
+                                                <select name="menu_id" class="form-select form-select-sm">
+                                                    <option value="">Rotar entre todos los menús activos</option>
+                                                    @foreach($companies as $c)
+                                                        @foreach(($menusByCompany[$c->id] ?? collect()) as $m)
+                                                            <option value="{{ $m->id }}"
+                                                                    data-company-id="{{ $c->id }}"
+                                                                    {{ ($link && (int) $link->menu_id === (int) $m->id) ? 'selected' : '' }}>
+                                                                {{ $m->name }}{{ $m->price ? ' — ' . $m->formattedPrice() : '' }}
+                                                            </option>
+                                                        @endforeach
+                                                    @endforeach
+                                                </select>
+                                                <small class="form-text text-muted">Solo aplica con la plantilla "Menú del día".</small>
                                             </div>
                                             @if($link && $link->last_synced_at)
                                                 <p class="small text-muted mb-2">
@@ -476,5 +498,43 @@ document.getElementById('copy-token')?.addEventListener('click', function () {
     var btn = this;
     setTimeout(function () { btn.textContent = 'Copiar'; }, 2000);
 });
+
+(function () {
+    function syncMenuPicker(form) {
+        var tplSelect = form.querySelector('[data-tvpik-template-select]');
+        var picker = form.querySelector('[data-tvpik-menu-picker]');
+        if (!tplSelect || !picker) return;
+        var opt = tplSelect.options[tplSelect.selectedIndex];
+        var supports = opt && opt.getAttribute('data-supports-menu') === '1';
+        picker.classList.toggle('d-none', !supports);
+        if (!supports) {
+            var menuSel = picker.querySelector('select[name="menu_id"]');
+            if (menuSel) menuSel.value = '';
+        } else {
+            filterMenuOptions(form);
+        }
+    }
+    function filterMenuOptions(form) {
+        var companySel = form.querySelector('select[name="company_id"]');
+        var menuSel = form.querySelector('select[name="menu_id"]');
+        if (!companySel || !menuSel) return;
+        var cid = String(companySel.value || '');
+        var any = false;
+        Array.from(menuSel.options).forEach(function (opt) {
+            if (!opt.value) { opt.hidden = false; return; }
+            var optCid = opt.getAttribute('data-company-id');
+            var show = optCid === cid;
+            opt.hidden = !show;
+            if (show) any = true;
+        });
+        if (!any && menuSel.value) menuSel.value = '';
+    }
+    document.querySelectorAll('form[action$="/admin/tvpik/publish"]').forEach(function (form) {
+        syncMenuPicker(form);
+        form.querySelectorAll('[data-tvpik-template-select], select[name="company_id"]').forEach(function (sel) {
+            sel.addEventListener('change', function () { syncMenuPicker(form); });
+        });
+    });
+})();
 </script>
 @endpush

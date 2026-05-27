@@ -1,19 +1,161 @@
 (function () {
-    const headline = document.getElementById('hero-headline');
-    if (headline) {
-        const hooks = JSON.parse(headline.dataset.hooks || '[]');
-        let index = 0;
-        if (hooks.length > 1) {
-            setInterval(function () {
-                headline.classList.add('is-fading');
-                setTimeout(function () {
-                    index = (index + 1) % hooks.length;
-                    headline.textContent = hooks[index];
-                    headline.classList.remove('is-fading');
-                }, 450);
-            }, 5200);
+    // Rotador para [data-cycle]. Dos modos según data-cycle-mode:
+    //   - "typewriter": escribe/borra letra a letra con cursor (business).
+    //   - "slide": loop continuo lento; el saliente sube con fade-out mientras
+    //     el entrante asoma desde abajo en paralelo (feature).
+    const dwellTimeForCycle = function (kind) {
+        switch (kind) {
+            case 'business': return 2400;   // pausa entre palabras escritas
+            case 'feature': return 2600;    // espera con la frase totalmente visible
+            default: return 2800;
         }
-    }
+    };
+    const prefersReducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const cycleNodes = document.querySelectorAll('[data-cycle]');
+
+    const initTypewriter = function (root, items) {
+        const textEl = root.querySelector('.hero-cycle__text');
+        if (!textEl) return null;
+        const kind = root.getAttribute('data-cycle');
+        const dwell = dwellTimeForCycle(kind);
+        const eraseSpeed = 35;
+        const typeSpeed = 70;
+        let index = 0;
+        let pending = null;
+        let stopped = false;
+
+        const sleep = function (ms) {
+            return new Promise(function (resolve) {
+                pending = window.setTimeout(resolve, ms);
+            });
+        };
+        const erase = function () {
+            return new Promise(function (resolve) {
+                const tick = function () {
+                    if (stopped) return resolve();
+                    const txt = textEl.textContent;
+                    if (txt.length === 0) return resolve();
+                    textEl.textContent = txt.slice(0, -1);
+                    pending = window.setTimeout(tick, eraseSpeed);
+                };
+                tick();
+            });
+        };
+        const type = function (target) {
+            return new Promise(function (resolve) {
+                let i = textEl.textContent.length;
+                const tick = function () {
+                    if (stopped) return resolve();
+                    if (i >= target.length) return resolve();
+                    i++;
+                    textEl.textContent = target.slice(0, i);
+                    pending = window.setTimeout(tick, typeSpeed);
+                };
+                tick();
+            });
+        };
+
+        const loop = async function () {
+            while (!stopped) {
+                await sleep(dwell);
+                if (stopped) break;
+                await erase();
+                if (stopped) break;
+                index = (index + 1) % items.length;
+                await type(items[index]);
+            }
+        };
+
+        return {
+            start: function () {
+                stopped = false;
+                loop();
+            },
+            stop: function () {
+                stopped = true;
+                if (pending) { window.clearTimeout(pending); pending = null; }
+            },
+        };
+    };
+
+    const initSlide = function (root, items) {
+        // Loop continuo: el saliente y el entrante se animan EN PARALELO,
+        // con transiciones lentas (≈1.1s) y fade gradual definidas en CSS.
+        // Para que el measure sea estable y sirva de "carril", lo dejamos
+        // siempre con la cadena más larga del set (ya inyectada en HTML).
+        const kind = root.getAttribute('data-cycle');
+        const dwell = dwellTimeForCycle(kind);
+        let current = root.querySelector('.hero-cycle__item.is-active');
+        let index = 0;
+        let timerId = null;
+        const transitionMs = 1100;  // debe coincidir con la transición CSS
+
+        const advance = function () {
+            const nextIndex = (index + 1) % items.length;
+            const nextText = items[nextIndex];
+
+            // Inserta el entrante ya posicionado abajo + invisible.
+            const incoming = document.createElement('span');
+            incoming.className = 'hero-cycle__item is-entering';
+            incoming.textContent = nextText;
+            root.appendChild(incoming);
+
+            // Reflow para que la transición arranque desde is-entering.
+            void incoming.offsetWidth;
+
+            // Disparamos ambos cambios en el mismo frame: saliente sube + se desvanece,
+            // entrante asciende y aparece. Ejecución paralela = ningún hueco vacío.
+            if (current) current.classList.add('is-leaving');
+            incoming.classList.remove('is-entering');
+            incoming.classList.add('is-active');
+
+            const previous = current;
+            current = incoming;
+            index = nextIndex;
+
+            if (previous) {
+                window.setTimeout(function () {
+                    if (previous && previous.parentNode === root) {
+                        root.removeChild(previous);
+                    }
+                }, transitionMs + 80);
+            }
+        };
+
+        return {
+            start: function () {
+                if (timerId !== null) return;
+                timerId = window.setInterval(advance, dwell);
+            },
+            stop: function () {
+                if (timerId !== null) { window.clearInterval(timerId); timerId = null; }
+            },
+        };
+    };
+
+    cycleNodes.forEach(function (root) {
+        let items;
+        try {
+            items = JSON.parse(root.getAttribute('data-cycle-items') || '[]');
+        } catch (_) {
+            items = [];
+        }
+        if (!Array.isArray(items) || items.length < 2) return;
+        if (prefersReducedMotion) return;
+
+        const mode = root.getAttribute('data-cycle-mode') || 'slide';
+        const controller = mode === 'typewriter'
+            ? initTypewriter(root, items)
+            : initSlide(root, items);
+        if (!controller) return;
+
+        const heroSection = root.closest('section');
+        if (heroSection) {
+            heroSection.addEventListener('mouseenter', controller.stop);
+            heroSection.addEventListener('mouseleave', controller.start);
+        }
+        controller.start();
+    });
 
     window.toggleFAQ = function (btn) {
         const item = btn.closest('.faq-item');
@@ -172,130 +314,224 @@
         setInterval(switchPreset, 3200);
     }
 
-    document.querySelectorAll('[data-tvpik-root]').forEach(function (root) {
-        const slides = JSON.parse(root.dataset.tvpikSlides || '[]');
-        const tv = root.querySelector('[data-tvpik-tv]');
-        const screen = root.querySelector('[data-tvpik-screen]');
-        const phone = root.querySelector('[data-tvpik-phone]');
-        const sync = root.querySelector('[data-tvpik-sync]');
-        const dotsWrap = root.querySelector('[data-tvpik-dots]');
-        const publishingLabel = root.dataset.tvpikPublishing || 'Publishing…';
-        const syncedLabel = root.dataset.tvpikSynced || 'Synced';
-        const el = {
-            photo: root.querySelector('[data-tvpik-photo]'),
-            tag: root.querySelector('[data-tvpik-tag]'),
-            title: root.querySelector('[data-tvpik-title]'),
-            price: root.querySelector('[data-tvpik-price]'),
-            items: root.querySelector('[data-tvpik-items]'),
-            action: root.querySelector('[data-tvpik-action]'),
-            phoneStatus: root.querySelector('[data-tvpik-phone-status]'),
-            updated: root.querySelector('[data-tvpik-updated]'),
+    // Slider unificado de plantillas TV (Hero, Tapas, Daily, Video, Menu)
+    document.querySelectorAll('[data-tv-show]').forEach(function (root) {
+        const slides = root.querySelectorAll('[data-tv-slide]');
+        const dots = root.querySelectorAll('[data-tv-dot]');
+        const prevBtn = root.querySelector('[data-tv-prev]');
+        const nextBtn = root.querySelector('[data-tv-next]');
+        if (!slides.length) return;
+
+        const total = slides.length;
+        let current = 0;
+        let timer = null;
+
+        const reducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        const autoplay = root.dataset.tvAutoplay !== 'false' && !reducedMotion;
+        const intervalMs = 4200;
+
+        function goTo(next) {
+            if (next === current) return;
+            next = (next + total) % total;
+            slides.forEach(function (slide, i) {
+                const active = i === next;
+                slide.classList.toggle('is-active', active);
+                slide.setAttribute('aria-hidden', active ? 'false' : 'true');
+            });
+            dots.forEach(function (dot, i) {
+                const active = i === next;
+                dot.classList.toggle('is-active', active);
+                dot.setAttribute('aria-selected', active ? 'true' : 'false');
+            });
+            current = next;
+        }
+
+        function restartTimer() {
+            if (!autoplay) return;
+            if (timer) clearInterval(timer);
+            timer = setInterval(function () { goTo(current + 1); }, intervalMs);
+        }
+
+        dots.forEach(function (dot, i) {
+            dot.addEventListener('click', function () { goTo(i); restartTimer(); });
+        });
+        if (prevBtn) prevBtn.addEventListener('click', function () { goTo(current - 1); restartTimer(); });
+        if (nextBtn) nextBtn.addEventListener('click', function () { goTo(current + 1); restartTimer(); });
+
+        root.addEventListener('mouseenter', function () { if (timer) clearInterval(timer); });
+        root.addEventListener('mouseleave', restartTimer);
+
+        restartTimer();
+    });
+
+    // Slider de funciones: drag con ratón en escritorio, flechas, dots y autoplay 5s
+    document.querySelectorAll('[data-feat-slider]').forEach(function (wrap) {
+        const track = wrap.querySelector('[data-feat-track]');
+        if (!track) return;
+
+        const slides = Array.from(track.querySelectorAll('[data-feat-slide]'));
+        if (!slides.length) return;
+
+        const prevBtn = wrap.querySelector('[data-feat-prev]');
+        const nextBtn = wrap.querySelector('[data-feat-next]');
+        const dotsHost = wrap.parentElement ? wrap.parentElement.querySelector('[data-feat-dots]') : null;
+        const dots = dotsHost ? Array.from(dotsHost.querySelectorAll('[data-feat-dot]')) : [];
+
+        const reducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        const isDesktop = function () {
+            return window.matchMedia && window.matchMedia('(min-width: 768px)').matches;
         };
 
-        if (!slides.length || !tv || !screen) {
-            return;
+        function indexFromScroll() {
+            const center = track.scrollLeft + (track.clientWidth / 2);
+            let best = 0;
+            let bestDist = Infinity;
+            slides.forEach(function (slide, i) {
+                const mid = slide.offsetLeft + (slide.offsetWidth / 2);
+                const dist = Math.abs(mid - center);
+                if (dist < bestDist) { bestDist = dist; best = i; }
+            });
+            return best;
         }
 
-        const isStatic = root.dataset.tvpikStatic === '1';
+        function updateActive(idx) {
+            dots.forEach(function (dot, i) {
+                const active = i === idx;
+                dot.classList.toggle('is-active', active);
+                dot.setAttribute('aria-selected', active ? 'true' : 'false');
+            });
+            if (prevBtn) prevBtn.setAttribute('aria-disabled', idx === 0 ? 'true' : 'false');
+            if (nextBtn) nextBtn.setAttribute('aria-disabled', idx === slides.length - 1 ? 'true' : 'false');
+        }
 
-        slides.forEach(function (_, i) {
-            const dot = document.createElement('span');
-            dot.className = 'landing-tvpik-dot' + (i === 0 ? ' is-active' : '');
-            if (dotsWrap) dotsWrap.appendChild(dot);
+        function goTo(idx, behavior) {
+            idx = Math.max(0, Math.min(slides.length - 1, idx));
+            const slide = slides[idx];
+            if (!slide) return;
+            const left = slide.offsetLeft - 16; // respeta padding inicial
+            track.scrollTo({ left: left, behavior: behavior || (reducedMotion ? 'auto' : 'smooth') });
+            updateActive(idx);
+        }
+
+        function nextSlide(loop) {
+            const cur = indexFromScroll();
+            if (cur >= slides.length - 1) {
+                if (loop) goTo(0);
+                return;
+            }
+            goTo(cur + 1);
+        }
+
+        function prevSlide() {
+            const cur = indexFromScroll();
+            goTo(cur - 1);
+        }
+
+        if (prevBtn) prevBtn.addEventListener('click', function () { prevSlide(); restartAutoplay(); });
+        if (nextBtn) nextBtn.addEventListener('click', function () { nextSlide(false); restartAutoplay(); });
+
+        dots.forEach(function (dot, i) {
+            dot.addEventListener('click', function () { goTo(i); restartAutoplay(); });
         });
 
-        let current = 0;
-        let busy = false;
+        let scrollSyncTimer = null;
+        track.addEventListener('scroll', function () {
+            if (scrollSyncTimer) clearTimeout(scrollSyncTimer);
+            scrollSyncTimer = setTimeout(function () {
+                updateActive(indexFromScroll());
+            }, 80);
+        }, { passive: true });
 
-        function setTheme(theme) {
-            screen.classList.remove('landing-tvpik-tv__screen--warm', 'landing-tvpik-tv__screen--dark', 'landing-tvpik-tv__screen--menu');
-            screen.classList.add('landing-tvpik-tv__screen--' + (theme || 'warm'));
+        // Drag con ratón (solo desktop). En móvil dejamos el scroll-touch nativo.
+        let isDown = false;
+        let startX = 0;
+        let startScroll = 0;
+        let movedDuringDrag = false;
+
+        function onMouseDown(e) {
+            if (e.button !== 0) return;
+            if (!isDesktop()) return;
+            isDown = true;
+            movedDuringDrag = false;
+            startX = e.pageX - track.offsetLeft;
+            startScroll = track.scrollLeft;
+            track.classList.add('is-grabbing');
+            pauseAutoplay();
+        }
+        function onMouseMove(e) {
+            if (!isDown) return;
+            e.preventDefault();
+            const x = e.pageX - track.offsetLeft;
+            const dx = x - startX;
+            if (Math.abs(dx) > 4) movedDuringDrag = true;
+            track.scrollLeft = startScroll - dx;
+        }
+        function endDrag() {
+            if (!isDown) return;
+            isDown = false;
+            track.classList.remove('is-grabbing');
+            // Si hubo drag real, snap al slide más cercano para corregir el suelta.
+            if (movedDuringDrag) {
+                goTo(indexFromScroll());
+            }
+            restartAutoplay();
         }
 
-        function applySlide(index) {
-            const slide = slides[index];
-            if (!slide) return;
+        track.addEventListener('mousedown', onMouseDown);
+        track.addEventListener('mousemove', onMouseMove);
+        track.addEventListener('mouseup', endDrag);
+        track.addEventListener('mouseleave', endDrag);
 
-            if (el.photo) el.photo.src = slide.image;
-            if (el.tag) el.tag.textContent = slide.tag;
-            if (el.title) el.title.textContent = slide.title;
-            if (el.price) el.price.textContent = slide.price;
-            if (el.action) el.action.textContent = slide.action;
-            setTheme(slide.theme);
+        // Si el usuario soltó pero el cursor terminó fuera, cazar globalmente.
+        document.addEventListener('mouseup', endDrag);
 
-            if (el.items) {
-                el.items.innerHTML = '';
-                if (slide.theme === 'menu' && slide.items && slide.items.length) {
-                    el.items.classList.remove('hidden');
-                    slide.items.forEach(function (item) {
-                        const li = document.createElement('li');
-                        li.textContent = item;
-                        el.items.appendChild(li);
-                    });
-                    if (el.price) el.price.classList.add('hidden');
-                } else {
-                    el.items.classList.add('hidden');
-                    if (el.price) el.price.classList.remove('hidden');
-                }
+        // Evita que el click "post-drag" abra enlaces si los hubiera.
+        track.addEventListener('click', function (e) {
+            if (movedDuringDrag) {
+                e.preventDefault();
+                e.stopPropagation();
+                movedDuringDrag = false;
             }
+        }, true);
 
-            if (dotsWrap) {
-                dotsWrap.querySelectorAll('.landing-tvpik-dot').forEach(function (node, i) {
-                    node.classList.toggle('is-active', i === index);
-                });
-            }
+        // Autoplay desktop: 5s por item, pausa con hover/focus/drag/visibilitychange
+        let autoplayTimer = null;
+        const intervalMs = 5000;
+
+        function autoplayActive() {
+            return isDesktop() && !reducedMotion;
+        }
+        function pauseAutoplay() { if (autoplayTimer) { clearInterval(autoplayTimer); autoplayTimer = null; } }
+        function startAutoplay() {
+            pauseAutoplay();
+            if (!autoplayActive()) return;
+            autoplayTimer = setInterval(function () { nextSlide(true); }, intervalMs);
+        }
+        function restartAutoplay() {
+            pauseAutoplay();
+            if (!autoplayActive()) return;
+            // pequeño retraso para que la interacción del usuario tenga prioridad
+            setTimeout(startAutoplay, 1200);
         }
 
-        function runSyncCycle(nextIndex) {
-            if (busy) return;
-            busy = true;
+        wrap.addEventListener('mouseenter', pauseAutoplay);
+        wrap.addEventListener('mouseleave', startAutoplay);
+        wrap.addEventListener('focusin', pauseAutoplay);
+        wrap.addEventListener('focusout', startAutoplay);
 
-            if (phone) {
-                phone.classList.add('is-publishing', 'is-switching');
-            }
-            if (el.phoneStatus) {
-                el.phoneStatus.textContent = publishingLabel;
-                el.phoneStatus.classList.remove('is-done');
-            }
-            if (sync) sync.classList.add('is-active');
-            if (el.updated) el.updated.classList.remove('is-visible');
+        document.addEventListener('visibilitychange', function () {
+            if (document.hidden) pauseAutoplay(); else startAutoplay();
+        });
 
-            setTimeout(function () {
-                if (tv) tv.classList.add('is-switching');
-                if (phone) phone.classList.remove('is-switching');
-            }, 400);
-
-            setTimeout(function () {
-                current = nextIndex;
-                applySlide(current);
-                if (tv) tv.classList.remove('is-switching');
-            }, 750);
-
-            setTimeout(function () {
-                if (sync) sync.classList.remove('is-active');
-                if (phone) phone.classList.remove('is-publishing');
-                if (el.phoneStatus) {
-                    el.phoneStatus.textContent = syncedLabel;
-                    el.phoneStatus.classList.add('is-done');
-                }
-                if (el.updated) el.updated.classList.add('is-visible');
-            }, 1200);
-
-            setTimeout(function () {
-                if (el.updated) el.updated.classList.remove('is-visible');
-                busy = false;
-            }, 2200);
+        if (window.matchMedia) {
+            const mq = window.matchMedia('(min-width: 768px)');
+            const onMqChange = function () { startAutoplay(); };
+            if (mq.addEventListener) mq.addEventListener('change', onMqChange);
+            else if (mq.addListener) mq.addListener(onMqChange);
         }
 
-        applySlide(0);
-        if (isStatic) {
-            return;
-        }
-
-        const intervalMs = root.classList.contains('landing-tvpik-scene--hero') ? 3800 : 4200;
-        setInterval(function () {
-            runSyncCycle((current + 1) % slides.length);
-        }, intervalMs);
+        updateActive(0);
+        startAutoplay();
     });
 
     (function initLandingLangSelect() {

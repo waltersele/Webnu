@@ -22,27 +22,46 @@ Route::get('pre-alta/media/{id}', 'PreAltaPreviewController@media')->name('pre-a
 Route::get('activar/{token}', 'PreAltaClaimController@show')->name('pre-alta.claim.show')->where('token', '[a-fA-F0-9]{64}');
 Route::post('activar/{token}', 'PreAltaClaimController@store')->name('pre-alta.claim.store')->where('token', '[a-fA-F0-9]{64}');
 
-// Legacy URL pública -> redirect 301 a la nueva URL jerárquica.
-// Para 'demo' y cartas sin user asociado servimos directamente el controlador
-// (mantiene compatibilidad con previews de plantillas y QRs antiguos).
-Route::get('carta/{companySlug}', function ($companySlug) {
-    if ($companySlug === 'demo' || strpos($companySlug, 'demo') === 0) {
+// Menú público concreto: /carta/{owner}/{company}/menu/{menu}
+Route::get('carta/{ownerSlug}/{companySlug}/menu/{menuSlug}', 'PagesController@seeMenu')
+    ->where('ownerSlug', '[a-z0-9][a-z0-9-]*')
+    ->where('companySlug', '[a-z0-9][a-z0-9-]*')
+    ->where('menuSlug', '[a-z0-9][a-z0-9-]*')
+    ->name('public.menu');
+
+// URL pública canónica: /carta/{owner}/{company}
+Route::get('carta/{ownerSlug}/{companySlug}', 'PagesController@see_menu')
+    ->where('ownerSlug', '[a-z0-9][a-z0-9-]*')
+    ->where('companySlug', '[a-z0-9][a-z0-9-]*')
+    ->name('see_menu');
+
+// /carta/{slug} (un solo segmento) — discriminamos:
+//   - Si es un User slug -> hub del negocio (lista cartas y menús).
+//   - Si es una Company slug -> redirect 301 al formato canónico.
+//   - 'demo' (o variantes) -> controlador legacy.
+Route::get('carta/{slug}', function ($slug) {
+    if ($slug === 'demo' || strpos($slug, 'demo') === 0) {
         return app(\App\Http\Controllers\PagesController::class)
-            ->see_menu(app(\App\Services\MenuService::class), request(), null, $companySlug);
+            ->see_menu(app(\App\Services\MenuService::class), request(), null, $slug);
     }
 
-    $company = \App\Company::where('slug', $companySlug)->with('user')->first();
+    $user = \App\User::where('slug', $slug)->first();
+    if ($user) {
+        return app(\App\Http\Controllers\PagesController::class)->ownerHub($slug);
+    }
+
+    $company = \App\Company::where('slug', $slug)->with('user')->first();
     if (!$company) {
         abort(404);
     }
     $ownerSlug = optional($company->user)->resolveSlug();
     if (!$ownerSlug) {
         return app(\App\Http\Controllers\PagesController::class)
-            ->see_menu(app(\App\Services\MenuService::class), request(), null, $companySlug);
+            ->see_menu(app(\App\Services\MenuService::class), request(), null, $slug);
     }
     $qs = request()->getQueryString();
-    return redirect(url($ownerSlug . '/' . $company->slug) . ($qs ? '?' . $qs : ''), 301);
-})->name('see_menu.legacy');
+    return redirect(url('carta/' . $ownerSlug . '/' . $company->slug) . ($qs ? '?' . $qs : ''), 301);
+})->where('slug', '[a-z0-9][a-z0-9-]*')->name('public.hub');
 
 Route::get('tv/{companySlug}/sync.json', 'TvMenuController@sync')->name('tv.sync');
 Route::get('tv/{companySlug}', 'TvMenuController@show')->name('tv.show');
@@ -147,6 +166,12 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['aut
     Route::put('sections/update_menu_type', 'SectionsController@update_menu_type')->name('admin.sections.updatemenutype');
     Route::put('sections/update_pdf_menu', 'SectionsController@update_pdf_menu')->name('admin.sections.updatepdfmenu');
     Route::get('qrgenerator/{company}', 'QrController@qrgenerator')->name('admin.qrgenerator');
+    Route::get('qrgenerator/{company}/print', 'QrController@print')->name('admin.qr.print');
+    Route::post('qrgenerator/{company}/email', 'QrController@email')->name('admin.qr.email');
+    // QR del hub público del owner
+    Route::get('qrgenerator-hub', 'QrController@hubQrgenerator')->name('admin.qr.hub.generator');
+    Route::get('qrgenerator-hub/print', 'QrController@hubPrint')->name('admin.qr.hub.print');
+    Route::post('qrgenerator-hub/email', 'QrController@hubEmail')->name('admin.qr.hub.email');
     Route::get('menu-print/{company}', 'MenuPrintController@printPdf')->name('admin.menu-print');
 
     Route::redirect('integrations', '/admin/tvpik', 301)->name('admin.integrations.index');
@@ -162,6 +187,20 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['aut
     Route::get('tvpik/preview', 'TvpikController@preview')->name('admin.tvpik.preview');
     Route::get('tvpik/player', 'TvpikController@player')->name('admin.tvpik.player');
 
+    Route::get('menus', 'MenusController@index')->name('admin.menus.index');
+    Route::post('menus', 'MenusController@store')->name('admin.menus.store');
+    Route::post('menus/combine', 'MenusController@updateCombine')->name('admin.menus.combine');
+    Route::get('menus/{menu}/edit', 'MenusController@edit')->name('admin.menus.edit');
+    Route::put('menus/{menu}', 'MenusController@update')->name('admin.menus.update');
+    Route::delete('menus/{menu}', 'MenusController@destroy')->name('admin.menus.destroy');
+    Route::post('menus/reorder', 'MenusController@reorder')->name('admin.menus.reorder');
+    Route::post('menus/{menu}/items/upload-image', 'MenusController@uploadItemImage')->name('admin.menus.items.upload_image');
+
+    // QR del menú individual
+    Route::get('menus/{menu}/qr', 'QrController@menuQrgenerator')->name('admin.qr.menu.generator');
+    Route::get('menus/{menu}/qr/print', 'QrController@menuPrint')->name('admin.qr.menu.print');
+    Route::post('menus/{menu}/qr/email', 'QrController@menuEmail')->name('admin.qr.menu.email');
+
     Route::get('products', 'ProductsController@index')->name('admin.products.index');
     Route::get('products/{product}/edit', 'ProductsController@edit')->name('admin.products.edit');
     Route::post('products', 'ProductsController@store')->name('admin.products.store');
@@ -169,6 +208,8 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['aut
     Route::delete('products', 'ProductsController@delete')->name('admin.products.delete');
     Route::delete('products/delete_image_product/{product}', 'ProductsController@delete_image_product')->name('admin.products.delete_image_product');
     Route::delete('products/delete_video_product/{product}', 'ProductsController@delete_video_product')->name('admin.products.delete_video_product');
+    Route::post('products/{product}/upload-image', 'ProductsController@uploadImageInline')->name('admin.products.upload_image');
+    Route::post('products/{product}/upload-video', 'ProductsController@uploadVideoInline')->name('admin.products.upload_video');
     Route::put('products/order_product', 'ProductsController@order_product')->name('admin.products.order_product');
     Route::patch('products/{product}/enabled', 'ProductsController@toggle_enabled')->name('admin.products.toggle_enabled');
 
@@ -218,10 +259,13 @@ Route::post('password/email', 'Auth\ForgotPasswordController@sendResetLinkEmail'
 Route::get('password/reset/{token}', 'Auth\ResetPasswordController@showResetForm')->name('password.reset');
 Route::post('password/reset', 'Auth\ResetPasswordController@reset')->name('password.update');
 
-// IMPORTANT: catch-all jerárquico de la URL pública {owner-slug}/{company-slug}.
+// Compat: el formato antiguo /{owner-slug}/{company-slug} (sin prefijo /carta/) redirige
+// 301 al nuevo formato canónico /carta/{owner}/{company}. Mantiene QRs ya impresos.
 // Debe ir AL FINAL para no capturar admin/, login/, register/, carta/, tv/, etc.
-// Si añades futuras rutas con 2 segmentos planos, declaralas ANTES de esto.
-Route::get('{ownerSlug}/{companySlug}', 'PagesController@see_menu')
+Route::get('{ownerSlug}/{companySlug}', function ($ownerSlug, $companySlug) {
+    $qs = request()->getQueryString();
+    return redirect(url('carta/' . $ownerSlug . '/' . $companySlug) . ($qs ? '?' . $qs : ''), 301);
+})
     ->where('ownerSlug', '[a-z0-9][a-z0-9-]*')
     ->where('companySlug', '[a-z0-9][a-z0-9-]*')
-    ->name('see_menu');
+    ->name('see_menu.legacy_flat');
