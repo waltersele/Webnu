@@ -9,14 +9,24 @@
         <div>
             <h2 class="h5 mb-1">Menús de {{ $company->name }}</h2>
             <p class="text-muted small mb-0">
-                {{ $menus->count() === 0
-                    ? 'Aún no has creado ningún menú.'
-                    : ($menus->count() === 1 ? '1 menú creado.' : $menus->count() . ' menús creados.') }}
+                @if($menuLimit !== null)
+                    {{ $menuCount }} / {{ $menuLimit }} {{ $menuLimit === 1 ? 'menú' : 'menús' }} en tu plan.
+                @elseif($menus->count() === 0)
+                    Aún no has creado ningún menú.
+                @else
+                    {{ $menus->count() === 1 ? '1 menú creado.' : $menus->count() . ' menús creados.' }}
+                @endif
             </p>
         </div>
-        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modal-create-menu">
-            <i class="ri ri-add-line me-1"></i> Crear menú
-        </button>
+        @if($canCreateMenu)
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modal-create-menu">
+                <i class="ri ri-add-line me-1"></i> Crear menú
+            </button>
+        @else
+            <a href="{{ url('/admin/settings') }}#plan" class="btn btn-label-secondary">
+                <i class="ti ti-crown me-1"></i> Más menús con Pro
+            </a>
+        @endif
     </div>
 
     @if(session('flash'))
@@ -62,9 +72,15 @@
                 <p class="text-muted mb-4">
                     Define un menú del día con precio fijo, o una carta de menús degustación, infantiles, etc.
                 </p>
-                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modal-create-menu">
-                    <i class="ri ri-add-line me-1"></i> Crear menú
-                </button>
+                @if($canCreateMenu)
+                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modal-create-menu">
+                        <i class="ri ri-add-line me-1"></i> Crear menú
+                    </button>
+                @else
+                    <a href="{{ url('/admin/settings') }}#plan" class="btn btn-label-secondary">
+                        <i class="ti ti-crown me-1"></i> Más menús con Pro
+                    </a>
+                @endif
             </div>
         </div>
     @else
@@ -134,6 +150,7 @@
 @endsection
 
 @push('modals')
+@if($canCreateMenu)
 <div class="modal fade" id="modal-create-menu" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <form class="modal-content" method="POST" action="{{ route('admin.menus.store') }}">
@@ -155,6 +172,7 @@
         </form>
     </div>
 </div>
+@endif
 @endpush
 
 @push('scripts')

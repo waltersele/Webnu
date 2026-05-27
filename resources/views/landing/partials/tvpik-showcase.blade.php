@@ -78,7 +78,21 @@
                                 </div>
 
                             @elseif($kind === 'video')
-                                <img src="{{ $slide['image'] ?? '' }}" alt="" class="landing-tv-show__photo landing-tv-show__photo--video" loading="lazy">
+                                <div class="landing-tv-show__video-template" aria-hidden="true">
+                                    @if(!empty($slide['template_preview']))
+                                        <img src="{{ $slide['template_preview'] }}" alt="" class="landing-tv-show__template-preview" loading="lazy">
+                                    @endif
+                                    @if(!empty($slide['video_url']))
+                                        <video class="landing-tv-show__video-inset"
+                                               src="{{ $slide['video_url'] }}"
+                                               @if(!empty($slide['video_poster'])) poster="{{ $slide['video_poster'] }}" @endif
+                                               muted
+                                               loop
+                                               playsinline
+                                               autoplay
+                                               preload="metadata"></video>
+                                    @endif
+                                </div>
                                 <span class="landing-tv-show__play" aria-hidden="true"><span class="material-symbols-outlined">play_arrow</span></span>
                                 <div class="landing-tv-show__overlay landing-tv-show__overlay--video">
                                     <span class="landing-tv-show__tag">{{ $slide['tag'] ?? '' }}</span>
@@ -113,6 +127,47 @@
                                                 </ul>
                                             </div>
                                         @endforeach
+                                    </div>
+                                </div>
+                            @elseif($kind === 'dual')
+                                {{-- Slide dual: mitad foto + mitad carta (fast-food) --}}
+                                <div class="landing-tv-show__dual">
+                                    <div class="landing-tv-show__dual-left">
+                                        <img src="{{ $slide['image'] ?? '' }}" alt="" class="landing-tv-show__photo" loading="lazy">
+                                        <div class="landing-tv-show__overlay landing-tv-show__overlay--hero">
+                                            <span class="landing-tv-show__tag">{{ $slide['tag'] ?? '' }}</span>
+                                            <h3 class="landing-tv-show__title">{{ $slide['title'] ?? '' }}</h3>
+                                            @if(!empty($slide['price']))
+                                                <span class="landing-tv-show__price">{{ $slide['price'] }}</span>
+                                            @endif
+                                        </div>
+                                    </div>
+                                    <div class="landing-tv-show__dual-right">
+                                        <div class="landing-tv-show__menu">
+                                            @if(!empty($slide['right_tag']))
+                                                <header class="landing-tv-show__menu-head">
+                                                    <span class="landing-tv-show__tag">{{ $slide['right_tag'] }}</span>
+                                                    <h3 class="landing-tv-show__title landing-tv-show__title--sm">{{ $slide['right_title'] ?? '' }}</h3>
+                                                </header>
+                                            @endif
+                                            <div class="landing-tv-show__menu-cols landing-tv-show__menu-cols--dual">
+                                                @foreach(($slide['sections'] ?? []) as $section)
+                                                    <div class="landing-tv-show__menu-col">
+                                                        <p class="landing-tv-show__menu-section">{{ $section['name'] ?? '' }}</p>
+                                                        <ul class="landing-tv-show__menu-list">
+                                                            @foreach(($section['items'] ?? []) as $line)
+                                                                <li>
+                                                                    <span>{{ $line['name'] ?? '' }}</span>
+                                                                    @if(!empty($line['price']))
+                                                                        <strong>{{ $line['price'] }}</strong>
+                                                                    @endif
+                                                                </li>
+                                                            @endforeach
+                                                        </ul>
+                                                    </div>
+                                                @endforeach
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             @endif

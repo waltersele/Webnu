@@ -250,6 +250,8 @@ Route::group(['prefix' => 'comercial', 'namespace' => 'Sales'], function () {
 
 Route::get('login', 'Auth\LoginController@showLoginForm')->name('login');
 Route::post('login', 'Auth\LoginController@login');
+Route::get('auth/google', 'Auth\GoogleAuthController@redirect')->name('auth.google.redirect');
+Route::get('auth/google/callback', 'Auth\GoogleAuthController@callback')->name('auth.google.callback');
 Route::post('logout', 'Auth\LoginController@logout')->name('logout');
 Route::get('register', 'Auth\RegisterController@index')->name('register');
 Route::post('register', 'Auth\RegisterController@register');

@@ -205,12 +205,21 @@ trait PreparesLandingPage
         // Cada slide trae sus propias imágenes (la principal y, opcionalmente,
         // miniaturas para tapas), apuntando a assets existentes.
         $rawSlides = __('landing.tvpik.slides') ?: [];
+        $tvpikTemplates = config('tvpik_templates.templates', []);
+        $kindToTemplate = [
+            'hero' => 'hero',
+            'tapas' => 'tapas',
+            'daily' => 'daily',
+            'video' => 'video',
+            'menu' => 'menu',
+            'dual' => 'featured',
+        ];
         $kindImages = [
             'hero'  => asset('img/productos/brasa-solomillo.jpg'),
             'tapas' => asset('img/productos/brasa-burrata.jpg'),
             'daily' => asset('img/productos/brasa-burrata.jpg'),
-            'video' => asset('img/productos/brasa-brownie.jpg'),
             'menu'  => asset('img/productos/cocktail-negroni.jpg'),
+            'dual'  => asset('img/productos/brasa-solomillo.jpg'),
         ];
         $tapasImages = [
             asset('img/productos/brasa-burrata.jpg'),
@@ -221,7 +230,20 @@ trait PreparesLandingPage
         foreach ($rawSlides as $slide) {
             $kind = $slide['kind'] ?? 'hero';
             $slide['kind'] = $kind;
-            $slide['image'] = $kindImages[$kind] ?? reset($kindImages);
+            $tplKey = $kindToTemplate[$kind] ?? 'hero';
+            $tplMeta = is_array($tvpikTemplates[$tplKey] ?? null) ? $tvpikTemplates[$tplKey] : null;
+            if ($tplMeta && ! empty($tplMeta['thumbnail'])) {
+                $slide['template_preview'] = asset($tplMeta['thumbnail']);
+            }
+
+            if ($kind === 'video') {
+                $videoFile = config('demo_media.videos.dessert.file', 'reel-dal-naan.mp4');
+                $slide['video_url'] = asset('img/demo/' . $videoFile);
+                $slide['video_poster'] = asset('img/productos/brasa-brownie.jpg');
+                $slide['image'] = $slide['video_poster'];
+            } else {
+                $slide['image'] = $kindImages[$kind] ?? reset($kindImages);
+            }
 
             if ($kind === 'tapas' && ! empty($slide['items']) && is_array($slide['items'])) {
                 foreach ($slide['items'] as $idx => $item) {
@@ -229,10 +251,6 @@ trait PreparesLandingPage
                         $slide['items'][$idx]['image'] = $tapasImages[$idx] ?? $tapasImages[0];
                     }
                 }
-            }
-
-            if ($kind === 'video') {
-                $slide['video_poster'] = $slide['image'];
             }
 
             $tvpikSlides[] = $slide;
@@ -251,6 +269,25 @@ trait PreparesLandingPage
         $user = $request->user();
         $userDisplayName = $user ? $this->landingUserDisplayName($user->name ?? '') : '';
 
+        $customizePresets = __('landing.customize.presets');
+        $colorSchemes = [
+            0 => ['primary' => '#c2410c', 'bg' => '#fff7ed', 'surface' => '#ffffff', 'text' => '#1c1917', 'muted' => '#78716c'],
+            1 => ['primary' => '#60a5fa', 'bg' => '#0a0e14', 'surface' => '#111827', 'text' => '#f1f5f9', 'muted' => '#94a3b8'],
+            2 => ['primary' => '#a855f7', 'bg' => '#0f0f13', 'surface' => '#1a1a24', 'text' => '#e2e8f0', 'muted' => '#94a3b8'],
+        ];
+        $landingTemplatePicker = [];
+        for ($i = 0; $i < 3; $i++) {
+            $preset = is_array($customizePresets[$i] ?? null) ? $customizePresets[$i] : [];
+            $demo = $demoShowcases[$i] ?? [];
+            $landingTemplatePicker[] = array_merge($preset, $colorSchemes[$i] ?? [], [
+                'preview' => $demo['preview'] ?? asset('img/productos/brasa-solomillo.jpg'),
+                'category' => mb_strtoupper((string) ($demo['badge'] ?? $preset['template'] ?? '')),
+                'title' => $demo['title'] ?? ($preset['business'] ?? ''),
+                'desc' => $demo['desc'] ?? '',
+                'tags' => array_slice($demo['tags'] ?? [], 0, 2),
+            ]);
+        }
+
         return [
             'locale' => $locale,
             'landingLocales' => config('landing.locales', []),
@@ -264,6 +301,7 @@ trait PreparesLandingPage
             'landingFranchisePlan' => $this->buildLandingFranchisePlan(),
             'landingPricingTierOrder' => $this->landingPricingTierOrder(),
             'landingCustomizePresets' => __('landing.customize.presets'),
+            'landingTemplatePicker' => $landingTemplatePicker,
             'landingReelVideo' => asset('img/demo/' . $steakFile),
             'demoCocktailsUrl' => url('/carta/demo-cocktails'),
             'templateCount' => $templateCount,

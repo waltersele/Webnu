@@ -8,6 +8,7 @@ use App\Menu;
 use App\MenuItem;
 use App\MenuSection;
 use App\Section;
+use App\Services\UserPlanService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Facades\Storage;
@@ -15,9 +16,10 @@ use Illuminate\Support\Str;
 
 class MenusController extends Controller
 {
-    public function index()
+    public function index(UserPlanService $plans)
     {
         $company = $this->selectedCompanyOrFail();
+        $user = auth()->user();
 
         $menus = $company->menus()
             ->withCount('items')
@@ -28,12 +30,16 @@ class MenusController extends Controller
         return view('admin.menus.index', [
             'company' => $company,
             'menus' => $menus,
+            'canCreateMenu' => $plans->canCreateMenu($user),
+            'menuLimit' => $plans->maxMenus($user),
+            'menuCount' => $plans->menuCount($user),
         ]);
     }
 
-    public function store(Request $request)
+    public function store(Request $request, UserPlanService $plans)
     {
         $company = $this->selectedCompanyOrFail();
+        $plans->assertCanCreateMenu($request->user());
 
         $data = $request->validate([
             'name' => 'required|string|max:120',

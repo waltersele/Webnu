@@ -20,6 +20,8 @@ class PlatformSetting extends Model
         'mail_password',
         'stripe_secret',
         'stripe_webhook_secret',
+        'google_client_secret',
+        'pre_alta_ingest_key',
         'tvpik_app_key',
         'digital_signage_app_key',
     ];
@@ -413,5 +415,67 @@ class PlatformSetting extends Model
     public static function digitalSignageAppKeyHint(): ?string
     {
         return static::secretHint(static::digitalSignageAppKey());
+    }
+
+    public static function googleClientId(): ?string
+    {
+        $fromDb = static::getValue('google_client_id');
+        if ($fromDb !== null && trim($fromDb) !== '') {
+            return trim($fromDb);
+        }
+
+        $fromEnv = env('GOOGLE_CLIENT_ID');
+
+        return $fromEnv !== null && $fromEnv !== '' ? trim($fromEnv) : null;
+    }
+
+    public static function googleClientSecret(): ?string
+    {
+        return static::secretFromDbOrEnv('google_client_secret', 'GOOGLE_CLIENT_SECRET');
+    }
+
+    public static function googleRedirectUri(): string
+    {
+        $fromDb = static::getValue('google_redirect_uri');
+        if ($fromDb !== null && trim($fromDb) !== '') {
+            return rtrim(trim($fromDb), '/');
+        }
+
+        $fromEnv = env('GOOGLE_REDIRECT_URI');
+        if ($fromEnv !== null && trim($fromEnv) !== '') {
+            return rtrim(trim($fromEnv), '/');
+        }
+
+        return rtrim((string) config('app.url'), '/') . '/auth/google/callback';
+    }
+
+    public static function hasGoogleOAuth(): bool
+    {
+        $id = static::googleClientId();
+        $secret = static::googleClientSecret();
+
+        return $id !== null && $id !== '' && $secret !== null && $secret !== '';
+    }
+
+    public static function googleClientSecretHint(): ?string
+    {
+        return static::secretHint(static::googleClientSecret());
+    }
+
+    public static function preAltaIngestKey(): ?string
+    {
+        return static::secretFromDbOrEnv('pre_alta_ingest_key', 'PRE_ALTA_INGEST_KEY');
+    }
+
+    public static function hasPreAltaIngestKey(): bool
+    {
+        $key = static::preAltaIngestKey();
+
+        return $key !== null && $key !== '';
+    }
+
+    public static function preAltaIngestKeyHint(): ?string
+    {
+        return static::secretHint(static::preAltaIngestKey());
     }
 }

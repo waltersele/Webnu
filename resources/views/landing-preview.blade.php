@@ -14,6 +14,7 @@
     $contactPublicEmail = $contactPublicEmail ?? 'hello@webnu.es';
     $demoUrl = url('/carta/demo?lang=en');
     $demoShowcases = $demoShowcases ?? [];
+    $landingTemplatePicker = $landingTemplatePicker ?? array_slice($landingCustomizePresets ?? [], 0, 3);
     $tvpikSlides = $tvpikSlides ?? [];
     $templateCount = $templateCount ?? 14;
     $landingReelVideo = $landingReelVideo ?? asset('img/demo/reel-grill-chicken.mp4');
@@ -59,6 +60,8 @@
         $businessLongest = collect($businessCycle)->sortByDesc(fn ($w) => mb_strlen($w))->first() ?? $businessFirst;
         $featureLongest = collect($featureCycle)->sortByDesc(fn ($w) => mb_strlen($w))->first() ?? $featureFirst;
         $phoneHero = asset('img/productos/cocktail-negroni.jpg');
+        $templateCountDisplay = max(20, (int) ($templateCount ?? 14));
+        $tvpikTemplateCount = count(config('tvpik_templates.templates', []));
     @endphp
     <section id="inicio" class="pt-8 pb-12 md:py-24 grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-16 items-center">
         <div class="space-y-5 md:space-y-7">
@@ -76,11 +79,13 @@
                 </span>
                 {{ __('landing.hero.title_tail') }}
             </h1>
-            <p class="text-body-lg md:text-headline-sm text-text-muted">
-                {{ __('landing.hero.platform_lead') }}
+            <p class="hero-platform-line text-body-lg md:text-headline-sm text-text-muted">
+                <span class="hero-platform-line__lead">{{ __('landing.hero.platform_lead') }}</span>
                 <span class="hero-cycle hero-cycle--slide hero-cycle--feature" data-cycle="feature" data-cycle-mode="slide" data-cycle-items='@json($featureCycle)'>
                     <span class="hero-cycle__measure" aria-hidden="true">{{ $featureLongest }}</span>
-                    <span class="hero-cycle__item is-active">{{ $featureFirst }}</span>
+                    <span class="hero-cycle__viewport">
+                        <span class="hero-cycle__item is-active">{{ $featureFirst }}</span>
+                    </span>
                 </span>
             </p>
             <p class="text-body-md text-text-muted max-w-xl">
@@ -112,7 +117,7 @@
         </div>
 
         {{-- Mockup móvil con cocktail Negroni + chips flotantes --}}
-        <div class="hero-phone-stage relative mx-auto w-full max-w-[360px]">
+        <div class="hero-phone-stage relative mx-auto w-full">
             <div class="hero-phone" aria-hidden="true">
                 <div class="hero-phone__notch"></div>
                 <div class="hero-phone__status">
@@ -161,113 +166,192 @@
                     </article>
                 </div>
             </div>
-            <div class="hero-phone-chip hero-phone-chip--ticket" aria-hidden="true">
-                <span class="hero-phone-chip__icon"><span class="material-symbols-outlined">trending_up</span></span>
-                <span class="hero-phone-chip__body">
-                    <span class="hero-phone-chip__label">{{ __('landing.hero.phone_ticket_label') }}</span>
-                    <span class="hero-phone-chip__value">{{ __('landing.hero.phone_ticket_value') }}</span>
+            @php
+                $allChips = collect(__('landing.hero.phone_chips') ?: []);
+                $chipA = $allChips->where('id', 'translation')->first() ?? $allChips->get(2) ?? [];
+                $chipB = $allChips->where('id', 'scan')->first()        ?? $allChips->get(1) ?? [];
+                $chipC = $allChips->where('id', 'ticket')->first()      ?? $allChips->get(0) ?? [];
+
+                $chipAVariants = json_encode([
+                    ['icon' => $chipA['icon'] ?? 'translate',    'text' => $chipA['text'] ?? __('landing.hero.phone_chip_translation')],
+                    ['icon' => 'language',                       'text' => 'Idioma automático'],
+                    ['icon' => 'qr_code_2',                      'text' => 'QR al instante'],
+                ], JSON_HEX_QUOT | JSON_HEX_APOS);
+
+                $chipBVariants = json_encode([
+                    ['icon' => $chipB['icon'] ?? 'bolt',         'text' => $chipB['text'] ?? __('landing.hero.phone_chip_scan')],
+                    ['icon' => 'psychology',                     'text' => 'IA en 8 minutos'],
+                    ['icon' => 'auto_awesome',                   'text' => 'Escaneo preciso'],
+                ], JSON_HEX_QUOT | JSON_HEX_APOS);
+
+                $chipCVariants = json_encode([
+                    ['icon' => $chipC['icon'] ?? 'trending_up',  'label' => $chipC['label'] ?? 'TICKET MEDIO', 'value' => $chipC['value'] ?? '+18%', 'metric' => true],
+                    ['icon' => 'storefront',                     'label' => 'VENTAS EN SALA',                  'value' => '↑ impulso',               'metric' => true],
+                    ['icon' => 'star',                           'label' => 'SATISFACCIÓN',                    'value' => '4,9 / 5',                  'metric' => true],
+                ], JSON_HEX_QUOT | JSON_HEX_APOS);
+            @endphp
+            <div class="hero-chips-row" aria-hidden="true">
+            {{-- Chip izquierda alta --}}
+            @if($chipA)
+            <div class="hero-chip hero-chip--a"
+                 aria-hidden="true"
+                 data-hero-chip="a"
+                 data-hero-chip-interval="4000"
+                 data-hero-chip-variants='{{ $chipAVariants }}'>
+                <span class="hero-chip__icon"><span class="material-symbols-outlined">{{ $chipA['icon'] ?? 'translate' }}</span></span>
+                <span class="hero-chip__text">{{ $chipA['text'] ?? __('landing.hero.phone_chip_translation') }}</span>
+            </div>
+            @endif
+            {{-- Chip izquierda baja --}}
+            @if($chipB)
+            <div class="hero-chip hero-chip--b"
+                 aria-hidden="true"
+                 data-hero-chip="b"
+                 data-hero-chip-interval="5500"
+                 data-hero-chip-offset="1800"
+                 data-hero-chip-variants='{{ $chipBVariants }}'>
+                <span class="hero-chip__icon"><span class="material-symbols-outlined">{{ $chipB['icon'] ?? 'bolt' }}</span></span>
+                <span class="hero-chip__text">{{ $chipB['text'] ?? __('landing.hero.phone_chip_scan') }}</span>
+            </div>
+            @endif
+            {{-- Chip derecha (métrico) --}}
+            @if($chipC)
+            <div class="hero-chip hero-chip--c hero-chip--light"
+                 aria-hidden="true"
+                 data-hero-chip="c"
+                 data-hero-chip-interval="6500"
+                 data-hero-chip-offset="3200"
+                 data-hero-chip-variants='{{ $chipCVariants }}'>
+                <span class="hero-chip__icon"><span class="material-symbols-outlined">{{ $chipC['icon'] ?? 'trending_up' }}</span></span>
+                <span class="hero-chip__body">
+                    <span class="hero-chip__label">{{ $chipC['label'] ?? 'TICKET MEDIO' }}</span>
+                    <span class="hero-chip__value">{{ $chipC['value'] ?? '+18%' }}</span>
                 </span>
             </div>
-            <div class="hero-phone-chip hero-phone-chip--scan" aria-hidden="true">
-                <span class="hero-phone-chip__icon hero-phone-chip__icon--accent"><span class="material-symbols-outlined">bolt</span></span>
-                <span>{{ __('landing.hero.phone_chip_scan') }}</span>
-            </div>
-            <div class="hero-phone-chip hero-phone-chip--translation" aria-hidden="true">
-                <span class="hero-phone-chip__icon hero-phone-chip__icon--accent"><span class="material-symbols-outlined">translate</span></span>
-                <span>{{ __('landing.hero.phone_chip_translation') }}</span>
-            </div>
+            @endif
+            </div>{{-- /.hero-chips-row --}}
         </div>
     </section>
 
     {{-- Cartas reales + Estudio visual unificados --}}
-    <section id="demos-carta" class="py-12 md:py-24">
-        <div class="text-center mb-12 max-w-3xl mx-auto">
+    <section id="demos-carta" class="py-12 md:py-20">
+        <div class="text-center mb-6 md:mb-8 max-w-3xl mx-auto">
             <span class="inline-flex items-center gap-2 bg-primary/10 text-primary px-3 py-1 rounded-full text-label-sm font-bold uppercase tracking-wider mb-3">
-                <span>{{ __('landing.demos.badge') }}</span>
-                <span aria-hidden="true" class="opacity-40">·</span>
-                <span>{{ __('landing.customize.badge') }}</span>
+                {{ __('landing.demos.badge') }}
             </span>
-            <h2 class="font-headline text-headline-xl mb-4">{{ __('landing.demos.title') }}</h2>
-            <p class="text-body-lg text-text-muted">
+            <h2 class="font-headline text-headline-xl mb-3">{{ __('landing.demos.title', ['count' => $templateCountDisplay]) }}</h2>
+            <p class="text-body-md md:text-body-lg text-text-muted">
                 {{ __('landing.demos.subtitle') }}
             </p>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
-            @foreach($demoShowcases as $demo)
-                <article class="rounded-2xl border-2 {{ $demo['accent'] }} overflow-hidden flex flex-col hover:shadow-lg transition-shadow">
-                    <div class="aspect-[16/10] overflow-hidden bg-surface-container">
-                        <img src="{{ $demo['preview'] }}" alt="{{ $demo['subtitle'] }}" class="w-full h-full object-cover" loading="lazy"/>
-                    </div>
-                    <div class="p-6 flex flex-col flex-grow">
-                        <span class="text-label-sm font-bold text-primary uppercase tracking-wide">{{ $demo['badge'] }}</span>
-                        <h3 class="font-headline text-headline-md mt-1 mb-1">{{ $demo['title'] }}</h3>
-                        <p class="text-label-md text-text-muted mb-3">{{ $demo['subtitle'] }}</p>
-                        <p class="text-body-md text-text-muted mb-4 flex-grow">{{ $demo['desc'] }}</p>
-                        <div class="flex flex-wrap gap-2 mb-5">
-                            @foreach($demo['tags'] as $tag)
-                                <span class="px-2.5 py-1 rounded-full bg-surface-container-high text-label-sm text-on-surface-variant">{{ $tag }}</span>
-                            @endforeach
-                        </div>
-                        <a href="{{ $demo['url'] }}" target="_blank" rel="noopener" class="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-lg bg-primary text-on-primary text-label-md font-semibold hover:opacity-90 transition-opacity">
-                            {{ __('landing.demos.cta') }} <span class="material-symbols-outlined text-[18px]">open_in_new</span>
-                        </a>
-                    </div>
-                </article>
-            @endforeach
-        </div>
-
-        {{-- Mini bloque "estudio visual": prueba a personalizar en vivo --}}
         <div id="personalizable"
-             class="mt-12 md:mt-16 grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)] gap-10 lg:gap-14 items-center max-w-5xl mx-auto"
-             data-customize-presets='@json($landingCustomizePresets ?? [])'>
-            <div class="landing-customize-wrap order-2 lg:order-1">
-                <div id="customize-phone" class="landing-customize-phone" aria-hidden="true">
-                    <div class="landing-customize-phone__status">
-                        <span></span><span></span><span></span>
-                    </div>
-                    <div id="customize-header" class="landing-customize-phone__header">
-                        <span id="customize-business" class="landing-customize-phone__business">La Brasa del Puerto</span>
-                        <span id="customize-template" class="landing-customize-phone__tpl">Básica</span>
-                    </div>
-                    <div class="landing-customize-phone__section" id="customize-section">Carta · Principales</div>
-                    <article class="landing-customize-phone__card">
-                        <div class="landing-customize-phone__thumb"></div>
-                        <div class="landing-customize-phone__info">
-                            <div class="landing-customize-phone__row">
-                                <span id="customize-dish" class="landing-customize-phone__dish">Solomillo al Pedro Ximénez</span>
-                                <span id="customize-price" class="landing-customize-phone__price">24,50 €</span>
-                            </div>
-                            <p id="customize-desc" class="landing-customize-phone__desc">Reducción de Pedro Ximénez y patata confitada.</p>
-                        </div>
-                    </article>
-                </div>
-                <div class="landing-customize-controls">
-                    <div class="landing-customize-controls__row">
-                        <span class="landing-customize-controls__label"><span class="material-symbols-outlined text-[16px]">palette</span> {{ __('landing.customize.color') }}</span>
-                        <div class="landing-customize-swatches" id="customize-swatches"></div>
-                    </div>
-                    <div class="landing-customize-controls__row">
-                        <span class="landing-customize-controls__label"><span class="material-symbols-outlined text-[16px]">edit</span> {{ __('landing.customize.text') }}</span>
-                        <span id="customize-hint" class="landing-customize-hint">{{ ($landingCustomizePresets[0] ?? [])['hint'] ?? '' }}</span>
-                    </div>
-                </div>
-            </div>
+             class="landing-templates-showcase"
+             data-customize-presets='@json($landingTemplatePicker ?? [])'>
 
-            <div class="space-y-5 order-1 lg:order-2">
-                <h3 class="font-headline text-headline-md md:text-headline-lg">{{ __('landing.customize.title') }}</h3>
-                <p class="text-body-md text-text-muted">{{ __('landing.customize.desc') }}</p>
-                <ul class="grid grid-cols-1 gap-2 text-label-md text-text-muted">
+            {{-- Columna 1: selector de plantillas --}}
+            <aside class="landing-template-picker" data-template-picker role="tablist" aria-label="{{ __('landing.customize.pick_title') }}">
+                <p class="landing-template-picker__title">{{ __('landing.customize.pick_title') }}</p>
+                @foreach($landingTemplatePicker as $ti => $tplCard)
+                    <button type="button"
+                            class="landing-template-picker__card {{ $ti === 0 ? 'is-active' : '' }}"
+                            data-template-index="{{ $ti }}"
+                            role="tab"
+                            aria-selected="{{ $ti === 0 ? 'true' : 'false' }}"
+                            aria-controls="customize-phone">
+                        <span class="landing-template-picker__thumb">
+                            <img src="{{ $tplCard['preview'] ?? '' }}" alt="{{ $tplCard['title'] ?? '' }}" loading="lazy" width="56" height="56">
+                        </span>
+                        <span class="landing-template-picker__body">
+                            <span class="landing-template-picker__category">{{ $tplCard['category'] ?? $tplCard['template'] ?? '' }}</span>
+                            <span class="landing-template-picker__name">{{ $tplCard['title'] ?? '' }}</span>
+                            <span class="landing-template-picker__desc">{{ $tplCard['desc'] ?? '' }}</span>
+                            @if(!empty($tplCard['tags']))
+                                <span class="landing-template-picker__tags">
+                                    @foreach($tplCard['tags'] as $tag)
+                                        <span class="landing-template-picker__tag">{{ $tag }}</span>
+                                    @endforeach
+                                </span>
+                            @endif
+                        </span>
+                    </button>
+                @endforeach
+
+                {{-- CTA debajo del picker --}}
+                <div class="landing-template-picker__cta-row">
                     @foreach(__('landing.customize.bullets') as $bullet)
-                        <li class="flex gap-2 items-start">
-                            <span class="material-symbols-outlined text-primary text-[18px] shrink-0">check_circle</span>
-                            <span>{{ $bullet }}</span>
-                        </li>
+                        @if($bullet)
+                        <span class="landing-template-picker__cta-bullet">
+                            <span class="material-symbols-outlined">check_circle</span>{{ $bullet }}
+                        </span>
+                        @endif
                     @endforeach
-                </ul>
-                <a href="#inicio" class="inline-flex items-center gap-2 px-5 py-3 rounded-lg bg-primary text-on-primary text-label-md font-semibold hover:opacity-90 transition-opacity">
-                    {{ __('landing.customize.cta') }} <span class="material-symbols-outlined text-[20px]">arrow_forward</span>
-                </a>
+                    <a href="#inicio" class="landing-template-picker__cta-btn">
+                        {{ __('landing.customize.cta') }} <span class="material-symbols-outlined">arrow_forward</span>
+                    </a>
+                </div>
+            </aside>
+
+            {{-- Columna 2: teléfono real + controles flotantes sobre él --}}
+            <div class="landing-template-phone-col">
+                <div class="landing-customize-wrap">
+                    {{-- Teléfono real con marco oscuro + notch --}}
+                    <div id="customize-phone" class="tpl-phone" aria-hidden="true">
+                        <div class="tpl-phone__notch"></div>
+                        <div class="tpl-phone__status">
+                            <span class="tpl-phone__status-time">9:41</span>
+                            <span class="tpl-phone__status-icons">
+                                <span class="material-symbols-outlined" style="font-size:12px">network_wifi</span>
+                                <span class="material-symbols-outlined" style="font-size:12px">battery_full</span>
+                            </span>
+                        </div>
+                        <div class="tpl-phone__screen">
+                            <header class="tpl-phone__app-header">
+                                <span id="customize-business" class="tpl-phone__business">La Brasa del Puerto</span>
+                                <span id="customize-template" class="tpl-phone__badge">Básica</span>
+                            </header>
+                            <p class="tpl-phone__section" id="customize-section">CARTA · PRINCIPALES</p>
+                            <article class="tpl-phone__dish">
+                                <div class="tpl-phone__dish-thumb"></div>
+                                <div class="tpl-phone__dish-info">
+                                    <div class="tpl-phone__dish-row">
+                                        <span id="customize-dish" class="tpl-phone__dish-name">Solomillo al Pedro Ximénez</span>
+                                        <span id="customize-price" class="tpl-phone__dish-price">24,50 €</span>
+                                    </div>
+                                    <p id="customize-desc" class="tpl-phone__dish-desc">Reducción de Pedro Ximénez y patata confitada.</p>
+                                </div>
+                            </article>
+                            <article class="tpl-phone__dish tpl-phone__dish--2" aria-hidden="true">
+                                <div class="tpl-phone__dish-thumb tpl-phone__dish-thumb--alt"></div>
+                                <div class="tpl-phone__dish-info">
+                                    <div class="tpl-phone__dish-row">
+                                        <span class="tpl-phone__dish-name tpl-phone__dish-name--muted">Miso Special</span>
+                                        <span class="tpl-phone__dish-price">10,50 €</span>
+                                    </div>
+                                    <p class="tpl-phone__dish-desc">Fermentación natural de soja blanca.</p>
+                                </div>
+                            </article>
+
+                            {{-- Tarjeta de controles flotante SOBRE la pantalla del teléfono --}}
+                            <div class="tpl-phone__controls-overlay">
+                                <div class="tpl-phone__controls-row">
+                                    <span class="tpl-phone__controls-label">
+                                        <span class="material-symbols-outlined">palette</span>
+                                        {{ __('landing.customize.color') }}
+                                    </span>
+                                    <div class="landing-customize-swatches" id="customize-swatches"></div>
+                                </div>
+                                <div class="tpl-phone__controls-row">
+                                    <span class="tpl-phone__controls-label">
+                                        <span class="material-symbols-outlined">edit</span>
+                                        {{ __('landing.customize.text') }}
+                                    </span>
+                                    <span id="customize-hint" class="customize-hint-text">{{ ($landingCustomizePresets[0] ?? [])['hint'] ?? '' }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </section>
@@ -361,80 +445,62 @@
     </section>
 
     {{-- Reels --}}
-    <section id="reels" class="py-12 md:py-24">
-        <div class="text-center mb-14">
-            <h2 class="font-headline text-headline-xl mb-4">{{ __('landing.reels.title') }}</h2>
+    <section id="reels" class="landing-reels-showcase py-12 md:py-16">
+        <div class="text-center mb-10 md:mb-12">
+            <span class="landing-reels-badge">{{ __('landing.reels.badge') }}</span>
+            <h2 class="font-headline text-headline-xl mt-3 mb-3">
+                {{ __('landing.reels.headline_lead') }}
+                <span class="landing-reels-headline__accent" data-kinetic-word aria-label="{{ __('landing.reels.headline_highlight') }}">
+                    @php
+                        $kineticWord = __('landing.reels.headline_highlight');
+                    @endphp
+                    @foreach(mb_str_split($kineticWord) as $ki => $letter)
+                        <span class="kinetic-letter" style="--ki:{{ $ki }}" aria-hidden="true">{{ $letter === ' ' ? "\u{00A0}" : $letter }}</span>
+                    @endforeach
+                </span>
+            </h2>
             <p class="text-body-lg text-text-muted max-w-2xl mx-auto">
-                {{ __('landing.reels.subtitle') }} <span class="text-primary font-medium">{{ __('landing.reels.plus_note') }}</span>
+                {{ __('landing.reels.hero_subtitle') }}
             </p>
         </div>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-            <div class="flex justify-center">
-                <div class="landing-menu-mock w-full max-w-sm">
-                    <div class="landing-menu-mock__chrome">
-                        <span class="landing-menu-mock__dot"></span>
-                        <span class="landing-menu-mock__dot"></span>
-                        <span class="landing-menu-mock__dot"></span>
-                        <span class="landing-menu-mock__title">{{ __('landing.reels.mock_section') }}</span>
-                    </div>
-                    <div class="landing-menu-mock__body">
-                        <article class="landing-menu-card">
-                            <div class="landing-menu-card__media landing-menu-card__media--reel">
-                                <video class="landing-menu-card__reel" autoplay muted loop playsinline preload="metadata" poster="{{ asset('img/productos/brasa-solomillo.jpg') }}">
-                                    <source src="{{ $landingReelVideo }}" type="video/mp4"/>
-                                </video>
-                                <span class="landing-menu-card__badge"><i class="material-symbols-outlined text-[14px]">videocam</i> Reel</span>
-                            </div>
-                            <div class="landing-menu-card__content">
-                                <div class="landing-menu-card__head">
-                                    <h4>{{ __('landing.reels.dish_name') }}</h4>
-                                    <span class="landing-menu-card__price">{{ __('landing.reels.dish_price') }}</span>
-                                </div>
-                                <p>{{ __('landing.reels.dish_desc') }}</p>
-                            </div>
-                        </article>
-                        <article class="landing-menu-card landing-menu-card--photo">
-                            <div class="landing-menu-card__media">
-                                <img src="{{ asset('img/productos/brasa-burrata.jpg') }}" alt="Ensalada de burrata" loading="lazy"/>
-                            </div>
-                            <div class="landing-menu-card__content">
-                                <div class="landing-menu-card__head">
-                                    <h4>{{ __('landing.reels.dish2_name') }}</h4>
-                                    <span class="landing-menu-card__price">{{ __('landing.reels.dish2_price') }}</span>
-                                </div>
-                                <p>{{ __('landing.reels.dish2_desc') }}</p>
-                            </div>
-                        </article>
-                    </div>
+
+        <div class="landing-reels-stage">
+            <div class="landing-reels-browser" aria-hidden="true">
+                <div class="landing-reels-browser__chrome">
+                    <span class="landing-reels-browser__dot"></span>
+                    <span class="landing-reels-browser__dot"></span>
+                    <span class="landing-reels-browser__dot"></span>
+                    <span class="landing-reels-browser__url">menuwebnu.es/demo/gourmet-experience</span>
+                </div>
+                <div class="landing-reels-browser__body">
+                    <video class="landing-reels-video" autoplay muted loop playsinline preload="metadata" poster="{{ asset('img/productos/brasa-solomillo.jpg') }}">
+                        <source src="{{ $landingReelVideo }}" type="video/mp4"/>
+                    </video>
+                    <span class="landing-reels-play" aria-hidden="true"><span class="material-symbols-outlined">play_arrow</span></span>
                 </div>
             </div>
-            <div class="space-y-8">
-                <div class="flex gap-4">
-                    <div class="w-12 h-12 rounded-full bg-primary-fixed flex items-center justify-center text-primary shrink-0">
-                        <span class="material-symbols-outlined">trending_up</span>
-                    </div>
-                    <div>
-                        <h4 class="font-headline text-headline-md mb-2">{{ __('landing.reels.benefit1_title') }}</h4>
-                        <p class="text-text-muted">{{ __('landing.reels.benefit1_desc') }}</p>
-                    </div>
+
+            <div class="landing-reels-float landing-reels-float--sell">
+                <span class="landing-reels-float__icon"><span class="material-symbols-outlined">auto_awesome</span></span>
+                <div class="landing-reels-float__body">
+                    <p class="landing-reels-float__title">{{ __('landing.reels.benefit1_title') }}</p>
+                    <p class="landing-reels-float__desc">{{ __('landing.reels.benefit1_desc') }}</p>
                 </div>
-                <div class="flex gap-4">
-                    <div class="w-12 h-12 rounded-full bg-primary-fixed flex items-center justify-center text-primary shrink-0">
-                        <span class="material-symbols-outlined">restaurant</span>
-                    </div>
-                    <div>
-                        <h4 class="font-headline text-headline-md mb-2">{{ __('landing.reels.benefit2_title') }}</h4>
-                        <p class="text-text-muted">{!! __('landing.reels.benefit2_desc', ['cocktails' => '<a href="'.e($demoCocktailsUrl ?? url('/carta/demo-cocktails')).'" target="_blank" class="text-primary font-medium hover:underline">Azul Coctelería</a>']) !!}</p>
-                    </div>
+            </div>
+
+            <div class="landing-reels-float landing-reels-float--fast">
+                <span class="landing-reels-float__icon"><span class="material-symbols-outlined">bolt</span></span>
+                <div class="landing-reels-float__body">
+                    <p class="landing-reels-float__title">{{ __('landing.reels.float_fast_title') }}</p>
+                    <p class="landing-reels-float__desc">{{ __('landing.reels.float_fast_desc') }}</p>
                 </div>
-                <div class="flex gap-4">
-                    <div class="w-12 h-12 rounded-full bg-primary-fixed flex items-center justify-center text-primary shrink-0">
-                        <span class="material-symbols-outlined">speed</span>
-                    </div>
-                    <div>
-                        <h4 class="font-headline text-headline-md mb-2">{{ __('landing.reels.benefit3_title') }}</h4>
-                        <p class="text-text-muted">{{ __('landing.reels.benefit3_desc') }}</p>
-                    </div>
+            </div>
+
+            <div class="landing-reels-float landing-reels-float--style">
+                <span class="landing-reels-float__icon"><span class="material-symbols-outlined">restaurant</span></span>
+                <div class="landing-reels-float__body">
+                    <p class="landing-reels-float__title">{{ __('landing.reels.benefit2_title') }}</p>
+                    <p class="landing-reels-float__desc">{!! __('landing.reels.benefit2_desc', ['cocktails' => '<a href=\"'.e($demoCocktailsUrl ?? url('/carta/demo-cocktails')).'\" target=\"_blank\" class=\"landing-reels-float__link\">Azul Coctelería</a>']) !!}</p>
                 </div>
             </div>
         </div>
@@ -475,81 +541,102 @@
     {{-- Escaneo IA — unificado en 3 pasos reales --}}
     @php
         $steps = $landingSteps ?? [];
-        $asideBullets = (array) __('landing.process.aside_bullets');
     @endphp
     <section id="process" class="py-12 md:py-20">
         <div class="text-center mb-10 md:mb-12 max-w-3xl mx-auto">
             <span class="inline-block bg-primary/10 text-primary px-3 py-1 rounded-full text-label-sm font-bold uppercase tracking-wider mb-3">{{ __('landing.process.badge') }}</span>
             <h2 class="font-headline text-headline-lg md:text-headline-xl">{{ __('landing.process.title') }}</h2>
-            <p class="text-body-md text-text-muted mt-2">{{ __('landing.process.subtitle') }} <span class="text-primary font-semibold">{{ __('landing.process.plus_note') }}</span></p>
+            <p class="text-body-md text-text-muted mt-2">{{ __('landing.process.subtitle') }}</p>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-6 lg:gap-10 relative max-w-6xl mx-auto">
-            <div class="hidden md:block absolute top-7 left-[16.66%] right-[16.66%] h-0.5 border-t-2 border-dashed border-outline-variant -z-10" aria-hidden="true"></div>
+        <div class="wn-process-slider-wrap max-w-6xl mx-auto" data-process-slider>
+            <button type="button" class="wn-process-slider__arrow wn-process-slider__arrow--prev md:hidden" data-process-prev aria-label="Paso anterior">
+                <span class="material-symbols-outlined">chevron_left</span>
+            </button>
+            <div class="wn-process-steps md:grid md:grid-cols-3 md:gap-6 lg:gap-10 relative" data-process-track role="list">
+                <div class="hidden md:block absolute top-24 left-[16.66%] right-[16.66%] h-0.5 border-t-2 border-dashed border-outline-variant -z-10" aria-hidden="true"></div>
 
-            {{-- Paso 1: Foto o PDF con demo del escaneo --}}
-            @if(! empty($steps[0]))
-                <div class="text-center md:text-left space-y-4">
-                    <div class="w-14 h-14 rounded-2xl bg-primary text-on-primary flex items-center justify-center mx-auto md:mx-0 shadow-sm">
-                        <span class="material-symbols-outlined text-[28px]">{{ $steps[0]['icon'] }}</span>
+                @if(! empty($steps[0]))
+                <article class="wn-process-step snap-center shrink-0 w-[min(88vw,340px)] md:w-auto" data-process-slide data-process-animate role="listitem">
+                    {{-- Ilustración: documento + badge cámara --}}
+                    <div class="proc-illus proc-illus--doc" aria-hidden="true">
+                        <div class="proc-illus__paper">
+                            <span class="proc-illus__line proc-illus__line--title" style="--i:0"></span>
+                            <div class="proc-illus__img-ph"></div>
+                            <span class="proc-illus__line" style="--i:1"></span>
+                            <span class="proc-illus__line proc-illus__line--short" style="--i:2"></span>
+                            <span class="proc-illus__line" style="--i:3"></span>
+                            <span class="proc-illus__line proc-illus__line--short" style="--i:4"></span>
+                            {{-- Badge cámara en esquina inferior-derecha del papel --}}
+                            <span class="proc-illus__cam-badge">
+                                <span class="material-symbols-outlined">photo_camera</span>
+                            </span>
+                        </div>
                     </div>
-                    <div>
+                    <div class="wn-process-step__body">
                         <h3 class="font-headline text-headline-sm mb-1.5">{{ $steps[0]['t'] }}</h3>
                         <p class="text-body-md text-text-muted">{{ $steps[0]['d'] }}</p>
                     </div>
-                    <div class="landing-scan-demo landing-scan-demo--compact" aria-hidden="true">
-                        <div class="landing-scan-demo__frame">
-                            <p class="landing-scan-demo__section">{{ __('landing.process.scan_demo.section_starters') }}</p>
-                            <div class="landing-scan-demo__row"><span>{{ __('landing.process.scan_demo.item1') }}</span><strong>{{ __('landing.process.scan_demo.price1') }}</strong></div>
-                            <div class="landing-scan-demo__row"><span>{{ __('landing.process.scan_demo.item2') }}</span><strong>{{ __('landing.process.scan_demo.price2') }}</strong></div>
-                            <p class="landing-scan-demo__section landing-scan-demo__section--spaced">{{ __('landing.process.scan_demo.section_mains') }}</p>
-                            <div class="landing-scan-demo__row"><span>{{ __('landing.process.scan_demo.item3') }}</span><strong>{{ __('landing.process.scan_demo.price3') }}</strong></div>
-                            <div class="landing-scan-demo__row"><span>{{ __('landing.process.scan_demo.item4') }}</span><strong>{{ __('landing.process.scan_demo.price4') }}</strong></div>
-                            <div class="landing-scan-demo__scanline" aria-hidden="true"></div>
+                </article>
+                @endif
+
+                @if(! empty($steps[1]))
+                <article class="wn-process-step snap-center shrink-0 w-[min(88vw,340px)] md:w-auto" data-process-slide role="listitem">
+                    {{-- Ilustración: tarjeta oscura IA con filas de colores en stagger --}}
+                    <div class="proc-illus proc-illus--ai" aria-hidden="true">
+                        <div class="proc-illus__card">
+                            <span class="proc-illus__ai-badge">
+                                <span class="material-symbols-outlined">auto_awesome</span>
+                            </span>
+                            <span class="proc-illus__ai-row" style="--i:0; --w:75%; --c:#004ac6"></span>
+                            <span class="proc-illus__ai-row" style="--i:1; --w:55%; --c:#7ec8ff"></span>
+                            <span class="proc-illus__ai-row" style="--i:2; --w:85%; --c:#ff5500"></span>
+                            <span class="proc-illus__ai-row" style="--i:3; --w:42%; --c:#004ac6"></span>
                         </div>
                     </div>
-                    <p class="sr-only">{{ __('landing.process.scan_demo.aria') }}</p>
-                </div>
-            @endif
-
-            {{-- Paso 2: Procesado IA con viñetas "¿Qué hace la IA?" --}}
-            @if(! empty($steps[1]))
-                <div class="text-center md:text-left space-y-4">
-                    <div class="w-14 h-14 rounded-2xl bg-primary text-on-primary flex items-center justify-center mx-auto md:mx-0 shadow-sm">
-                        <span class="material-symbols-outlined text-[28px]">{{ $steps[1]['icon'] }}</span>
-                    </div>
-                    <div>
+                    <div class="wn-process-step__body">
                         <h3 class="font-headline text-headline-sm mb-1.5">{{ $steps[1]['t'] }}</h3>
                         <p class="text-body-md text-text-muted">{{ $steps[1]['d'] }}</p>
                     </div>
-                    @if(! empty($asideBullets))
-                        <ul class="wn-scan-aside__list wn-scan-aside__list--inline">
-                            @foreach($asideBullets as $bullet)
-                                <li><span class="material-symbols-outlined">check_circle</span><span>{{ $bullet }}</span></li>
-                            @endforeach
-                        </ul>
-                    @endif
-                </div>
-            @endif
+                </article>
+                @endif
 
-            {{-- Paso 3: Listo para servir con CTA principal --}}
-            @if(! empty($steps[2]))
-                <div class="text-center md:text-left space-y-4">
-                    <div class="w-14 h-14 rounded-2xl bg-primary text-on-primary flex items-center justify-center mx-auto md:mx-0 shadow-sm">
-                        <span class="material-symbols-outlined text-[28px]">{{ $steps[2]['icon'] }}</span>
+                @if(! empty($steps[2]))
+                <article class="wn-process-step snap-center shrink-0 w-[min(88vw,340px)] md:w-auto" data-process-slide data-process-animate role="listitem">
+                    {{-- Ilustración: patrón QR + miniphone --}}
+                    <div class="proc-illus proc-illus--qr" aria-hidden="true">
+                        <div class="proc-illus__qr-grid">
+                            @php
+                                $qrPattern = [
+                                    1,1,1,1,1,1,1,
+                                    1,0,0,0,0,0,1,
+                                    1,0,1,1,1,0,1,
+                                    1,0,1,0,1,0,1,
+                                    1,0,1,1,1,0,1,
+                                    1,0,0,0,0,0,1,
+                                    1,1,1,1,1,1,1,
+                                ];
+                            @endphp
+                            @foreach($qrPattern as $cell)
+                                <span class="{{ $cell ? 'proc-illus__qr-cell--dark' : '' }}"></span>
+                            @endforeach
+                        </div>
+                        <div class="proc-illus__miniphone">
+                            <span class="proc-illus__miniphone-url">menuwebnu.es/res</span>
+                            <div class="proc-illus__miniphone-thumb"></div>
+                        </div>
                     </div>
-                    <div>
+                    <div class="wn-process-step__body">
                         <h3 class="font-headline text-headline-sm mb-1.5">{{ $steps[2]['t'] }}</h3>
                         <p class="text-body-md text-text-muted">{{ $steps[2]['d'] }}</p>
                     </div>
-                    <a href="{{ $isLoggedIn ? $panelUrl : $registerUrl }}" class="wn-scan-cta wn-scan-cta--block" id="scan-main-cta">
-                        <span class="wn-scan-cta__icon"><span class="material-symbols-outlined text-[20px]">photo_camera</span></span>
-                        <span>{{ __('landing.process.cta_main') }}</span>
-                        <span class="material-symbols-outlined text-[22px]">arrow_forward</span>
-                    </a>
-                    <p class="text-label-sm text-text-muted">{{ __('landing.process.cta_main_note') }}</p>
-                </div>
-            @endif
+                </article>
+                @endif
+            </div>
+            <button type="button" class="wn-process-slider__arrow wn-process-slider__arrow--next md:hidden" data-process-next aria-label="Siguiente paso">
+                <span class="material-symbols-outlined">chevron_right</span>
+            </button>
+            <div class="wn-process-slider__dots md:hidden" data-process-dots role="tablist" aria-label="Pasos del proceso"></div>
         </div>
     </section>
 

@@ -79,33 +79,28 @@
     };
 
     const initSlide = function (root, items) {
-        // Loop continuo: el saliente y el entrante se animan EN PARALELO,
-        // con transiciones lentas (≈1.1s) y fade gradual definidas en CSS.
-        // Para que el measure sea estable y sirva de "carril", lo dejamos
-        // siempre con la cadena más larga del set (ya inyectada en HTML).
         const kind = root.getAttribute('data-cycle');
         const dwell = dwellTimeForCycle(kind);
-        let current = root.querySelector('.hero-cycle__item.is-active');
+        const viewport = root.querySelector('.hero-cycle__viewport') || root;
+        let current = viewport.querySelector('.hero-cycle__item.is-active');
         let index = 0;
-        let timerId = null;
-        const transitionMs = 1100;  // debe coincidir con la transición CSS
+        let pendingTimeout = null;
+        let stopped = false;
+        const transitionMs = 1100;
 
         const advance = function () {
+            if (stopped) return;
             const nextIndex = (index + 1) % items.length;
-            const nextText = items[nextIndex];
-
-            // Inserta el entrante ya posicionado abajo + invisible.
             const incoming = document.createElement('span');
             incoming.className = 'hero-cycle__item is-entering';
-            incoming.textContent = nextText;
-            root.appendChild(incoming);
-
-            // Reflow para que la transición arranque desde is-entering.
+            incoming.textContent = items[nextIndex];
+            viewport.appendChild(incoming);
             void incoming.offsetWidth;
 
-            // Disparamos ambos cambios en el mismo frame: saliente sube + se desvanece,
-            // entrante asciende y aparece. Ejecución paralela = ningún hueco vacío.
-            if (current) current.classList.add('is-leaving');
+            if (current) {
+                current.classList.remove('is-active');
+                current.classList.add('is-leaving');
+            }
             incoming.classList.remove('is-entering');
             incoming.classList.add('is-active');
 
@@ -113,22 +108,31 @@
             current = incoming;
             index = nextIndex;
 
-            if (previous) {
-                window.setTimeout(function () {
-                    if (previous && previous.parentNode === root) {
-                        root.removeChild(previous);
-                    }
-                }, transitionMs + 80);
-            }
+            window.setTimeout(function () {
+                if (previous && previous.parentNode === viewport) {
+                    viewport.removeChild(previous);
+                }
+                if (!stopped) {
+                    pendingTimeout = window.setTimeout(advance, dwell);
+                }
+            }, transitionMs + 80);
+        };
+
+        const scheduleLoop = function () {
+            pendingTimeout = window.setTimeout(advance, dwell);
         };
 
         return {
             start: function () {
-                if (timerId !== null) return;
-                timerId = window.setInterval(advance, dwell);
+                stopped = false;
+                scheduleLoop();
             },
             stop: function () {
-                if (timerId !== null) { window.clearInterval(timerId); timerId = null; }
+                stopped = true;
+                if (pendingTimeout !== null) {
+                    window.clearTimeout(pendingTimeout);
+                    pendingTimeout = null;
+                }
             },
         };
     };
@@ -156,6 +160,146 @@
         }
         controller.start();
     });
+
+    // Hero chips — cada chip rota de forma independiente con sus propias variantes
+    (function initHeroChips() {
+        var chipEls = document.querySelectorAll('[data-hero-chip]');
+        if (!chipEls.length) return;
+
+        chipEls.forEach(function (el) {
+            var variants;
+            try { variants = JSON.parse(el.getAttribute('data-hero-chip-variants') || '[]'); } catch (_) { variants = []; }
+            var interval = parseInt(el.getAttribute('data-hero-chip-interval') || '4000', 10);
+            var offset   = parseInt(el.getAttribute('data-hero-chip-offset')   || '0',    10);
+            var idx = 0;
+            var timerId = null;
+            var isLight = el.classList.contains('hero-chip--light');
+
+            function applyVariant(v) {
+                var iconEl   = el.querySelector('.hero-chip__icon .material-symbols-outlined');
+                var textEl   = el.querySelector('.hero-chip__text');
+                var labelEl  = el.querySelector('.hero-chip__label');
+                var valueEl  = el.querySelector('.hero-chip__value');
+                if (iconEl && v.icon) iconEl.textContent = v.icon;
+                if (textEl && v.text !== undefined) textEl.textContent = v.text;
+                if (labelEl && v.label !== undefined) labelEl.textContent = v.label;
+                if (valueEl && v.value !== undefined) valueEl.textContent = v.value;
+            }
+
+            function showChip() {
+                el.classList.remove('is-hiding');
+                el.classList.add('is-visible');
+            }
+            function hideAndSwap() {
+                if (variants.length < 2) return;
+                el.classList.remove('is-visible');
+                el.classList.add('is-hiding');
+                setTimeout(function () {
+                    idx = (idx + 1) % variants.length;
+                    applyVariant(variants[idx]);
+                    el.classList.remove('is-hiding');
+                    el.classList.add('is-visible');
+                }, 500);
+            }
+
+            if (prefersReducedMotion) {
+                el.classList.add('is-visible');
+                return;
+            }
+
+            // Mostrar al inicio con offset
+            setTimeout(function () {
+                showChip();
+                timerId = window.setInterval(hideAndSwap, interval);
+            }, offset);
+
+            // Pausa al hover en la sección
+            var heroSection = el.closest('section');
+            if (heroSection) {
+                heroSection.addEventListener('mouseenter', function () {
+                    if (timerId) { clearInterval(timerId); timerId = null; }
+                });
+                heroSection.addEventListener('mouseleave', function () {
+                    if (!timerId) timerId = window.setInterval(hideAndSwap, interval);
+                });
+            }
+        });
+    }());
+
+    // Proceso — animaciones secuenciales activadas por IntersectionObserver
+    (function initProcessAnimations() {
+        var slides = Array.from(document.querySelectorAll('[data-process-slide]'));
+        if (!slides.length) return;
+
+        if (prefersReducedMotion) {
+            slides.forEach(function (s) { s.classList.add('is-animated'); });
+            return;
+        }
+
+        // En desktop (md+) activamos los tres en secuencia cuando el proceso entra en vista
+        // En móvil, activamos cada slide cuando entra en el viewport del scroll horizontal
+        var isMobile = function () { return window.innerWidth < 768; };
+
+        // Delays secuenciales solo para pasos 1 y 3 (foto/PDF y QR)
+        var animateSlides = slides.filter(function (s) {
+            return s.hasAttribute('data-process-animate');
+        });
+        var stepDelays = [0, 1200];
+
+        // Observa el contenedor del proceso para desktop
+        var processSection = document.getElementById('process');
+        var activated = false;
+
+        function activateAll() {
+            if (activated) return;
+            activated = true;
+            animateSlides.forEach(function (slide, i) {
+                setTimeout(function () {
+                    slide.classList.add('is-animated');
+                }, stepDelays[i] || 0);
+            });
+        }
+
+        if ('IntersectionObserver' in window) {
+            var observer = new IntersectionObserver(function (entries) {
+                entries.forEach(function (entry) {
+                    if (!entry.isIntersecting) return;
+                    if (!isMobile()) {
+                        // Desktop: animar los tres en secuencia
+                        activateAll();
+                    } else {
+                        // Móvil: animar solo slides con ilustración animada visibles
+                        animateSlides.forEach(function (slide) {
+                            var r = slide.getBoundingClientRect();
+                            if (r.left < window.innerWidth && r.right > 0) {
+                                slide.classList.add('is-animated');
+                            }
+                        });
+                    }
+                    // Reiniciar si vuelven a salir de viewport (desktop)
+                    if (!isMobile()) observer.disconnect();
+                });
+            }, { threshold: 0.25 });
+
+            if (processSection) observer.observe(processSection);
+
+            // En móvil también observar cada slide individualmente
+            animateSlides.forEach(function (slide) {
+                var mobileObs = new IntersectionObserver(function (entries) {
+                    entries.forEach(function (entry) {
+                        if (entry.isIntersecting && isMobile()) {
+                            slide.classList.add('is-animated');
+                            mobileObs.disconnect();
+                        }
+                    });
+                }, { threshold: 0.5 });
+                mobileObs.observe(slide);
+            });
+        } else {
+            // Fallback: activar todo de golpe
+            activateAll();
+        }
+    }());
 
     window.toggleFAQ = function (btn) {
         const item = btn.closest('.faq-item');
@@ -247,6 +391,7 @@
                 Object.assign(preset, textPresets[i]);
             }
         });
+        presets.length = Math.min(presets.length, 3);
 
         const el = {
             business: document.getElementById('customize-business'),
@@ -259,6 +404,9 @@
             swatches: document.getElementById('customize-swatches'),
         };
 
+        if (el.swatches) {
+            el.swatches.innerHTML = '';
+        }
         presets.forEach(function (preset, i) {
             const swatch = document.createElement('span');
             swatch.className = 'landing-customize-swatch' + (i === 0 ? ' is-active' : '');
@@ -269,19 +417,33 @@
             }
         });
 
+        const pickerRoot = document.querySelector('[data-template-picker]');
+        const pickerCards = pickerRoot
+            ? Array.from(pickerRoot.querySelectorAll('.landing-template-picker__card'))
+            : [];
+
         let current = 0;
+        let autoplayId = null;
 
         function applyPreset(index) {
             const p = presets[index];
             if (!p) return;
 
-            phone.style.setProperty('--cust-primary', p.primary);
-            phone.style.setProperty('--cust-bg', p.bg);
-            phone.style.setProperty('--cust-surface', p.surface);
-            phone.style.setProperty('--cust-text', p.text);
-            phone.style.setProperty('--cust-muted', p.muted);
-            phone.style.setProperty('--cust-thumb', p.thumb);
-            phone.style.borderColor = p.bg === '#0a0a0a' || p.bg === '#0a0e14' ? '#2a2a2a' : '#e5e7eb';
+            if (p.primary) phone.style.setProperty('--cust-primary', p.primary);
+            if (p.bg)      phone.style.setProperty('--cust-bg', p.bg);
+            if (p.surface) phone.style.setProperty('--cust-surface', p.surface);
+            if (p.text)    phone.style.setProperty('--cust-text', p.text);
+            if (p.muted)   phone.style.setProperty('--cust-muted', p.muted);
+            if (p.thumb)   phone.style.setProperty('--cust-thumb', p.thumb);
+            if (p.preview) {
+                phone.style.setProperty('--cust-thumb-img', 'url("' + p.preview + '")');
+            } else {
+                phone.style.removeProperty('--cust-thumb-img');
+            }
+            // solo asignamos borderColor si no es el teléfono real (que usa un marco fijo oscuro)
+            if (!phone.classList.contains('tpl-phone')) {
+                phone.style.borderColor = p.bg === '#0a0a0a' || p.bg === '#0a0e14' ? '#2a2a2a' : '#e5e7eb';
+            }
 
             if (el.business) el.business.textContent = p.business;
             if (el.template) el.template.textContent = p.template;
@@ -298,20 +460,65 @@
             }
         }
 
+        function setActiveTemplate(index) {
+            if (index < 0 || index >= presets.length) return;
+            current = index;
+            applyPreset(index);
+            pickerCards.forEach(function (card, i) {
+                const active = i === index;
+                card.classList.toggle('is-active', active);
+                card.setAttribute('aria-selected', active ? 'true' : 'false');
+            });
+        }
+
         function switchPreset() {
             phone.classList.add('is-switching');
             if (el.hint) el.hint.classList.add('is-fading');
 
             setTimeout(function () {
-                current = (current + 1) % presets.length;
-                applyPreset(current);
+                setActiveTemplate((current + 1) % presets.length);
                 phone.classList.remove('is-switching');
                 if (el.hint) el.hint.classList.remove('is-fading');
             }, 320);
         }
 
-        applyPreset(0);
-        setInterval(switchPreset, 3200);
+        function startAutoplay() {
+            if (prefersReducedMotion || presets.length < 2) return;
+            if (autoplayId !== null) return;
+            autoplayId = window.setInterval(switchPreset, 3200);
+        }
+
+        function stopAutoplay() {
+            if (autoplayId !== null) {
+                window.clearInterval(autoplayId);
+                autoplayId = null;
+            }
+        }
+
+        setActiveTemplate(0);
+        startAutoplay();
+
+        pickerCards.forEach(function (card) {
+            card.addEventListener('click', function () {
+                const idx = parseInt(card.getAttribute('data-template-index'), 10);
+                if (isNaN(idx) || idx === current) return;
+                stopAutoplay();
+                phone.classList.add('is-switching');
+                if (el.hint) el.hint.classList.add('is-fading');
+                setTimeout(function () {
+                    setActiveTemplate(idx);
+                    phone.classList.remove('is-switching');
+                    if (el.hint) el.hint.classList.remove('is-fading');
+                    startAutoplay();
+                }, 320);
+            });
+        });
+
+        const personalizeSection = document.getElementById('personalizable');
+        if (personalizeSection) {
+            personalizeSection.addEventListener('mouseenter', stopAutoplay);
+            personalizeSection.addEventListener('mouseleave', startAutoplay);
+        }
     }
 
     // Slider unificado de plantillas TV (Hero, Tapas, Daily, Video, Menu)
@@ -532,6 +739,80 @@
 
         updateActive(0);
         startAutoplay();
+    });
+
+    document.querySelectorAll('[data-process-slider]').forEach(function (wrap) {
+        const track = wrap.querySelector('[data-process-track]');
+        if (!track) return;
+
+        const slides = Array.from(track.querySelectorAll('[data-process-slide]'));
+        if (!slides.length) return;
+
+        const prevBtn = wrap.querySelector('[data-process-prev]');
+        const nextBtn = wrap.querySelector('[data-process-next]');
+        const dotsHost = wrap.querySelector('[data-process-dots]');
+        const reducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        const isMobile = function () {
+            return window.matchMedia && window.matchMedia('(max-width: 767px)').matches;
+        };
+
+        if (dotsHost && !dotsHost.children.length) {
+            slides.forEach(function (_, i) {
+                const dot = document.createElement('button');
+                dot.type = 'button';
+                dot.className = 'wn-process-slider__dot' + (i === 0 ? ' is-active' : '');
+                dot.setAttribute('data-process-dot', '');
+                dot.setAttribute('aria-label', 'Paso ' + (i + 1));
+                dotsHost.appendChild(dot);
+            });
+        }
+        const dots = dotsHost ? Array.from(dotsHost.querySelectorAll('[data-process-dot]')) : [];
+
+        function indexFromScroll() {
+            const center = track.scrollLeft + (track.clientWidth / 2);
+            let best = 0;
+            let bestDist = Infinity;
+            slides.forEach(function (slide, i) {
+                const mid = slide.offsetLeft + (slide.offsetWidth / 2);
+                const dist = Math.abs(mid - center);
+                if (dist < bestDist) { bestDist = dist; best = i; }
+            });
+            return best;
+        }
+
+        function updateActive(idx) {
+            dots.forEach(function (dot, i) {
+                dot.classList.toggle('is-active', i === idx);
+            });
+            if (prevBtn) prevBtn.setAttribute('aria-disabled', idx === 0 ? 'true' : 'false');
+            if (nextBtn) nextBtn.setAttribute('aria-disabled', idx === slides.length - 1 ? 'true' : 'false');
+        }
+
+        function goTo(idx, behavior) {
+            if (!isMobile()) return;
+            idx = Math.max(0, Math.min(slides.length - 1, idx));
+            const slide = slides[idx];
+            if (!slide) return;
+            track.scrollTo({ left: slide.offsetLeft - 8, behavior: behavior || (reducedMotion ? 'auto' : 'smooth') });
+            updateActive(idx);
+        }
+
+        if (prevBtn) prevBtn.addEventListener('click', function () { goTo(indexFromScroll() - 1); });
+        if (nextBtn) nextBtn.addEventListener('click', function () { goTo(indexFromScroll() + 1); });
+        dots.forEach(function (dot, i) {
+            dot.addEventListener('click', function () { goTo(i); });
+        });
+
+        let scrollSyncTimer = null;
+        track.addEventListener('scroll', function () {
+            if (!isMobile()) return;
+            if (scrollSyncTimer) clearTimeout(scrollSyncTimer);
+            scrollSyncTimer = setTimeout(function () {
+                updateActive(indexFromScroll());
+            }, 80);
+        }, { passive: true });
+
+        updateActive(0);
     });
 
     (function initLandingLangSelect() {

@@ -69,6 +69,11 @@ return [
         'phone_lang_chip' => 'EN',
         'phone_chip_translation' => 'Traducción Automática',
         'phone_chip_scan' => 'Escaneo IA',
+        'phone_chips' => [
+            ['type' => 'metric', 'id' => 'ticket', 'icon' => 'trending_up', 'label' => 'TICKET MEDIO', 'value' => '+18%'],
+            ['type' => 'pill', 'id' => 'scan', 'icon' => 'bolt', 'text' => 'Escaneo IA'],
+            ['type' => 'pill', 'id' => 'translation', 'icon' => 'translate', 'text' => 'Traducción Automática'],
+        ],
         'phone_ticket_label' => 'TICKET MEDIO',
         'phone_ticket_value' => '+18%',
         'phone_item1_name' => 'Classic Negroni',
@@ -120,8 +125,8 @@ return [
 
     'demos' => [
         'badge' => 'En vivo',
-        'title' => 'Tres cartas reales (y muchas más por venir)',
-        'subtitle' => 'Abre cualquier demo en tu móvil: restaurante clásico, coctelería o local asiático. Hay japonés, fast food, marisquería y muchos estilos más — y puedes personalizar colores, tipografías y textos al vuelo.',
+        'title' => 'Más de :count plantillas para tu local',
+        'subtitle' => 'Elige estilo (restaurante, bar, coctelería, delivery…), abre una demo en tu móvil y cambia colores, tipografías y logo al instante.',
         'cta' => 'Ver carta en vivo',
         'items' => [
             [
@@ -150,12 +155,12 @@ return [
 
     'customize' => [
         'badge' => 'Estudio visual',
-        'title' => 'Decenas de estilos y nuevas cada temporada',
-        'desc' => 'Además de estas tres demos hay japonés, fast food, marisquería, fine dining, coctelería, asador y más — y seguimos sumando. Cambia colores, tipografías, logo y textos desde el panel; la carta se actualiza al instante.',
+        'pick_title' => 'Seleccionar plantilla',
+        'title' => '',
+        'desc' => '',
         'bullets' => [
             'Estilos para restaurante, bar, coctelería, delivery u hotel',
-            'Paleta de colores y fuentes por plantilla',
-            'Previsualiza antes de publicar, sin perder tus platos',
+            'Previsualiza colores y fuentes antes de publicar',
         ],
         'cta' => 'Crear mi carta',
         'color' => 'Color',
@@ -227,6 +232,12 @@ return [
     ],
 
     'reels' => [
+        'badge' => 'SaaS para restaurantes premium',
+        'headline_lead' => 'Tu carta, en',
+        'headline_highlight' => 'movimiento',
+        'hero_subtitle' => 'Transforma tu menú estático en una experiencia cinematográfica que seduce a tus clientes antes del primer bocado.',
+        'float_fast_title' => 'Carga ultra-rápida',
+        'float_fast_desc' => 'Optimizado para una experiencia fluida sin esperas.',
         'title' => 'Cartas que cobran vida con Reels',
         'subtitle' => 'Vídeos cortos en cada plato: una carta visual y moderna que despierta el apetito y ayuda a vender más.',
         'plus_note' => 'Incluido desde el plan Pro.',
@@ -248,7 +259,13 @@ return [
     'tvpik' => [
         'badge' => 'Plan Plus',
         'title' => 'Tu carta también en la TV del local',
-        'subtitle' => 'Plato del día, tabla de tapas, menú del día, vídeos o carta completa — cinco plantillas TV listas, todo sincronizado desde Webnu y controlado con TVPik desde el móvil.',
+        'subtitle' => 'Distintas posibilidades en pantalla — plato del día, tapas, menú del día, vídeos, carta completa y más formatos que seguimos ampliando — sincronizados desde Webnu y controlados con TVPik desde el móvil.',
+        'stats_sales_label' => 'Más ventas en sala',
+        'stats_sales_value' => 'Carta visual',
+        'stats_ticket_label' => 'Ticket medio',
+        'stats_ticket_value' => '+18%',
+        'benefit_sales_title' => 'Más ticket y más pedidos',
+        'benefit_sales_desc' => 'La carta en TV y en móvil vende mejor: platos en vídeo, destacados y precios siempre al día impulsan el ticket medio.',
         'benefit1_title' => 'Sincroniza desde el móvil',
         'benefit1_desc' => 'Cambias un precio o marcas un plato agotado en Webnu y la TV del local lo refleja al instante. Sin cables ni Fire Stick.',
         'benefit2_title' => 'Plantillas pensadas para TV',
@@ -256,6 +273,12 @@ return [
         'benefit3_title' => 'Barra, sala o terraza',
         'benefit3_desc' => 'Una TV para el menú del día en barra, otra con promos en sala. Misma base de datos, distinto contenido por pantalla.',
         'pricing_link' => 'Incluido en Plus · add-on en Pro',
+        'feat_sync_label' => 'Estado',
+        'feat_sync_value' => 'Sincronizado',
+        'feat_price_label' => 'Actualización',
+        'feat_mobile_label' => 'Control móvil',
+        'feat_ticket_label' => 'Ticket medio',
+        'feat_ticket_value' => '+18%',
         'live' => 'EN VIVO',
         'updated' => 'Actualizado',
         'nav_prev' => 'Plantilla anterior',
@@ -323,6 +346,35 @@ return [
                 ],
                 'label' => 'Carta',
             ],
+            [
+                'kind' => 'dual',
+                'label' => '2 Pantallas',
+                'tag' => 'RECOMENDADO',
+                'title' => 'Hamburguesa Premium',
+                'price' => '12,90 €',
+                'right_tag' => 'MENÚ',
+                'right_title' => 'Carta rápida',
+                'sections' => [
+                    [
+                        'name' => 'HAMBURGUESAS',
+                        'items' => [
+                            ['name' => 'Classic Burger', 'price' => '9,90 €'],
+                            ['name' => 'Bacon Cheese', 'price' => '11,90 €'],
+                            ['name' => 'Premium', 'price' => '12,90 €'],
+                            ['name' => 'Veggie', 'price' => '10,50 €'],
+                        ],
+                    ],
+                    [
+                        'name' => 'BEBIDAS',
+                        'items' => [
+                            ['name' => 'Refresco', 'price' => '2,50 €'],
+                            ['name' => 'Agua', 'price' => '1,50 €'],
+                            ['name' => 'Cerveza', 'price' => '2,90 €'],
+                            ['name' => 'Café', 'price' => '1,80 €'],
+                        ],
+                    ],
+                ],
+            ],
         ],
     ],
 
@@ -386,13 +438,13 @@ return [
             'period' => '€ · siempre gratis',
             'cta' => 'Empezar gratis',
             'features' => [
-                '<strong>1 carta digital + QR</strong> dinámico',
+                '<strong>1 carta y 1 menú</strong> + QR dinámico',
                 'Platos y categorías ilimitados',
                 'Fotos de platos incluidas',
                 'Alérgenos (14 obligatorios)',
-                'Plantillas básicas',
+                '<strong>5 plantillas</strong> básicas',
                 '<strong>1 importación IA</strong> de prueba',
-                'Sin traducciones, vídeos ni TVPik',
+                'Sin traducciones, vídeos, PDF ni TVPik',
                 'Badge «by Webnu»',
             ],
         ],
@@ -403,7 +455,7 @@ return [
             'period' => '€ / mes · sin IVA',
             'cta' => 'Contratar Pro',
             'features' => [
-                '<strong>Hasta 5 cartas</strong> (5 QR)',
+                '<strong>Hasta 5 cartas y 5 menús</strong> (5 QR)',
                 'Platos y categorías ilimitados',
                 'Fotos y <strong>vídeos</strong> de platos',
                 '<strong>3 idiomas</strong> con traducción automática',
@@ -423,7 +475,7 @@ return [
             'cta' => 'Contratar Plus',
             'features' => [
                 'Todo lo del Pro',
-                '<strong>Cartas ilimitadas</strong>',
+                '<strong>Cartas y menús ilimitados</strong>',
                 '<strong>Idiomas ilimitados</strong>',
                 '<strong>1 pantalla TVPik</strong> incluida',
                 'Sync automático TV',
@@ -439,7 +491,7 @@ return [
             'cta' => 'Contactar',
             'features' => [
                 'Panel multi-local',
-                'Cartas e idiomas ilimitados',
+                'Cartas, menús e idiomas ilimitados',
                 'TVPik incluido',
                 'Factura única',
                 'Account manager',
@@ -449,7 +501,8 @@ return [
         'comparison' => [
             'title' => 'Comparativa de planes',
             'rows' => [
-                'menus' => 'Cartas digitales',
+                'menus' => 'Cartas digitales (QR)',
+                'menu_types' => 'Menús por carta',
                 'products' => 'Platos por carta',
                 'photos' => 'Fotos de platos',
                 'ai_scans' => 'Escaneos IA',
@@ -464,6 +517,8 @@ return [
             'unlimited' => 'Ilimitados',
             'menus_unlimited' => 'Ilimitadas',
             'menus_count' => ':count carta|:count cartas',
+            'menu_types_count' => ':count menú|:count menús',
+            'menu_types_unlimited' => 'Ilimitados',
             'products_count' => ':count platos',
             'scans_lifetime' => ':count (de por vida)',
             'scans_monthly' => ':count al mes',
@@ -480,11 +535,11 @@ return [
         'title' => 'Preguntas frecuentes',
         'items' => [
             ['q' => '¿Cómo funciona el escáner IA?', 'a' => 'Subes foto o PDF de tu carta. Un modelo especializado en gastronomía detecta platos, precios, secciones y alérgenos. Revisas en el panel y publicas.'],
-            ['q' => '¿Qué incluye el plan Free?', 'a' => '2 cartas, 30 platos por carta, 5 plantillas de diseño, alérgenos, QR descargable y 1 escaneo IA. Sin fotos, vídeos ni traducciones. Al registrarte tienes 30 días de Pro gratis (todas las plantillas, fotos, vídeos, 3 idiomas, PDF). Después vuelves a Free si no suscribes.'],
+            ['q' => '¿Qué incluye el plan Free?', 'a' => '1 carta y 1 menú, platos y categorías ilimitados, fotos de platos, 5 plantillas básicas, alérgenos, QR descargable y 1 escaneo IA de prueba. Sin vídeos, traducciones, PDF ni TVPik. Badge «by Webnu». Al registrarte tienes 30 días de Pro de regalo (más cartas y menús, vídeos, 3 idiomas, plantillas premium y PDF). Después vuelves a Free si no suscribes.'],
             ['q' => '¿Puedo cambiar precios desde el móvil?', 'a' => 'Sí. Los cambios son instantáneos para quien escanee el QR. Ideal para productos agotados o menú del día.'],
             ['q' => '¿Qué son los reels en la carta?', 'a' => 'Son vídeos cortos en cada plato de la carta QR: el cliente ve el movimiento sin salir del menú, con una presentación visual y moderna que ayuda a despertar el apetito y vender más.'],
             ['q' => '¿Necesito WiFi en el local para el cliente?', 'a' => 'No. El comensal usa su 4G/5G. La carta está optimizada para señal débil y los vídeos cargan de forma progresiva.'],
-            ['q' => '¿Puedo gestionar varios locales?', 'a' => 'Sí. Desde un mismo panel puedes crear y administrar varios negocios, cada uno con su QR y carta independiente. Disponible según tu plan.'],
+            ['q' => '¿Puedo gestionar varios locales?', 'a' => 'Sí. Free incluye 1 carta y 1 menú; Pro hasta 5 cartas y 5 menús; Plus, cartas y menús ilimitados. Cada carta tiene su QR y puedes organizar varios menús (del día, vinos, etc.) dentro de la misma carta según tu plan.'],
             ['q' => '¿Puedo cambiar de plantilla después?', 'a' => 'Sí. En el estudio visual eliges plantilla y colores cuando quieras. Free incluye 5 diseños; con Pro desbloqueas toda la biblioteca temática sin perder tus platos.'],
             ['q' => '¿Cómo funciona el idioma en la carta?', 'a' => 'Desde Pro activas hasta 3 idiomas extra; con Plus, idiomas ilimitados. Puedes traducir con IA o editar manualmente. Si el navegador del comensal está en otro idioma y lo tienes activo, la carta se abre en ese idioma; también puede elegirlo con el selector al escanear el QR.'],
             ['q' => '¿Cómo funciona TVPik?', 'a' => 'TVPik publica en las TVs del local el contenido que configuras desde Webnu: plantillas de carta completa, plato del día, destacados o vídeos. No es obligatorio mostrar la misma vista que el QR — puedes usar slides, menú del día o recomendaciones. Los cambios de precios y platos en Webnu se sincronizan al instante. Sin HDMI ni Fire Stick.'],
@@ -494,7 +549,7 @@ return [
     ],
 
     'cta' => [
-        'title' => 'Tu mesa 1 puede tener carta digital esta tarde',
+        'title' => 'Tu local puede tener carta digital hoy',
         'subtitle' => 'Únete a la hostelería que ya no imprime cartas por cada cambio de precio.',
         'primary' => 'Empezar gratis',
         'secondary' => 'Ver demo en vivo',

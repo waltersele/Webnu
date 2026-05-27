@@ -154,6 +154,15 @@ class PlatformSettingsService
             'stripe_secret_hint' => PlatformSetting::stripeSecretHint(),
             'stripe_webhook_configured' => PlatformSetting::stripeWebhookSecret() !== null,
             'stripe_webhook_hint' => PlatformSetting::stripeWebhookHint(),
+            'google_client_id' => PlatformSetting::googleClientId() ?? '',
+            'google_oauth_configured' => PlatformSetting::hasGoogleOAuth(),
+            'google_client_secret_configured' => PlatformSetting::googleClientSecret() !== null,
+            'google_client_secret_hint' => PlatformSetting::googleClientSecretHint(),
+            'google_redirect_uri' => PlatformSetting::getValue('google_redirect_uri') ?? '',
+            'google_redirect_uri_effective' => PlatformSetting::googleRedirectUri(),
+            'google_redirect_uri_default' => rtrim((string) config('app.url'), '/') . '/auth/google/callback',
+            'pre_alta_ingest_configured' => PlatformSetting::hasPreAltaIngestKey(),
+            'pre_alta_ingest_hint' => PlatformSetting::preAltaIngestKeyHint(),
             'tvpik_api_url' => PlatformSetting::tvpikApiUrl() ?? '',
             'tvpik_web_url' => PlatformSetting::tvpikWebUrl(),
             'tvpik_app_key_configured' => PlatformSetting::tvpikAppKey() !== null,
@@ -189,6 +198,32 @@ class PlatformSettingsService
 
         if ($data['clear_stripe_webhook_secret'] ?? false) {
             PlatformSetting::where('key', 'stripe_webhook_secret')->delete();
+        }
+
+        if (array_key_exists('google_client_id', $data)) {
+            $id = trim((string) $data['google_client_id']);
+            PlatformSetting::setValue('google_client_id', $id === '' ? null : $id);
+        }
+
+        if (! empty($data['google_client_secret'])) {
+            PlatformSetting::setValue('google_client_secret', trim((string) $data['google_client_secret']));
+        }
+
+        if ($data['clear_google_client_secret'] ?? false) {
+            PlatformSetting::where('key', 'google_client_secret')->delete();
+        }
+
+        if (array_key_exists('google_redirect_uri', $data)) {
+            $uri = trim((string) $data['google_redirect_uri']);
+            PlatformSetting::setValue('google_redirect_uri', $uri === '' ? null : rtrim($uri, '/'));
+        }
+
+        if (! empty($data['pre_alta_ingest_key'])) {
+            PlatformSetting::setValue('pre_alta_ingest_key', trim((string) $data['pre_alta_ingest_key']));
+        }
+
+        if ($data['clear_pre_alta_ingest_key'] ?? false) {
+            PlatformSetting::where('key', 'pre_alta_ingest_key')->delete();
         }
 
         if (array_key_exists('tvpik_api_url', $data)) {

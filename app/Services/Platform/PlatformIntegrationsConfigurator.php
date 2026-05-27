@@ -36,6 +36,11 @@ class PlatformIntegrationsConfigurator
         }
 
         config(['digital_signage.only_enabled' => PlatformSetting::digitalSignageOnlyEnabled()]);
+
+        $preAltaKey = PlatformSetting::preAltaIngestKey();
+        if ($preAltaKey) {
+            config(['pre_alta.ingest_key' => $preAltaKey]);
+        }
     }
 
     protected function tableReady(): bool

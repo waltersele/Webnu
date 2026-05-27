@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Company;
+use App\Menu;
 use App\MenuScanJob;
 use App\Product;
 use App\User;
@@ -335,6 +336,42 @@ class UserPlanService
         ]);
     }
 
+    public function maxMenus(User $user): ?int
+    {
+        $max = $this->tier($user)['max_menus'] ?? null;
+
+        return $max === null ? null : (int) $max;
+    }
+
+    public function menuCount(User $user): int
+    {
+        return Menu::whereHas('company', function ($q) use ($user) {
+            $q->where('user_id', $user->id);
+        })->count();
+    }
+
+    public function canCreateMenu(User $user): bool
+    {
+        $max = $this->maxMenus($user);
+        if ($max === null) {
+            return true;
+        }
+
+        return $this->menuCount($user) < $max;
+    }
+
+    public function assertCanCreateMenu(User $user): void
+    {
+        if ($this->canCreateMenu($user)) {
+            return;
+        }
+
+        $max = $this->maxMenus($user);
+        throw ValidationException::withMessages([
+            'name' => "Tu plan permite hasta {$max} " . ($max === 1 ? 'menú' : 'menús') . '. Mejora a Pro (' . $this->proPriceLabel() . ') o Plus (' . $this->plusPriceLabel() . ') para añadir más.',
+        ]);
+    }
+
     public function assertCanAddProduct(User $user, Company $company): void
     {
         if ($this->canAddProduct($user, $company)) {
@@ -656,6 +693,7 @@ class UserPlanService
             ],
             'limits' => [
                 'max_companies' => $this->maxCompanies($user),
+                'max_menus' => $this->maxMenus($user),
                 'max_products_per_company' => $this->maxProductsPerCompany($user),
                 'menu_scans_remaining' => $this->menuScansRemaining($user),
                 'translation_max_locales' => $this->maxTranslationLocales($user),
