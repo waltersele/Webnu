@@ -26,9 +26,9 @@ Guía operativa del despliegue de **webnu.es** desde tu equipo a producción.
 ```
 
 - **Document root** del dominio en cPanel: `/home/wwwwebnu/public_html/webnu.es/public/`.
-- **Stack actual**: PHP 7.4, Laravel 7.x, MySQL (cPanel), Cashier 12.
+- **Stack actual**: PHP 8.3, Laravel 10.x, MySQL/MariaDB (cPanel), Cashier 15.
 - **Rama desplegada**: `origin/main`.
-- **Rama `upgrade/laravel-10`** (no se despliega aún): preparación para PHP 8.3 + Laravel 10.
+- **Nota**: el despliegue **SIEMPRE** respeta `.env`, `public/img/` (uploads) y `storage/`.
 
 ## Despliegue normal (el caso del 95% de las veces)
 
@@ -54,9 +54,9 @@ El script hace:
 2. Calcula la lista de **archivos cambiados** entre el SHA anterior y el nuevo (sin transferir el repo completo).
 3. Modo mantenimiento (`artisan down`).
 4. Backup MySQL automático en `storage/backups/db-YYYYMMDD-HHMM.sql.gz`.
-5. `rsync` solo de los ficheros cambiados, excluyendo `.env`, `vendor/`, `public/img/`, `storage/`, etc.
+5. `rsync` solo de los ficheros cambiados, excluyendo `.env`, `public/img/`, `storage/`, etc.
 6. Limpia `bootstrap/cache/{services,packages,config}.php`.
-7. `composer dump-autoload --ignore-platform-reqs` (no instala paquetes; solo regenera el classmap).
+7. En PHP 8.x/Laravel 10: `composer install --no-dev` (instala/actualiza `vendor/`). En stacks legacy, hace `composer dump-autoload`.
 8. `php artisan package:discover`.
 9. `php artisan migrate --force`.
 10. Si el commit incluye `database/seeds/ProductionDemoSeeder.php` ⇒ lo ejecuta.
@@ -92,6 +92,7 @@ Salida típica:
 | `--skip-backup` | Saltar `mysqldump`. Útil para deploys triviales repetidos. |
 | `--no-down` | Deploy en caliente (sin `artisan down`). Riesgo si hay migraciones. |
 | `--full-rsync` | rsync completo en lugar de delta git. Útil si sospechas archivos desincronizados. |
+| `--with-vendor` | Fuerza sincronizar `composer.json/lock` y `vendor/` + ejecutar `composer install` (útil en upgrades). |
 
 ## Rollback rápido
 
@@ -141,13 +142,13 @@ El script ya los excluye, pero es bueno conocerlos:
 | `public/img/` | Fotos subidas por los clientes (logos, productos). Pérdida irreversible. |
 | `public/.htaccess` | Redirects de hosting (https, www, etc.). Si lo pisas, posible bucle 301 o caída. |
 | `storage/logs/`, `storage/framework/sessions/` | Sesiones activas (logout masivo) y logs en curso. |
-| `vendor/` | Compilado para PHP 7.4. El `composer.json` del repo apunta a PHP ^8.1; `composer install` aquí rompería. |
-| `composer.json`, `composer.lock` | Misma razón que `vendor/`. Solo se actualizan cuando migremos a PHP 8.3+. |
+| `public/img/` | Ya arriba: uploads de clientes. Nunca sobreescribir. |
+| `.env` | Ya arriba: credenciales. Nunca sobreescribir. |
 
 ## Variables de entorno a vigilar (.env)
 
 - `APP_ENV=production`, `APP_DEBUG=false`.
-- `APP_URL=https://webnu.es`.
+- `APP_URL=https://webnu.es` (**importante**: si se queda en `http://` el panel puede cargar assets por HTTP y el navegador los bloqueará → CSS roto).
 - `DB_*` correctos.
 - `STRIPE_KEY`, `STRIPE_SECRET`, `STRIPE_WEBHOOK_SECRET` activos.
 - `MAIL_FROM_ADDRESS`, `MAIL_FROM_NAME` (los emails de suscripción los usan).
@@ -155,6 +156,21 @@ El script ya los excluye, pero es bueno conocerlos:
 - `GEMINI_API_KEY` o configurado desde Plataforma → Escaneo IA.
 
 ## Troubleshooting
+
+### El panel se ve “sin CSS” / logo gigante
+
+Causa típica: `APP_URL` en `http://...` → el navegador bloquea CSS/JS por *mixed content*.
+
+Solución rápida:
+
+```bash
+cd /home/wwwwebnu/public_html/webnu.es
+nano .env  # asegurar APP_URL=https://webnu.es
+/opt/alt/php83/usr/bin/php artisan config:clear
+/opt/alt/php83/usr/bin/php artisan view:clear
+/opt/alt/php83/usr/bin/php artisan cache:clear
+/opt/alt/php83/usr/bin/php artisan config:cache
+```
 
 ### `Command "webnu:X" is not defined`
 
