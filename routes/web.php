@@ -22,6 +22,12 @@ Route::get('pre-alta/media/{id}', 'PreAltaPreviewController@media')->name('pre-a
 Route::get('activar/{token}', 'PreAltaClaimController@show')->name('pre-alta.claim.show')->where('token', '[a-fA-F0-9]{64}');
 Route::post('activar/{token}', 'PreAltaClaimController@store')->name('pre-alta.claim.store')->where('token', '[a-fA-F0-9]{64}');
 
+// Menú en carta con URL simple: /carta/{company}/menu/{menu}
+Route::get('carta/{companySlug}/menu/{menuSlug}', 'PagesController@seeMenuSimple')
+    ->where('companySlug', '[a-z0-9][a-z0-9-]*')
+    ->where('menuSlug', '[a-z0-9][a-z0-9-]*')
+    ->name('public.menu.simple');
+
 // Menú público concreto: /carta/{owner}/{company}/menu/{menu}
 Route::get('carta/{ownerSlug}/{companySlug}/menu/{menuSlug}', 'PagesController@seeMenu')
     ->where('ownerSlug', '[a-z0-9][a-z0-9-]*')
@@ -40,6 +46,11 @@ Route::get('carta/{ownerSlug}/{companySlug}', 'PagesController@see_menu')
 //   - Si es una Company slug -> redirect 301 al formato canónico.
 //   - 'demo' (o variantes) -> controlador legacy.
 Route::get('carta/{slug}', function ($slug) {
+    $redirectTarget = app(\App\Services\PublicUrlRedirectService::class)->resolveFromRequest(request());
+    if ($redirectTarget) {
+        return redirect($redirectTarget, 301);
+    }
+
     if ($slug === 'demo' || strpos($slug, 'demo') === 0) {
         return app(\App\Http\Controllers\PagesController::class)
             ->see_menu(app(\App\Services\MenuService::class), request(), null, $slug);
@@ -51,16 +62,21 @@ Route::get('carta/{slug}', function ($slug) {
     }
 
     $company = \App\Company::where('slug', $slug)->with('user')->first();
-    if (!$company) {
-        abort(404);
+    if ($company) {
+        if ($company->usesSimplePublicUrl()) {
+            return app(\App\Http\Controllers\PagesController::class)
+                ->see_menu(app(\App\Services\MenuService::class), request(), null, $slug);
+        }
+        $ownerSlug = optional($company->user)->slug;
+        if (!$ownerSlug) {
+            return app(\App\Http\Controllers\PagesController::class)
+                ->see_menu(app(\App\Services\MenuService::class), request(), null, $slug);
+        }
+        $qs = request()->getQueryString();
+        return redirect(url('carta/' . $ownerSlug . '/' . $company->slug) . ($qs ? '?' . $qs : ''), 301);
     }
-    $ownerSlug = optional($company->user)->resolveSlug();
-    if (!$ownerSlug) {
-        return app(\App\Http\Controllers\PagesController::class)
-            ->see_menu(app(\App\Services\MenuService::class), request(), null, $slug);
-    }
-    $qs = request()->getQueryString();
-    return redirect(url('carta/' . $ownerSlug . '/' . $company->slug) . ($qs ? '?' . $qs : ''), 301);
+
+    abort(404);
 })->where('slug', '[a-z0-9][a-z0-9-]*')->name('public.hub');
 
 Route::get('tv/{companySlug}/sync.json', 'TvMenuController@sync')->name('tv.sync');
@@ -68,6 +84,8 @@ Route::get('tv/{companySlug}', 'TvMenuController@show')->name('tv.show');
 Route::get('tv/{companySlug}/{layout}', 'TvMenuController@show')->name('tv.show.layout');
 
 Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['auth', 'subscribed', 'redirect.sales.from.admin']], function () {
+    Route::get('check-public-path', 'PublicPathController@check')->name('admin.check-public-path');
+
     Route::get('onboarding', 'OnboardingController@show')->name('admin.onboarding');
     Route::post('onboarding', 'OnboardingController@update')->name('admin.onboarding.update');
     Route::post('onboarding/skip', 'OnboardingController@skip')->name('admin.onboarding.skip');

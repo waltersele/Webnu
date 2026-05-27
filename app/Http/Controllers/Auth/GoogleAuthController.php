@@ -7,7 +7,10 @@ use App\Http\Controllers\Controller;
 use App\PlatformSetting;
 use App\Providers\RouteServiceProvider;
 use App\Services\Platform\PlatformGoogleConfigurator;
+use App\Services\AccountSlugService;
 use App\Services\CompanySlugService;
+use App\Services\MenuLocaleService;
+use Illuminate\Http\Request;
 use App\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cookie;
@@ -30,7 +33,7 @@ class GoogleAuthController extends Controller
         return Socialite::driver('google')->redirect();
     }
 
-    public function callback(): RedirectResponse
+    public function callback(Request $request): RedirectResponse
     {
         $this->ensureGoogleOAuthConfigured();
 
@@ -42,9 +45,14 @@ class GoogleAuthController extends Controller
 
         if (! $user) {
             $displayName = $googleUser->getName() ?: Str::before($googleUser->getEmail(), '@');
+            $pendingSlug = 'cuenta-pendiente-' . strtolower(Str::random(10));
+            while (! app(AccountSlugService::class)->isAvailable($pendingSlug)) {
+                $pendingSlug = 'cuenta-pendiente-' . strtolower(Str::random(10));
+            }
+
             $user = User::create([
                 'name' => $displayName,
-                'slug' => User::generateUniqueSlug($displayName),
+                'slug' => $pendingSlug,
                 'email' => $googleUser->getEmail(),
                 'google_id' => $googleUser->getId(),
                 'password' => Hash::make(Str::random(48)),
@@ -55,15 +63,15 @@ class GoogleAuthController extends Controller
                 'email_verified_at' => now(),
             ]);
 
-            $slug = app(CompanySlugService::class)->generateFromName($displayName, null, null, $user->slug);
             $company = Company::create([
-                'name' => $displayName,
-                'slug' => $slug,
+                'name' => 'Mi restaurante',
+                'slug' => app(CompanySlugService::class)->generatePlaceholderSlug(),
                 'template' => 'lumiere',
                 'menu_type' => 1,
                 'enabled' => false,
                 'reservation' => false,
                 'user_id' => $user->id,
+                'default_locale' => app(MenuLocaleService::class)->detectSupportedLocaleFromRequest($request),
             ]);
             Cookie::queue(Cookie::forever('selected_company', $company->id));
         } else {

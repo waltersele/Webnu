@@ -3,12 +3,13 @@
 namespace App\Services;
 
 use App\Company;
+use App\User;
 use Illuminate\Support\Str;
 
 class CompanySlugService
 {
     /** @var array<int, string> */
-    protected const RESERVED = [
+    public const RESERVED = [
         'admin',
         'api',
         'billing',
@@ -48,7 +49,35 @@ class CompanySlugService
             $query->where('id', '!=', $exceptCompanyId);
         }
 
-        return ! $query->exists();
+        if ($query->exists()) {
+            return false;
+        }
+
+        if (User::where('slug', $slug)->exists()) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /** Slug temporal hasta que el usuario elija la URL en onboarding. */
+    public function generatePlaceholderSlug(?int $exceptCompanyId = null): string
+    {
+        do {
+            $slug = 'pendiente-' . strtolower(Str::random(10));
+        } while (! $this->isAvailable($slug, $exceptCompanyId));
+
+        return $slug;
+    }
+
+    public function isPlaceholderSlug(?string $slug): bool
+    {
+        return $slug !== null && $slug !== '' && preg_match('/^pendiente-[a-z0-9-]+$/', $slug) === 1;
+    }
+
+    public function isAutoCartaSlug(?string $slug): bool
+    {
+        return $slug !== null && preg_match('/^carta(-\d+)?$/', $slug) === 1;
     }
 
     /**

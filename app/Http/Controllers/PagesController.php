@@ -6,6 +6,7 @@ use App\Company;
 use App\Http\Controllers\Concerns\PreparesLandingPage;
 use App\PlatformSetting;
 use App\Services\MenuService;
+use App\Services\PublicUrlRedirectService;
 use App\Services\UserPlanService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
@@ -36,6 +37,10 @@ class PagesController extends Controller
 
     public function see_menu(MenuService $menuService, Request $request, $ownerSlug, $companySlug = null)
     {
+        if ($redirect = app(PublicUrlRedirectService::class)->resolveFromRequest($request)) {
+            return redirect($redirect, 301);
+        }
+
         // Compatibilidad: si solo se recibe un argumento (uso legacy directo),
         // tratamos el primero como companySlug y dejamos ownerSlug a null.
         if ($companySlug === null) {
@@ -146,6 +151,10 @@ class PagesController extends Controller
      */
     public function ownerHub($ownerSlug)
     {
+        if ($redirect = app(PublicUrlRedirectService::class)->resolveFromRequest(request())) {
+            return redirect($redirect, 301);
+        }
+
         $user = \App\User::where('slug', $ownerSlug)->first();
         if (! $user) {
             abort(404);
@@ -214,8 +223,30 @@ class PagesController extends Controller
     /**
      * Vista pública de un menú concreto del negocio.
      */
+    public function seeMenuSimple($companySlug, $menuSlug)
+    {
+        if ($redirect = app(PublicUrlRedirectService::class)->resolveFromRequest(request())) {
+            return redirect($redirect, 301);
+        }
+
+        $company = Company::where('slug', $companySlug)
+            ->where('public_url_format', 'simple')
+            ->with('user')
+            ->first();
+
+        if (! $company) {
+            abort(404);
+        }
+
+        return $this->renderPublicMenu($company, $menuSlug, optional($company->user)->slug);
+    }
+
     public function seeMenu($ownerSlug, $companySlug, $menuSlug)
     {
+        if ($redirect = app(PublicUrlRedirectService::class)->resolveFromRequest(request())) {
+            return redirect($redirect, 301);
+        }
+
         $company = Company::where('slug', $companySlug)
             ->whereHas('user', function ($q) use ($ownerSlug) {
                 $q->where('slug', $ownerSlug);
@@ -227,6 +258,11 @@ class PagesController extends Controller
             abort(404);
         }
 
+        return $this->renderPublicMenu($company, $menuSlug, $ownerSlug);
+    }
+
+    protected function renderPublicMenu(Company $company, string $menuSlug, ?string $ownerSlug)
+    {
         $menu = $company->menus()
             ->where('slug', $menuSlug)
             ->where('enabled', true)

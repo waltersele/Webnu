@@ -45,7 +45,11 @@
                 <form method="POST" action="{{ route('admin.companies.languages.update', $company) }}">
                     @csrf
                     @method('PUT')
-                    <div class="vstack gap-2 mb-4">
+                    @php $maxPublicLocales = $maxExtraLocales !== null ? $maxExtraLocales + 1 : null; @endphp
+                    <div class="vstack gap-2 mb-4"
+                         data-locale-limit
+                         data-max-extra-locales="{{ $maxExtraLocales ?? '' }}"
+                         data-billing-url="{{ $billingUrl }}">
                         @foreach($supportedLocales as $code => $meta)
                             @if($code === $defaultLocale)
                                 @continue
@@ -54,7 +58,8 @@
                                 $checked = in_array($code, $enabledExtra, true);
                                 $stat = $stats[$code] ?? ['percent' => 0, 'done' => 0, 'total' => 0];
                             @endphp
-                            <label class="d-flex align-items-start gap-3 p-3 border rounded {{ $checked ? 'border-primary bg-light' : '' }} {{ ! $canTranslate ? 'opacity-90' : '' }}">
+                            <label class="d-flex align-items-start gap-3 p-3 border rounded wn-locale-extra-row {{ $checked ? 'border-primary bg-light' : '' }} {{ ! $canTranslate ? 'opacity-90' : '' }}"
+                                   data-locale-code="{{ $code }}">
                                 <input type="checkbox" name="locales[]" value="{{ $code }}" class="form-check-input mt-1"
                                     {{ $checked ? 'checked' : '' }} @if(! $canTranslate) disabled @endif>
                                 <span class="flex-grow-1">
@@ -69,12 +74,17 @@
                                         <span class="text-muted small d-block">{{ $stat['done'] }}/{{ $stat['total'] }} elementos</span>
                                     @endif
                                 </span>
+                                @if ($canTranslate)
+                                    <span class="wn-onb-locale__plus-badge align-self-center" hidden>
+                                        @include('admin.partials.plan-pro-badge', ['label' => 'Plus', 'size' => 'xs'])
+                                    </span>
+                                @endif
                             </label>
                         @endforeach
                     </div>
 
                     @if($canTranslate && $maxExtraLocales !== null)
-                        <p class="text-muted small">Tu plan permite hasta <strong>{{ $maxExtraLocales }}</strong> {{ $maxExtraLocales === 1 ? 'idioma extra' : 'idiomas extra' }}.</p>
+                        <p class="text-muted small">Hasta <strong>{{ $maxPublicLocales }} idiomas en la carta</strong> (1 principal + {{ $maxExtraLocales }} extras).</p>
                     @endif
 
                     @error('locales')<div class="text-danger small mb-2">{{ $message }}</div>@enderror
@@ -230,3 +240,7 @@
     </div>
 </div>
 @endsection
+
+@push('scripts')
+    <script src="{{ asset('js/webnu-locale-limit.js') }}"></script>
+@endpush

@@ -29,6 +29,17 @@ class MenuLocaleService
         return $default;
     }
 
+    public function detectSupportedLocaleFromRequest(Request $request): string
+    {
+        $supported = array_keys(config('menu_locales.supported', []));
+        $detected = $this->matchLocaleFromAcceptLanguage(
+            $request->header('Accept-Language'),
+            $supported
+        );
+
+        return $detected ?? config('menu_locales.default', 'es');
+    }
+
     public function localeMeta(string $locale): array
     {
         $supported = config('menu_locales.supported', []);
@@ -72,6 +83,10 @@ class MenuLocaleService
     /** @return string[] */
     public function publicLocalesForCompany(Company $company): array
     {
+        if (request()->boolean('studio_preview') || request()->boolean('onb_preview')) {
+            return [$company->defaultLocale()];
+        }
+
         $locales = $company->publicLocales();
         $user = $company->relationLoaded('user') ? $company->user : $company->user()->first();
 
@@ -79,7 +94,28 @@ class MenuLocaleService
             return [$company->defaultLocale()];
         }
 
+        $maxExtra = $user ? app(UserPlanService::class)->maxTranslationLocales($user) : null;
+        if ($maxExtra !== null) {
+            return $this->capLocalesToPlan($locales, $company->defaultLocale(), $maxExtra);
+        }
+
         return $locales;
+    }
+
+    /**
+     * @param  string[]  $locales
+     * @return string[]
+     */
+    public function capLocalesToPlan(array $locales, string $defaultLocale, int $maxExtra): array
+    {
+        $extras = array_values(array_filter(
+            $locales,
+            fn ($locale) => $locale !== $defaultLocale
+        ));
+
+        $extras = array_slice($extras, 0, $maxExtra);
+
+        return array_values(array_unique(array_merge([$defaultLocale], $extras)));
     }
 
     /** @param string[] $allowed */
@@ -89,8 +125,15 @@ class MenuLocaleService
             return null;
         }
 
-        $header = $request->header('Accept-Language');
-        if (! $header) {
+        return $this->matchLocaleFromAcceptLanguage($request->header('Accept-Language'), $allowed);
+    }
+
+    /**
+     * @param  string[]  $allowed
+     */
+    protected function matchLocaleFromAcceptLanguage(?string $header, array $allowed): ?string
+    {
+        if (! $header || $allowed === []) {
             return null;
         }
 

@@ -48,7 +48,11 @@ class TranslationController extends Controller
             'locales.*' => 'string|in:' . implode(',', $supported),
         ]);
 
-        $locales = $validated['locales'] ?? [];
+        $default = $company->defaultLocale();
+        $locales = array_values(array_filter(
+            $validated['locales'] ?? [],
+            fn ($locale) => $locale !== $default
+        ));
         $translations->updateCompanyLocales($company, $request->user(), $locales);
 
         $target = $request->input('redirect_to') === 'sections'

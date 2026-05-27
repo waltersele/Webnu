@@ -48,7 +48,7 @@
                 <p class="wn-onb-lead">Vamos a dejar lista la carta de <strong>{{ $company->name }}</strong>. Son {{ $maxStep }} pasos rápidos: diseño, idiomas y QR.</p>
                 <ul class="wn-onb-checklist">
                     @if(!empty($planPresentation['trial_active']))
-                        <li><i class="ri-check-line"></i> <strong>30 días de Plus gratis</strong> — vídeos, traducciones e IA ilimitada</li>
+                        <li><i class="ri-check-line"></i> <strong>30 días de Pro gratis</strong> — vídeos, traducciones e IA</li>
                     @else
                         <li><i class="ri-check-line"></i> Sin tarjeta · Plan {{ $plan['label'] ?? 'Gratis' }}</li>
                     @endif
@@ -61,21 +61,49 @@
             </div>
         </section>
 
-        {{-- Paso 2: Nombre --}}
+        {{-- Paso 2: Negocio + carta + URL --}}
         <section class="wn-onb-step {{ $step === 2 ? 'is-active' : '' }}" data-onb-step="2">
             <div class="wn-onb-card">
                 <div class="wn-onb-step__visual">
                     @include('admin.onboarding.animations.business-name')
                 </div>
                 <span class="wn-onb-step-num">Paso 2 de {{ $maxStep }}</span>
-                <h2>¿Cómo se llama tu negocio?</h2>
-                <p>Aparecerá en la carta y en el código QR.</p>
-                <form method="POST" action="{{ route('admin.onboarding.update') }}" class="wn-onb-form">
+                <h2>Tu negocio y la URL de tu carta</h2>
+                <p>Esta dirección irá en tu código QR. Elige bien antes de imprimirlo.</p>
+                <form method="POST" action="{{ route('admin.onboarding.update') }}" class="wn-onb-form"
+                      data-webnu-url-preview
+                      data-url-mode="simple"
+                      data-url-host="webnu.es"
+                      data-check-url="{{ route('admin.check-public-path') }}"
+                      data-company-id="{{ $company->id }}"
+                      data-user-id="{{ $user->id }}">
                     @csrf
                     <input type="hidden" name="step" value="2">
-                    <label class="wn-onb-label" for="company-name">Nombre del restaurante</label>
-                    <input id="company-name" type="text" name="name" class="wn-onb-input" value="{{ old('name', $company->name) }}" required autofocus>
-                    <button type="submit" class="wn-onb-btn wn-onb-btn--primary w-100">Continuar <i class="ri-arrow-right-line"></i></button>
+                    <label class="wn-onb-label" for="onb-business-name">Nombre del negocio</label>
+                    <input id="onb-business-name" type="text" name="business_name" class="wn-onb-input"
+                           value="{{ old('business_name', $defaultBusinessName ?? '') }}"
+                           placeholder="Ej. Grupo La Brasa" data-url-owner-input required autofocus>
+                    @error('business_name')<p class="wn-onb-error">{{ $message }}</p>@enderror
+
+                    <label class="wn-onb-label mt-3" for="onb-company-name">Nombre de la carta</label>
+                    <input id="onb-company-name" type="text" name="name" class="wn-onb-input"
+                           value="{{ old('name', $company->name === 'Mi restaurante' ? '' : $company->name) }}"
+                           placeholder="Ej. La Brasa del Puerto" data-url-name-input required>
+                    @error('name')<p class="wn-onb-error">{{ $message }}</p>@enderror
+
+                    <label class="wn-onb-label mt-3" for="onb-company-slug">URL de la carta</label>
+                    <input id="onb-company-slug" type="text" name="company_slug" class="wn-onb-input"
+                           value="{{ old('company_slug', $defaultCompanySlug ?? '') }}"
+                           placeholder="la-brasa-del-puerto" data-url-slug-input required>
+                    @error('company_slug')<p class="wn-onb-error">{{ $message }}</p>@enderror
+
+                    <div class="wn-url-preview mt-3" role="status" aria-live="polite">
+                        <p class="wn-url-preview__path"><span data-url-preview-path>webnu.es/carta/tu-carta</span></p>
+                        <p class="wn-url-preview__status" data-url-preview-status></p>
+                        <p class="wn-url-preview__hint">Esta URL irá en tu código QR. No la cambies después de imprimirlo.</p>
+                    </div>
+
+                    <button type="submit" class="wn-onb-btn wn-onb-btn--primary w-100 mt-3">Continuar <i class="ri-arrow-right-line"></i></button>
                 </form>
             </div>
         </section>
@@ -134,60 +162,92 @@
         </section>
 
         {{-- Paso 4: Idiomas --}}
+        @php
+            $onbBaseLocale = old('default_locale', $defaultLocale);
+            $onbSuggestedBase = $suggestedBaseLocale ?? $defaultLocale;
+        @endphp
         <section class="wn-onb-step {{ $step === 4 ? 'is-active' : '' }}" data-onb-step="4">
             <div class="wn-onb-card wn-onb-card--wide">
                 <div class="wn-onb-step__visual">
                     @include('admin.onboarding.animations.languages')
                 </div>
                 <span class="wn-onb-step-num">Paso 4 de {{ $maxStep }}</span>
-                <h2>¿Carta para turistas internacionales?</h2>
-                <p>Activa idiomas extra y genera traducciones con IA. Tus clientes eligen idioma al escanear el QR.</p>
+                <h2>Idioma de tu carta</h2>
+                <p class="wn-onb-lead wn-onb-lead--left">Escribirás platos y categorías en este idioma. Si activas extras, tus clientes podrán cambiar al escanear el QR.</p>
 
-                @if($canTranslate)
-                    <form method="POST" action="{{ route('admin.onboarding.update') }}" class="wn-onb-form">
-                        @csrf
-                        <input type="hidden" name="step" value="4">
-                        <p class="wn-onb-label">Idioma base: <strong>{{ $supportedLocales[$defaultLocale]['native'] ?? strtoupper($defaultLocale) }}</strong></p>
-                        <div class="wn-onb-locales">
+                <form method="POST" action="{{ route('admin.onboarding.update') }}" class="wn-onb-form" id="onb-locales-form">
+                    @csrf
+                    <input type="hidden" name="step" value="4">
+
+                    <p class="wn-onb-label">Idioma principal de la carta</p>
+                    <div class="wn-onb-locales wn-onb-locales--base" data-locale-role="base">
+                        @foreach($supportedLocales as $code => $meta)
+                            <label class="wn-onb-locale wn-onb-locale--radio {{ $onbBaseLocale === $code ? 'is-selected' : '' }}">
+                                <input type="radio" name="default_locale" value="{{ $code }}"
+                                    {{ $onbBaseLocale === $code ? 'checked' : '' }}
+                                    data-locale-base-radio>
+                                <span>
+                                    <strong>{{ $meta['native'] ?? $meta['label'] }}</strong>
+                                    <small>{{ strtoupper($code) }}</small>
+                                    @if($code === $onbSuggestedBase)
+                                        <span class="wn-onb-locale__hint">Recomendado (tu navegador)</span>
+                                    @endif
+                                </span>
+                            </label>
+                        @endforeach
+                    </div>
+                    @error('default_locale')<p class="wn-onb-error">{{ $message }}</p>@enderror
+
+                    @if($canTranslate)
+                        <hr class="wn-onb-divider">
+                        <h3 class="wn-onb-subtitle">¿Carta para turistas internacionales?</h3>
+                        <p class="wn-onb-hint mb-3">Idiomas adicionales con traducción IA (no incluye el idioma principal).</p>
+
+                        <div class="wn-onb-locales wn-onb-locales--extras"
+                             id="onb-locale-extras"
+                             data-locale-limit
+                             data-max-extra-locales="{{ $maxExtraLocales ?? '' }}"
+                             data-billing-url="{{ $billingUrl }}">
                             @foreach($supportedLocales as $code => $meta)
-                                @if($code === $defaultLocale)
-                                    @continue
-                                @endif
-                                <label class="wn-onb-locale">
+                                <label class="wn-onb-locale wn-onb-locale--extra" data-locale-code="{{ $code }}"
+                                    @if($code === $onbBaseLocale) hidden @endif>
                                     <input type="checkbox" name="locales[]" value="{{ $code }}"
                                         {{ in_array($code, $enabledExtra, true) ? 'checked' : '' }}>
                                     <span>
                                         <strong>{{ $meta['native'] ?? $meta['label'] }}</strong>
                                         <small>{{ strtoupper($code) }}</small>
                                     </span>
+                                    <span class="wn-onb-locale__plus-badge" hidden>
+                                        @include('admin.partials.plan-pro-badge', ['label' => 'Plus', 'size' => 'xs'])
+                                    </span>
                                 </label>
                             @endforeach
                         </div>
                         @if($maxExtraLocales !== null)
-                            <p class="wn-onb-hint">Tu plan permite hasta {{ $maxExtraLocales }} {{ $maxExtraLocales === 1 ? 'idioma extra' : 'idiomas extra' }}.</p>
+                            <p class="wn-onb-hint">
+                                Tu plan permite hasta <strong>{{ $maxPublicLocales ?? ($maxExtraLocales + 1) }} idiomas en la carta</strong>
+                                (1 principal + {{ $maxExtraLocales }} {{ $maxExtraLocales === 1 ? 'extra' : 'extras' }}).
+                            </p>
                         @endif
                         @error('locales')<p class="wn-onb-error">{{ $message }}</p>@enderror
                         <label class="wn-onb-check">
                             <input type="checkbox" name="generate_ai" value="1">
                             <span>Generar traducciones automáticamente con IA</span>
                         </label>
-                        <button type="submit" class="wn-onb-btn wn-onb-btn--primary w-100">Guardar y continuar <i class="ri-arrow-right-line"></i></button>
-                    </form>
-                    <form method="POST" action="{{ route('admin.onboarding.update') }}" class="mt-3">
-                        @csrf
-                        <input type="hidden" name="step" value="4">
-                        <button type="submit" class="wn-onb-btn wn-onb-btn--ghost w-100">Saltar · solo español por ahora</button>
-                    </form>
-                @else
-                    <div class="wn-onb-upsell">
-                        <p>La carta multilingüe requiere <strong>Plus</strong>. <a href="{{ $billingUrl }}">Mejora tu plan</a> para activar idiomas.</p>
-                    </div>
-                    <form method="POST" action="{{ route('admin.onboarding.update') }}" class="mt-3">
-                        @csrf
-                        <input type="hidden" name="step" value="4">
-                        <button type="submit" class="wn-onb-btn wn-onb-btn--primary w-100">Continuar sin idiomas extra</button>
-                    </form>
-                @endif
+                    @else
+                        <div class="wn-onb-upsell mt-3">
+                            <p class="mb-0">La carta multilingüe requiere plan <strong>Pro</strong>. <a href="{{ $billingUrl }}">Ver planes</a>.</p>
+                        </div>
+                    @endif
+
+                    <button type="submit" class="wn-onb-btn wn-onb-btn--primary w-100 mt-3">Guardar y continuar <i class="ri-arrow-right-line"></i></button>
+                </form>
+                <form method="POST" action="{{ route('admin.onboarding.update') }}" class="mt-3">
+                    @csrf
+                    <input type="hidden" name="step" value="4">
+                    <input type="hidden" name="default_locale" value="{{ $onbBaseLocale }}">
+                    <button type="submit" class="wn-onb-btn wn-onb-btn--ghost w-100">Saltar · sin idiomas extra por ahora</button>
+                </form>
             </div>
         </section>
 
@@ -289,6 +349,7 @@
 @endsection
 
 @push('scripts')
+<script src="{{ asset('js/webnu-public-url-preview.js') }}" defer></script>
 <script>
     var previewIframe = document.getElementById('onb-template-iframe');
     var previewLink = document.getElementById('onb-template-preview-link');

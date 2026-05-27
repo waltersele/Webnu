@@ -1,20 +1,27 @@
 # Arranca Webnu en local con SQLite (solo vista previa; no usa la BD de producción)
 # PHP 8.1+ recomendado (8.3 ideal). Ajusta la ruta en $PhpCandidates si hace falta.
+# Laravel 10 en main requiere PHP 8.1+ (composer.json: ^8.3). Priorizar 8.3 del sistema.
 $PhpCandidates = @(
-    (Join-Path $PSScriptRoot ".php-runtime\php.exe"),
-    (Join-Path $PSScriptRoot ".php-runtime74\php.exe"),
-    "C:\php\php.exe",
     "C:\php83\php.exe",
-    "C:\xampp\php\php.exe",
+    "C:\laragon\bin\php\php-8.3.16-Win32-vs16-x64\php.exe",
     "C:\laragon\bin\php\php-8.3.12-Win32-vs16-x64\php.exe",
-    "C:\laragon\bin\php\php-8.3.0-Win32-vs16-x64\php.exe"
+    "C:\laragon\bin\php\php-8.3.0-Win32-vs16-x64\php.exe",
+    "C:\xampp\php\php.exe",
+    "C:\php\php.exe",
+    (Join-Path $PSScriptRoot ".php-runtime\php.exe"),
+    (Join-Path $PSScriptRoot ".php-runtime74\php.exe")
 )
 $Php = $null
 foreach ($candidate in $PhpCandidates) {
-    if (Test-Path $candidate) {
-        $Php = $candidate
-        break
+    if (-not (Test-Path $candidate)) { continue }
+    $verLine = & $candidate -r "echo PHP_VERSION;" 2>$null
+    if (-not $verLine) { continue }
+    $ver = [version]$verLine
+    if ($ver.Major -lt 8 -or ($ver.Major -eq 8 -and $ver.Minor -lt 1)) {
+        continue
     }
+    $Php = $candidate
+    break
 }
 $Ini = Join-Path $PSScriptRoot "php-local.ini"
 $Sqlite = Join-Path $PSScriptRoot "database\database.sqlite"
@@ -77,6 +84,37 @@ if (Test-Path $envPath) {
         $utf8NoBom = New-Object System.Text.UTF8Encoding $false
         [System.IO.File]::WriteAllText($envPath, $text, $utf8NoBom)
         Write-Host "Aviso: se eliminó BOM UTF-8 de .env (causa pantalla en blanco)." -ForegroundColor Yellow
+    }
+}
+
+# Tras git pull: vendor puede ser Laravel 7 mientras el código es Laravel 10.
+$l10FrameworkMarker = Join-Path $PSScriptRoot "vendor\laravel\framework\src\Illuminate\Foundation\Support\Providers\RouteServiceProvider.php"
+if (-not (Test-Path $l10FrameworkMarker)) {
+    Write-Host "Dependencias desactualizadas (Laravel 10 en composer.json). Ejecutando composer install..." -ForegroundColor Cyan
+    $composerPhar = $null
+    foreach ($cp in @(
+        (Join-Path $PSScriptRoot "composer.phar"),
+        "C:\laragon\bin\composer\composer.phar"
+    )) {
+        if (Test-Path $cp) { $composerPhar = $cp; break }
+    }
+    if (-not $composerPhar) {
+        $composerCmd = Get-Command composer -ErrorAction SilentlyContinue
+        if (-not $composerCmd) {
+            Write-Host "No se encontró Composer. Coloca composer.phar en el proyecto o instálalo." -ForegroundColor Red
+            exit 1
+        }
+        & $Php $composerCmd.Source install --no-interaction --prefer-dist
+    } else {
+        & $Php $composerPhar install --no-interaction --prefer-dist
+        if ($LASTEXITCODE -ne 0) {
+            Write-Host "composer install falló; probando composer update..." -ForegroundColor Yellow
+            & $Php $composerPhar update --no-interaction --prefer-dist
+        }
+    }
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host "Composer falló. Necesitas PHP 8.1+ (ideal 8.3) y extension zip habilitada." -ForegroundColor Red
+        exit 1
     }
 }
 

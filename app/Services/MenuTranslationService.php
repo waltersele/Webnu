@@ -25,14 +25,22 @@ class MenuTranslationService
 
     public function updateCompanyLocales(Company $company, User $user, array $locales): Company
     {
-        app(UserPlanService::class)->assertCanEnableLocales($user, count($locales));
-
         $default = $company->defaultLocale();
         $supported = array_keys(config('menu_locales.supported', []));
 
         $normalized = array_values(array_unique(array_filter($locales, function ($locale) use ($supported, $default) {
             return in_array($locale, $supported, true) && $locale !== $default;
         })));
+
+        $plans = app(UserPlanService::class);
+        $maxExtra = $plans->maxTranslationLocales($user);
+        if ($maxExtra !== null && count($normalized) > $maxExtra) {
+            $normalized = array_slice($normalized, 0, $maxExtra);
+        }
+
+        if ($normalized !== []) {
+            $plans->assertCanEnableLocales($user, count($normalized));
+        }
 
         $company->enabled_locales = $normalized;
         $company->save();

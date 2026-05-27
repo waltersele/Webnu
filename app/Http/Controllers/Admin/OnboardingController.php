@@ -4,7 +4,12 @@ namespace App\Http\Controllers\Admin;
 
 use App\Company;
 use App\Http\Controllers\Controller;
+use App\Services\AccountSlugService;
 use App\Services\CompanySlugService;
+use App\Services\MenuLocaleService;
+use App\Services\PublicPathRegistry;
+use App\Services\PublicUrlRedirectService;
+use Illuminate\Validation\ValidationException;
 use App\Services\MenuTranslationService;
 use App\Services\UserPlanService;
 use Illuminate\Http\Request;
@@ -14,10 +19,11 @@ class OnboardingController extends Controller
 {
     protected const MAX_STEP = 6;
 
-    public function show(Request $request, UserPlanService $plans, MenuTranslationService $translations)
+    public function show(Request $request, UserPlanService $plans, MenuTranslationService $translations, MenuLocaleService $locales)
     {
         $user = $request->user();
         $company = $this->primaryCompany($user);
+        $this->maybeApplyBrowserDefaultLocale($company, $locales, $request);
 
         if ($user->hasCompletedOnboarding()) {
             return redirect()->route('admin.companies.edit', $company);
@@ -34,6 +40,15 @@ class OnboardingController extends Controller
         $templates = collect(config('company_templates.templates', []));
         $templatePreviewUrls = $this->templatePreviewUrls();
         $themePresets = config('company_templates.presets', []);
+        $slugService = app(CompanySlugService::class);
+        $accountSlugs = app(AccountSlugService::class);
+        $defaultBusinessName = $accountSlugs->isPendingPlaceholder($user->slug)
+            ? ''
+            : ucwords(str_replace('-', ' ', (string) $user->slug));
+        $defaultCompanySlug = ($slugService->isPlaceholderSlug($company->slug) || $slugService->isAutoCartaSlug($company->slug))
+            ? ''
+            : (string) $company->slug;
+
         $publicUrl = $company->publicUrl();
         $qrImageUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=220x220&margin=12&data=' . urlencode($publicUrl);
         $planPresentation = $plans->planPresentation($user);
@@ -68,11 +83,17 @@ class OnboardingController extends Controller
             'menuScanUrl' => route('admin.menu-scan.create'),
             'billingUrl' => route('admin.settings'),
             'companyHasIdentity' => $companyHasIdentity,
+            'defaultBusinessName' => $defaultBusinessName,
+            'defaultCompanySlug' => $defaultCompanySlug,
             'supportedLocales' => config('menu_locales.supported', []),
             'defaultLocale' => $company->defaultLocale(),
+            'suggestedBaseLocale' => $locales->detectSupportedLocaleFromRequest($request),
             'enabledExtra' => is_array($company->enabled_locales) ? $company->enabled_locales : [],
             'canTranslate' => $plans->canUseTranslation($user),
             'maxExtraLocales' => $plans->maxTranslationLocales($user),
+            'maxPublicLocales' => $plans->maxTranslationLocales($user) !== null
+                ? $plans->maxTranslationLocales($user) + 1
+                : null,
         ]);
     }
 
@@ -87,19 +108,59 @@ class OnboardingController extends Controller
 
         switch ($step) {
             case 2:
+                $slugs = app(CompanySlugService::class);
+                $accounts = app(AccountSlugService::class);
+                $paths = app(PublicPathRegistry::class);
+                $redirects = app(PublicUrlRedirectService::class);
+
                 $data = $request->validate([
+                    'business_name' => 'required|string|max:255',
                     'name' => 'required|string|max:255',
+                    'company_slug' => 'required|string|max:64',
                 ]);
-                $company->name = $data['name'];
-                if (! $company->enabled) {
-                    $company->slug = app(CompanySlugService::class)->generateFromName(
-                        $data['name'],
-                        $company->city,
-                        $company->id,
-                        optional($company->user)->resolveSlug()
-                    );
+
+                $user = $request->user();
+                $previousCompanyPath = $company->publicPath();
+                $previousUserPath = $user->slug ? 'carta/' . $user->slug : null;
+
+                if (! $company->isPublicSlugLocked()) {
+                    $companySlug = $slugs->normalize($data['company_slug']);
+                    $slugError = $slugs->validateCustomSlug($companySlug, $company->id);
+                    if ($slugError) {
+                        throw ValidationException::withMessages(['company_slug' => [$slugError]]);
+                    }
+                    $company->slug = $companySlug;
+                    $company->name = $data['name'];
+                    $company->public_url_format = 'simple';
+                } else {
+                    $company->name = $data['name'];
                 }
+
+                if (! $user->onboarding_completed_at) {
+                    $ownerSlug = $accounts->normalize($data['business_name']);
+                    $ownerError = $accounts->validateAccountSlug($ownerSlug, $user->id);
+                    if ($ownerError) {
+                        throw ValidationException::withMessages(['business_name' => [$ownerError]]);
+                    }
+                    $user->slug = $ownerSlug;
+                    $user->save();
+                    $company->load('user');
+                }
+
+                $pathError = $paths->validateCompanySlug($company->slug, $company, $user->slug);
+                if ($pathError) {
+                    throw ValidationException::withMessages(['company_slug' => [$pathError]]);
+                }
+
                 $company->save();
+
+                $newCompanyPath = $company->fresh()->publicPath();
+                if ($previousCompanyPath && $previousCompanyPath !== $newCompanyPath) {
+                    $redirects->record($previousCompanyPath, $newCompanyPath, $company->id);
+                }
+                if ($previousUserPath && $user->slug && $previousUserPath !== 'carta/' . $user->slug) {
+                    $redirects->record($previousUserPath, 'carta/' . $user->slug, null, $user->id);
+                }
                 break;
 
             case 3:
@@ -126,23 +187,29 @@ class OnboardingController extends Controller
 
             case 4:
                 $supported = array_keys(config('menu_locales.supported', []));
-                $default = $company->defaultLocale();
                 $validated = $request->validate([
+                    'default_locale' => 'required|string|in:' . implode(',', $supported),
                     'locales' => 'nullable|array',
                     'locales.*' => 'string|in:' . implode(',', $supported),
                     'generate_ai' => 'nullable|boolean',
                 ]);
 
+                $company->default_locale = $validated['default_locale'];
+                $company->save();
+
+                $default = $company->defaultLocale();
                 $locales = array_values(array_filter(
                     $validated['locales'] ?? [],
                     fn ($locale) => $locale !== $default
                 ));
 
-                if ($locales !== [] && $plans->canUseTranslation($user)) {
-                    $plans->assertCanEnableLocales($user, count($locales));
+                if ($plans->canUseTranslation($user)) {
+                    if ($locales !== []) {
+                        $plans->assertCanEnableLocales($user, count($locales));
+                    }
                     $translations->updateCompanyLocales($company, $user, $locales);
 
-                    if ($request->boolean('generate_ai')) {
+                    if ($request->boolean('generate_ai') && $locales !== []) {
                         $hasProducts = $company->sections()
                             ->whereHas('products')
                             ->exists();
@@ -175,6 +242,10 @@ class OnboardingController extends Controller
 
             case 6:
                 $company->enabled = true;
+                if ($company->public_url_format === null) {
+                    $company->public_url_format = 'simple';
+                }
+                $company->lockPublicSlug();
                 $company->save();
 
                 $user->onboarding_completed_at = now();
@@ -201,6 +272,10 @@ class OnboardingController extends Controller
         $this->authorize('update', $company);
 
         $company->enabled = true;
+        if ($company->public_url_format === null) {
+            $company->public_url_format = 'simple';
+        }
+        $company->lockPublicSlug();
         $company->save();
 
         $user->onboarding_completed_at = now();
@@ -231,9 +306,24 @@ class OnboardingController extends Controller
 
     protected function companyHasIdentity(Company $company): bool
     {
+        $slugs = app(CompanySlugService::class);
+        $accounts = app(AccountSlugService::class);
         $name = trim((string) $company->name);
+        $user = $company->user;
 
-        return $name !== '' && $name !== 'Mi restaurante';
+        if ($name === '' || $name === 'Mi restaurante') {
+            return false;
+        }
+
+        if ($slugs->isPlaceholderSlug($company->slug) || $slugs->isAutoCartaSlug($company->slug)) {
+            return false;
+        }
+
+        if (! $user || $accounts->isPendingPlaceholder($user->slug)) {
+            return false;
+        }
+
+        return true;
     }
 
     /** @return array<string, string> */
@@ -262,9 +352,30 @@ class OnboardingController extends Controller
         foreach (config('company_templates.templates', []) as $id => $tpl) {
             $slug = $tpl['preview_slug'] ?? $fallbackSlugs[$id] ?? 'demo';
             // Demos no tienen user asociado: usamos la URL hub /carta/{slug}
-            $urls[$id] = route('public.hub', ['slug' => $slug]);
+            $urls[$id] = route('public.hub', [
+                'slug' => $slug,
+                'studio_preview' => 1,
+                'onb_preview' => 1,
+            ]);
         }
 
         return $urls;
+    }
+
+    protected function maybeApplyBrowserDefaultLocale(Company $company, MenuLocaleService $locales, Request $request): void
+    {
+        $fallback = config('menu_locales.default', 'es');
+        $stored = $company->default_locale;
+        if ($stored !== null && $stored !== '' && $stored !== $fallback) {
+            return;
+        }
+
+        $detected = $locales->detectSupportedLocaleFromRequest($request);
+        if ($detected === $company->defaultLocale()) {
+            return;
+        }
+
+        $company->default_locale = $detected;
+        $company->save();
     }
 }

@@ -8,7 +8,11 @@ use App\Providers\RouteServiceProvider;
 use App\User;
 use Illuminate\Foundation\Auth\RegistersUsers;
 use Illuminate\Http\Request;
+use App\Services\AccountSlugService;
 use App\Services\CompanySlugService;
+use App\Services\MenuLocaleService;
+use App\Services\PublicPathRegistry;
+use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
@@ -65,6 +69,8 @@ class RegisterController extends Controller
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
             'business_name' => ['required', 'string', 'max:255'],
+            'company_name' => ['nullable', 'string', 'max:255'],
+            'company_slug' => ['nullable', 'string', 'max:64'],
         ]);
     }
 
@@ -77,10 +83,31 @@ class RegisterController extends Controller
     protected function create(array $data)
     {
         $businessName = trim($data['business_name'] ?? '') ?: 'Mi restaurante';
+        $companyName = trim($data['company_name'] ?? '') ?: $businessName;
+        $accountSlugs = app(AccountSlugService::class);
+        $companySlugs = app(CompanySlugService::class);
+        $paths = app(PublicPathRegistry::class);
+
+        $ownerSlug = $accountSlugs->generateUnique($businessName);
+
+        if (! empty($data['company_slug'])) {
+            $companySlug = $companySlugs->normalize($data['company_slug']);
+            $slugError = $companySlugs->validateCustomSlug($companySlug);
+            if ($slugError) {
+                throw ValidationException::withMessages(['company_slug' => [$slugError]]);
+            }
+        } else {
+            $companySlug = $companySlugs->generateFromName($companyName);
+        }
+
+        $pathError = $paths->validatePathAvailable('carta/' . $companySlug);
+        if ($pathError) {
+            throw ValidationException::withMessages(['company_slug' => [$pathError]]);
+        }
 
         $user = User::create([
             'name' => $data['name'],
-            'slug' => User::generateUniqueSlug($businessName ?: $data['name']),
+            'slug' => $ownerSlug,
             'email' => $data['email'],
             'password' => Hash::make($data['password']),
             'plan' => 'free',
@@ -89,16 +116,16 @@ class RegisterController extends Controller
             'trial_plan_key' => config('plans.trial_tier', 'pro'),
         ]);
 
-        $slug = app(CompanySlugService::class)->generateFromName($businessName, null, null, $user->slug);
-
         $company = Company::create([
-            'name' => $businessName,
-            'slug' => $slug,
+            'name' => $companyName,
+            'slug' => $companySlug,
+            'public_url_format' => 'simple',
             'template' => 'lumiere',
             'menu_type' => 1,
             'enabled' => false,
             'reservation' => false,
             'user_id' => $user->id,
+            'default_locale' => app(MenuLocaleService::class)->detectSupportedLocaleFromRequest(request()),
         ]);
 
         Cookie::queue(Cookie::forever('selected_company', $company->id));

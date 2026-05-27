@@ -483,8 +483,9 @@ class UserPlanService
         }
 
         if ($extraLocaleCount > $max) {
+            $total = $max + 1;
             throw ValidationException::withMessages([
-                'locales' => "Tu plan Pro permite hasta {$max} idiomas extra. Mejora a Plus (" . $this->plusPriceLabel() . ') para idiomas ilimitados.',
+                'locales' => "Tu plan Pro permite hasta {$total} idiomas en la carta (idioma base + {$max} extras). Mejora a Plus (" . $this->plusPriceLabel() . ') para idiomas ilimitados.',
             ]);
         }
     }

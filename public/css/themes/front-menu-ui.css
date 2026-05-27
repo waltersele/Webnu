@@ -738,21 +738,23 @@ body.wn-theme-oriental .wn-menu-nav {
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
-  padding: 0.35rem 0.65rem;
+  padding: 0.4rem 0.75rem;
   border-radius: 999px;
-  border: 1px solid color-mix(in srgb, var(--wn-text, #141b2b) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--wn-text, #141b2b) 14%, transparent);
   background: var(--wn-surface, #fff);
   color: var(--wn-text-muted, #4b5563);
   font-size: 0.75rem;
   font-weight: 600;
   text-decoration: none;
-  transition: border-color 0.2s, background 0.2s, color 0.2s;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
+  transition: border-color 0.2s, background 0.2s, color 0.2s, box-shadow 0.2s;
 }
 
 .wn-lang-chip.is-active {
-  border-color: var(--wn-primary, #004ac6);
-  background: color-mix(in srgb, var(--wn-primary, #004ac6) 12%, #fff);
-  color: var(--wn-primary, #004ac6);
+  border-color: color-mix(in srgb, var(--wn-accent, var(--wn-primary, #004ac6)) 55%, transparent);
+  background: color-mix(in srgb, var(--wn-accent, var(--wn-primary, #004ac6)) 14%, var(--wn-surface, #fff));
+  color: var(--wn-text, #0f172a);
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.08);
 }
 
 .wn-lang-chip__code {

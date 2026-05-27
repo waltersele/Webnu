@@ -34,6 +34,7 @@
 <body class="wn-onb-body">
 @yield('content')
 <script src="{{ asset('js/webnu-onboarding.js') }}"></script>
+<script src="{{ asset('js/webnu-locale-limit.js') }}" defer></script>
 <script src="{{ asset('js/webnu-pwa-install.js') }}"></script>
 <script>
 if ('serviceWorker' in navigator) {

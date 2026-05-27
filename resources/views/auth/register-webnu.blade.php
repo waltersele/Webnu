@@ -24,7 +24,14 @@
             <p class="mt-2 text-label-md text-text-muted">Plan gratis · <strong>30 días de Plus gratis</strong> · Sin tarjeta</p>
         </div>
 
-        <form method="POST" action="{{ route('register') }}" class="space-y-4">
+        <form method="POST" action="{{ route('register') }}" class="space-y-4"
+              data-webnu-url-preview
+              data-url-mode="simple"
+              data-url-host="webnu.es">
+            <div class="rounded-lg border border-dashed border-border-subtle px-4 py-3 text-label-sm text-text-muted mb-2" role="status" aria-live="polite">
+                <span data-url-preview-path>webnu.es/carta/tu-carta</span>
+                <p class="mt-2 mb-0 text-label-sm">Esta URL irá en tu código QR. Elige bien antes de imprimirlo.</p>
+            </div>
             @csrf
 
             <div>
@@ -37,11 +44,31 @@
             </div>
 
             <div>
-                <label for="business_name" class="text-label-md text-on-surface-variant block mb-1">Nombre del restaurante</label>
+                <label for="business_name" class="text-label-md text-on-surface-variant block mb-1">Nombre del negocio</label>
                 <input id="business_name" type="text" name="business_name" value="{{ old('business_name') }}" required autocomplete="organization"
                     class="w-full px-4 py-3 rounded-lg border border-border-subtle focus:ring-2 focus:ring-primary focus:border-primary outline-none @error('business_name') border-red-500 @enderror"
-                    placeholder="Ej. La Brasa de Juan"/>
+                    placeholder="Ej. Grupo La Brasa" data-url-owner-input/>
                 @error('business_name')
+                    <p class="mt-1 text-label-sm text-red-600">{{ $message }}</p>
+                @enderror
+            </div>
+
+            <div>
+                <label for="company_name" class="text-label-md text-on-surface-variant block mb-1">Nombre de la carta</label>
+                <input id="company_name" type="text" name="company_name" value="{{ old('company_name') }}" autocomplete="organization"
+                    class="w-full px-4 py-3 rounded-lg border border-border-subtle focus:ring-2 focus:ring-primary focus:border-primary outline-none @error('company_name') border-red-500 @enderror"
+                    placeholder="Ej. La Brasa del Puerto" data-url-name-input/>
+                @error('company_name')
+                    <p class="mt-1 text-label-sm text-red-600">{{ $message }}</p>
+                @enderror
+            </div>
+
+            <div>
+                <label for="company_slug" class="text-label-md text-on-surface-variant block mb-1">URL de tu carta</label>
+                <input id="company_slug" type="text" name="company_slug" value="{{ old('company_slug') }}"
+                    class="w-full px-4 py-3 rounded-lg border border-border-subtle focus:ring-2 focus:ring-primary focus:border-primary outline-none @error('company_slug') border-red-500 @enderror"
+                    placeholder="la-brasa-del-puerto" data-url-slug-input/>
+                @error('company_slug')
                     <p class="mt-1 text-label-sm text-red-600">{{ $message }}</p>
                 @enderror
             </div>
@@ -88,5 +115,6 @@
     </div>
 </main>
 @include('partials.pwa-landing-scripts')
+<script src="{{ asset('js/webnu-public-url-preview.js') }}" defer></script>
 </body>
 </html>

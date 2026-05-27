@@ -64,7 +64,7 @@ return [
             'videos' => true,
             'chef_suggestions' => true,
             'translation' => true,
-            'translation_max_locales' => 3,
+            'translation_max_locales' => 2,
             'pdf_menu' => true,
             'show_webnu_badge' => false,
             'tvpik' => false,

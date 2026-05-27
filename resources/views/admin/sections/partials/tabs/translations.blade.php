@@ -8,6 +8,8 @@
     $enabledExtra = is_array($company->enabled_locales) ? $company->enabled_locales : [];
     $canTranslate = $plansSrv->canUseTranslation($user);
     $maxExtraLocales = $plansSrv->maxTranslationLocales($user);
+    $maxPublicLocales = $maxExtraLocales !== null ? $maxExtraLocales + 1 : null;
+    $hasMenuContent = $company->sections()->whereHas('products')->exists();
     $planLabel = $plansSrv->tier($user)['label'] ?? 'Gratis';
     $stats = $translationsSrv->statsForCompany($company);
     $defaultMeta = $supportedLocales[$defaultLocale] ?? ['native' => strtoupper($defaultLocale)];
@@ -46,17 +48,23 @@
                     @endif
                 </div>
                 <div class="card-body">
-                    <p class="text-muted small">
-                        Idioma base: <strong>{{ $defaultMeta['native'] ?? strtoupper($defaultLocale) }}</strong>
-                        (los textos que editas en Platos de la carta).
+                    <p class="text-muted small mb-2">
+                        Idioma principal: <strong>{{ $defaultMeta['native'] ?? strtoupper($defaultLocale) }}</strong>
+                        (platos y categorías que editas en la carta).
                     </p>
+                    @if (! $hasMenuContent)
+                        <p class="text-muted small mb-3">Puedes cambiar el idioma principal mientras la carta esté vacía desde el paso de idiomas al editar la empresa.</p>
+                    @endif
 
-                    <form method="POST" action="{{ route('admin.companies.languages.update', $company) }}">
+                    <form method="POST" action="{{ route('admin.companies.languages.update', $company) }}" data-locale-form>
                         @csrf
                         @method('PUT')
                         <input type="hidden" name="redirect_to" value="sections">
 
-                        <div class="vstack gap-2 mb-3">
+                        <div class="vstack gap-2 mb-3"
+                             data-locale-limit
+                             data-max-extra-locales="{{ $maxExtraLocales ?? '' }}"
+                             data-billing-url="{{ $billingUrl }}">
                             @foreach ($supportedLocales as $code => $meta)
                                 @if ($code === $defaultLocale)
                                     @continue
@@ -65,7 +73,8 @@
                                     $checked = in_array($code, $enabledExtra, true);
                                     $stat = $stats[$code] ?? ['percent' => 0, 'done' => 0, 'total' => 0];
                                 @endphp
-                                <label class="d-flex align-items-start gap-3 p-3 border rounded {{ $checked ? 'border-primary bg-light' : '' }} {{ ! $canTranslate ? 'opacity-75' : '' }}">
+                                <label class="d-flex align-items-start gap-3 p-3 border rounded wn-locale-extra-row {{ $checked ? 'border-primary bg-light' : '' }} {{ ! $canTranslate ? 'opacity-75' : '' }}"
+                                       data-locale-code="{{ $code }}">
                                     <input type="checkbox"
                                            name="locales[]"
                                            value="{{ $code }}"
@@ -84,14 +93,19 @@
                                             <span class="text-muted small d-block">{{ $stat['done'] }}/{{ $stat['total'] }} elementos</span>
                                         @endif
                                     </span>
+                                    @if ($canTranslate)
+                                        <span class="wn-onb-locale__plus-badge align-self-center" hidden>
+                                            @include('admin.partials.plan-pro-badge', ['label' => 'Plus', 'size' => 'xs'])
+                                        </span>
+                                    @endif
                                 </label>
                             @endforeach
                         </div>
 
                         @if ($canTranslate && $maxExtraLocales !== null)
                             <p class="text-muted small mb-2">
-                                Tu plan permite hasta <strong>{{ $maxExtraLocales }}</strong>
-                                {{ $maxExtraLocales === 1 ? 'idioma extra' : 'idiomas extra' }}.
+                                Hasta <strong>{{ $maxPublicLocales }} idiomas en la carta</strong>
+                                (1 principal + {{ $maxExtraLocales }} {{ $maxExtraLocales === 1 ? 'extra' : 'extras' }}).
                             </p>
                         @endif
 
@@ -150,3 +164,9 @@
         </div>
     </div>
 </div>
+
+@once
+    @push('scripts')
+        <script src="{{ asset('js/webnu-locale-limit.js') }}"></script>
+    @endpush
+@endonce

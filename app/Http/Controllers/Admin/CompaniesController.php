@@ -8,6 +8,8 @@ use App\Http\Controllers\Controller;
 use App\Product;
 use App\Services\CompanySlugService;
 use App\Services\CompanyThemeService;
+use App\Services\PublicPathRegistry;
+use App\Services\PublicUrlRedirectService;
 use App\Services\LogoColorAnalyzer;
 use App\Services\UserPlanService;
 use Illuminate\Http\Request;
@@ -125,12 +127,30 @@ class CompaniesController extends Controller
         }
 
         if ($request->filled('slug')) {
+            if ($company->isPublicSlugLocked()) {
+                throw ValidationException::withMessages([
+                    'slug' => ['La URL está bloqueada tras publicar. Contacta con soporte si necesitas cambiarla.'],
+                ]);
+            }
+
             $customSlug = $slugs->normalize($request->get('slug'));
             $slugError = $slugs->validateCustomSlug($customSlug, $company->id);
             if ($slugError) {
                 throw ValidationException::withMessages(['slug' => [$slugError]]);
             }
+
+            $previousPath = $company->publicPath();
             $company->slug = $customSlug;
+
+            $pathError = app(PublicPathRegistry::class)->validateCompanySlug($customSlug, $company);
+            if ($pathError) {
+                throw ValidationException::withMessages(['slug' => [$pathError]]);
+            }
+
+            $newPath = $company->publicPath();
+            if ($previousPath !== $newPath) {
+                app(PublicUrlRedirectService::class)->record($previousPath, $newPath, $company->id);
+            }
         }
 
         $company->fill([

@@ -209,7 +209,13 @@
   box-sizing: border-box;
 }
 
+.wn-menu-hero__logo-chip {
+  flex-shrink: 0;
+}
+
 .wn-menu-hero__brand-text {
+  position: relative;
+  z-index: 1;
   min-width: 0;
   flex: 1;
   text-align: left;
@@ -221,7 +227,13 @@
   font-weight: 600;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: var(--wn-primary);
+  color: var(--wn-accent, var(--wn-primary));
+}
+
+.wn-menu-hero--dark .wn-menu-hero__eyebrow,
+body.wn-theme-lumiere .wn-menu-hero__eyebrow,
+body.wn-theme-nocturne .wn-menu-hero__eyebrow {
+  color: rgba(248, 246, 241, 0.92);
 }
 
 .wn-menu-hero__title {

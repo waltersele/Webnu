@@ -23,6 +23,7 @@ class Menu extends Model
         'price' => 'decimal:2',
         'enabled' => 'boolean',
         'position' => 'integer',
+        'public_slug_locked_at' => 'datetime',
     ];
 
     public function company()
@@ -54,17 +55,36 @@ class Menu extends Model
         return number_format((float) $this->price, 2, ',', '.') . ' €';
     }
 
+    public function isPublicSlugLocked(): bool
+    {
+        if ($this->public_slug_locked_at !== null) {
+            return true;
+        }
+
+        $company = $this->company;
+
+        return $company && $company->isPublicSlugLocked();
+    }
+
     /**
-     * URL pública del menú. Resuelve el owner slug a través de la company.
+     * URL pública del menú.
      */
     public function publicUrl(): ?string
     {
         $company = $this->company ?: $this->company()->with('user')->first();
-        if (! $company) {
+        if (! $company || ! $company->slug || ! $this->slug) {
             return null;
         }
-        $ownerSlug = optional($company->user)->resolveSlug();
-        if (! $ownerSlug || ! $company->slug || ! $this->slug) {
+
+        if ($company->usesSimplePublicUrl()) {
+            return route('public.menu.simple', [
+                'companySlug' => $company->slug,
+                'menuSlug' => $this->slug,
+            ]);
+        }
+
+        $ownerSlug = optional($company->user)->slug;
+        if (! $ownerSlug) {
             return null;
         }
 
@@ -73,5 +93,10 @@ class Menu extends Model
             'companySlug' => $company->slug,
             'menuSlug' => $this->slug,
         ]);
+    }
+
+    public function publicPath(): string
+    {
+        return app(\App\Services\PublicPathRegistry::class)->menuPath($this);
     }
 }

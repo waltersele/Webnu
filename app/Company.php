@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Company extends Model
 {
-    protected $fillable = ['name', 'chef_name', 'slug', 'logo', 'logo_luminance', 'logo_has_solid_bg', 'logo_dominant_hex', 'logo_chip_variant', 'background_header', 'address', 'postal_code', 'city', 'province', 'country', 'phone', 'mobile_phone', 'email', 'web', 'whatsapp', 'facebook', 'instagram', 'comments', 'schedule', 'template', 'theme_settings', 'menu_type', 'menu_type_2_pdf', 'combine_menus', 'enabled', 'reservation', 'user_id', 'sales_rep_user_id', 'sales_converted_at', 'default_locale', 'enabled_locales', 'suggest_translation_upgrade', 'daily_spotlight', 'daily_spotlight_price', 'daily_highlights', 'created_at', 'updated_at'];
+    protected $fillable = ['name', 'chef_name', 'slug', 'public_url_format', 'public_slug_locked_at', 'logo', 'logo_luminance', 'logo_has_solid_bg', 'logo_dominant_hex', 'logo_chip_variant', 'background_header', 'address', 'postal_code', 'city', 'province', 'country', 'phone', 'mobile_phone', 'email', 'web', 'whatsapp', 'facebook', 'instagram', 'comments', 'schedule', 'template', 'theme_settings', 'menu_type', 'menu_type_2_pdf', 'combine_menus', 'enabled', 'reservation', 'user_id', 'sales_rep_user_id', 'sales_converted_at', 'default_locale', 'enabled_locales', 'suggest_translation_upgrade', 'daily_spotlight', 'daily_spotlight_price', 'daily_highlights', 'created_at', 'updated_at'];
 
     protected $attributes = [
         'reservation' => false,
@@ -24,6 +24,7 @@ class Company extends Model
         'reservation' => 'boolean',
         'suggest_translation_upgrade' => 'boolean',
         'sales_converted_at' => 'datetime',
+        'public_slug_locked_at' => 'datetime',
         'logo_luminance' => 'float',
         'logo_has_solid_bg' => 'boolean',
     ];
@@ -214,28 +215,62 @@ class Company extends Model
         return count($this->publicLocales()) > 1;
     }
 
+    public function usesSimplePublicUrl(): bool
+    {
+        return $this->public_url_format === 'simple';
+    }
+
+    public function isPublicSlugLocked(): bool
+    {
+        return $this->public_slug_locked_at !== null;
+    }
+
+    public function lockPublicSlug(): void
+    {
+        if ($this->public_slug_locked_at === null) {
+            $this->public_slug_locked_at = now();
+            $this->save();
+        }
+    }
+
     /**
-     * URL pública de la carta. Si el user no tiene slug (caso degenerado o
-     * migración aún no aplicada), cae en la ruta legacy /carta/{companySlug}.
+     * URL pública de la carta.
      * Read-only: no dispara persistencia.
      */
     public function publicUrl(array $extra = []): string
     {
+        if ($this->usesSimplePublicUrl() && $this->slug) {
+            return route('public.hub', array_merge(['slug' => $this->slug], $extra));
+        }
+
         $ownerSlug = optional($this->user)->slug;
         if ($ownerSlug && $this->slug) {
             return route('see_menu', array_merge([$ownerSlug, $this->slug], $extra));
         }
+
         return route('public.hub', array_merge(['slug' => $this->slug], $extra));
     }
 
     /** Path relativo para mostrar (ej: "carta/casa-maria/menu-de-verano"). */
     public function publicPath(): string
     {
-        $ownerSlug = optional($this->user)->slug;
-        if ($ownerSlug && $this->slug) {
-            return 'carta/' . $ownerSlug . '/' . $this->slug;
+        return app(\App\Services\PublicPathRegistry::class)->companyPath($this);
+    }
+
+    public function previousPublicPath(): string
+    {
+        $original = $this->getOriginal();
+        $clone = clone $this;
+        if (is_array($original)) {
+            if (array_key_exists('slug', $original)) {
+                $clone->slug = $original['slug'];
+            }
+            if (array_key_exists('public_url_format', $original)) {
+                $clone->public_url_format = $original['public_url_format'];
+            }
         }
-        return 'carta/' . ($this->slug ?? '');
+
+        return app(\App\Services\PublicPathRegistry::class)->companyPath($clone);
     }
 
     /**
