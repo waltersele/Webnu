@@ -5,7 +5,9 @@ namespace App\Http\Controllers\Admin;
 use App\Company;
 use App\Http\Controllers\Controller;
 use App\Section;
+use App\Services\CompanySlugService;
 use App\Services\ProfileWizardService;
+use Illuminate\Support\Facades\Cookie;
 
 class AdminController extends Controller
 {
@@ -24,7 +26,9 @@ class AdminController extends Controller
         $company = $this->resolveSelectedCompany($user);
 
         if (! $company) {
-            return redirect()->route('admin.companies.index');
+            $this->ensureCompanyForOnboarding($user);
+
+            return redirect()->route('admin.onboarding');
         }
 
         $profileGroups   = $wizard->groupsFor($user, $company);
@@ -65,6 +69,37 @@ class AdminController extends Controller
         }
 
         return $query->orderBy('name')->first();
+    }
+
+    /**
+     * Para usuarios legacy sin company (p.ej. marcados como onboarding completo por la
+     * migración 2026_05_20 pero sin negocio creado), bootstrap una company vacía y
+     * reinicia el wizard para que /admin/onboarding funcione sin 404 ni bucles.
+     */
+    protected function ensureCompanyForOnboarding($user): void
+    {
+        if ($user->companies()->exists()) {
+            return;
+        }
+
+        $businessName = 'Mi carta';
+        $ownerSlug = $user->resolveSlug();
+
+        $company = Company::create([
+            'name' => $businessName,
+            'slug' => app(CompanySlugService::class)->generateFromName($businessName, null, null, $ownerSlug),
+            'template' => 'lumiere',
+            'menu_type' => 1,
+            'enabled' => false,
+            'reservation' => false,
+            'user_id' => $user->id,
+        ]);
+
+        Cookie::queue(Cookie::forever('selected_company', $company->id));
+
+        $user->onboarding_completed_at = null;
+        $user->onboarding_step = 1;
+        $user->save();
     }
 
     protected function companyHasMenuStructure(Company $company): bool

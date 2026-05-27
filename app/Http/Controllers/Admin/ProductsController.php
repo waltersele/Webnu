@@ -143,6 +143,56 @@ class ProductsController extends Controller
             ->with('flash', 'Producto actualizado correctamente');
     }
 
+    public function uploadImageInline(Request $request, Product $product, UserPlanService $plans)
+    {
+        $product->load('section.company');
+        $this->authorize('update', $product);
+
+        $plans->assertCanUseProductPhotos($request->user());
+
+        $request->validate([
+            'image' => 'required|image|max:8192',
+        ]);
+
+        if ($product->image) {
+            Storage::delete($product->image);
+        }
+
+        $product->image = $request->file('image')->store('productos');
+        $product->save();
+
+        return response()->json([
+            'success' => true,
+            'image_url' => asset('img/' . $product->image),
+        ]);
+    }
+
+    public function uploadVideoInline(Request $request, Product $product, UserPlanService $plans)
+    {
+        $product->load('section.company');
+        $this->authorize('update', $product);
+
+        $plans->assertCanUseVideos($request->user());
+
+        $rules = $this->videoValidationRules('video');
+        $rules['video'] = str_replace('nullable|', 'required|', $rules['video']);
+        $request->validate($rules);
+
+        if ($product->video) {
+            Storage::delete($product->video);
+        }
+
+        $product->video = app(ProductVideoOptimizer::class)->storeOptimized(
+            $request->file('video')
+        );
+        $product->save();
+
+        return response()->json([
+            'success' => true,
+            'video_url' => asset('img/' . $product->video),
+        ]);
+    }
+
     public function delete_image_product(Product $product)
     {
         $product->load('section.company');

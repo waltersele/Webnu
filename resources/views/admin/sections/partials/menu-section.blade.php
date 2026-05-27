@@ -4,7 +4,7 @@
 @endphp
 <article id="{{ $section->id }}" class="card mb-4 webnu-section-card is-open">
     <div class="card-header webnu-section-card__header d-flex flex-wrap align-items-center gap-2 border-0 pb-0">
-        <i class="ri ri-draggable icon-20px text-muted webnu-drag-handle" title="Arrastrar sección"></i>
+        <i class="ri ri-draggable icon-20px text-muted webnu-section-drag-handle" title="Arrastrar sección"></i>
         <div class="me-auto min-w-0">
             <h5 class="card-title mb-0">{{ $section->name }}</h5>
             <p class="text-muted small mb-0">

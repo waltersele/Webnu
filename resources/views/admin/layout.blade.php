@@ -9,6 +9,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
     <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('page_title', 'Panel') — Webnu</title>
     <link rel="icon" type="image/png" href="{{ \App\PlatformSetting::brandUrl('favicon') }}">
     @if($useClientShell)
@@ -182,6 +183,7 @@
         @include('admin.partials.qr-modal', ['currentCompany' => $qrModalCurrent])
     @endif
 @endif
+@stack('modals')
 @stack('scripts')
 @if($useClientShell)
 <script src="{{ asset('js/admin-share-menu.js') }}"></script>

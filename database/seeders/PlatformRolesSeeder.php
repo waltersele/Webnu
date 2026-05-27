@@ -1,5 +1,7 @@
 <?php
 
+namespace Database\Seeders;
+
 use App\User;
 use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Permission;
@@ -7,7 +9,7 @@ use Spatie\Permission\Models\Role;
 
 class PlatformRolesSeeder extends Seeder
 {
-    public function run()
+    public function run(): void
     {
         app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
 

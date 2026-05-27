@@ -4,7 +4,7 @@ return [
 
     'default' => 'menu',
 
-    'layouts' => ['menu', 'spotlight', 'featured', 'video'],
+    'layouts' => ['menu', 'spotlight', 'featured', 'video', 'daily', 'hero', 'tapas'],
 
     'templates' => [
         'menu' => [
@@ -54,6 +54,43 @@ return [
             'show_header' => false,
             'icon' => 'ti-player-play',
             'thumbnail' => 'img/tvpik/previews/video.svg',
+        ],
+        'daily' => [
+            'key' => 'daily',
+            'label' => 'Menú del día',
+            'description' => 'Menú fijo con primeros, segundos y postres, precio destacado y foto del plato estrella.',
+            'layout' => 'daily',
+            'view' => 'tv.templates.daily',
+            'duration_hint' => 'Si tienes varios menús, rota entre ellos en la misma pantalla',
+            'rotate_seconds' => 15,
+            'show_header' => false,
+            'icon' => 'ti-bowl-spoon',
+            'thumbnail' => 'img/tvpik/previews/daily.svg',
+            'supports_menu_selector' => true,
+        ],
+        'hero' => [
+            'key' => 'hero',
+            'label' => 'Plato hero',
+            'description' => 'Plato destacado a pantalla completa con título grande y categoría.',
+            'layout' => 'hero',
+            'view' => 'tv.templates.hero',
+            'duration_hint' => 'Rota entre los platos destacados con foto',
+            'rotate_seconds' => 10,
+            'show_header' => false,
+            'icon' => 'ti-photo-filled',
+            'thumbnail' => 'img/tvpik/previews/hero.svg',
+        ],
+        'tapas' => [
+            'key' => 'tapas',
+            'label' => 'Tapas / Destacados',
+            'description' => 'Rejilla 2x2 con tus platos estrella y precio destacado.',
+            'layout' => 'tapas',
+            'view' => 'tv.templates.tapas',
+            'duration_hint' => 'Cambio automático de grupos si hay más de 4 destacados',
+            'rotate_seconds' => 12,
+            'show_header' => true,
+            'icon' => 'ti-grid-dots',
+            'thumbnail' => 'img/tvpik/previews/tapas.svg',
         ],
     ],
 

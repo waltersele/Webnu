@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 180" role="img" aria-label="Vista previa plato hero">
+  <defs>
+    <linearGradient id="heroShade" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#000" stop-opacity="0.35"/>
+      <stop offset="40%" stop-color="#000" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#000" stop-opacity="0.85"/>
+    </linearGradient>
+    <radialGradient id="heroPizza" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#f4c87a"/>
+      <stop offset="55%" stop-color="#d6863a"/>
+      <stop offset="100%" stop-color="#4a2410"/>
+    </radialGradient>
+  </defs>
+  <rect width="320" height="180" fill="#0f0a06"/>
+  <circle cx="160" cy="92" r="84" fill="url(#heroPizza)"/>
+  <circle cx="148" cy="80" r="8" fill="#c63030"/>
+  <circle cx="178" cy="74" r="6" fill="#c63030"/>
+  <circle cx="170" cy="106" r="7" fill="#c63030"/>
+  <circle cx="138" cy="108" r="5" fill="#c63030"/>
+  <circle cx="186" cy="98" r="5" fill="#3a7a3a"/>
+  <circle cx="156" cy="120" r="4" fill="#3a7a3a"/>
+  <circle cx="150" cy="92" r="5" fill="#f3eee3"/>
+  <circle cx="178" cy="92" r="4" fill="#f3eee3"/>
+  <rect width="320" height="180" fill="url(#heroShade)"/>
+  <rect x="14" y="14" width="60" height="14" rx="7" fill="#ffffff" opacity="0.18"/>
+  <text x="20" y="24" fill="#ffffff" font-family="system-ui,sans-serif" font-size="7" font-weight="700">WEBNU</text>
+  <rect x="232" y="14" width="74" height="14" rx="7" fill="#000" opacity="0.55"/>
+  <text x="240" y="24" fill="#f3eee3" font-family="system-ui,sans-serif" font-size="6" font-weight="600"> GALERÍA</text>
+  <rect x="14" y="136" width="48" height="2" fill="#e9a233"/>
+  <text x="14" y="150" fill="#f3eee3" font-family="system-ui,sans-serif" font-size="5" font-weight="700" letter-spacing="1.5">HORNO DE LEÑA</text>
+  <text x="14" y="170" fill="#ffffff" font-family="system-ui,sans-serif" font-size="16" font-weight="800">Pizza Margherita</text>
+</svg>

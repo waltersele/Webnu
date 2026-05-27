@@ -53,10 +53,19 @@ class CompanySlugService
 
     /**
      * Genera una URL limpia única a partir del nombre (y opcionalmente la ciudad).
+     * Si se pasa $ownerSlug y el slug calculado coincide con el del propietario,
+     * se prefiere "carta" (o variantes) para evitar URLs feas tipo
+     * /carta/maria-garcia/maria-garcia.
      */
-    public function generateFromName(string $name, ?string $city = null, ?int $exceptCompanyId = null): string
+    public function generateFromName(string $name, ?string $city = null, ?int $exceptCompanyId = null, ?string $ownerSlug = null): string
     {
         $base = $this->normalize($name);
+
+        // Evitar duplicar el slug del propietario: si coinciden, partimos de "carta".
+        if ($ownerSlug !== null && $ownerSlug !== '' && $base === $ownerSlug) {
+            $base = 'carta';
+        }
+
         $candidates = [$base];
 
         if ($city) {
@@ -108,8 +117,11 @@ class CompanySlugService
         return null;
     }
 
-    public function publicPath(string $slug): string
+    public function publicPath(string $slug, ?string $ownerSlug = null): string
     {
+        if ($ownerSlug !== null && $ownerSlug !== '') {
+            return '/carta/' . $ownerSlug . '/' . $slug;
+        }
         return '/carta/' . $slug;
     }
 }

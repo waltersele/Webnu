@@ -56,7 +56,7 @@
         </div>
 
         <div class="d-flex col-12 col-lg-5 col-xl-4 align-items-center justify-content-center webnu-auth-panel p-4 p-sm-5">
-            <div class="w-100" style="max-width: 26rem;">
+            <div class="webnu-auth-shell w-100">
                 @yield('content')
             </div>
         </div>

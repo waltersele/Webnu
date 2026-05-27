@@ -82,7 +82,8 @@
                 </div>
                 <div class="card-body">
                     <p class="text-muted">
-                        Las claves sensibles se guardan cifradas en la base de datos y tienen prioridad sobre el <code>.env</code>.
+                        <strong>Aquí se configuran todas las claves de integración</strong> (Stripe, Google, Gemini, TVPik, Pre-Alta, etc.).
+                        Los secretos se guardan cifrados en la base de datos y tienen prioridad sobre el <code>.env</code> (útil solo como respaldo en despliegues automatizados).
                         Tras cambiar de cuenta Stripe, borra el catálogo local en Facturación y vuelve a crear los precios.
                     </p>
 
@@ -96,7 +97,7 @@
                         </div>
                     @else
                         <div class="alert alert-warning py-2 mb-3">
-                            Sin <code>STRIPE_SECRET</code>. El checkout y la facturación no funcionarán hasta configurarla aquí o en <code>.env</code>.
+                            Sin clave secreta de Stripe. El checkout y la facturación no funcionarán hasta configurarla aquí.
                         </div>
                     @endif
 
@@ -139,6 +140,82 @@
                             formmethod="post">
                         <i class="ri-bank-card-line me-1"></i> Probar conexión con Stripe
                     </button>
+
+                    <hr>
+
+                    <h6 class="text-primary">Google (inicio de sesión OAuth)</h6>
+                    @if ($integrations['google_oauth_configured'])
+                        <div class="alert alert-success py-2">
+                            <i class="ri-check-line me-1"></i> OAuth configurado
+                            @if ($integrations['google_client_secret_hint'])
+                                <span class="text-muted">(secreto {{ $integrations['google_client_secret_hint'] }})</span>
+                            @endif
+                        </div>
+                    @else
+                        <div class="alert alert-warning py-2 mb-3">
+                            Falta Client ID o Client Secret. El botón «Continuar con Google» en <code>/login</code> no aparecerá hasta completar ambos.
+                        </div>
+                    @endif
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label for="google_client_id" class="form-label">Client ID</label>
+                            <input type="text" name="google_client_id" id="google_client_id" class="form-control font-monospace"
+                                   value="{{ old('google_client_id', $integrations['google_client_id']) }}"
+                                   placeholder="xxxx.apps.googleusercontent.com" autocomplete="off">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="google_client_secret" class="form-label">Client Secret</label>
+                            <input type="password" name="google_client_secret" id="google_client_secret" class="form-control font-monospace"
+                                   placeholder="{{ $integrations['google_client_secret_configured'] ? 'Dejar vacío para no cambiar (' . ($integrations['google_client_secret_hint'] ?? '') . ')' : 'GOCSPX-...' }}"
+                                   autocomplete="off">
+                        </div>
+                        <div class="col-12">
+                            <label for="google_redirect_uri" class="form-label">URI de redirección autorizada</label>
+                            <input type="url" name="google_redirect_uri" id="google_redirect_uri" class="form-control font-monospace"
+                                   value="{{ old('google_redirect_uri', $integrations['google_redirect_uri']) }}"
+                                   placeholder="{{ $integrations['google_redirect_uri_default'] }}">
+                            <div class="form-text">
+                                Debe coincidir exactamente con la URI en
+                                <a href="https://console.cloud.google.com/apis/credentials" target="_blank" rel="noopener">Google Cloud Console</a>.
+                                Si lo dejas vacío al guardar, se usa: <code>{{ $integrations['google_redirect_uri_effective'] }}</code>
+                            </div>
+                        </div>
+                    </div>
+                    @if ($integrations['google_client_secret_configured'])
+                        <div class="form-check mb-4">
+                            <input type="checkbox" class="form-check-input" name="clear_google_client_secret" value="1" id="clear_google_client_secret">
+                            <label class="form-check-label text-danger" for="clear_google_client_secret">Eliminar Client Secret guardado</label>
+                        </div>
+                    @endif
+
+                    <h6 class="text-primary">Pre-Alta / worker de captura</h6>
+                    @if ($integrations['pre_alta_ingest_configured'])
+                        <div class="alert alert-success py-2">
+                            <i class="ri-check-line me-1"></i> Clave de ingesta configurada
+                            @if ($integrations['pre_alta_ingest_hint'])
+                                <span class="text-muted">({{ $integrations['pre_alta_ingest_hint'] }})</span>
+                            @endif
+                        </div>
+                    @else
+                        <div class="alert alert-warning py-2 mb-3">
+                            Sin clave de ingesta. Los endpoints <code>/api/pre-alta/ingest</code> y el worker externo responderán 503.
+                        </div>
+                    @endif
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-8">
+                            <label for="pre_alta_ingest_key" class="form-label">Clave de ingesta (PRE_ALTA)</label>
+                            <input type="password" name="pre_alta_ingest_key" id="pre_alta_ingest_key" class="form-control font-monospace"
+                                   placeholder="{{ $integrations['pre_alta_ingest_configured'] ? 'Dejar vacío para no cambiar (' . ($integrations['pre_alta_ingest_hint'] ?? '') . ')' : 'Clave larga aleatoria (mín. 16 caracteres)' }}"
+                                   autocomplete="off">
+                            <div class="form-text">Misma clave en el worker como <code>WEBNU_DEMO_API_KEY</code> o <code>PRE_ALTA_INGEST_KEY</code>.</div>
+                        </div>
+                    </div>
+                    @if ($integrations['pre_alta_ingest_configured'])
+                        <div class="form-check mb-4">
+                            <input type="checkbox" class="form-check-input" name="clear_pre_alta_ingest_key" value="1" id="clear_pre_alta_ingest_key">
+                            <label class="form-check-label text-danger" for="clear_pre_alta_ingest_key">Eliminar clave de ingesta guardada</label>
+                        </div>
+                    @endif
 
                     <hr>
 
@@ -207,8 +284,7 @@
                 </div>
                 <div class="card-body">
                     <p class="text-muted">
-                        Los restaurantes podrán escanear su carta desde el móvil. La clave se guarda cifrada.
-                        También puedes definirla en <code>.env</code> como respaldo (<code>GEMINI_API_KEY</code>).
+                        Los restaurantes podrán escanear su carta desde el móvil. La API key se guarda cifrada en la base de datos.
                     </p>
 
                     @if ($geminiConfigured)
@@ -270,7 +346,7 @@
                 <div class="card-body">
                     <p class="text-muted mb-3">
                         Configura el envío de emails de la plataforma (formularios de la landing, notificaciones, etc.).
-                        Si no rellenas estos campos, se usan los valores de <code>.env</code>.
+                        Los valores guardados aquí tienen prioridad sobre <code>.env</code>.
                     </p>
 
                     <div class="row g-3">

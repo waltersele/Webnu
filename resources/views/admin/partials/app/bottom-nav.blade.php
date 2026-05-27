@@ -39,12 +39,10 @@
         </a>
     @endif
     <a href="{{ route('admin.tvpik.index') }}" class="webnu-bottomnav__item {{ $screensActive ? 'is-active' : '' }} {{ ! $canUseTvpik ? 'is-locked' : '' }}">
-        <span class="webnu-bottomnav__icon-wrap">
-            <i class="ti ti-device-tv"></i>
-            @if(! $canUseTvpik)
-                <span class="webnu-bottomnav__lock" aria-hidden="true"><i class="ti ti-lock"></i></span>
-            @endif
-        </span>
+        <i class="ti ti-device-tv"></i>
+        @if(! $canUseTvpik)
+            <span class="webnu-bottomnav__lock" aria-hidden="true"><i class="ti ti-lock"></i></span>
+        @endif
         <span>Pantallas</span>
     </a>
     <button type="button"

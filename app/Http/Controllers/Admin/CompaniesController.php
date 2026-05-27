@@ -3,10 +3,12 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Company;
+use App\Http\Controllers\Concerns\BuildsCompanyStudioPayload;
 use App\Http\Controllers\Controller;
 use App\Product;
 use App\Services\CompanySlugService;
 use App\Services\CompanyThemeService;
+use App\Services\LogoColorAnalyzer;
 use App\Services\UserPlanService;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
@@ -17,6 +19,8 @@ use Illuminate\Validation\ValidationException;
 
 class CompaniesController extends Controller
 {
+    use BuildsCompanyStudioPayload;
+
     public function index()
     {
         $user = auth()->user();
@@ -42,36 +46,9 @@ class CompaniesController extends Controller
     {
         $this->authorize('view', $company);
 
-        $user = auth()->user();
-        $templateAccess = $plans->templateAccessForUser($user);
-        $templates = config('company_templates.templates', []);
-        $colorKeys = config('company_templates.color_keys', []);
-        $fontKeys = config('company_templates.font_keys', []);
-        $fonts = config('company_templates.fonts', []);
-        $themeSettings = $company->resolvedThemeSettings();
-        $themePresets = config('company_templates.presets', []);
-        $previewUrl = $company->publicUrl(['studio_preview' => 1]);
+        $payload = $this->studioPayload($company, $plans);
 
-        $templateLabels = collect($templates)->mapWithKeys(function ($meta, $key) {
-            return [$key => $meta['label'] ?? $key];
-        })->all();
-
-        $hasMenuProducts = $company->sections()->whereHas('products')->exists();
-        $previewUsesSamples = ! $hasMenuProducts;
-
-        return view('admin.companies.edit', compact(
-            'company',
-            'templates',
-            'templateAccess',
-            'colorKeys',
-            'fontKeys',
-            'fonts',
-            'themeSettings',
-            'themePresets',
-            'previewUrl',
-            'templateLabels',
-            'previewUsesSamples'
-        ));
+        return view('admin.companies.edit', array_merge(['company' => $company], $payload));
     }
 
     public function store(Request $request, UserPlanService $plans, CompanySlugService $slugs)
@@ -82,12 +59,15 @@ class CompaniesController extends Controller
             'name' => 'required',
         ]);
 
+        $userId = auth()->id();
+        $ownerSlug = optional($request->user())->resolveSlug();
+
         $slug = $slugs->generateFromName(
             $request->get('name'),
-            $request->get('city')
+            $request->get('city'),
+            null,
+            $ownerSlug
         );
-
-        $userId = auth()->id();
         $defaultTemplate = 'lumiere';
         if (! $plans->canUseTemplate($request->user(), $defaultTemplate)) {
             $freeKeys = $plans->freeTemplateKeys();
@@ -114,6 +94,25 @@ class CompaniesController extends Controller
     public function update(Request $request, CompanySlugService $slugs, CompanyThemeService $themes, UserPlanService $plans, Company $company)
     {
         $this->authorize('update', $company);
+
+        $step = $request->get('studio_step', 'identity');
+
+        if ($step === 'design') {
+            $newTemplate = $request->get('template', $company->template ?: 'basic');
+            if ($newTemplate !== ($company->template ?: 'basic')) {
+                $plans->assertCanUseTemplate($request->user(), $newTemplate);
+            }
+
+            $company->fill([
+                'template' => $newTemplate,
+                'theme_settings' => $themes->normalizeFromRequest($request),
+            ]);
+            $company->save();
+
+            return redirect()
+                ->to(route('admin.sections.index') . '#tab-personalizacion')
+                ->with('flash', 'Diseño actualizado correctamente');
+        }
 
         $this->validate($request, [
             'name' => 'required',
@@ -159,8 +158,7 @@ class CompaniesController extends Controller
         ]);
         $company->save();
 
-        $step = $request->get('studio_step', 'identity');
-        if (!in_array($step, ['identity', 'contact', 'design', 'publish'], true)) {
+        if (!in_array($step, ['identity', 'contact', 'publish'], true)) {
             $step = 'identity';
         }
 
@@ -201,7 +199,7 @@ class CompaniesController extends Controller
         return redirect()->route('admin.companies.index')->with('flash', 'Negocio eliminado correctamente');
     }
 
-    public function storelogo(Company $company)
+    public function storelogo(Company $company, LogoColorAnalyzer $logoColorAnalyzer)
     {
         $this->authorize('update', $company);
 
@@ -209,6 +207,14 @@ class CompaniesController extends Controller
 
         $old = $company->logo;
         $company->logo = $file->store('negocios');
+
+        $absolutePath = public_path('img/' . $company->logo);
+        $analysis = $logoColorAnalyzer->analyze($absolutePath);
+        $company->logo_luminance    = $analysis['luminance'];
+        $company->logo_has_solid_bg = $analysis['has_solid_bg'];
+        $company->logo_dominant_hex = $analysis['dominant_hex'];
+        $company->logo_chip_variant = $analysis['chip_variant'];
+
         $company->save();
 
         if ($old && $old !== $company->logo) {
@@ -218,6 +224,7 @@ class CompaniesController extends Controller
         return response()->json([
             'success' => true,
             'url' => '/img/' . $company->logo,
+            'chip_variant' => $company->logo_chip_variant,
         ]);
     }
 
@@ -228,6 +235,10 @@ class CompaniesController extends Controller
         if ($company->logo) {
             Storage::delete($company->logo);
             $company->logo = null;
+            $company->logo_luminance = null;
+            $company->logo_has_solid_bg = null;
+            $company->logo_dominant_hex = null;
+            $company->logo_chip_variant = null;
             $company->save();
         }
 

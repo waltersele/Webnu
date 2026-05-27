@@ -30,9 +30,24 @@
         || request()->is('admin/menu-scan*');
 
     $companiesActive = request()->is('admin/companies*');
+
+    $menusActive = request()->is('admin/menus*');
+
+    $homeActive = request()->routeIs('admin.dashboard');
 @endphp
 
 <nav class="wn-shell-sidebar" aria-label="Navegación principal">
+    {{-- Inicio (dashboard) --}}
+    <a href="{{ route('admin.dashboard') }}"
+       class="wn-shell-nav {{ $homeActive ? 'is-active' : '' }}"
+       aria-label="Inicio"
+       @if($homeActive) aria-current="page" @endif>
+        <span class="wn-shell-nav__icon">
+            <i class="ti ti-home"></i>
+        </span>
+        <span class="wn-shell-nav__label">Inicio</span>
+    </a>
+
     {{-- Mis cartas (parent con subitems) --}}
     @if($hasCompany)
         <div class="wn-shell-nav-group {{ $cartaActive ? 'is-active-group' : '' }}">
@@ -95,6 +110,57 @@
                 <i class="ti ti-tools-kitchen-2"></i>
             </span>
             <span class="wn-shell-nav__label">Mis cartas</span>
+        </span>
+    @endif
+
+    {{-- Menús (parent con subitems) --}}
+    @if($hasCompany)
+        @php
+            $menusEditing = request()->is('admin/menus/*/edit');
+            $menusIndexActive = $menusActive && ! $menusEditing;
+        @endphp
+        <div class="wn-shell-nav-group {{ $menusActive ? 'is-active-group' : '' }}">
+            <a href="{{ route('admin.menus.index') }}"
+               class="wn-shell-nav wn-shell-nav--parent {{ $menusIndexActive ? 'is-active' : '' }}"
+               aria-label="Menús"
+               @if($menusActive) aria-current="page" @endif>
+                <span class="wn-shell-nav__icon">
+                    <i class="ti ti-bowl-spoon"></i>
+                </span>
+                <span class="wn-shell-nav__label">Menús</span>
+            </a>
+
+            @if(!empty($available_menus) && $available_menus->count())
+                <div class="wn-shell-subnav" role="list" aria-label="Menús disponibles">
+                    @foreach($available_menus as $m)
+                        @php
+                            $isCurrentMenu = request()->is('admin/menus/' . $m->id . '/edit');
+                            $menuDotClass = $m->enabled ? 'is-on' : 'is-off';
+                            $menuStatusLabel = $m->enabled ? 'activo' : 'borrador';
+                        @endphp
+                        <a href="{{ route('admin.menus.edit', $m->id) }}"
+                           class="wn-shell-subnav__item {{ $isCurrentMenu ? 'is-current' : '' }}"
+                           title="{{ $m->name }} ({{ $menuStatusLabel }})"
+                           @if($isCurrentMenu) aria-current="true" @endif>
+                            <span class="wn-shell-subnav__dot {{ $menuDotClass }}" aria-hidden="true"></span>
+                            <span class="wn-shell-subnav__name">{{ $m->name }}</span>
+                        </a>
+                    @endforeach
+                    <a href="{{ route('admin.menus.index') }}#new"
+                       class="wn-shell-subnav__add"
+                       title="Crear un menú">
+                        <i class="ti ti-plus"></i>
+                        <span>Crear menú</span>
+                    </a>
+                </div>
+            @endif
+        </div>
+    @else
+        <span class="wn-shell-nav is-disabled" title="Crea un negocio primero" aria-disabled="true">
+            <span class="wn-shell-nav__icon">
+                <i class="ti ti-bowl-spoon"></i>
+            </span>
+            <span class="wn-shell-nav__label">Menús</span>
         </span>
     @endif
 

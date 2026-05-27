@@ -95,7 +95,8 @@ class OnboardingController extends Controller
                     $company->slug = app(CompanySlugService::class)->generateFromName(
                         $data['name'],
                         $company->city,
-                        $company->id
+                        $company->id,
+                        optional($company->user)->resolveSlug()
                     );
                 }
                 $company->save();
@@ -260,8 +261,8 @@ class OnboardingController extends Controller
         $urls = [];
         foreach (config('company_templates.templates', []) as $id => $tpl) {
             $slug = $tpl['preview_slug'] ?? $fallbackSlugs[$id] ?? 'demo';
-            // Demos no tienen user asociado: usamos la URL legacy /carta/{slug}
-            $urls[$id] = route('see_menu.legacy', $slug);
+            // Demos no tienen user asociado: usamos la URL hub /carta/{slug}
+            $urls[$id] = route('public.hub', ['slug' => $slug]);
         }
 
         return $urls;

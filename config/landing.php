@@ -19,9 +19,9 @@ return [
 
     'template_showcase_keys' => ['basic', 'nocturne', 'otaku'],
 
-    'pricing_order' => ['free', 'pro', 'plus'],
+    'pricing_order' => ['free', 'pro', 'plus', 'franchise'],
 
-    'pricing_highlight' => 'pro',
+    'pricing_highlight' => 'plus',
 
     'franchise_contact_email' => env('WEBNU_FRANCHISE_EMAIL', 'hola@webnu.es'),
 

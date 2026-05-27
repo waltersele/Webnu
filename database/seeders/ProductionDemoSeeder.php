@@ -1,12 +1,14 @@
 <?php
 
+namespace Database\Seeders;
+
 use App\Services\Demo\DemoMenuSeeder;
 use Illuminate\Database\Seeder;
 
 /**
  * Sembrador idempotente de las 9 cartas demo en producción.
  *
- *   php artisan db:seed --class=ProductionDemoSeeder
+ *   php artisan db:seed --class=Database\\Seeders\\ProductionDemoSeeder
  *
  * o, más cómodo:
  *

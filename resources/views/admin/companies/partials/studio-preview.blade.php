@@ -16,12 +16,14 @@
         </div>
         <div class="card-body pt-0 pb-3">
             <div class="wn-phone-frame">
-                <div class="wn-phone-frame__loader">
-                    <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
-                    <span class="small text-muted">Cargando carta…</span>
-                </div>
                 <div class="wn-phone-notch"></div>
-                <iframe id="wn-carta-preview" title="Vista previa de la carta" loading="eager"></iframe>
+                <div class="wn-phone-frame__viewport">
+                    <div class="wn-phone-frame__loader">
+                        <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
+                        <span class="small text-muted">Cargando carta…</span>
+                    </div>
+                    <iframe id="wn-carta-preview" title="Vista previa de la carta" loading="eager"></iframe>
+                </div>
             </div>
             @if(!empty($previewUsesSamples))
                 <p class="small text-primary mt-3 mb-2" id="wn-preview-sample-hint">

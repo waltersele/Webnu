@@ -9,24 +9,9 @@
 @endphp
 
 <div class="card mb-4 product-media-block" data-media-mode="{{ $mode }}">
-    <div class="card-header d-flex align-items-center justify-content-between flex-wrap gap-2">
+    <div class="card-header">
         <h5 class="card-title mb-0">Foto y vídeo</h5>
-        <div class="d-flex flex-wrap gap-2 webnu-media-quick-actions">
-            <button type="button" class="btn btn-sm btn-outline-primary webnu-media-go-photo">
-                <i class="ri-image-add-line me-1"></i> Añadir foto
-            </button>
-            @if ($canVideos)
-                <button type="button" class="btn btn-sm btn-outline-secondary webnu-media-go-video">
-                    <i class="ri-video-add-line me-1"></i> Añadir vídeo
-                </button>
-            @else
-                <button type="button"
-                        class="btn btn-sm btn-outline-secondary"
-                        data-upgrade-trigger="video">
-                    <i class="ri-video-add-line me-1"></i> Añadir vídeo (Plus)
-                </button>
-            @endif
-        </div>
+        <p class="text-muted small mb-0">Sube desde el dispositivo o usa la cámara para hacer una foto/grabar ahí mismo.</p>
     </div>
     <div class="card-body">
         <div class="row g-4">
@@ -57,40 +42,16 @@
                         <img src="" alt="Vista previa" class="webnu-media-existing__preview">
                     </div>
 
-                    <div class="webnu-media-controls">
-                        <div class="webnu-media-mode btn-group btn-group-sm w-100" role="group">
-                            <input type="radio" class="btn-check product-image-mode-radio" name="{{ $idPrefix }}-image-mode" id="{{ $idPrefix }}-image-upload" value="upload" checked>
-                            <label class="btn btn-outline-secondary" for="{{ $idPrefix }}-image-upload"><i class="ri-upload-2-line me-1"></i> Subir</label>
-                            <input type="radio" class="btn-check product-image-mode-radio" name="{{ $idPrefix }}-image-mode" id="{{ $idPrefix }}-image-camera" value="camera">
-                            <label class="btn btn-outline-secondary product-image-camera-tab-item" for="{{ $idPrefix }}-image-camera"><i class="ri-camera-line me-1"></i> Hacer foto</label>
-                        </div>
-
-                        <div class="product-image-panel product-image-panel--upload" id="{{ $idPrefix }}-image-upload-panel">
-                            <label class="webnu-file-drop webnu-file-drop--compact d-block" for="{{ $idPrefix }}-image">
-                                <i class="ri-upload-cloud-2-line"></i>
-                                <span>Seleccionar imagen</span>
-                                <input type="file"
-                                       accept="image/*"
-                                       capture="environment"
-                                       name="{{ $prefix }}_image"
-                                       id="{{ $idPrefix }}-image"
-                                       class="product-image-input webnu-file-drop__input">
-                            </label>
-                        </div>
-
-                        <div class="product-image-panel product-image-panel--camera hidden" id="{{ $idPrefix }}-image-camera-panel">
-                            <p class="text-muted small product-photo-unsupported" style="display:none;">
-                                Tu navegador no permite usar la cámara. Usa «Subir» en su lugar.
-                            </p>
-                            <video class="product-photo-preview rounded border bg-dark w-100 mb-2" playsinline autoplay muted style="max-height: 160px;"></video>
-                            <div class="d-flex flex-wrap gap-2">
-                                <button type="button" class="btn btn-sm btn-primary product-photo-capture">
-                                    <i class="ri-camera-fill me-1"></i> Capturar foto
-                                </button>
-                                <button type="button" class="btn btn-sm btn-label-secondary product-photo-retake" style="display:none;">Otra foto</button>
-                            </div>
-                        </div>
-                    </div>
+                    <label class="webnu-file-drop d-block" for="{{ $idPrefix }}-image">
+                        <i class="ri-upload-cloud-2-line"></i>
+                        <span class="webnu-file-drop__title">Subir o hacer foto</span>
+                        <span class="webnu-file-drop__hint">Tu móvil te dejará elegir entre cámara, galería o archivos.</span>
+                        <input type="file"
+                               accept="image/*"
+                               name="{{ $prefix }}_image"
+                               id="{{ $idPrefix }}-image"
+                               class="product-image-input webnu-file-drop__input">
+                    </label>
                 </div>
             </div>
 
@@ -118,48 +79,20 @@
                         </div>
                     @endif
 
-                    <div class="webnu-media-controls">
-                        <div class="webnu-media-mode btn-group btn-group-sm w-100 mb-2" role="group">
-                            <input type="radio" class="btn-check product-video-mode-radio" name="{{ $idPrefix }}-video-mode" id="{{ $idPrefix }}-video-upload" value="upload" checked>
-                            <label class="btn btn-outline-secondary" for="{{ $idPrefix }}-video-upload"><i class="ri-upload-2-line me-1"></i> Subir</label>
-                            <input type="radio" class="btn-check product-video-mode-radio" name="{{ $idPrefix }}-video-mode" id="{{ $idPrefix }}-video-record" value="record">
-                            <label class="btn btn-outline-secondary product-video-record-tab-item" for="{{ $idPrefix }}-video-record"><i class="ri-record-circle-line me-1"></i> Grabar</label>
-                        </div>
-
-                        <div class="product-video-panel product-video-panel--upload" id="{{ $idPrefix }}-video-upload-panel">
-                            <label class="webnu-file-drop webnu-file-drop--compact d-block" for="{{ $idPrefix }}-video">
-                                <i class="ri-film-line"></i>
-                                <span>Seleccionar vídeo</span>
-                                <input type="file"
-                                       accept="video/*"
-                                       name="{{ $prefix }}_video"
-                                       id="{{ $idPrefix }}-video"
-                                       class="product-video-file-input webnu-file-drop__input">
-                            </label>
-                        </div>
-
-                        <div class="product-video-panel product-video-panel--record hidden" id="{{ $idPrefix }}-video-record-panel">
-                            <p class="text-muted small product-recorder-unsupported" style="display:none;">
-                                Tu navegador no permite grabar. Usa «Subir» en su lugar.
-                            </p>
-                            <video class="product-recorder-preview rounded border bg-dark w-100 mb-2" playsinline muted style="max-height: 160px;"></video>
-                            <div class="d-flex flex-wrap align-items-center gap-2">
-                                <button type="button" class="btn btn-sm btn-danger product-recorder-start">
-                                    <i class="ri-record-circle-line me-1"></i> Grabar
-                                </button>
-                                <button type="button" class="btn btn-sm btn-label-secondary product-recorder-stop" disabled>Parar</button>
-                                <span class="text-muted small product-recorder-timer">0:00 / 0:{{ str_pad((string) $maxSeconds, 2, '0', STR_PAD_LEFT) }}</span>
-                            </div>
-                        </div>
-
-                        <div class="webnu-media-preview mt-2" id="{{ $idPrefix }}-video-preview" style="display:none;">
-                            <video src="" controls playsinline class="webnu-media-existing__preview w-100"></video>
-                        </div>
-                        <p class="text-muted small mt-2 mb-0">
-                            <i class="ri-tv-line me-1"></i>
-                            Ideal 10–15 s, vertical u horizontal. Webnu comprime a H.264 ligero para móvil y Smart TV (sin audio, menos peso, buena nitidez).
-                        </p>
+                    <div class="webnu-media-preview" id="{{ $idPrefix }}-video-preview" style="display:none;">
+                        <video src="" controls playsinline class="webnu-media-existing__preview w-100"></video>
                     </div>
+
+                    <label class="webnu-file-drop d-block" for="{{ $idPrefix }}-video">
+                        <i class="ri-film-line"></i>
+                        <span class="webnu-file-drop__title">Subir o grabar vídeo</span>
+                        <span class="webnu-file-drop__hint">Cámara, galería o archivos. Webnu lo comprime a H.264 ligero (sin audio) para móvil y Smart TV.</span>
+                        <input type="file"
+                               accept="video/*"
+                               name="{{ $prefix }}_video"
+                               id="{{ $idPrefix }}-video"
+                               class="product-video-file-input webnu-file-drop__input">
+                    </label>
                 </div>
             </div>
             @elseif ($showVideoUpgrade)

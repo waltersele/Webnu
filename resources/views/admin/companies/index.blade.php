@@ -44,9 +44,14 @@
                 <div class="card h-100 border-0 shadow-sm wn-company-card {{ $company->enabled ? 'is-published' : 'is-draft' }}">
                     <div class="card-body d-flex flex-column">
                         <div class="d-flex align-items-start gap-3 mb-3">
-                            <div class="wn-company-card__avatar flex-shrink-0">
+                            @php
+                                $avatarVariant = $company->logo_chip_variant ?: 'glass';
+                                $avatarAutocontrast = ($company->logo && empty($company->logo_chip_variant)) ? 'on' : 'off';
+                            @endphp
+                            <div class="wn-company-card__avatar wn-company-card__avatar--bg-{{ $avatarVariant }} {{ $company->logo ? 'wn-company-card__avatar--has-logo' : '' }} flex-shrink-0"
+                                 data-logo-autocontrast="{{ $avatarAutocontrast }}">
                                 @if($company->logo)
-                                    <img src="{{ asset('img/' . $company->logo) }}" alt="">
+                                    <img src="{{ asset('img/' . $company->logo) }}" alt="" crossorigin="anonymous">
                                 @else
                                     <span>{{ mb_strtoupper(mb_substr($company->name, 0, 1)) }}</span>
                                 @endif
@@ -178,26 +183,51 @@
     </div>
 @endif
 
-<div class="modal fade" id="modal-add-company">
-    <div class="modal-dialog">
+@php
+    $newCardOwnerSlug = optional(auth()->user())->resolveSlug() ?: 'tu-negocio';
+    $newCardSuggestions = ['Restaurante', 'Carta de vinos', 'Menú del día', 'Cena', 'Brunch', 'Eventos'];
+@endphp
+<div class="modal fade" id="modal-add-company" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Nueva carta</h5>
+                <h5 class="modal-title">Crear nueva carta</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
             </div>
-            <form method="POST" action="{{ route('admin.companies.store') }}">
+            <form method="POST" action="{{ route('admin.companies.store') }}" id="wn-new-card-form">
                 @csrf
                 <div class="modal-body">
-                    <label class="form-label" for="new-company-name">Nombre de la carta</label>
-                    <input type="text" id="new-company-name" name="name" autofocus value="{{ old('name') }}" class="form-control {{ $errors->has('name') ? 'is-invalid' : '' }}" placeholder="Ej. Casa María - Menú del día" required>
+                    <label class="form-label fw-medium" for="new-company-name">¿Cómo se llamará esta carta?</label>
+                    <input type="text"
+                           id="new-company-name"
+                           name="name"
+                           autofocus
+                           value="{{ old('name') }}"
+                           class="form-control form-control-lg {{ $errors->has('name') ? 'is-invalid' : '' }}"
+                           placeholder="Ej. Restaurante, Carta de vinos, Menú del día"
+                           data-new-card-name
+                           required>
                     @error('name')<div class="invalid-feedback">{{ $message }}</div>@enderror
-                    <small class="text-muted d-block mt-2">
-                        Puedes usarla para cartas distintas (comida, cena, eventos, bebidas).
-                    </small>
+
+                    <div class="wn-new-card-suggestions mt-3">
+                        <span class="wn-new-card-suggestions__label">Sugerencias:</span>
+                        @foreach ($newCardSuggestions as $suggestion)
+                            <button type="button" class="wn-new-card-chip" data-new-card-suggestion="{{ $suggestion }}">{{ $suggestion }}</button>
+                        @endforeach
+                    </div>
+
+                    <div class="wn-new-card-preview mt-3" role="status" aria-live="polite">
+                        <i class="ri ri-link"></i>
+                        <span class="wn-new-card-preview__url">
+                            webnu.es/carta/{{ $newCardOwnerSlug }}/<strong data-slug-preview>tu-carta</strong>
+                        </span>
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn btn-primary">Crear y configurar</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="ri ri-add-line me-1"></i> Crear y configurar
+                    </button>
                 </div>
             </form>
         </div>
@@ -287,9 +317,32 @@
     overflow: hidden;
     background: linear-gradient(135deg, var(--wn-primary-dark, #002055), var(--wn-primary, #0074d9));
     display: flex; align-items: center; justify-content: center;
+    transition: background 0.2s ease, border-color 0.2s ease;
 }
 .wn-company-card__avatar img { width: 100%; height: 100%; object-fit: cover; }
 .wn-company-card__avatar span { color: #fff; font-weight: 700; font-size: 1.5rem; }
+
+/* Cuando hay logo subido usamos object-fit: contain con padding para no recortarlo,
+ * y el fondo se elige por luminancia (calculado al subir). */
+.wn-company-card__avatar--has-logo {
+    background: #fff;
+    border: 1px solid var(--wn-border-subtle, #e5e7eb);
+    padding: 6px;
+}
+.wn-company-card__avatar--has-logo img { object-fit: contain; }
+
+.wn-company-card__avatar--has-logo.wn-company-card__avatar--bg-light {
+    background: #ffffff;
+    border-color: var(--wn-border-subtle, #e5e7eb);
+}
+.wn-company-card__avatar--has-logo.wn-company-card__avatar--bg-dark {
+    background: #111;
+    border-color: rgba(0, 0, 0, 0.35);
+}
+.wn-company-card__avatar--has-logo.wn-company-card__avatar--bg-glass {
+    background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+    border-color: var(--wn-border-subtle, #e5e7eb);
+}
 
 .wn-company-card__toggle {
     padding: 12px;
@@ -412,7 +465,98 @@
     display: flex; align-items: center; justify-content: center;
     font-size: 32px;
 }
+
+/* Modal Nueva carta */
+.wn-new-card-suggestions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+}
+.wn-new-card-suggestions__label {
+    font-size: 12px;
+    color: var(--wn-text-muted, #64748b);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    font-weight: 600;
+    margin-right: 4px;
+}
+.wn-new-card-chip {
+    background: #f1f5fa;
+    border: 1px solid #e2e8f0;
+    color: #1e293b;
+    border-radius: 999px;
+    padding: 5px 12px;
+    font-size: 12.5px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+.wn-new-card-chip:hover {
+    background: var(--wn-primary, #004ac6);
+    border-color: var(--wn-primary, #004ac6);
+    color: #fff;
+}
+.wn-new-card-preview {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 12px;
+    background: #f8fafc;
+    border: 1px dashed #cbd5e1;
+    border-radius: 10px;
+    font-size: 13px;
+    color: #475569;
+    word-break: break-all;
+}
+.wn-new-card-preview i {
+    color: var(--wn-primary, #004ac6);
+    flex-shrink: 0;
+}
+.wn-new-card-preview__url strong {
+    color: var(--wn-primary, #004ac6);
+    font-weight: 700;
+}
 </style>
+@endpush
+
+@push('scripts')
+<script src="{{ asset('js/webnu-logo-autocontrast.js') }}" defer></script>
+<script>
+(function () {
+    var input = document.querySelector('[data-new-card-name]');
+    var preview = document.querySelector('[data-slug-preview]');
+    if (!input || !preview) return;
+
+    function slugify(value) {
+        return (value || '')
+            .toString()
+            .toLowerCase()
+            .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+            .replace(/[^a-z0-9\s-]/g, '')
+            .trim()
+            .replace(/\s+/g, '-')
+            .replace(/-+/g, '-');
+    }
+
+    function render() {
+        var slug = slugify(input.value);
+        preview.textContent = slug || 'tu-carta';
+    }
+
+    input.addEventListener('input', render);
+
+    document.querySelectorAll('[data-new-card-suggestion]').forEach(function (chip) {
+        chip.addEventListener('click', function () {
+            input.value = chip.getAttribute('data-new-card-suggestion');
+            input.focus();
+            render();
+        });
+    });
+
+    render();
+})();
+</script>
 @endpush
 
 {{-- El handler [data-company-toggle] está centralizado en public/materio/js/webnu-admin.js (initCompanyEnabledToggles). --}}
