@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Webnu — Script de despliegue desde GitHub al sitio live de webnu.es
 #
-# Pensado para el hosting actual: cPanel + SSH + PHP 7.4
+# Pensado para cPanel + SSH. Históricamente PHP 7.4; desde Laravel 10 requiere PHP 8.3+.
 # Estructura asumida:
 #   $HOME/webnu-deploy/                ← clon git de origin/main
 #   $HOME/public_html/webnu.es/        ← sitio live (la aplicación Laravel)
@@ -49,9 +49,7 @@ EXCLUDES=(
     --exclude='.env.example'
     --exclude='php-local.ini'
     --exclude='run-local.ps1'
-    --exclude='composer.json'
-    --exclude='composer.lock'
-    --exclude='vendor/'
+    # En PHP 7.4 se excluían composer/vendor. Desde Laravel 10 (PHP 8.3+) deben sincronizarse.
     --exclude='storage/logs/'
     --exclude='storage/framework/sessions/'
     --exclude='storage/framework/cache/'
@@ -69,6 +67,7 @@ SKIP_MIGRATE=0
 SKIP_BACKUP=0
 NO_DOWN=0
 FULL_RSYNC=0
+WITH_VENDOR=0
 
 while [[ $# -gt 0 ]]; do
     case "$1" in
@@ -78,6 +77,7 @@ while [[ $# -gt 0 ]]; do
         --skip-backup)  SKIP_BACKUP=1 ;;
         --no-down)      NO_DOWN=1 ;;
         --full-rsync)   FULL_RSYNC=1 ;;
+        --with-vendor)  WITH_VENDOR=1 ;;
         -h|--help)
             sed -n '2,25p' "$0"
             exit 0
@@ -119,6 +119,19 @@ log_line() {
 
 artisan() {
     run "$PHP_BIN $SITE_ROOT/artisan $*"
+}
+
+# Detecta si estamos en stack Laravel 10+ (PHP >= 8.1) para permitir composer/vendor.
+should_sync_vendor() {
+    if [[ $WITH_VENDOR -eq 1 ]]; then
+        return 0
+    fi
+    local ver
+    ver="$($PHP_BIN -r 'echo PHP_MAJOR_VERSION.".".PHP_MINOR_VERSION;' 2>/dev/null || echo '7.4')"
+    case "$ver" in
+        8.*) return 0 ;;
+        *)   return 1 ;;
+    esac
 }
 
 # ---------- Comprobaciones previas ----------------------------------------- #
@@ -180,6 +193,14 @@ if [[ "$PREV_SHA" = "$NEW_SHA" ]]; then
 fi
 
 say "PREV=$PREV_SHA  NEW=$NEW_SHA"
+
+# En Laravel 10+ necesitamos composer.json/lock y vendor.
+if should_sync_vendor; then
+    # Quitamos exclusiones heredadas.
+    EXCLUDES=(${EXCLUDES[@]/--exclude='composer.json'/})
+    EXCLUDES=(${EXCLUDES[@]/--exclude='composer.lock'/})
+    EXCLUDES=(${EXCLUDES[@]/--exclude='vendor/'/})
+fi
 
 # ---------- Mantenimiento --------------------------------------------------- #
 if [[ $NO_DOWN -eq 0 ]]; then
@@ -277,7 +298,11 @@ say "Limpiando bootstrap cache"
 run "rm -f $SITE_ROOT/bootstrap/cache/services.php $SITE_ROOT/bootstrap/cache/packages.php $SITE_ROOT/bootstrap/cache/config.php"
 
 say "Regenerando autoload (composer dump-autoload)"
-run "cd $SITE_ROOT && $COMPOSER_BIN dump-autoload --no-scripts --optimize --no-interaction --ignore-platform-reqs"
+if should_sync_vendor; then
+    run "cd $SITE_ROOT && $PHP_BIN $COMPOSER_BIN install --no-dev --no-interaction --prefer-dist --optimize-autoloader"
+else
+    run "cd $SITE_ROOT && $COMPOSER_BIN dump-autoload --no-scripts --optimize --no-interaction --ignore-platform-reqs"
+fi
 
 say "Re-descubriendo paquetes"
 artisan "package:discover"
