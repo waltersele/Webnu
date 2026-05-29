@@ -148,8 +148,8 @@
                         <tr>
                             <td>{{ $menu['name'] }}</td>
                             <td>
-                                <a href="{{ $menu['public_url'] ?? url('/carta/' . $menu['slug']) }}" target="_blank" rel="noopener" class="small">
-                                    webnu.es/carta/{{ $menu['slug'] }}
+                                <a href="{{ $menu['public_url'] ?? url('/' . $menu['slug']) }}" target="_blank" rel="noopener" class="small">
+                                    webnu.es/{{ $menu['slug'] }}
                                 </a>
                             </td>
                             <td class="text-muted small">{{ $menu['sync_version'] ?? '—' }}</td>

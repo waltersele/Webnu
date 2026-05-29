@@ -23,21 +23,12 @@ class PublicPathRegistry
 
     public function companyPath(Company $company): string
     {
-        if ($company->usesSimplePublicUrl() && $company->slug) {
-            return 'carta/' . $company->slug;
-        }
-
-        $owner = optional($company->user)->slug;
-        if ($owner && $company->slug) {
-            return 'carta/' . $owner . '/' . $company->slug;
-        }
-
-        return 'carta/' . ($company->slug ?? '');
+        return $company->slug ?? '';
     }
 
     public function userHubPath(User $user): string
     {
-        return 'carta/' . $user->slug;
+        return '@' . $user->slug;
     }
 
     public function menuPath(Menu $menu): string
@@ -48,16 +39,11 @@ class PublicPathRegistry
             return '';
         }
 
-        if ($company->usesSimplePublicUrl() && $company->slug) {
-            return 'carta/' . $company->slug . '/menu/' . $menu->slug;
+        if (! $company->slug) {
+            return '';
         }
 
-        $owner = optional($company->user)->slug;
-        if ($owner && $company->slug) {
-            return 'carta/' . $owner . '/' . $company->slug . '/menu/' . $menu->slug;
-        }
-
-        return '';
+        return $company->slug . '/' . $menu->slug;
     }
 
     /**

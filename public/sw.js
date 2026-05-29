@@ -1,7 +1,7 @@
 /**
  * Service worker mínimo para instalabilidad PWA en la landing (scope /).
  */
-const CACHE = 'webnu-public-v1';
+const CACHE = 'webnu-public-v2';
 
 self.addEventListener('install', function (event) {
   event.waitUntil(

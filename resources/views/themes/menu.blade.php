@@ -4,7 +4,7 @@
     $themeSettings = method_exists($company, 'resolvedThemeSettings') ? $company->resolvedThemeSettings() : [];
     $accent = $themeSettings['accent'] ?? $themeSettings['primary'] ?? '#004ac6';
     $menuImage = $menu->imageUrl();
-    $hubUrl = route('public.hub', ['slug' => $ownerSlug]);
+    $hubUrl = $ownerSlug ? route('public.owner.hub', ['ownerSlug' => $ownerSlug]) : null;
 @endphp
 <!DOCTYPE html>
 <html lang="es">

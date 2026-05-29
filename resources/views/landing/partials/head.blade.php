@@ -13,6 +13,7 @@
 @endisset
 <link rel="icon" type="image/png" href="{{ \App\PlatformSetting::brandUrl('favicon') }}"/>
 <meta name="theme-color" content="#004ac6">
+<link rel="manifest" href="{{ asset('manifest.webmanifest') }}">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.2.3/css/flag-icons.min.css"/>
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
@@ -90,6 +91,43 @@
     };
 </script>
 <style>
+    .wn-splash {
+        position: fixed;
+        inset: 0;
+        z-index: 2147483000;
+        display: grid;
+        place-items: center;
+        background: linear-gradient(135deg, #003594 0%, #004AC6 55%, #38bdf8 100%);
+        transition: opacity 380ms ease, transform 380ms ease;
+        opacity: 1;
+        transform: translateY(0);
+        pointer-events: none;
+    }
+    .wn-splash__inner {
+        display: grid;
+        place-items: center;
+        padding: 24px;
+        width: min(92vw, 420px);
+    }
+    .wn-splash__logo {
+        width: min(70vw, 260px);
+        height: auto;
+        animation: wn-splash-float 1.5s ease-in-out infinite;
+        filter: drop-shadow(0 16px 44px rgba(0, 0, 0, 0.22));
+    }
+    @keyframes wn-splash-float {
+        0%, 100% { transform: translateY(0) scale(1); opacity: 1; }
+        50% { transform: translateY(-8px) scale(1.01); opacity: 0.97; }
+    }
+    .wn-splash.is-hiding {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+    @media (prefers-reduced-motion: reduce) {
+        .wn-splash { transition: none; }
+        .wn-splash__logo { animation: none; }
+    }
+
     .material-symbols-outlined {
         font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
         display: inline-block;
@@ -3133,3 +3171,30 @@
         .landing-scan-demo--compact { margin: 0; }
     }
 </style>
+<script>
+    (function () {
+        var splash = null;
+        function hideSplash() {
+            if (!splash) return;
+            splash.classList.add('is-hiding');
+            window.setTimeout(function () {
+                if (splash && splash.parentNode) splash.parentNode.removeChild(splash);
+                splash = null;
+            }, 420);
+        }
+        function init() {
+            splash = document.getElementById('wn-splash');
+            if (!splash) return;
+            window.requestAnimationFrame(function () {
+                window.setTimeout(hideSplash, 650);
+            });
+            window.addEventListener('load', hideSplash, { once: true });
+            window.setTimeout(hideSplash, 3000);
+        }
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', init, { once: true });
+        } else {
+            init();
+        }
+    })();
+</script>

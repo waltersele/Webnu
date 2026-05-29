@@ -317,7 +317,7 @@ class QrController extends Controller
         $slug = method_exists($user, 'resolveSlug') ? $user->resolveSlug() : ($user->slug ?? null);
         if (! $slug) return null;
 
-        $url = route('public.hub', ['slug' => $slug]);
+        $url = route('public.owner.hub', ['ownerSlug' => $slug]);
         $displayName = $user->name ?: ($user->legal_name ?? 'Mi negocio');
 
         $brandCompany = $user->companies()->orderBy('id')->first();

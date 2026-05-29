@@ -54,18 +54,18 @@
             }
             if (mode === 'nested') {
                 var owner = ownerInput ? slugify(ownerInput.value) : 'tu-negocio';
-                return 'carta/' + owner + '/' + slug;
+                return '@' + owner;
             }
             if (mode === 'menu-simple') {
                 var carta = root.getAttribute('data-company-slug') || 'tu-carta';
-                return 'carta/' + carta + '/menu/' + slug;
+                return carta + '/' + slug;
             }
             if (mode === 'menu-nested') {
                 var ownerSlug = ownerInput ? slugify(ownerInput.value) : 'tu-negocio';
                 var companySlug = root.getAttribute('data-company-slug') || 'tu-carta';
-                return 'carta/' + ownerSlug + '/' + companySlug + '/menu/' + slug;
+                return companySlug + '/' + slug;
             }
-            return 'carta/' + slug;
+            return slug;
         }
 
         function render() {

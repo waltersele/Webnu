@@ -23,20 +23,35 @@ Route::get('activar/{token}', 'PreAltaClaimController@show')->name('pre-alta.cla
 Route::post('activar/{token}', 'PreAltaClaimController@store')->name('pre-alta.claim.store')->where('token', '[a-fA-F0-9]{64}');
 
 // Menú en carta con URL simple: /carta/{company}/menu/{menu}
-Route::get('carta/{companySlug}/menu/{menuSlug}', 'PagesController@seeMenuSimple')
+Route::get('carta/{companySlug}/menu/{menuSlug}', function ($companySlug, $menuSlug) {
+    $qs = request()->getQueryString();
+    $to = route('public.company.menu', ['companySlug' => $companySlug, 'menuSlug' => $menuSlug]);
+
+    return redirect($to . ($qs ? '?' . $qs : ''), 301);
+})
     ->where('companySlug', '[a-z0-9][a-z0-9-]*')
     ->where('menuSlug', '[a-z0-9][a-z0-9-]*')
     ->name('public.menu.simple');
 
 // Menú público concreto: /carta/{owner}/{company}/menu/{menu}
-Route::get('carta/{ownerSlug}/{companySlug}/menu/{menuSlug}', 'PagesController@seeMenu')
+Route::get('carta/{ownerSlug}/{companySlug}/menu/{menuSlug}', function ($ownerSlug, $companySlug, $menuSlug) {
+    $qs = request()->getQueryString();
+    $to = route('public.company.menu', ['companySlug' => $companySlug, 'menuSlug' => $menuSlug]);
+
+    return redirect($to . ($qs ? '?' . $qs : ''), 301);
+})
     ->where('ownerSlug', '[a-z0-9][a-z0-9-]*')
     ->where('companySlug', '[a-z0-9][a-z0-9-]*')
     ->where('menuSlug', '[a-z0-9][a-z0-9-]*')
     ->name('public.menu');
 
 // URL pública canónica: /carta/{owner}/{company}
-Route::get('carta/{ownerSlug}/{companySlug}', 'PagesController@see_menu')
+Route::get('carta/{ownerSlug}/{companySlug}', function ($ownerSlug, $companySlug) {
+    $qs = request()->getQueryString();
+    $to = route('public.company', ['companySlug' => $companySlug]);
+
+    return redirect($to . ($qs ? '?' . $qs : ''), 301);
+})
     ->where('ownerSlug', '[a-z0-9][a-z0-9-]*')
     ->where('companySlug', '[a-z0-9][a-z0-9-]*')
     ->name('see_menu');
@@ -58,22 +73,18 @@ Route::get('carta/{slug}', function ($slug) {
 
     $user = \App\User::where('slug', $slug)->first();
     if ($user) {
-        return app(\App\Http\Controllers\PagesController::class)->ownerHub($slug);
+        $qs = request()->getQueryString();
+        $to = route('public.owner.hub', ['ownerSlug' => $slug]);
+
+        return redirect($to . ($qs ? '?' . $qs : ''), 301);
     }
 
     $company = \App\Company::where('slug', $slug)->with('user')->first();
     if ($company) {
-        if ($company->usesSimplePublicUrl()) {
-            return app(\App\Http\Controllers\PagesController::class)
-                ->see_menu(app(\App\Services\MenuService::class), request(), null, $slug);
-        }
-        $ownerSlug = optional($company->user)->slug;
-        if (!$ownerSlug) {
-            return app(\App\Http\Controllers\PagesController::class)
-                ->see_menu(app(\App\Services\MenuService::class), request(), null, $slug);
-        }
         $qs = request()->getQueryString();
-        return redirect(url('carta/' . $ownerSlug . '/' . $company->slug) . ($qs ? '?' . $qs : ''), 301);
+        $to = route('public.company', ['companySlug' => $company->slug]);
+
+        return redirect($to . ($qs ? '?' . $qs : ''), 301);
     }
 
     abort(404);
@@ -279,13 +290,18 @@ Route::post('password/email', 'Auth\ForgotPasswordController@sendResetLinkEmail'
 Route::get('password/reset/{token}', 'Auth\ResetPasswordController@showResetForm')->name('password.reset');
 Route::post('password/reset', 'Auth\ResetPasswordController@reset')->name('password.update');
 
-// Compat: el formato antiguo /{owner-slug}/{company-slug} (sin prefijo /carta/) redirige
-// 301 al nuevo formato canónico /carta/{owner}/{company}. Mantiene QRs ya impresos.
-// Debe ir AL FINAL para no capturar admin/, login/, register/, carta/, tv/, etc.
-Route::get('{ownerSlug}/{companySlug}', function ($ownerSlug, $companySlug) {
-    $qs = request()->getQueryString();
-    return redirect(url('carta/' . $ownerSlug . '/' . $companySlug) . ($qs ? '?' . $qs : ''), 301);
-})
+// Hub público del owner: /@{ownerSlug}
+Route::get('@{ownerSlug}', 'PagesController@ownerHub')
     ->where('ownerSlug', '[a-z0-9][a-z0-9-]*')
+    ->name('public.owner.hub');
+
+// Nueva URL pública canónica: /{companySlug}/{menuSlug}
+Route::get('{companySlug}/{menuSlug}', 'PagesController@publicCompanyMenu')
     ->where('companySlug', '[a-z0-9][a-z0-9-]*')
-    ->name('see_menu.legacy_flat');
+    ->where('menuSlug', '[a-z0-9][a-z0-9-]*')
+    ->name('public.company.menu');
+
+// Nueva URL pública canónica: /{companySlug}
+Route::get('{companySlug}', 'PagesController@publicCompanyHub')
+    ->where('companySlug', '[a-z0-9][a-z0-9-]*')
+    ->name('public.company');

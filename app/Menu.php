@@ -76,20 +76,7 @@ class Menu extends Model
             return null;
         }
 
-        if ($company->usesSimplePublicUrl()) {
-            return route('public.menu.simple', [
-                'companySlug' => $company->slug,
-                'menuSlug' => $this->slug,
-            ]);
-        }
-
-        $ownerSlug = optional($company->user)->slug;
-        if (! $ownerSlug) {
-            return null;
-        }
-
-        return route('public.menu', [
-            'ownerSlug' => $ownerSlug,
+        return route('public.company.menu', [
             'companySlug' => $company->slug,
             'menuSlug' => $this->slug,
         ]);

@@ -239,16 +239,7 @@ class Company extends Model
      */
     public function publicUrl(array $extra = []): string
     {
-        if ($this->usesSimplePublicUrl() && $this->slug) {
-            return route('public.hub', array_merge(['slug' => $this->slug], $extra));
-        }
-
-        $ownerSlug = optional($this->user)->slug;
-        if ($ownerSlug && $this->slug) {
-            return route('see_menu', array_merge([$ownerSlug, $this->slug], $extra));
-        }
-
-        return route('public.hub', array_merge(['slug' => $this->slug], $extra));
+        return route('public.company', array_merge(['companySlug' => $this->slug], $extra));
     }
 
     /** Path relativo para mostrar (ej: "carta/casa-maria/menu-de-verano"). */

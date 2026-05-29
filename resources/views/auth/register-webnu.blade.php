@@ -29,7 +29,7 @@
               data-url-mode="simple"
               data-url-host="webnu.es">
             <div class="rounded-lg border border-dashed border-border-subtle px-4 py-3 text-label-sm text-text-muted mb-2" role="status" aria-live="polite">
-                <span data-url-preview-path>webnu.es/carta/tu-carta</span>
+                <span data-url-preview-path>webnu.es/tu-carta</span>
                 <p class="mt-2 mb-0 text-label-sm">Esta URL irá en tu código QR. Elige bien antes de imprimirlo.</p>
             </div>
             @csrf

@@ -351,9 +351,9 @@ class OnboardingController extends Controller
         $urls = [];
         foreach (config('company_templates.templates', []) as $id => $tpl) {
             $slug = $tpl['preview_slug'] ?? $fallbackSlugs[$id] ?? 'demo';
-            // Demos no tienen user asociado: usamos la URL hub /carta/{slug}
-            $urls[$id] = route('public.hub', [
-                'slug' => $slug,
+            // Demos no tienen user asociado: usamos la URL pública /{companySlug}
+            $urls[$id] = route('public.company', [
+                'companySlug' => $slug,
                 'studio_preview' => 1,
                 'onb_preview' => 1,
             ]);

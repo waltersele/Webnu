@@ -13,7 +13,7 @@
     });
     $ownerSlugForHub = $qrUser && method_exists($qrUser, 'resolveSlug') ? $qrUser->resolveSlug() : ($qrUser?->slug ?? null);
     $useHub = $ownerSlugForHub && ($publishedCompanies->count() > 1 || $hasPublishedMenus);
-    $hubUrl = $useHub ? route('public.hub', ['slug' => $ownerSlugForHub]) : null;
+    $hubUrl = $useHub ? route('public.owner.hub', ['ownerSlug' => $ownerSlugForHub]) : null;
     $hubName = $qrUser?->name ?: ($qrUser?->legal_name ?? 'Mi negocio');
 @endphp
 @if($defaultQrCompany || $useHub)

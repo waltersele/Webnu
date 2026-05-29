@@ -208,7 +208,7 @@
                     @foreach($companies as $c)
                         @php
                             $cLogo = $c->logo ? url('img/' . ltrim($c->logo, '/')) : null;
-                            $cUrl = route('see_menu', ['ownerSlug' => $ownerSlug, 'companySlug' => $c->slug]);
+                            $cUrl = route('public.company', ['companySlug' => $c->slug]);
                             $initial = mb_strtoupper(mb_substr($c->name ?: 'C', 0, 1));
                         @endphp
                         <a href="{{ $cUrl }}" class="wn-hub-card" aria-label="Abrir {{ $c->name }}">
@@ -242,8 +242,7 @@
                     @foreach($menus as $m)
                         @php
                             $mImage = $m->imageUrl();
-                            $mUrl = route('public.menu', [
-                                'ownerSlug' => $ownerSlug,
+                            $mUrl = route('public.company.menu', [
                                 'companySlug' => $m->company->slug,
                                 'menuSlug' => $m->slug,
                             ]);

@@ -219,7 +219,7 @@
                     <div class="wn-new-card-preview mt-3" role="status" aria-live="polite">
                         <i class="ri ri-link"></i>
                         <span class="wn-new-card-preview__url">
-                            webnu.es/carta/{{ $newCardOwnerSlug }}/<strong data-slug-preview>tu-carta</strong>
+                            webnu.es/<strong data-slug-preview>tu-carta</strong>
                         </span>
                     </div>
                 </div>

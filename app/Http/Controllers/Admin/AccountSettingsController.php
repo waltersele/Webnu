@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\UpdateAccountBillingInfoRequest;
 use App\Http\Requests\UpdateAccountProfileRequest;
+use App\Services\UserPlanService;
 use App\Services\Platform\UserBillingPresenter;
 use Illuminate\Http\Request;
 
@@ -13,14 +14,26 @@ class AccountSettingsController extends Controller
     public function index(UserBillingPresenter $presenter)
     {
         $user = auth()->user();
+        $plans = app(UserPlanService::class);
+        $planPresentation = $plans->planPresentation($user);
+        $tier = $plans->tier($user);
 
         return view('admin.settings.index', [
             'user' => $user,
-            'statusLabel' => $presenter->statusLabel($user),
+            'statusLabel' => $presenter->publicStatusLabel($user),
             'statusBadgeClass' => $presenter->statusBadgeClass($user),
-            'planLabel' => $presenter->planLabel($user),
+            'planLabel' => $presenter->effectivePlanLabel($user),
+            'stripePlanLabel' => $presenter->stripeSubscriptionLabel($user),
             'subscription' => $user->primarySubscription(),
             'hasAccess' => $user->hasActiveSubscription(),
+            'planPresentation' => $planPresentation,
+            'planKey' => $plans->planKey($user),
+            'tier' => $tier,
+            'featureFlags' => $plans->featureFlags($user),
+            'planFeatureList' => $presenter->planFeatureList($user),
+            'planComparison' => $presenter->planComparison($user),
+            'cardSummary' => $presenter->cardSummary($user),
+            'invoices' => $presenter->invoices($user)->take(6),
         ]);
     }
 

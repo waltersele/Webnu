@@ -48,10 +48,10 @@
             <hr> 
             <div class="row">
                 <div class="col-md-6">
-                    <a href="https://webnu.es/carta/webnu-test" target="_blank" class="appao-btn appao-btn2">Ver carta digital</a>
+                    <a href="https://webnu.es/webnu-test" target="_blank" class="appao-btn appao-btn2">Ver carta digital</a>
                 </div>
                 <div class="col-md-6">
-                    <a href="https://webnu.es/carta/la-ibense" target="_blank" class="appao-btn appao-btn2">Ver carta digital PDF</a>
+                    <a href="https://webnu.es/la-ibense" target="_blank" class="appao-btn appao-btn2">Ver carta digital PDF</a>
                 </div>
             </div>
         </div>
@@ -102,7 +102,7 @@
                         <li><i class="icofont icofont-check-circled"></i> Ideal para barras, salones y terrazas</li>
                         <li><i class="icofont icofont-check-circled"></i> Misma carta que escanean tus clientes con QR</li>
                     </ul>
-                    <a href="https://webnu.es/carta/webnu-test" target="_blank" rel="noopener" class="appao-btn appao-btn2">Ver carta de ejemplo</a>
+                    <a href="https://webnu.es/webnu-test" target="_blank" rel="noopener" class="appao-btn appao-btn2">Ver carta de ejemplo</a>
                 </div>
             </div>
             <div class="col-lg-7">

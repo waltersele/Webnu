@@ -98,7 +98,7 @@
                     @error('company_slug')<p class="wn-onb-error">{{ $message }}</p>@enderror
 
                     <div class="wn-url-preview mt-3" role="status" aria-live="polite">
-                        <p class="wn-url-preview__path"><span data-url-preview-path>webnu.es/carta/tu-carta</span></p>
+                        <p class="wn-url-preview__path"><span data-url-preview-path>webnu.es/tu-carta</span></p>
                         <p class="wn-url-preview__status" data-url-preview-status></p>
                         <p class="wn-url-preview__hint">Esta URL irá en tu código QR. No la cambies después de imprimirlo.</p>
                     </div>
@@ -111,7 +111,7 @@
         {{-- Paso 3: Plantilla --}}
         @php
             $selectedTemplate = old('template', $company->template ?: 'lumiere');
-            $initialPreviewUrl = $templatePreviewUrls[$selectedTemplate] ?? $templatePreviewUrls['lumiere'] ?? route('public.hub', ['slug' => 'demo']);
+            $initialPreviewUrl = $templatePreviewUrls[$selectedTemplate] ?? $templatePreviewUrls['lumiere'] ?? route('public.company', ['companySlug' => 'demo']);
         @endphp
         <section class="wn-onb-step {{ $step === 3 ? 'is-active' : '' }}" data-onb-step="3">
             <div class="wn-onb-card wn-onb-card--wide">

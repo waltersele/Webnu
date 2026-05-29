@@ -16,6 +16,50 @@ class PagesController extends Controller
 {
     use PreparesLandingPage;
 
+    /**
+     * Nueva URL pública: /{companySlug}
+     */
+    public function publicCompanyHub(MenuService $menuService, Request $request, string $companySlug)
+    {
+        return $this->see_menu($menuService, $request, null, $companySlug);
+    }
+
+    /**
+     * Nueva URL pública: /{companySlug}/{menuSlug}
+     */
+    public function publicCompanyMenu(string $companySlug, string $menuSlug)
+    {
+        if ($redirect = app(PublicUrlRedirectService::class)->resolveFromRequest(request())) {
+            return redirect($redirect, 301);
+        }
+
+        $company = Company::where('slug', $companySlug)
+            ->with('user')
+            ->first();
+
+        if (! $company) {
+            // Compat: antiguo formato /{ownerSlug}/{companySlug} (sin prefijo /carta/).
+            // Si el primer segmento es un owner y el segundo una company suya,
+            // redirigimos al nuevo canónico /{companySlug}.
+            $legacyCompany = Company::where('slug', $menuSlug)
+                ->whereHas('user', function ($q) use ($companySlug) {
+                    $q->where('slug', $companySlug);
+                })
+                ->first();
+
+            if ($legacyCompany) {
+                $qs = request()->getQueryString();
+                $to = route('public.company', ['companySlug' => $legacyCompany->slug]);
+
+                return redirect($to . ($qs ? '?' . $qs : ''), 301);
+            }
+
+            abort(404);
+        }
+
+        return $this->renderPublicMenu($company, $menuSlug, optional($company->user)->slug);
+    }
+
     public function index(Request $request)
     {
         $locale = $this->resolveLandingLocale($request);
@@ -69,7 +113,7 @@ class PagesController extends Controller
             $hasActiveMenus = $company->menus()->where('enabled', true)->exists();
             $resolvedOwner = $ownerSlug ?: optional($company->user)->resolveSlug();
             if ($hasActiveMenus && $resolvedOwner) {
-                return redirect()->route('public.hub', ['slug' => $resolvedOwner], 302);
+                return redirect()->route('public.owner.hub', ['ownerSlug' => $resolvedOwner], 302);
             }
             abort(404);
         }
@@ -188,8 +232,7 @@ class PagesController extends Controller
 
         // 1 carta activa, 0 menús: el hub es ruido, redirigir a la carta.
         if ($activeCompanies->count() === 1 && $menus->isEmpty()) {
-            return redirect()->route('see_menu', [
-                'ownerSlug' => $ownerSlug,
+            return redirect()->route('public.company', [
                 'companySlug' => $activeCompanies->first()->slug,
             ], 302);
         }
@@ -197,8 +240,7 @@ class PagesController extends Controller
         // 0 cartas activas, 1 menú activo: redirigir directo al menú.
         if ($activeCompanies->isEmpty() && $menus->count() === 1) {
             $only = $menus->first();
-            return redirect()->route('public.menu', [
-                'ownerSlug' => $ownerSlug,
+            return redirect()->route('public.company.menu', [
                 'companySlug' => $only->company->slug,
                 'menuSlug' => $only->slug,
             ], 302);

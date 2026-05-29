@@ -5,6 +5,14 @@
 </head>
 <body class="bg-background text-on-surface text-body-md">
 @php
+    $splashLogoUrl = \App\PlatformSetting::brandUrl('logo_white');
+@endphp
+<div id="wn-splash" class="wn-splash" aria-hidden="true">
+    <div class="wn-splash__inner">
+        <img class="wn-splash__logo" src="{{ $splashLogoUrl }}" alt="" decoding="async" fetchpriority="high">
+    </div>
+</div>
+@php
     $isLoggedIn = auth()->check();
     $loginUrl = route('login');
     $registerUrl = route('register');

@@ -7,10 +7,24 @@
         <h5 class="card-title mb-0">Usar Webnu como app</h5>
     </div>
     <div class="card-body">
-        <p class="text-muted mb-3">
-            Instala el panel en la pantalla de inicio de tu móvil o tablet. Se abre a pantalla completa, con el icono de Webnu, sin pasar por la tienda de aplicaciones.
-        </p>
-        @include('admin.partials.pwa-install-body')
+        <div class="row g-3 align-items-start">
+            <div class="col-lg-6">
+                <p class="text-muted mb-3">
+                    Instala el panel en la pantalla de inicio de tu móvil o tablet. Se abre a pantalla completa, con el icono de Webnu, sin pasar por la tienda de aplicaciones.
+                </p>
+                <div class="border rounded p-3">
+                    <p class="fw-semibold mb-1">Ventajas</p>
+                    <ul class="mb-0 small text-muted ps-3">
+                        <li>Acceso más rápido desde la pantalla de inicio.</li>
+                        <li>Experiencia a pantalla completa.</li>
+                        <li>Ideal para tablets en el local.</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                @include('admin.partials.pwa-install-body')
+            </div>
+        </div>
     </div>
 </div>
 @elseif($variant === 'compact')
