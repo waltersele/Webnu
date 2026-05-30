@@ -1,6 +1,6 @@
 <div class="wn-menu-shell wn-menu-shell--nocturne wn-menu-shell--no-topbar">
     <button type="button" class="wn-floating-info wn-floating-info--nocturne" id="wn-info-toggle" aria-label="Información del negocio">
-        <i class="fas fa-info-circle" aria-hidden="true"></i>
+        @include('themes.partials.icons.svg-info')
     </button>
 
     <header class="wn-hero-nocturne">
@@ -17,7 +17,7 @@
         @foreach ($sections as $section)
             <section class="wn-menu-section wn-menu-section--nocturne" id="section-{{ $section->id }}">
                 <h2 class="wn-menu-section__title wn-menu-section__title--nocturne">
-                    <i class="fas fa-cocktail wn-section-icon" aria-hidden="true"></i>
+                    @include('themes.partials.icons.svg-cocktail')
                     {{ $section->name }}
                 </h2>
                 @foreach ($section->products as $index => $product)

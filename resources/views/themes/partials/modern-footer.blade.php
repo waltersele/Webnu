@@ -8,16 +8,16 @@
     @endif
 
     <div class="wn-modern-footer__links">
-        @if($company->phone)<a href="tel:{{ $company->phone }}"><i class="fas fa-phone"></i> {{ $company->phone }}</a>@endif
-        @if($company->mobile_phone)<a href="tel:{{ $company->mobile_phone }}"><i class="fas fa-mobile-alt"></i> {{ $company->mobile_phone }}</a>@endif
-        @if($company->email)<a href="mailto:{{ $company->email }}"><i class="fas fa-envelope"></i> {{ $company->email }}</a>@endif
-        @if($company->web)<a href="{{ $company->web }}" target="_blank" rel="noopener"><i class="fas fa-globe"></i> Web</a>@endif
+        @if($company->phone)<a href="tel:{{ $company->phone }}">@include('themes.partials.icons.svg-phone') {{ $company->phone }}</a>@endif
+        @if($company->mobile_phone)<a href="tel:{{ $company->mobile_phone }}">@include('themes.partials.icons.svg-mobile') {{ $company->mobile_phone }}</a>@endif
+        @if($company->email)<a href="mailto:{{ $company->email }}">@include('themes.partials.icons.svg-envelope') {{ $company->email }}</a>@endif
+        @if($company->web)<a href="{{ $company->web }}" target="_blank" rel="noopener">@include('themes.partials.icons.svg-globe') Web</a>@endif
     </div>
     @if($company->schedule)
-        <p class="wn-modern-footer__meta"><i class="fas fa-clock"></i> {{ $company->schedule }}</p>
+        <p class="wn-modern-footer__meta">@include('themes.partials.icons.svg-clock') {{ $company->schedule }}</p>
     @endif
     @if($company->address)
-        <p class="wn-modern-footer__meta"><i class="fas fa-map-marker-alt"></i> {{ $company->address }}@if($company->city), {{ $company->city }}@endif</p>
+        <p class="wn-modern-footer__meta">@include('themes.partials.icons.svg-map-pin') {{ $company->address }}@if($company->city), {{ $company->city }}@endif</p>
     @endif
     @if($company->comments)
         <p class="wn-modern-footer__meta wn-modern-footer__about">{{ $company->comments }}</p>

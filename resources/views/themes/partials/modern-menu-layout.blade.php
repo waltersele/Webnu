@@ -1,19 +1,20 @@
 @php
     $variant = $variant ?? $company->template;
     $cardLayout = $cardLayout ?? 'horizontal';
-    $heroMode = $heroMode ?? 'compact';
-    $featuredProduct = $featuredProduct ?? null;
+    $hero = $company->heroConfig();
+    $preset = $hero['preset'] ?? 'compact_card';
 
-    if ($heroMode === 'spotlight' && !$featuredProduct) {
+    $featuredProduct = $featuredProduct ?? null;
+    if ($preset === 'spotlight_dish' && ! $featuredProduct) {
         foreach ($sections as $section) {
             foreach ($section->products as $product) {
-                if (!empty($product->highlight)) {
+                if (! empty($product->highlight)) {
                     $featuredProduct = $product;
                     break 2;
                 }
             }
         }
-        if (!$featuredProduct) {
+        if (! $featuredProduct) {
             foreach ($sections as $section) {
                 if ($section->products->count()) {
                     $featuredProduct = $section->products->first();
@@ -23,123 +24,101 @@
         }
     }
 
-    $hasHeroBanner = ($heroMode === 'spotlight' && $featuredProduct)
-        || ($heroMode === 'spotlight' && $company->background_header)
-        || $heroMode === 'dark'
-        || ($heroMode === 'light' && $company->background_header)
-        || in_array($heroMode, ['compact', 'circle'], true);
+    $effectivePreset = $preset;
+    if ($preset === 'spotlight_dish' && ! $featuredProduct) {
+        $effectivePreset = $hero['fallback'] ?? 'compact_card';
+    }
+
+    $hasHeroBanner = $effectivePreset !== 'minimal_bar';
+    $usesTopHeader = $effectivePreset === 'minimal_bar';
+    $usesStickyNav = in_array($variant, ['nocturne', 'catalogo', 'temporada', 'atelier', 'maison'], true);
+
+    $shellClass = 'wn-menu-shell';
+    if ($variant) {
+        $shellClass .= ' wn-menu-shell--' . $variant;
+    }
+    if ($hasHeroBanner) {
+        $shellClass .= ' wn-menu-shell--no-topbar';
+    }
 @endphp
 
-<div class="wn-menu-shell{{ $hasHeroBanner ? ' wn-menu-shell--no-topbar' : '' }}">
+<div class="{{ $shellClass }}">
     @include('themes.partials.language-switcher')
 
-    @if(!$hasHeroBanner)
+    @if($usesTopHeader)
         @include('themes.partials.modern-header')
+    @endif
+
+    @if($variant === 'catalogo' && $usesTopHeader)
+        <header class="wn-hero-catalogo wn-hero-catalogo--inline">
+            <h1 class="wn-hero-catalogo__title">{{ $company->chef_name ?: $company->name }}</h1>
+            @if($company->comments)
+                <p class="wn-hero-catalogo__subtitle">{{ $company->comments }}</p>
+            @endif
+        </header>
     @endif
 
     @include('themes.partials.daily-highlights')
 
-    @if($heroMode === 'spotlight' && $featuredProduct)
-        <section class="wn-menu-spotlight">
-            <div class="wn-menu-spotlight__media">
-                @if(($featuredProduct->display_image ?? $featuredProduct->image) || $featuredProduct->video)
-                    @include('themes.partials.product-inline-thumb', ['product' => $featuredProduct])
-                @else
-                    <div class="wn-modern-card__placeholder wn-modern-card__placeholder--featured"><i class="fas fa-utensils"></i></div>
-                @endif
-                <div class="wn-menu-spotlight__gradient"></div>
-                <div class="wn-menu-spotlight__content">
-                    @if(!empty($featuredProduct->highlight))
-                        <div class="wn-menu-spotlight__badge">
-                            @include('themes.partials.product-highlight-badge', ['product' => $featuredProduct])
-                        </div>
-                    @endif
-                    <h2>{{ $featuredProduct->name }}</h2>
-                    @if($featuredProduct->description)
-                        <p>{{ \Illuminate\Support\Str::limit($featuredProduct->description, 100) }}</p>
-                    @endif
-                </div>
-            </div>
-        </section>
-    @elseif($heroMode === 'spotlight' && $company->background_header)
-        <section class="wn-menu-hero wn-menu-hero--light" style="--wn-hero-image: url('{{ URL::to('/') . '/img/' . $company->background_header }}')">
-            <div class="wn-menu-hero__overlay wn-menu-hero__overlay--light">
-                @if($company->comments)<p class="wn-menu-hero__subtitle">{{ $company->comments }}</p>@endif
-            </div>
-        </section>
-    @elseif($heroMode === 'dark')
-        @php
-            $heroBgUrl = $company->background_header
-                ? URL::to('/') . '/img/' . $company->background_header
-                : asset('img/demo/demo-01.jpg');
-        @endphp
-        <section class="wn-menu-hero wn-menu-hero--dark wn-menu-hero--bleed" style="--wn-hero-image: url('{{ $heroBgUrl }}')">
-            <div class="wn-menu-hero__overlay wn-menu-hero__overlay--bleed">
-                <div class="wn-menu-hero__brand">
-                    @include('themes.partials.logo-chip', ['company' => $company])
-                    <div class="wn-menu-hero__brand-text">
-                        @if($company->chef_name)
-                            <p class="wn-menu-hero__eyebrow">{{ strtoupper($company->chef_name) }}</p>
-                        @endif
-                        <h1 class="wn-menu-hero__title">{{ $company->name }}</h1>
-                        @if($company->comments)
-                            <p class="wn-menu-hero__subtitle">{{ $company->comments }}</p>
-                        @endif
-                    </div>
-                </div>
-            </div>
-        </section>
-    @elseif($heroMode === 'light' && $company->background_header)
-        <section class="wn-menu-hero wn-menu-hero--light" style="--wn-hero-image: url('{{ URL::to('/') . '/img/' . $company->background_header }}')">
-            <div class="wn-menu-hero__overlay wn-menu-hero__overlay--light">
-                @if($company->comments)<p class="wn-menu-hero__subtitle">{{ $company->comments }}</p>@endif
-            </div>
-        </section>
-    @elseif(in_array($heroMode, ['compact', 'circle'], true))
-        <section class="wn-menu-hero wn-menu-hero--{{ $heroMode }} wn-menu-hero--bleed" @if($company->background_header) style="--wn-hero-image: url('{{ URL::to('/') . '/img/' . $company->background_header }}')" @else style="--wn-hero-image: url('{{ asset('img/default-header.jpg') }}')" @endif>
-            <div class="wn-menu-hero__overlay wn-menu-hero__overlay--bleed wn-menu-hero__overlay--{{ $heroMode }}">
-                <div class="wn-menu-hero__brand">
-                    @if($heroMode === 'circle')
-                        @include('themes.partials.logo-chip', [
-                            'company' => $company,
-                            'shape' => 'circle',
-                            'fallbackUrl' => \App\PlatformSetting::brandUrl('logo'),
-                        ])
-                    @else
-                        @include('themes.partials.logo-chip', ['company' => $company])
-                    @endif
-                    <div class="wn-menu-hero__brand-text">
-                        <h1 class="wn-menu-hero__title wn-menu-hero__title--compact">{{ $company->name }}</h1>
-                        @if($company->chef_name)
-                            <p class="wn-menu-hero__eyebrow wn-menu-hero__eyebrow--muted">{{ $company->chef_name }}</p>
-                        @endif
-                    </div>
-                </div>
-            </div>
-        </section>
-    @endif
+    @include('themes.partials.menu-hero', [
+        'featuredProduct' => $featuredProduct,
+        'variant' => $variant,
+    ])
 
     @if($hasHeroBanner)
-        <button type="button" class="wn-floating-info" id="wn-info-toggle" aria-label="Información del negocio">
-            <i class="fas fa-info-circle" aria-hidden="true"></i>
+        <button type="button" class="wn-floating-info{{ $variant === 'nocturne' ? ' wn-floating-info--nocturne' : '' }}{{ $variant === 'atelier' ? ' wn-floating-info--atelier' : '' }}{{ $variant === 'maison' ? ' wn-floating-info--maison' : '' }}" id="wn-info-toggle" aria-label="Información del negocio">
+            @include('themes.partials.icons.svg-info')
         </button>
     @endif
 
-    <nav class="wn-menu-nav {{ in_array($variant, ['bistro', 'basic', 'visual', 'mar', 'elegance', 'temporada', 'catalogo'], true) ? 'wn-menu-nav--light' : '' }}" id="sticker" aria-label="Secciones">
-        <div class="wn-menu-nav__track">
-            @foreach ($sections as $index => $section)
-                <a href="#" class="wn-menu-chip linkTo {{ $index === 0 ? 'is-active' : '' }}" id="{{ $section->id }}">{{ $section->name }}</a>
-            @endforeach
-        </div>
-    </nav>
+    @if($usesStickyNav)
+        @include('themes.partials.sticky-category-nav', ['variant' => $variant])
+    @else
+        <nav class="wn-menu-nav {{ in_array($variant, ['bistro', 'basic', 'visual', 'mar', 'elegance', 'temporada', 'catalogo', 'saffron', 'pizza', 'fastfood'], true) ? 'wn-menu-nav--light' : '' }}" id="sticker" aria-label="Secciones">
+            <div class="wn-menu-nav__track">
+                @foreach ($sections as $index => $section)
+                    <a href="#" class="wn-menu-chip linkTo {{ $index === 0 ? 'is-active' : '' }}" id="{{ $section->id }}">{{ $section->name }}</a>
+                @endforeach
+            </div>
+        </nav>
+    @endif
 
-    @php $lightSurface = in_array($variant, ['bistro', 'basic', 'visual', 'fastfood', 'pizza', 'mar', 'elegance', 'temporada', 'catalogo'], true); @endphp
-    <main class="wn-menu-main {{ $lightSurface ? 'wn-menu-main--light' : '' }}">
+    @php
+        $lightSurface = in_array($variant, ['bistro', 'basic', 'visual', 'fastfood', 'pizza', 'mar', 'elegance', 'temporada', 'catalogo', 'saffron'], true);
+        $mainClass = 'wn-menu-main' . ($lightSurface ? ' wn-menu-main--light' : '');
+        if ($variant) {
+            $mainClass .= ' wn-menu-main--' . $variant;
+        }
+    @endphp
+    <main class="{{ $mainClass }}">
         @foreach ($sections as $section)
-            <section class="wn-menu-section" id="section-{{ $section->id }}">
-                <h2 class="wn-menu-section__title">{{ $section->name }}</h2>
-                @foreach ($section->products as $product)
-                    @include('themes.partials.modern-product-card', ['product' => $product, 'layout' => $cardLayout])
+            <section class="wn-menu-section{{ $variant ? ' wn-menu-section--' . $variant : '' }}" id="section-{{ $section->id }}">
+                <h2 class="wn-menu-section__title{{ $variant ? ' wn-menu-section__title--' . $variant : '' }}">
+                    @if($variant === 'lumiere')
+                        @include('themes.partials.icons.svg-lumiere-diamond')
+                    @elseif($variant === 'fastfood')
+                        @include('themes.partials.icons.svg-fastfood-bolt')
+                    @elseif($variant === 'saffron')
+                        @include('themes.partials.icons.svg-saffron-leaf')
+                    @elseif($variant === 'velvet')
+                        @include('themes.partials.icons.svg-velvet-wine')
+                    @elseif($variant === 'maison')
+                        @include('themes.partials.icons.svg-maison-mark')
+                    @elseif(in_array($variant, ['nocturne', 'temporada'], true))
+                        @include('themes.partials.icons.svg-' . ($variant === 'nocturne' ? 'cocktail' : 'utensils'))
+                    @endif
+                    {{ $section->name }}
+                </h2>
+                @foreach ($section->products as $index => $product)
+                    @if((in_array($variant, ['nocturne', 'maison'], true) && ($index === 0 || ! empty($product->highlight))) || $variant === 'atelier')
+                        @include('themes.partials.cards.product-overlay', ['product' => $product])
+                    @elseif($variant === 'temporada')
+                        @include('themes.partials.cards.product-temporada', ['product' => $product])
+                    @elseif($variant === 'catalogo')
+                        @include('themes.partials.cards.product-catalogo', ['product' => $product])
+                    @else
+                        @include('themes.partials.modern-product-card', ['product' => $product, 'layout' => $cardLayout])
+                    @endif
                 @endforeach
             </section>
         @endforeach
@@ -151,4 +130,3 @@
         @include('themes.partials.menu-favorites')
     @endif
 </div>
-

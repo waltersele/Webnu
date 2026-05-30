@@ -95,47 +95,16 @@ body.wn-theme-nocturne {
   font-size: 1.1rem;
 }
 
-/* Tarjeta overlay */
-.wn-card-overlay {
-  position: relative;
+/* Tarjeta overlay — acentos nocturne (media base en front-menu-ui.css) */
+.wn-theme-nocturne .wn-card-overlay {
   border-radius: 18px;
-  overflow: hidden;
   margin-bottom: 0.85rem;
   background: var(--wn-surface);
   border: 1px solid rgba(255, 255, 255, 0.07);
   box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
-  cursor: pointer;
 }
 
-.wn-card-overlay__media {
-  position: relative;
-  min-height: 220px;
-  background: #0f172a;
-}
-
-.wn-card-overlay__media > img,
-.wn-card-overlay__media > video,
-.wn-card-overlay__media > .wn-card-reel,
-.wn-card-overlay__media > .wn-card-media-link > img,
-.wn-card-overlay__media > .wn-card-media-link > video {
-  width: 100%;
-  min-height: 220px;
-  max-height: 280px;
-  object-fit: cover;
-  display: block;
-}
-
-.wn-card-overlay__placeholder {
-  min-height: 220px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 2.5rem;
-  color: var(--wn-primary);
-  opacity: 0.35;
-}
-
-.wn-card-overlay__shade {
+.wn-theme-nocturne .wn-card-overlay__shade {
   position: absolute;
   inset: 0;
   background: linear-gradient(
@@ -147,7 +116,17 @@ body.wn-theme-nocturne {
   pointer-events: none;
 }
 
-.wn-card-overlay__content {
+.wn-theme-nocturne .wn-card-overlay__placeholder {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--wn-primary);
+  opacity: 0.35;
+}
+
+.wn-theme-nocturne .wn-card-overlay__content {
   position: absolute;
   left: 0;
   right: 0;

@@ -1,0 +1,22 @@
+---
+description: Diseño carta QR móvil — aplicar skills webnu-menu-hallmark, webnu-menu-taste y estándar MENU-TEMPLATE-STANDARD
+globs: resources/views/themes/**,public/css/themes/**,config/company_templates.php
+alwaysApply: false
+---
+
+# Diseño carta QR Webnu
+
+Al crear, refinar o revisar plantillas de carta móvil en los archivos cubiertos por esta regla:
+
+1. **Leer y aplicar** el skill [webnu-menu-hallmark](../skills/webnu-menu-hallmark/SKILL.md) para audit/redesign/study y anti-slop.
+2. **Leer y aplicar** el skill [webnu-menu-taste](../skills/webnu-menu-taste/SKILL.md) para diales y pre-flight.
+3. **Respetar** [docs/MENU-TEMPLATE-STANDARD.md](../../docs/MENU-TEMPLATE-STANDARD.md) como fuente de verdad inamovible.
+4. **No usar** Taste/Hallmark genéricos sin adaptador — React/Framer/Tailwind no aplican a carta QR Blade.
+
+## Recordatorio rápido
+
+- Shell compartido: `modern-menu-layout` + `menu-hero` + `logo-chip`.
+- Preset hero bloqueado en `config/company_templates.php` → `template_hero`.
+- `front-{template}.css` **solo acentos** (color/tipografía); nunca estructura hero/cards/nav salvo excepciones documentadas.
+- **Prohibido emojis** en UI, demo y copy generado. **Solo iconos SVG** en `partials/icons/` — no mezclar Font Awesome.
+- Pre-flight obligatorio antes de cerrar: checklist DoD §10 + preview `/carta/demo?tpl={template}` en 320px y 375px.

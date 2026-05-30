@@ -48,14 +48,35 @@ $(function () {
         }
     });
 
-    $('.wn-modern-card--interactive, .wn-card-overlay, .wn-card-temporada, .wn-card-catalogo').on('click', function (e) {
-        if ($(e.target).closest('a, button, .wn-allergens, .modal, .wn-card-reel__open, video, .wn-fav-btn').length) {
+    function openDishModal(selector) {
+        if (!selector) {
             return;
         }
-        var target = $(this).find('[data-target^="#wnDish"]').first().attr('data-target');
-        if (target) {
-            $(target).modal('show');
+        var $modal = $(selector);
+        if ($modal.length) {
+            $modal.modal('show');
         }
+    }
+
+    $(document).on('click', '[data-target^="#wnDish"]', function (e) {
+        var target = $(this).attr('data-target');
+        if (!target) {
+            return;
+        }
+        e.preventDefault();
+        e.stopPropagation();
+        openDishModal(target);
+    });
+
+    $('.wn-modern-card--interactive, .wn-card-overlay, .wn-card-temporada, .wn-card-catalogo').on('click', function (e) {
+        if ($(e.target).closest('.wn-fav-btn, .wn-allergens, .modal, a[href]:not([data-target])').length) {
+            return;
+        }
+        var $trigger = $(this).find('[data-target^="#wnDish"]').not('.wn-card-reel__open').first();
+        if (!$trigger.length) {
+            $trigger = $(this).find('[data-target^="#wnDish"]').first();
+        }
+        openDishModal($trigger.attr('data-target'));
     });
 
     if ('IntersectionObserver' in window && $nav.length) {

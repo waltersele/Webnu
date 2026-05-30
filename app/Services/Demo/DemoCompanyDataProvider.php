@@ -3,7 +3,7 @@
 namespace App\Services\Demo;
 
 /**
- * Datos curados de las 9 cartas demo. Misma estructura que
+ * Datos curados de las cartas demo. Misma estructura que
  * `scripts/seed-local-demo.php` para producir cartas idénticas en local y prod
  * sin tocar el script local (que descarga imágenes con cURL/HTTPS).
  */
@@ -22,6 +22,7 @@ class DemoCompanyDataProvider
             $this->demoMar(),
             $this->demoElegance(),
             $this->demoAsador(),
+            $this->demoMaison(),
         ];
     }
 
@@ -98,11 +99,11 @@ class DemoCompanyDataProvider
             ],
             'sections' => ['前菜 · Entrantes' => 0, '麺 · Ramen' => 1, '甘味 · Dulces' => 2],
             'dishes' => [
-                ['section' => '前菜 · Entrantes', 'name' => 'Gyozas 餃子', 'description' => '🇪🇸 Empanadillas asiáticas a la plancha. Relleno de cerdo o verduras.', 'price' => '3.95', 'image' => 'fuego-gyozas.jpg', 'allergens' => ['Gluten', 'Soja'], 'highlight' => 'featured', 'video' => 'asian_fry'],
-                ['section' => '前菜 · Entrantes', 'name' => 'Tori no Karaage 唐揚げ', 'description' => '🇪🇸 Pollo frito japonés. Marinado en jengibre, soja y mirin.', 'price' => '4.95', 'image' => 'fuego-karaage.jpg', 'allergens' => ['Gluten', 'Soja'], 'video' => 'fried_chicken'],
-                ['section' => '前菜 · Entrantes', 'name' => 'Yakitori 焼き鳥', 'description' => '🇪🇸 Brochetas a la brasa. Pollo campero o vaca gallega madurada.', 'price' => '4.95', 'image' => 'fuego-yakitori.jpg', 'allergens' => ['Soja'], 'highlight' => 'bestseller', 'video' => 'steak'],
-                ['section' => '麺 · Ramen', 'name' => 'Tonkotsu Ramen 豚骨', 'description' => '🇪🇸 Caldo de cerdo estilo Yokohama. Huevo macerado, brotes de bambú y cebollino.', 'price' => '11.95', 'image' => 'fuego-tonkotsu.jpg', 'allergens' => ['Gluten', 'Soja', 'Huevos'], 'highlight' => 'bestseller', 'video' => 'ramen'],
-                ['section' => '麺 · Ramen', 'name' => 'Haek Buldak Ramen 🔥', 'description' => '🇪🇸 Ramen seco con salsa picante nuclear. Carne picada, huevo poché y verduras frescas.', 'price' => '11.95', 'image' => 'fuego-buldak.jpg', 'allergens' => ['Gluten', 'Soja', 'Huevos'], 'highlight' => 'featured', 'video' => 'ramen'],
+                ['section' => '前菜 · Entrantes', 'name' => 'Gyozas 餃子', 'description' => 'Empanadillas asiáticas a la plancha. Relleno de cerdo o verduras.', 'price' => '3.95', 'image' => 'fuego-gyozas.jpg', 'allergens' => ['Gluten', 'Soja'], 'highlight' => 'featured', 'video' => 'asian_fry'],
+                ['section' => '前菜 · Entrantes', 'name' => 'Tori no Karaage 唐揚げ', 'description' => 'Pollo frito japonés. Marinado en jengibre, soja y mirin.', 'price' => '4.95', 'image' => 'fuego-karaage.jpg', 'allergens' => ['Gluten', 'Soja'], 'video' => 'fried_chicken'],
+                ['section' => '前菜 · Entrantes', 'name' => 'Yakitori 焼き鳥', 'description' => 'Brochetas a la brasa. Pollo campero o vaca gallega madurada.', 'price' => '4.95', 'image' => 'fuego-yakitori.jpg', 'allergens' => ['Soja'], 'highlight' => 'bestseller', 'video' => 'steak'],
+                ['section' => '麺 · Ramen', 'name' => 'Tonkotsu Ramen 豚骨', 'description' => 'Caldo de cerdo estilo Yokohama. Huevo macerado, brotes de bambú y cebollino.', 'price' => '11.95', 'image' => 'fuego-tonkotsu.jpg', 'allergens' => ['Gluten', 'Soja', 'Huevos'], 'highlight' => 'bestseller', 'video' => 'ramen'],
+                ['section' => '麺 · Ramen', 'name' => 'Haek Buldak Ramen (picante)', 'description' => 'Ramen seco con salsa picante intensa. Carne picada, huevo poché y verduras frescas.', 'price' => '11.95', 'image' => 'fuego-buldak.jpg', 'allergens' => ['Gluten', 'Soja', 'Huevos'], 'highlight' => 'featured', 'video' => 'ramen'],
                 ['section' => '甘味 · Dulces', 'name' => 'Mochi Matcha 抹茶大福', 'description' => 'Masa gyuhi casera con mousse de matcha ceremonial y corazón de fresa.', 'price' => '5.95', 'image' => 'fuego-mochi.jpg', 'allergens' => ['Lácteos'], 'highlight' => 'new', 'video' => 'dessert'],
             ],
         ];
@@ -239,6 +240,30 @@ class DemoCompanyDataProvider
                 ['section' => 'De la brasa', 'name' => 'Morcilla de Burgos', 'description' => 'A la plancha con piquillo asado.', 'price' => '8.50', 'image' => 'brasa-croquetas.jpg', 'allergens' => [], 'video' => 'steak'],
                 ['section' => 'Guarniciones', 'name' => 'Pimientos de Padrón', 'description' => 'Sal gorda y aceite de oliva.', 'price' => '7.00', 'image' => 'brasa-gazpacho.jpg', 'allergens' => [], 'video' => null],
                 ['section' => 'Guarniciones', 'name' => 'Patata confitada', 'description' => 'Patata baby, ajo y romero.', 'price' => '5.50', 'image' => 'brasa-arroz-setas.jpg', 'allergens' => [], 'video' => null],
+            ],
+        ];
+    }
+
+    /** @return array<string, mixed> */
+    protected function demoMaison(): array
+    {
+        return [
+            'slug' => 'demo-maison',
+            'name' => 'Maison Arden',
+            'chef_name' => 'Chef Laurent Duval',
+            'template' => 'maison',
+            'comments' => 'Cocina de autor. Producto de temporada, técnica precisa y servicio íntimo.',
+            'background_header' => null,
+            'logo' => 'demo/demo-logo.jpg',
+            'sections' => ['Entrantes' => 0, 'Principales' => 1, 'Postres' => 2],
+            'dishes' => [
+                ['section' => 'Entrantes', 'name' => 'Tartare de atún rojo', 'description' => 'Atún Balfegó, emulsión de mostaza antigua, yema curada y pan de centeno tostado.', 'price' => '19.00', 'image' => 'brasa-lubina.jpg', 'allergens' => ['Pescados', 'Gluten', 'Huevos', 'Mostaza'], 'highlight' => 'featured', 'video' => 'fish'],
+                ['section' => 'Entrantes', 'name' => 'Velouté de setas silvestres', 'description' => 'Setas de temporada, aceite de trufa blanca y crouton de brioche.', 'price' => '14.50', 'image' => 'brasa-arroz-setas.jpg', 'allergens' => ['Gluten', 'Lácteos'], 'video' => null],
+                ['section' => 'Principales', 'name' => 'Lubina en costra de sal', 'description' => 'Lubina salvaje, beurre blanc de estragón y verduras baby glaseadas.', 'price' => '28.00', 'image' => 'brasa-lubina.jpg', 'allergens' => ['Pescados', 'Lácteos'], 'highlight' => 'bestseller', 'video' => 'fish'],
+                ['section' => 'Principales', 'name' => 'Pigeon rôti', 'description' => 'Pichón asado, jus reducido, puré de chirivía y hojas de mostaza.', 'price' => '32.00', 'image' => 'brasa-solomillo.jpg', 'allergens' => ['Lácteos'], 'highlight' => 'featured', 'video' => 'steak'],
+                ['section' => 'Principales', 'name' => 'Risotto al parmigiano', 'description' => 'Arroz carnaroli, caldo de ave, parmigiano reggiano 36 meses y aceite de albahaca.', 'price' => '22.00', 'image' => 'brasa-arroz-setas.jpg', 'allergens' => ['Lácteos'], 'video' => null],
+                ['section' => 'Postres', 'name' => 'Soufflé de chocolate', 'description' => 'Chocolate Valrhona 70 %, servido al momento con helado de vainilla Bourbon.', 'price' => '11.00', 'image' => 'brasa-brownie.jpg', 'allergens' => ['Gluten', 'Lácteos', 'Huevos'], 'highlight' => 'new', 'video' => 'dessert'],
+                ['section' => 'Postres', 'name' => 'Tarta fina de manzana', 'description' => 'Manzana reineta, hojaldre crujiente y crème fraîche de vainilla.', 'price' => '9.50', 'image' => 'brasa-tarta-queso.jpg', 'allergens' => ['Gluten', 'Lácteos', 'Huevos'], 'video' => null],
             ],
         ];
     }

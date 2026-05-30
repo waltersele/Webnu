@@ -35,11 +35,11 @@
                             data-product-id="{{ $product->id }}"
                             aria-pressed="false"
                             aria-label="{{ config('menu_locales.ui.' . ($menuLocale ?? 'es') . '.favorites_add', 'Añadir a favoritos') }}">
-                        <i class="far fa-heart" aria-hidden="true"></i>
+                        @include('themes.partials.icons.svg-heart')
                     </button>
                 @endif
                 <button type="button" class="wn-modern-card__detail-btn" data-toggle="modal" data-target="#wnDish{{ $product->id }}" aria-label="Ver detalle">
-                    <i class="fas fa-chevron-right"></i>
+                    @include('themes.partials.icons.svg-chevron-right')
                 </button>
             </div>
         </div>

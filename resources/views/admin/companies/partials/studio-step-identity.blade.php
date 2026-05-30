@@ -65,6 +65,32 @@
                 <div class="wn-brand-upload__status d-none" aria-live="polite"></div>
             </div>
             <div class="form-text">Foto del local o plato estrella para el banner superior.</div>
+            @if($company->background_header)
+                <button type="button" class="btn btn-sm btn-outline-primary mt-2" id="wn-header-crop-open">
+                    <i class="ri-crop-line me-1"></i> Ajustar recorte
+                </button>
+            @endif
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="wn-header-crop-modal" tabindex="-1" aria-labelledby="wn-header-crop-title" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="wn-header-crop-title">Recorte del banner</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <p class="text-muted small">Arrastra para centrar el plato o el local. El recorte se adapta a tu plantilla.</p>
+                <div class="wn-header-crop-stage">
+                    <img id="wn-header-crop-image" src="" alt="Recorte de cabecera" class="w-100">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="wn-header-crop-save">Guardar recorte</button>
+            </div>
         </div>
     </div>
 </div>

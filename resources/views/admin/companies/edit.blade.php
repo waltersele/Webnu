@@ -110,6 +110,7 @@
 
 @push('styles')
     <link rel="stylesheet" href="{{ asset('materio/css/webnu-company-studio.css') }}">
+    <link rel="stylesheet" href="{{ asset('materio/vendor/cropperjs/cropper.min.css') }}">
     @php
         $studioFontFamilies = [];
         foreach ($fonts as $fontMeta) {
@@ -134,11 +135,15 @@
             activeStep: @json($activeStep),
             themePresets: @json($themePresets),
             templateLabels: @json($templateLabels),
+            heroRatios: @json($heroRatios ?? []),
+            headerCropUrl: @json($headerCropUrl ?? null),
+            headerCrop: @json($headerCrop ?? null),
             steps: @json(array_keys($steps)),
             logoUrl: @json($company->logo ? '/img/' . $company->logo : null),
             headerUrl: @json($company->background_header ? '/img/' . $company->background_header : null),
         };
     </script>
+    <script src="{{ asset('materio/vendor/cropperjs/cropper.min.js') }}"></script>
     <script src="{{ asset('materio/js/webnu-company-studio.js') }}"></script>
 @endpush
 

@@ -296,6 +296,26 @@ body.wn-theme-catalogo .wn-menu-nav--catalogo.is-pinned {
   color: var(--wn-text-muted);
 }
 
+/* Premium: alérgenos solo texto (sin pictogramas color) */
+.wn-allergens--text-only .wn-allergens__item--text-only {
+  padding: 0.18rem 0.55rem;
+  border-radius: 2px;
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  color: var(--wn-text-muted);
+}
+
+.wn-theme-maison .wn-allergens--text-only .wn-allergens__item--text-only,
+.wn-theme-atelier .wn-allergens--text-only .wn-allergens__item--text-only,
+.wn-theme-nocturne .wn-allergens--text-only .wn-allergens__item--text-only,
+.wn-theme-lumiere .wn-allergens--text-only .wn-allergens__item--text-only {
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
 .wn-allergens__item img,
 .wn-allergens__item svg,
 .wn-allergens__icon {
@@ -474,54 +494,7 @@ body.wn-theme-oriental .wn-dish-modal .wn-allergens__item {
   opacity: 0.65;
 }
 
-/* L'Essence — optimizado móvil (tarjetas horizontales como Bistro) */
 @media (max-width: 640px) {
-  .wn-theme-lumiere .wn-modern-card--stacked {
-    display: flex;
-    flex-direction: row;
-    align-items: stretch;
-  }
-
-  .wn-theme-lumiere .wn-modern-card--stacked .wn-modern-card__media {
-    width: 34%;
-    min-width: 112px;
-    max-width: 140px;
-    aspect-ratio: 1;
-    flex-shrink: 0;
-  }
-
-  .wn-theme-lumiere .wn-modern-card--stacked .wn-modern-card__body {
-    flex: 1;
-    min-width: 0;
-    padding: 0.85rem 0.9rem;
-  }
-
-  .wn-theme-lumiere .wn-modern-card--stacked .wn-modern-card__desc {
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-  }
-
-  .wn-theme-lumiere .wn-menu-hero:not(.wn-menu-hero--bleed) {
-    min-height: 160px;
-    margin-left: max(1rem, env(safe-area-inset-left, 0px));
-    margin-right: max(1rem, env(safe-area-inset-right, 0px));
-  }
-
-  .wn-theme-lumiere .wn-menu-hero--bleed {
-    min-height: clamp(160px, 36vw, 220px);
-  }
-
-  .wn-theme-lumiere .wn-menu-hero__overlay:not(.wn-menu-hero__overlay--bleed) {
-    min-height: 160px;
-    padding: 1.25rem 1rem 1rem;
-  }
-
-  .wn-theme-lumiere .wn-menu-hero__title {
-    font-size: clamp(1.35rem, 5vw, 1.75rem);
-  }
-
   .wn-theme-pasion .wn-modern-card--stacked .wn-modern-card__media:not(:has(.wn-card-reel)) {
     aspect-ratio: 16 / 11;
     max-height: 200px;
@@ -1074,4 +1047,160 @@ body.wn-theme-oriental .wn-menu-nav {
 
 body.wn-favorites-open {
   overflow: hidden;
+}
+
+/* —— Premium card polish (todas las plantillas) —— */
+.wn-modern-card {
+  border-radius: var(--wn-card-radius, 16px);
+  box-shadow: var(--wn-card-shadow, 0 4px 20px rgba(15, 23, 42, 0.08));
+}
+
+.wn-modern-card--horizontal .wn-modern-card__media {
+  width: 120px;
+  aspect-ratio: 4 / 3;
+  min-height: 0;
+}
+
+.wn-modern-card--stacked .wn-modern-card__media:not(:has(.wn-card-reel)) {
+  aspect-ratio: 16 / 10;
+}
+
+.wn-modern-card__title {
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.wn-modern-card__desc {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  font-size: 0.875rem;
+  line-height: 1.45;
+  color: var(--wn-text-muted);
+}
+
+.wn-modern-card__detail-btn,
+.wn-fav-btn {
+  min-width: 44px;
+  min-height: 44px;
+  width: 44px;
+  height: 44px;
+}
+
+.wn-card-catalogo {
+  border-radius: var(--wn-card-radius, 16px);
+  box-shadow: var(--wn-card-shadow, 0 4px 20px rgba(15, 23, 42, 0.08));
+}
+
+.wn-card-catalogo__desc {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.wn-card-catalogo__detail {
+  min-width: 44px;
+  min-height: 44px;
+}
+
+.wn-card-overlay {
+  border-radius: var(--wn-card-radius, 16px);
+  box-shadow: var(--wn-card-shadow, 0 4px 20px rgba(15, 23, 42, 0.12));
+  overflow: hidden;
+}
+
+/* Media overlay: foto/vídeo a borde completo (todos los temas) */
+.wn-card-overlay__media {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 4 / 3;
+  min-height: clamp(220px, 56vw, 320px);
+  background: var(--wn-surface, #111);
+}
+
+.wn-card-overlay__media > .wn-card-media-link,
+.wn-card-overlay__media > .wn-card-reel {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  border: none;
+}
+
+.wn-card-overlay__media > .wn-card-media-link img,
+.wn-card-overlay__media > .wn-card-reel__video,
+.wn-card-overlay__media > img,
+.wn-card-overlay__media > video {
+  width: 100%;
+  height: 100%;
+  min-height: 100%;
+  max-height: none;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+  pointer-events: none;
+}
+
+.wn-card-overlay__media > .wn-card-media-link {
+  cursor: pointer;
+}
+
+.wn-modern-card__media .wn-card-reel__video,
+.wn-modern-card__media > .wn-card-media-link > img {
+  pointer-events: none;
+}
+
+.wn-card-overlay__media .wn-card-reel__open {
+  display: none;
+  pointer-events: none;
+}
+
+.wn-card-overlay__shade {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.wn-card-overlay__content {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 2;
+}
+
+.wn-card-overlay__desc {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.wn-card-overlay__open {
+  min-width: 44px;
+  min-height: 44px;
+}
+
+.wn-hero-catalogo--inline {
+  padding: 0.75rem max(1rem, env(safe-area-inset-right, 0px)) 0.5rem max(1rem, env(safe-area-inset-left, 0px));
+  background: var(--wn-bg);
+}
+
+.wn-hero-catalogo--inline .wn-hero-catalogo__title {
+  font-size: 1.125rem;
+  margin: 0 0 0.25rem;
+}
+
+.wn-hero-catalogo--inline .wn-hero-catalogo__subtitle {
+  font-size: 0.8125rem;
+  margin: 0;
+  color: var(--wn-text-muted);
 }

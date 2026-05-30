@@ -578,6 +578,18 @@
   margin-top: 0.35rem;
 }
 
+.wn-header-crop-stage {
+  max-height: 60vh;
+  overflow: hidden;
+  background: #0f172a;
+  border-radius: 0.5rem;
+}
+
+.wn-header-crop-stage img {
+  display: block;
+  max-width: 100%;
+}
+
 .wn-color-input .form-control-color {
   width: 3rem;
   height: 2.5rem;

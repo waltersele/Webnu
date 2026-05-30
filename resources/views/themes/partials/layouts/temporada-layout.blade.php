@@ -16,7 +16,7 @@
         @foreach ($sections as $section)
             <section class="wn-menu-section wn-menu-section--temporada" id="section-{{ $section->id }}">
                 <h2 class="wn-menu-section__title wn-menu-section__title--temporada">
-                    <i class="fas fa-utensils wn-section-icon" aria-hidden="true"></i>
+                    @include('themes.partials.icons.svg-utensils')
                     {{ $section->name }}
                 </h2>
                 @foreach ($section->products as $product)

@@ -346,6 +346,10 @@ class OnboardingController extends Controller
             'pasion' => 'demo',
             'oriental' => 'demo-japo',
             'visual' => 'demo',
+            'maison' => 'demo-maison',
+            'atelier' => 'demo-elegance',
+            'saffron' => 'demo',
+            'velvet' => 'demo-elegance',
         ];
 
         $urls = [];

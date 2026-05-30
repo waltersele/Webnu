@@ -179,6 +179,10 @@ GET http://127.0.0.1:8000/integrations/tvpik/connect?state=test&redirect_uri=htt
 → 200 (formulario), no 404
 ```
 
+**Arranque TVPik:** usa `c:\Users\Walter\tvpik\scripts\start.ps1` en una **terminal nueva** (no la misma donde corre `run-local.ps1`). Webnu exporta `DB_CONNECTION=sqlite` y, si TVPik hereda ese entorno, la API devuelve 500 (`could not find driver` / tablas inexistentes). `start.ps1` fuerza MySQL y `SESSION_DRIVER=file`; preferir PHP de Laragon (no winget sin extensiones).
+
+**Callback OAuth:** debe responder `302` hacia `localhost:5173/integrations?...` (el panel TVPik). Si `:5173` no está levantado, el navegador puede quedarse colgado tras el redirect — arranca `cd tvpik-web && npm run dev`.
+
 ```bash
 # Pantallas demo sin API TVPik (solo hub Webnu)
 TVPIK_STUB_SCREENS=true

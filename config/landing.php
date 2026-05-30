@@ -35,6 +35,10 @@ return [
         'mar' => '/carta/demo-mar',
         'elegance' => '/carta/demo-elegance',
         'asador' => '/carta/demo-asador',
+        'saffron' => '/carta/demo?tpl=saffron',
+        'velvet' => '/carta/demo?tpl=velvet',
+        'atelier' => '/carta/demo?tpl=atelier',
+        'maison' => '/carta/demo-maison',
     ],
 
 ];

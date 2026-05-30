@@ -20,7 +20,7 @@
 
     <div class="wn-favorites-bar" role="region" aria-label="{{ $favUi['favorites_title'] ?? 'Mis favoritos' }}">
         <button type="button" class="wn-favorites-bar__btn" data-fav-open aria-expanded="false">
-            <i class="fas fa-heart" aria-hidden="true"></i>
+            @include('themes.partials.icons.svg-heart')
             <span>{{ $favUi['favorites_open'] ?? 'Mis favoritos' }}</span>
             <span class="wn-favorites-bar__badge" data-fav-count hidden>0</span>
         </button>
@@ -32,7 +32,7 @@
             <header class="wn-favorites-panel__head">
                 <h2 id="wn-favorites-title">{{ $favUi['favorites_title'] ?? 'Mis favoritos' }}</h2>
                 <button type="button" class="wn-favorites-panel__close" data-fav-close aria-label="Cerrar">
-                    <i class="fas fa-times"></i>
+                    @include('themes.partials.icons.svg-times')
                 </button>
             </header>
             <div class="wn-favorites-panel__actions">

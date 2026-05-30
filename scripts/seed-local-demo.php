@@ -126,20 +126,20 @@ $cocktailDishes = [
 ];
 
 $fuegoDishes = [
-    ['section' => '前菜 · Entrantes', 'name' => 'Gyozas 餃子', 'description' => '🇪🇸 Empanadillas asiáticas a la plancha. Relleno de cerdo o verduras. 📍 Manchuria, China 🇨🇳', 'price' => '3.95', 'image' => 'fuego-gyozas.jpg', 'allergens' => ['Gluten', 'Soja'], 'highlight' => 'featured', 'video' => 'asian_fry'],
-    ['section' => '前菜 · Entrantes', 'name' => 'Tori no Karaage 唐揚げ', 'description' => '🇪🇸 Pollo frito japonés. Marinado en jengibre, soja y mirin. 📍 Beppu, Japón 🇯🇵', 'price' => '4.95', 'image' => 'fuego-karaage.jpg', 'allergens' => ['Gluten', 'Soja'], 'video' => 'fried_chicken'],
-    ['section' => '前菜 · Entrantes', 'name' => 'Yakitori 焼き鳥', 'description' => '🇪🇸 Brochetas a la brasa. Pollo campero o vaca gallega madurada. 📍 Tokyo, Japón 🇯🇵', 'price' => '4.95', 'image' => 'fuego-yakitori.jpg', 'allergens' => ['Soja'], 'highlight' => 'bestseller', 'video' => 'steak'],
-    ['section' => '麺 · Ramen', 'name' => 'Tonkotsu Ramen 豚骨', 'description' => '🇪🇸 Caldo de cerdo estilo Yokohama. Huevo macerado, brotes de bambú y cebollino. PEQUEÑO 9,95 € · GRANDE 11,95 €. 📍 Yokohama, Japón 🇯🇵', 'price' => '11.95', 'image' => 'fuego-tonkotsu.jpg', 'allergens' => ['Gluten', 'Soja', 'Huevos'], 'highlight' => 'bestseller', 'video' => 'ramen'],
-    ['section' => '麺 · Ramen', 'name' => 'Haek Buldak Ramen 🔥🇰🇷', 'description' => '🇪🇸 Ramen seco con salsa picante nuclear. Carne picada, huevo poché y verduras frescas. 📍 Seúl, Corea del Sur 🇰🇷', 'price' => '11.95', 'image' => 'fuego-buldak.jpg', 'allergens' => ['Gluten', 'Soja', 'Huevos'], 'highlight' => 'featured', 'video' => 'ramen'],
-    ['section' => '甘味 · Dulces', 'name' => 'Mochi Matcha 抹茶大福', 'description' => 'Masa gyuhi casera con mousse de matcha ceremonial y corazón de fresa. 📍 Receta propia ㊙️', 'price' => '5.95', 'image' => 'fuego-mochi.jpg', 'allergens' => ['Lácteos'], 'highlight' => 'new', 'video' => 'dessert'],
+    ['section' => '前菜 · Entrantes', 'name' => 'Gyozas 餃子', 'description' => 'Empanadillas asiáticas a la plancha. Relleno de cerdo o verduras. Origen: Manchuria, China.', 'price' => '3.95', 'image' => 'fuego-gyozas.jpg', 'allergens' => ['Gluten', 'Soja'], 'highlight' => 'featured', 'video' => 'asian_fry'],
+    ['section' => '前菜 · Entrantes', 'name' => 'Tori no Karaage 唐揚げ', 'description' => 'Pollo frito japonés. Marinado en jengibre, soja y mirin. Origen: Beppu, Japón.', 'price' => '4.95', 'image' => 'fuego-karaage.jpg', 'allergens' => ['Gluten', 'Soja'], 'video' => 'fried_chicken'],
+    ['section' => '前菜 · Entrantes', 'name' => 'Yakitori 焼き鳥', 'description' => 'Brochetas a la brasa. Pollo campero o vaca gallega madurada. Origen: Tokyo, Japón.', 'price' => '4.95', 'image' => 'fuego-yakitori.jpg', 'allergens' => ['Soja'], 'highlight' => 'bestseller', 'video' => 'steak'],
+    ['section' => '麺 · Ramen', 'name' => 'Tonkotsu Ramen 豚骨', 'description' => 'Caldo de cerdo estilo Yokohama. Huevo macerado, brotes de bambú y cebollino. PEQUEÑO 9,95 € · GRANDE 11,95 €. Origen: Yokohama, Japón.', 'price' => '11.95', 'image' => 'fuego-tonkotsu.jpg', 'allergens' => ['Gluten', 'Soja', 'Huevos'], 'highlight' => 'bestseller', 'video' => 'ramen'],
+    ['section' => '麺 · Ramen', 'name' => 'Haek Buldak Ramen (picante)', 'description' => 'Ramen seco con salsa picante intensa. Carne picada, huevo poché y verduras frescas. Origen: Seúl, Corea del Sur.', 'price' => '11.95', 'image' => 'fuego-buldak.jpg', 'allergens' => ['Gluten', 'Soja', 'Huevos'], 'highlight' => 'featured', 'video' => 'ramen'],
+    ['section' => '甘味 · Dulces', 'name' => 'Mochi Matcha 抹茶大福', 'description' => 'Masa gyuhi casera con mousse de matcha ceremonial y corazón de fresa. Receta de la casa.', 'price' => '5.95', 'image' => 'fuego-mochi.jpg', 'allergens' => ['Lácteos'], 'highlight' => 'new', 'video' => 'dessert'],
 ];
 
 $japoDishes = [
-    ['section' => '前菜 · Entradas', 'name' => 'Edamame 枝豆', 'description' => 'Vainas de soja al vapor con sal de mar. 📍 Kyoto, Japón 🇯🇵', 'price' => '4.50', 'image' => 'fuego-gyozas.jpg', 'allergens' => ['Soja'], 'video' => null],
-    ['section' => '前菜 · Entradas', 'name' => 'Sashimi del día 刺身', 'description' => 'Selección de pescado fresco del mercado. Wasabi y jengibre encurtido. 📍 Tsukiji, Japón 🇯🇵', 'price' => '14.50', 'image' => 'brasa-lubina.jpg', 'allergens' => ['Pescados', 'Soja'], 'highlight' => 'featured', 'video' => 'fish'],
-    ['section' => '丼 · Arroz', 'name' => 'Gyudon 牛丼', 'description' => 'Bol de arroz con ternera, cebolla y salsa dashi. Huevo poché y shichimi. 📍 Tokio, Japón 🇯🇵', 'price' => '8.50', 'image' => 'brasa-arroz-setas.jpg', 'allergens' => ['Gluten', 'Soja', 'Huevos'], 'highlight' => 'bestseller', 'video' => 'pasta_rice'],
-    ['section' => '温 · Caliente', 'name' => 'Miso Ramen 味噌', 'description' => 'Caldo tonkotsu con pasta de miso, chashu, repollo chino y huevo macerado. 📍 Hokkaido, Japón 🇯🇵', 'price' => '11.95', 'image' => 'fuego-tonkotsu.jpg', 'allergens' => ['Gluten', 'Soja', 'Huevos'], 'video' => 'ramen'],
-    ['section' => '甘 · Dulce', 'name' => 'Mochi de té verde', 'description' => 'Daifuku casero con matcha ceremonial. 📍 Receta propia ㊙️', 'price' => '5.50', 'image' => 'fuego-mochi.jpg', 'allergens' => ['Lácteos'], 'video' => 'dessert'],
+    ['section' => '前菜 · Entradas', 'name' => 'Edamame 枝豆', 'description' => 'Vainas de soja al vapor con sal de mar. Origen: Kyoto, Japón.', 'price' => '4.50', 'image' => 'fuego-gyozas.jpg', 'allergens' => ['Soja'], 'video' => null],
+    ['section' => '前菜 · Entradas', 'name' => 'Sashimi del día 刺身', 'description' => 'Selección de pescado fresco del mercado. Wasabi y jengibre encurtido. Origen: Tsukiji, Japón.', 'price' => '14.50', 'image' => 'brasa-lubina.jpg', 'allergens' => ['Pescados', 'Soja'], 'highlight' => 'featured', 'video' => 'fish'],
+    ['section' => '丼 · Arroz', 'name' => 'Gyudon 牛丼', 'description' => 'Bol de arroz con ternera, cebolla y salsa dashi. Huevo poché y shichimi. Origen: Tokio, Japón.', 'price' => '8.50', 'image' => 'brasa-arroz-setas.jpg', 'allergens' => ['Gluten', 'Soja', 'Huevos'], 'highlight' => 'bestseller', 'video' => 'pasta_rice'],
+    ['section' => '温 · Caliente', 'name' => 'Miso Ramen 味噌', 'description' => 'Caldo tonkotsu con pasta de miso, chashu, repollo chino y huevo macerado. Origen: Hokkaido, Japón.', 'price' => '11.95', 'image' => 'fuego-tonkotsu.jpg', 'allergens' => ['Gluten', 'Soja', 'Huevos'], 'video' => 'ramen'],
+    ['section' => '甘 · Dulce', 'name' => 'Mochi de té verde', 'description' => 'Daifuku casero con matcha ceremonial. Receta de la casa.', 'price' => '5.50', 'image' => 'fuego-mochi.jpg', 'allergens' => ['Lácteos'], 'video' => 'dessert'],
 ];
 
 $pizzaDishes = [
@@ -183,6 +183,16 @@ $asadorDishes = [
     ['section' => 'De la brasa', 'name' => 'Morcilla de Burgos', 'description' => 'A la plancha con piquillo asado.', 'price' => '8.50', 'image' => 'brasa-croquetas.jpg', 'allergens' => [], 'video' => 'steak'],
     ['section' => 'Guarniciones', 'name' => 'Pimientos de Padrón', 'description' => 'Sal gorda y aceite de oliva.', 'price' => '7.00', 'image' => 'brasa-gazpacho.jpg', 'allergens' => [], 'video' => null],
     ['section' => 'Guarniciones', 'name' => 'Patata confitada', 'description' => 'Patata baby, ajo y romero.', 'price' => '5.50', 'image' => 'brasa-arroz-setas.jpg', 'allergens' => [], 'video' => null],
+];
+
+$maisonDishes = [
+    ['section' => 'Entrantes', 'name' => 'Tartare de atún rojo', 'description' => 'Atún Balfegó, emulsión de mostaza antigua, yema curada y pan de centeno tostado.', 'price' => '19.00', 'image' => 'brasa-lubina.jpg', 'allergens' => ['Pescados', 'Gluten', 'Huevos', 'Mostaza'], 'highlight' => 'featured', 'video' => 'fish'],
+    ['section' => 'Entrantes', 'name' => 'Velouté de setas silvestres', 'description' => 'Setas de temporada, aceite de trufa blanca y crouton de brioche.', 'price' => '14.50', 'image' => 'brasa-arroz-setas.jpg', 'allergens' => ['Gluten', 'Lácteos'], 'video' => null],
+    ['section' => 'Principales', 'name' => 'Lubina en costra de sal', 'description' => 'Lubina salvaje, beurre blanc de estragón y verduras baby glaseadas.', 'price' => '28.00', 'image' => 'brasa-lubina.jpg', 'allergens' => ['Pescados', 'Lácteos'], 'highlight' => 'bestseller', 'video' => 'fish'],
+    ['section' => 'Principales', 'name' => 'Pigeon rôti', 'description' => 'Pichón asado, jus reducido, puré de chirivía y hojas de mostaza.', 'price' => '32.00', 'image' => 'brasa-solomillo.jpg', 'allergens' => ['Lácteos'], 'highlight' => 'featured', 'video' => 'steak'],
+    ['section' => 'Principales', 'name' => 'Risotto al parmigiano', 'description' => 'Arroz carnaroli, caldo de ave, parmigiano reggiano 36 meses y aceite de albahaca.', 'price' => '22.00', 'image' => 'brasa-arroz-setas.jpg', 'allergens' => ['Lácteos'], 'video' => null],
+    ['section' => 'Postres', 'name' => 'Soufflé de chocolate', 'description' => 'Chocolate Valrhona 70 %, servido al momento con helado de vainilla Bourbon.', 'price' => '11.00', 'image' => 'brasa-brownie.jpg', 'allergens' => ['Gluten', 'Lácteos', 'Huevos'], 'highlight' => 'new', 'video' => 'dessert'],
+    ['section' => 'Postres', 'name' => 'Tarta fina de manzana', 'description' => 'Manzana reineta, hojaldre crujiente y crème fraîche de vainilla.', 'price' => '9.50', 'image' => 'brasa-tarta-queso.jpg', 'allergens' => ['Gluten', 'Lácteos', 'Huevos'], 'video' => null],
 ];
 
 $demoCompanies = [
@@ -303,6 +313,18 @@ $demoCompanies = [
         'theme_settings' => null,
         'sections' => ['De la brasa' => 0, 'Guarniciones' => 1],
         'dishes' => $asadorDishes,
+    ],
+    [
+        'slug' => 'demo-maison',
+        'name' => 'Maison Arden',
+        'chef_name' => 'Chef Laurent Duval',
+        'template' => 'maison',
+        'comments' => 'Cocina de autor. Producto de temporada, técnica precisa y servicio íntimo.',
+        'background_header' => null,
+        'logo' => 'demo/demo-logo.jpg',
+        'theme_settings' => null,
+        'sections' => ['Entrantes' => 0, 'Principales' => 1, 'Postres' => 2],
+        'dishes' => $maisonDishes,
     ],
 ];
 

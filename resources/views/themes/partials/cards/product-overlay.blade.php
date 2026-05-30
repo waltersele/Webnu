@@ -25,7 +25,7 @@
             </div>
         </div>
         <button type="button" class="wn-card-overlay__open" data-toggle="modal" data-target="#wnDish{{ $product->id }}" aria-label="Ver detalle">
-            <i class="fas fa-expand-alt" aria-hidden="true"></i>
+            @include('themes.partials.icons.svg-expand')
         </button>
     @else
         <div class="wn-card-overlay__body">
@@ -39,7 +39,7 @@
                     <h3 class="wn-card-overlay__title">{{ $product->name }}</h3>
                 </div>
                 <button type="button" class="wn-card-overlay__open wn-card-overlay__open--inline" data-toggle="modal" data-target="#wnDish{{ $product->id }}" aria-label="Ver detalle">
-                    <i class="fas fa-chevron-right" aria-hidden="true"></i>
+                    @include('themes.partials.icons.svg-chevron-right')
                 </button>
             </div>
             @if($product->description)

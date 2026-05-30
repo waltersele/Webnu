@@ -23,6 +23,7 @@ yarn-error.log
 composer.phar
 composer.lock.bak
 .vscode/
+.agents/
 /database/database.sqlite
 
 # Laravel storage & cache

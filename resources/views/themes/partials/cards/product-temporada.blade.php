@@ -22,7 +22,7 @@
         @endif
     </div>
     <button type="button" class="wn-card-temporada__detail" data-toggle="modal" data-target="#wnDish{{ $product->id }}" aria-label="Ver detalle">
-        <i class="fas fa-chevron-right" aria-hidden="true"></i>
+        @include('themes.partials.icons.svg-chevron-right')
     </button>
 </article>
 

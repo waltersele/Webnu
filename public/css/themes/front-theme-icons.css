@@ -1,0 +1,101 @@
+/**
+ * Iconos SVG compartidos en carta móvil
+ */
+.wn-svg-icon {
+  display: block;
+  flex-shrink: 0;
+}
+
+.wn-svg-icon--inline {
+  display: inline-block;
+  vertical-align: -0.15em;
+  margin-right: 0.35rem;
+}
+
+.wn-menu-section__title .wn-section-icon,
+.wn-menu-section__title .wn-svg-icon.wn-section-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.wn-modern-card__detail-btn .wn-svg-icon,
+.wn-fav-btn .wn-svg-icon,
+.wn-floating-info .wn-svg-icon,
+.wn-modern-header__info .wn-svg-icon,
+.wn-dish-modal__close .wn-svg-icon,
+.wn-card-overlay__open .wn-svg-icon,
+.wn-card-temporada__detail .wn-svg-icon,
+.wn-card-catalogo__detail .wn-svg-icon,
+.wn-card-reel__open .wn-svg-icon {
+  margin: 0 auto;
+}
+
+.wn-modern-footer__links a,
+.wn-modern-footer__meta {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.35rem;
+}
+
+.wn-modern-footer__links a .wn-svg-icon--inline,
+.wn-modern-footer__meta .wn-svg-icon--inline {
+  margin-top: 0.15rem;
+  flex-shrink: 0;
+}
+
+.wn-card-reel__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.wn-modern-card__placeholder .wn-svg-icon,
+.wn-modern-card__placeholder--featured .wn-svg-icon {
+  width: 32px;
+  height: 32px;
+  margin: 0 auto;
+  opacity: 0.35;
+}
+
+.wn-card-media-play .wn-svg-icon {
+  width: 28px;
+  height: 28px;
+}
+
+.wn-favorites-bar__btn .wn-svg-icon {
+  width: 18px;
+  height: 18px;
+}
+
+.wn-favorites-panel__close .wn-svg-icon {
+  width: 20px;
+  height: 20px;
+}
+
+.wn-fav-btn.is-favorited .wn-svg-heart path,
+.wn-fav-btn[aria-pressed='true'] .wn-svg-heart path {
+  fill: currentColor;
+}
+
+.wn-theme-fastfood .wn-fav-btn.is-favorited .wn-svg-heart path,
+.wn-theme-fastfood .wn-fav-btn[aria-pressed='true'] .wn-svg-heart path {
+  fill: var(--wn-primary);
+  stroke: var(--wn-primary);
+}
+
+.wn-theme-saffron .wn-fav-btn.is-favorited .wn-svg-heart path,
+.wn-theme-saffron .wn-fav-btn[aria-pressed='true'] .wn-svg-heart path {
+  fill: var(--wn-primary);
+  stroke: var(--wn-primary);
+}
+
+.wn-theme-atelier .wn-fav-btn.is-favorited .wn-svg-heart path,
+.wn-theme-atelier .wn-fav-btn[aria-pressed='true'] .wn-svg-heart path {
+  fill: var(--wn-accent);
+  stroke: var(--wn-accent);
+}
+
+.wn-theme-atelier .wn-modern-card__placeholder .wn-svg-icon {
+  opacity: 0.25;
+}

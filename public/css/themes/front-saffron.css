@@ -1,0 +1,208 @@
+/**
+ * Azafrán — mediterráneo editorial (hero emblema + tarjetas horizontales)
+ */
+body.wn-theme-saffron {
+  --wn-card-radius: 16px;
+  background: var(--wn-bg) !important;
+  color: var(--wn-text);
+  -webkit-font-smoothing: antialiased;
+  position: relative;
+}
+
+body.wn-theme-saffron::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background:
+    radial-gradient(ellipse 85% 45% at 0% 0%, rgba(199, 91, 58, 0.14) 0%, transparent 55%),
+    radial-gradient(ellipse 70% 40% at 100% 15%, rgba(107, 143, 113, 0.12) 0%, transparent 50%);
+}
+
+body.wn-theme-saffron .wn-menu-shell {
+  position: relative;
+  z-index: 1;
+}
+
+/* —— Hero emblema circular —— */
+.wn-theme-saffron .wn-menu-hero--circle .wn-menu-hero__logo-chip,
+.wn-theme-saffron .wn-menu-hero__logo-chip--circle {
+  box-shadow:
+    0 0 0 3px var(--wn-surface),
+    0 0 0 5px var(--wn-primary),
+    0 12px 32px rgba(199, 91, 58, 0.35);
+}
+
+.wn-theme-saffron .wn-menu-hero__title {
+  font-family: var(--wn-font-heading) !important;
+  font-size: clamp(2rem, 8.5vw, 2.85rem) !important;
+  font-weight: 600 !important;
+  letter-spacing: -0.02em;
+  line-height: 1.05;
+  color: #fff !important;
+  -webkit-text-fill-color: #fff;
+  text-shadow: 0 4px 24px rgba(44, 24, 16, 0.45);
+}
+
+.wn-theme-saffron .wn-menu-hero__eyebrow {
+  color: color-mix(in srgb, var(--wn-accent) 85%, #fff) !important;
+  letter-spacing: 0.24em;
+  font-weight: 700;
+}
+
+.wn-theme-saffron .wn-menu-hero__subtitle {
+  font-size: 0.9375rem;
+  line-height: 1.55;
+  max-width: 34ch;
+  opacity: 0.92;
+}
+
+/* —— Nav —— */
+.wn-theme-saffron .wn-menu-nav {
+  background: rgba(250, 246, 241, 0.96) !important;
+  backdrop-filter: blur(12px);
+  border-bottom: 2px solid color-mix(in srgb, var(--wn-primary) 28%, transparent);
+  box-shadow: 0 8px 24px rgba(92, 48, 32, 0.08);
+}
+
+.wn-theme-saffron .wn-menu-chip {
+  background: #fff;
+  color: var(--wn-text-muted);
+  border: 2px solid color-mix(in srgb, var(--wn-primary) 22%, transparent);
+  font-weight: 700;
+  font-size: 0.8125rem;
+  letter-spacing: 0.04em;
+  transition: background 0.12s, color 0.12s, border-color 0.12s, transform 0.1s, box-shadow 0.12s;
+}
+
+.wn-theme-saffron .wn-menu-chip.is-active,
+.wn-theme-saffron .wn-menu-chip:hover {
+  background: var(--wn-primary);
+  color: #fff;
+  border-color: var(--wn-primary);
+  box-shadow: 0 6px 18px color-mix(in srgb, var(--wn-primary) 38%, transparent);
+  transform: translateY(-1px);
+}
+
+.wn-theme-saffron .wn-menu-chip:active {
+  transform: scale(0.98);
+}
+
+/* —— Secciones —— */
+.wn-theme-saffron .wn-menu-section__title {
+  display: flex !important;
+  align-items: center;
+  gap: 0.6rem;
+  font-family: var(--wn-font-heading) !important;
+  font-size: clamp(1.45rem, 5vw, 1.75rem) !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.02em;
+  color: #fff !important;
+  background: linear-gradient(90deg, var(--wn-primary) 0%, color-mix(in srgb, var(--wn-primary) 78%, var(--wn-accent)) 100%);
+  margin: 1.5rem 0 0.85rem !important;
+  padding: 0.55rem 0.9rem !important;
+  border-radius: 10px;
+  border-bottom: none !important;
+  box-shadow: 0 4px 16px color-mix(in srgb, var(--wn-primary) 28%, transparent);
+}
+
+.wn-theme-saffron .wn-menu-section__title .wn-section-icon {
+  color: color-mix(in srgb, var(--wn-accent) 70%, #fff);
+}
+
+.wn-theme-saffron .wn-menu-main {
+  padding: 0.35rem max(0.85rem, env(safe-area-inset-right, 0px)) 2rem max(0.85rem, env(safe-area-inset-left, 0px));
+}
+
+/* —— Tarjetas horizontales —— */
+.wn-theme-saffron .wn-modern-card--horizontal {
+  display: flex;
+  background: var(--wn-surface);
+  border: 1px solid color-mix(in srgb, var(--wn-primary) 14%, transparent);
+  border-left: 4px solid var(--wn-primary);
+  box-shadow: 0 8px 28px rgba(92, 48, 32, 0.1);
+  transition: transform 0.1s, box-shadow 0.12s;
+}
+
+.wn-theme-saffron .wn-modern-card--horizontal:active {
+  transform: scale(0.985);
+}
+
+.wn-theme-saffron .wn-modern-card--horizontal .wn-modern-card__media {
+  border-radius: 12px 0 0 12px;
+}
+
+.wn-theme-saffron .wn-modern-card__title {
+  font-family: var(--wn-font-heading);
+  font-size: 1.0625rem;
+  font-weight: 600;
+  line-height: 1.22;
+}
+
+.wn-theme-saffron .wn-modern-card__desc {
+  font-size: 0.875rem;
+  line-height: 1.45;
+  color: var(--wn-text-muted);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.wn-theme-saffron .wn-modern-card .wn-price-item {
+  font-family: var(--wn-font-heading);
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--wn-primary) !important;
+}
+
+.wn-theme-saffron .wn-modern-card__detail-btn {
+  min-width: 44px;
+  min-height: 44px;
+  background: color-mix(in srgb, var(--wn-primary) 14%, var(--wn-surface));
+  color: var(--wn-primary);
+  border: 1px solid color-mix(in srgb, var(--wn-primary) 32%, transparent);
+}
+
+.wn-theme-saffron .wn-fav-btn {
+  min-width: 44px;
+  min-height: 44px;
+  color: var(--wn-primary);
+}
+
+.wn-theme-saffron .wn-modern-card__badges .webnu-product-badge--featured {
+  background: var(--wn-primary) !important;
+  color: #fff !important;
+}
+
+.wn-theme-saffron .wn-modern-card__badges .webnu-product-badge--bestseller {
+  background: var(--wn-accent) !important;
+  color: #fff !important;
+}
+
+.wn-theme-saffron .wn-floating-info {
+  width: 48px;
+  height: 48px;
+  background: var(--wn-primary);
+  color: #fff;
+  border: 2px solid #fff;
+  box-shadow: 0 8px 24px color-mix(in srgb, var(--wn-primary) 35%, transparent);
+}
+
+.wn-theme-saffron .wn-modern-footer {
+  border-top: 2px solid color-mix(in srgb, var(--wn-primary) 18%, transparent);
+}
+
+.wn-theme-saffron .wn-dish-modal .wn-price-item {
+  color: var(--wn-primary) !important;
+  font-family: var(--wn-font-heading);
+  font-size: 1.5rem;
+}
+
+@media (min-width: 768px) {
+  .wn-theme-saffron .wn-menu-main {
+    max-width: 440px;
+    margin: 0 auto;
+  }
+}

@@ -1,5 +1,7 @@
 @php
     $theme = $company->resolvedThemeSettings();
+    $heroVars = $company->heroCssVars();
+    $headerTone = $company->headerToneIsDark() ? 'dark' : 'light';
 @endphp
 @include('themes.partials.theme-fonts')
 <style>
@@ -15,6 +17,14 @@
     --wn-header-height: 52px;
     --wn-nav-height: 52px;
     --wn-scroll-offset: calc(var(--wn-header-height) + var(--wn-nav-height) + 8px);
+    --wn-header-tone: {{ $headerTone }};
+    --wn-hero-overlay-strength: {{ $heroVars['--wn-hero-overlay-strength'] ?? '0.72' }};
+    --wn-hero-overlay-mode: {{ $heroVars['--wn-hero-overlay-mode'] ?? 'dark' }};
+    --wn-hero-text-tone: {{ $heroVars['--wn-hero-text-tone'] ?? 'light' }};
+    --wn-hero-focal-x: {{ $heroVars['--wn-hero-focal-x'] ?? '50%' }};
+    --wn-hero-focal-y: {{ $heroVars['--wn-hero-focal-y'] ?? '40%' }};
+    --wn-card-radius: 16px;
+    --wn-card-shadow: 0 4px 20px rgba(15, 23, 42, 0.08);
 }
 
 html {

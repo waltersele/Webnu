@@ -42,11 +42,15 @@ class SwapCourseForMenuSectionIdOnMenuItems extends Migration
             // Ignora si ya existe.
         }
 
-        // Elimina el índice compuesto si existe.
-        try {
-            DB::statement('DROP INDEX menu_items_menu_id_course_position_index ON menu_items');
-        } catch (\Throwable $e) {
-            // Ignora si no existe o no se puede eliminar en este estado.
+        // Elimina el índice compuesto si existe (SQLite usa sintaxis distinta a MySQL).
+        if (DB::getDriverName() === 'sqlite') {
+            DB::statement('DROP INDEX IF EXISTS menu_items_menu_id_course_position_index');
+        } else {
+            try {
+                DB::statement('DROP INDEX menu_items_menu_id_course_position_index ON menu_items');
+            } catch (\Throwable $e) {
+                // Ignora si no existe o no se puede eliminar en este estado.
+            }
         }
 
         // Elimina course si existe.
@@ -81,10 +85,14 @@ class SwapCourseForMenuSectionIdOnMenuItems extends Migration
         } catch (\Throwable $e) {
             // Ignora si no existe.
         }
-        try {
-            DB::statement('DROP INDEX menu_items_menu_section_id_position_index ON menu_items');
-        } catch (\Throwable $e) {
-            // Ignora si no existe.
+        if (DB::getDriverName() === 'sqlite') {
+            DB::statement('DROP INDEX IF EXISTS menu_items_menu_section_id_position_index');
+        } else {
+            try {
+                DB::statement('DROP INDEX menu_items_menu_section_id_position_index ON menu_items');
+            } catch (\Throwable $e) {
+                // Ignora si no existe.
+            }
         }
 
         if (Schema::hasColumn('menu_items', 'menu_section_id')) {

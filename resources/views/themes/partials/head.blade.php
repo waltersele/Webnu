@@ -16,6 +16,8 @@
 
     <link rel="stylesheet" type="text/css" href="{{ asset('css/themes/front-modern.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ asset('css/themes/front-menu-ui.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ asset('css/themes/front-menu-hero.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ asset('css/themes/front-theme-icons.css') }}">
     <link rel="stylesheet" type="text/css" href="{{asset('css/themes/front-'.$company->template.'.css')}}">
     <link rel="stylesheet" type="text/css" href="{{ asset('css/themes/product-media.css') }}">
 
@@ -26,8 +28,6 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
-
-    <link rel="stylesheet" href="https://pro.fontawesome.com/releases/v5.10.0/css/all.css" integrity="sha384-AYmEC3Yw5cVb3ZcuHtOA93w35dYTsvhLPVnYs9eStHfGJvOvKxVfELGroGkvsg+p" crossorigin="anonymous"/>
 
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
     @include('themes.partials.theme-modal-overrides')

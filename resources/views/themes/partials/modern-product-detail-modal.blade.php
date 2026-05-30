@@ -8,7 +8,7 @@
     <div class="modal-dialog modal-dialog-centered" role="document">
         <div class="modal-content wn-dish-modal__content">
             <button type="button" class="wn-dish-modal__close" data-dismiss="modal" aria-label="Cerrar">
-                <i class="fas fa-times"></i>
+                @include('themes.partials.icons.svg-times')
             </button>
             @if(!empty($favoritesEnabled))
                 <button type="button"
@@ -17,7 +17,7 @@
                         data-product-id="{{ $product->id }}"
                         aria-pressed="false"
                         aria-label="{{ config('menu_locales.ui.' . ($menuLocale ?? 'es') . '.favorites_add', 'Añadir a favoritos') }}">
-                    <i class="far fa-heart" aria-hidden="true"></i>
+                    @include('themes.partials.icons.svg-heart')
                 </button>
             @endif
 

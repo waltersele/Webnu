@@ -24,6 +24,13 @@ trait BuildsCompanyStudioPayload
 
         $hasMenuProducts = $company->sections()->whereHas('products')->exists();
 
+        $heroRatios = [];
+        $templateHero = config('company_templates.template_hero', []);
+        $heroPresets = config('company_templates.hero_presets', []);
+        foreach ($templateHero as $templateKey => $presetKey) {
+            $heroRatios[$templateKey] = $heroPresets[$presetKey]['ratio'] ?? '16:9';
+        }
+
         return [
             'templates'          => $templates,
             'templateAccess'     => $plans->templateAccessForUser($user),
@@ -33,8 +40,11 @@ trait BuildsCompanyStudioPayload
             'themeSettings'      => $company->resolvedThemeSettings(),
             'themePresets'       => config('company_templates.presets', []),
             'templateLabels'     => $templateLabels,
+            'heroRatios'         => $heroRatios,
+            'headerCropUrl'      => route('admin.companies.updateheadercrop', $company),
             'previewUrl'         => $company->publicUrl(['studio_preview' => 1]),
-            'previewUsesSamples' => ! $hasMenuProducts,
+            'previewUsesSamples'   => ! $hasMenuProducts,
+            'headerCrop'         => $company->header_crop,
         ];
     }
 }

@@ -88,6 +88,10 @@
                     icon.classList.toggle('fa-heart', true);
                     icon.classList.toggle('fas', on);
                 }
+                var svgHeart = btn.querySelector('.wn-svg-heart');
+                if (svgHeart) {
+                    svgHeart.classList.toggle('is-filled', on);
+                }
             });
         }
 

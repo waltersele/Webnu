@@ -3,6 +3,9 @@
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', 'PagesController@index')->name('home');
+Route::get('/up', function () {
+    return response('ok', 200, ['Content-Type' => 'text/plain']);
+});
 Route::get('/landing-preview', 'PagesController@landingPreview')->name('landing.preview');
 Route::view('/welcome', 'welcome')->name('welcome');
 Route::post('/pay_product', 'PaymentController@pay_product')->name('pay_product');
@@ -190,6 +193,7 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['aut
     Route::post('companies/{company}/logo', 'CompaniesController@storelogo')->name('admin.companies.storelogo');
     Route::delete('companies/{company}/deletelogo', 'CompaniesController@deletelogo')->name('admin.companies.deletelogo');
     Route::post('companies/{company}/header', 'CompaniesController@storeheader')->name('admin.companies.storeheader');
+    Route::patch('companies/{company}/header-crop', 'CompaniesController@updateHeaderCrop')->name('admin.companies.updateheadercrop');
     Route::delete('companies/{company}/deleteheader', 'CompaniesController@deleteheader')->name('admin.companies.deleteheader');
     Route::post('companies/changecompany', 'CompaniesController@changecompany')->name('admin.companies.changecompany');
 

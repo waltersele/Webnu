@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Company extends Model
 {
-    protected $fillable = ['name', 'chef_name', 'slug', 'public_url_format', 'public_slug_locked_at', 'logo', 'logo_luminance', 'logo_has_solid_bg', 'logo_dominant_hex', 'logo_chip_variant', 'background_header', 'address', 'postal_code', 'city', 'province', 'country', 'phone', 'mobile_phone', 'email', 'web', 'whatsapp', 'facebook', 'instagram', 'comments', 'schedule', 'template', 'theme_settings', 'menu_type', 'menu_type_2_pdf', 'combine_menus', 'menu_favorites_enabled', 'enabled', 'reservation', 'user_id', 'sales_rep_user_id', 'sales_converted_at', 'default_locale', 'enabled_locales', 'suggest_translation_upgrade', 'daily_spotlight', 'daily_spotlight_price', 'daily_highlights', 'created_at', 'updated_at'];
+    protected $fillable = ['name', 'chef_name', 'slug', 'public_url_format', 'public_slug_locked_at', 'logo', 'logo_luminance', 'logo_has_solid_bg', 'logo_dominant_hex', 'logo_chip_variant', 'background_header', 'header_luminance', 'header_overlay_mode', 'header_overlay_strength', 'header_dominant_hex', 'header_crop', 'address', 'postal_code', 'city', 'province', 'country', 'phone', 'mobile_phone', 'email', 'web', 'whatsapp', 'facebook', 'instagram', 'comments', 'schedule', 'template', 'theme_settings', 'menu_type', 'menu_type_2_pdf', 'combine_menus', 'menu_favorites_enabled', 'enabled', 'reservation', 'user_id', 'sales_rep_user_id', 'sales_converted_at', 'default_locale', 'enabled_locales', 'suggest_translation_upgrade', 'daily_spotlight', 'daily_spotlight_price', 'daily_highlights', 'created_at', 'updated_at'];
 
     protected $attributes = [
         'reservation' => false,
@@ -29,7 +29,109 @@ class Company extends Model
         'public_slug_locked_at' => 'datetime',
         'logo_luminance' => 'float',
         'logo_has_solid_bg' => 'boolean',
+        'header_luminance' => 'float',
+        'header_overlay_strength' => 'float',
+        'header_crop' => 'array',
     ];
+
+    /**
+     * Hero preset locked for the active template.
+     *
+     * @return array<string, mixed>
+     */
+    public function heroConfig(): array
+    {
+        $template = $this->template ?: 'basic';
+        $map = config('company_templates.template_hero', []);
+        $presets = config('company_templates.hero_presets', []);
+        $key = $map[$template] ?? 'compact_card';
+        $preset = $presets[$key] ?? $presets['compact_card'] ?? [];
+
+        return array_merge($preset, ['template_key' => $key]);
+    }
+
+    /**
+     * @return array{x:float,y:float,w:float,h:float}|null
+     */
+    public function resolvedHeaderCrop(): ?array
+    {
+        $crop = $this->header_crop;
+        if (! is_array($crop) || ! isset($crop['w'], $crop['h'])) {
+            return null;
+        }
+
+        return [
+            'x' => max(0.0, min(1.0, (float) ($crop['x'] ?? 0))),
+            'y' => max(0.0, min(1.0, (float) ($crop['y'] ?? 0))),
+            'w' => max(0.05, min(1.0, (float) $crop['w'])),
+            'h' => max(0.05, min(1.0, (float) $crop['h'])),
+        ];
+    }
+
+    /**
+     * @return array{x:string,y:string}
+     */
+    public function headerFocalPoint(): array
+    {
+        $crop = $this->resolvedHeaderCrop();
+        if ($crop === null) {
+            return ['x' => '50%', 'y' => '40%'];
+        }
+
+        $fx = ($crop['x'] + ($crop['w'] / 2)) * 100;
+        $fy = ($crop['y'] + ($crop['h'] / 2)) * 100;
+
+        return [
+            'x' => round($fx, 1) . '%',
+            'y' => round($fy, 1) . '%',
+        ];
+    }
+
+    /**
+     * CSS custom properties for hero overlay and typography tone.
+     *
+     * @return array<string, string>
+     */
+    public function heroCssVars(): array
+    {
+        $focal = $this->headerFocalPoint();
+        $strength = $this->header_overlay_strength ?? 0.72;
+        $mode = $this->header_overlay_mode ?: 'dark';
+        $textTone = $mode === 'light' ? 'dark' : 'light';
+
+        if ($this->header_luminance !== null) {
+            if ($this->header_luminance >= 0.58) {
+                $textTone = 'light';
+            } elseif ($this->header_luminance <= 0.42) {
+                $textTone = 'dark';
+            }
+        }
+
+        return [
+            '--wn-hero-overlay-strength' => (string) max(0.45, min(0.92, (float) $strength)),
+            '--wn-hero-overlay-mode' => $mode,
+            '--wn-hero-text-tone' => $textTone,
+            '--wn-hero-focal-x' => $focal['x'],
+            '--wn-hero-focal-y' => $focal['y'],
+        ];
+    }
+
+    public function headerToneIsDark(): bool
+    {
+        $theme = $this->resolvedThemeSettings();
+        $bg = $theme['background'] ?? '#ffffff';
+        $hex = ltrim($bg, '#');
+        if (strlen($hex) !== 6) {
+            return false;
+        }
+
+        $r = hexdec(substr($hex, 0, 2));
+        $g = hexdec(substr($hex, 2, 2));
+        $b = hexdec(substr($hex, 4, 2));
+        $lum = (0.2126 * $r + 0.7152 * $g + 0.0722 * $b) / 255;
+
+        return $lum < 0.45;
+    }
 
     public function themeColor(string $key): string
     {

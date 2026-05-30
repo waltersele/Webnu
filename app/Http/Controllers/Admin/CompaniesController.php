@@ -11,6 +11,7 @@ use App\Services\CompanyThemeService;
 use App\Services\PublicPathRegistry;
 use App\Services\PublicUrlRedirectService;
 use App\Services\LogoColorAnalyzer;
+use App\Services\BannerImageAnalyzer;
 use App\Services\UserPlanService;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
@@ -274,7 +275,7 @@ class CompaniesController extends Controller
         return response()->json(['success' => true]);
     }
 
-    public function storeheader(Company $company)
+    public function storeheader(Company $company, BannerImageAnalyzer $bannerImageAnalyzer)
     {
         $this->authorize('update', $company);
 
@@ -282,15 +283,69 @@ class CompaniesController extends Controller
 
         $old = $company->background_header;
         $company->background_header = $file->store('negocios');
+        $company->header_crop = null;
+
+        $absolutePath = public_path('img/' . $company->background_header);
+        $analysis = $bannerImageAnalyzer->analyze($absolutePath);
+        $company->header_luminance = $analysis['luminance'];
+        $company->header_overlay_mode = $analysis['overlay_mode'];
+        $company->header_overlay_strength = $analysis['overlay_strength'];
+        $company->header_dominant_hex = $analysis['dominant_hex'];
+
         $company->save();
 
         if ($old && $old !== $company->background_header) {
             Storage::delete($old);
         }
 
+        $hero = $company->heroConfig();
+
         return response()->json([
             'success' => true,
             'url' => '/img/' . $company->background_header,
+            'overlay_mode' => $company->header_overlay_mode,
+            'overlay_strength' => $company->header_overlay_strength,
+            'hero_ratio' => $hero['ratio'] ?? '16:9',
+        ]);
+    }
+
+    public function updateHeaderCrop(Company $company, Request $request, BannerImageAnalyzer $bannerImageAnalyzer)
+    {
+        $this->authorize('update', $company);
+
+        if (! $company->background_header) {
+            return response()->json(['success' => false, 'message' => 'No hay imagen de cabecera.'], 422);
+        }
+
+        $data = $request->validate([
+            'x' => 'required|numeric|min:0|max:1',
+            'y' => 'required|numeric|min:0|max:1',
+            'w' => 'required|numeric|min:0.05|max:1',
+            'h' => 'required|numeric|min:0.05|max:1',
+        ]);
+
+        $crop = [
+            'x' => (float) $data['x'],
+            'y' => (float) $data['y'],
+            'w' => (float) $data['w'],
+            'h' => (float) $data['h'],
+        ];
+
+        $company->header_crop = $crop;
+
+        $absolutePath = public_path('img/' . $company->background_header);
+        $analysis = $bannerImageAnalyzer->analyze($absolutePath, $crop);
+        $company->header_luminance = $analysis['luminance'];
+        $company->header_overlay_mode = $analysis['overlay_mode'];
+        $company->header_overlay_strength = $analysis['overlay_strength'];
+        $company->header_dominant_hex = $analysis['dominant_hex'];
+        $company->save();
+
+        return response()->json([
+            'success' => true,
+            'crop' => $crop,
+            'overlay_mode' => $company->header_overlay_mode,
+            'overlay_strength' => $company->header_overlay_strength,
         ]);
     }
 
@@ -301,6 +356,11 @@ class CompaniesController extends Controller
         if ($company->background_header) {
             Storage::delete($company->background_header);
             $company->background_header = null;
+            $company->header_luminance = null;
+            $company->header_overlay_mode = null;
+            $company->header_overlay_strength = null;
+            $company->header_dominant_hex = null;
+            $company->header_crop = null;
             $company->save();
         }
 

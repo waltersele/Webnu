@@ -3,7 +3,6 @@
 @include('themes.partials.modern-menu-layout', [
     'variant' => 'fastfood',
     'cardLayout' => 'stacked',
-    'heroMode' => 'dark',
 ])
 
 @include('themes.partials.modern-scripts')

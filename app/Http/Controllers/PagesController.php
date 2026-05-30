@@ -150,6 +150,10 @@ class PagesController extends Controller
             $tpl = $request->get('tpl');
             if (in_array($tpl, $allowed, true)) {
                 $company->template = $tpl;
+                $templateDefaults = config('company_templates.defaults.' . $tpl, []);
+                if ($templateDefaults !== []) {
+                    $company->theme_settings = $templateDefaults;
+                }
             }
         }
 
