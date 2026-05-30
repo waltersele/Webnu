@@ -148,11 +148,25 @@ class MenuService
 
     protected function applyProductLocale($product, string $locale, string $defaultLocale)
     {
+        $originalName = (string) $product->name;
+        $defaultTranslation = $product->translations->firstWhere('locale', $defaultLocale);
+        if ($defaultTranslation && $defaultTranslation->name) {
+            $originalName = $defaultTranslation->name;
+        }
+
+        $product->setAttribute('name_original', $originalName);
+
         if ($locale === $defaultLocale) {
+            $product->name = $originalName;
+            $product->setAttribute('name_locale', $originalName);
+
             return $product;
         }
 
         $translation = $product->translations->firstWhere('locale', $locale);
+        $localeName = ($translation && $translation->name) ? $translation->name : $originalName;
+        $product->setAttribute('name_locale', $localeName);
+
         if ($translation) {
             if ($translation->name) {
                 $product->name = $translation->name;
@@ -160,6 +174,8 @@ class MenuService
             if ($translation->description !== null && $translation->description !== '') {
                 $product->description = $translation->description;
             }
+        } else {
+            $product->name = $originalName;
         }
 
         return $product;

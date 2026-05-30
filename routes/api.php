@@ -28,5 +28,6 @@ Route::prefix('signage')
             Route::get('menus', 'SignageMenuController@index');
             Route::get('menus/{slug}/version', 'SignageMenuController@version');
             Route::get('menus/{slug}', 'SignageMenuController@show');
+            Route::get('tv-templates', 'SignageTvTemplateController@index');
         });
     });

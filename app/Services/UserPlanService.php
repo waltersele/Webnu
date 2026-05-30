@@ -305,6 +305,105 @@ class UserPlanService
         return $this->tvpikMaxScreens($user) > 0;
     }
 
+    /** @return string[] */
+    public function premiumTvpikTemplateKeys(): array
+    {
+        $keys = [];
+        foreach (config('tvpik_templates.templates', []) as $key => $template) {
+            if (! empty($template['premium'])) {
+                $keys[] = (string) ($template['key'] ?? $key);
+            }
+        }
+
+        return $keys;
+    }
+
+    public function isPremiumTvpikTemplate(string $templateKey): bool
+    {
+        $template = config('tvpik_templates.templates.' . $templateKey);
+
+        return ! empty($template['premium']);
+    }
+
+    public function canUseTvpikPremiumTemplates(User $user): bool
+    {
+        if ($user->isSuperAdmin()) {
+            return true;
+        }
+
+        if (! $this->canUseTvpik($user)) {
+            return false;
+        }
+
+        return (bool) ($this->tier($user)['tvpik_premium_templates'] ?? false);
+    }
+
+    public function canUseTvpikTemplate(User $user, string $templateKey): bool
+    {
+        if (! $this->canUseTvpik($user)) {
+            return false;
+        }
+
+        if ($this->isPremiumTvpikTemplate($templateKey)) {
+            return $this->canUseTvpikPremiumTemplates($user);
+        }
+
+        return true;
+    }
+
+    public function assertCanUseTvpikTemplate(User $user, string $templateKey): void
+    {
+        if ($this->canUseTvpikTemplate($user, $templateKey)) {
+            return;
+        }
+
+        if (! $this->canUseTvpik($user)) {
+            throw ValidationException::withMessages([
+                'template_key' => 'Las pantallas TV requieren plan Plus o un add-on de pantalla en Pro.',
+            ]);
+        }
+
+        $template = config('tvpik_templates.templates.' . $templateKey);
+        $label = (string) ($template['label'] ?? $templateKey);
+        $planLabel = $this->requiredPlanLabel('tvpik_premium_templates') ?? 'Plus';
+
+        throw ValidationException::withMessages([
+            'template_key' => "La plantilla «{$label}» requiere plan {$planLabel} (plantillas TV premium).",
+        ]);
+    }
+
+    /**
+     * @return array{can_use_premium: bool, allowed_keys: string[], locked_keys: string[]}
+     */
+    public function tvpikTemplateAccessForUser(User $user): array
+    {
+        $all = array_keys(config('tvpik_templates.templates', []));
+        $premium = $this->premiumTvpikTemplateKeys();
+        $standard = array_values(array_diff($all, $premium));
+
+        if (! $this->canUseTvpik($user)) {
+            return [
+                'can_use_premium' => false,
+                'allowed_keys' => [],
+                'locked_keys' => $all,
+            ];
+        }
+
+        if ($this->canUseTvpikPremiumTemplates($user)) {
+            return [
+                'can_use_premium' => true,
+                'allowed_keys' => $all,
+                'locked_keys' => [],
+            ];
+        }
+
+        return [
+            'can_use_premium' => false,
+            'allowed_keys' => $standard,
+            'locked_keys' => $premium,
+        ];
+    }
+
     public function maxCompanies(User $user): ?int
     {
         $max = $this->tier($user)['max_companies'] ?? null;
@@ -638,6 +737,7 @@ class UserPlanService
             'chef_suggestions' => $this->canUseChefSuggestions($user),
             'translation' => $this->canUseTranslation($user),
             'tvpik' => $this->canUseTvpik($user),
+            'tvpik_premium_templates' => $this->canUseTvpikPremiumTemplates($user),
             'menu_scan' => $this->canUseMenuScan($user),
             'multi_company' => $this->maxCompanies($user) === null || $this->maxCompanies($user) > 1,
             'show_webnu_badge' => $this->shouldShowWebnuBadge($user),
@@ -684,6 +784,7 @@ class UserPlanService
             ],
             'features' => [
                 'tvpik' => $features['tvpik'],
+                'tvpik_premium_templates' => $features['tvpik_premium_templates'],
                 'videos' => $features['videos'],
                 'translation' => $features['translation'],
                 'menu_scan' => $features['menu_scan'],
@@ -702,6 +803,7 @@ class UserPlanService
             ],
             'required_plan_for' => [
                 'tvpik' => $this->requiredPlanLabel('tvpik'),
+                'tvpik_premium_templates' => $this->requiredPlanLabel('tvpik_premium_templates'),
                 'videos' => $this->requiredPlanLabel('videos'),
                 'translation' => $this->requiredPlanLabel('translation'),
                 'product_photos' => $this->requiredPlanLabel('product_photos'),
@@ -731,6 +833,7 @@ class UserPlanService
             'templates' => 'pro',
             'chef_suggestions' => 'pro',
             'tvpik' => 'plus',
+            'tvpik_premium_templates' => 'plus',
         ];
 
         $tierKey = $fallback[$feature] ?? null;

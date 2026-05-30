@@ -49,7 +49,7 @@ $(function () {
     });
 
     $('.wn-modern-card--interactive, .wn-card-overlay, .wn-card-temporada, .wn-card-catalogo').on('click', function (e) {
-        if ($(e.target).closest('a, button, .wn-allergens, .modal, .wn-card-reel__open, video').length) {
+        if ($(e.target).closest('a, button, .wn-allergens, .modal, .wn-card-reel__open, video, .wn-fav-btn').length) {
             return;
         }
         var target = $(this).find('[data-target^="#wnDish"]').first().attr('data-target');
@@ -85,4 +85,7 @@ $(function () {
     }
 });
 </script>
+@if(!empty($favoritesEnabled))
+<script src="{{ asset('js/webnu-menu-favorites.js') }}" defer></script>
+@endif
 <script src="{{ asset('js/webnu-logo-autocontrast.js') }}" defer></script>

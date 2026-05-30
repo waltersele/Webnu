@@ -14,13 +14,13 @@ TVPik **no implementa Stripe ni precios**. Solo consulta permisos vía API y blo
 
 ## Planes y feature TVPik
 
-| Plan | `tvpik_max_screens` | Notas |
-|------|---------------------|--------|
-| `free` | `0` | Sin hub TV |
-| `pro` | `0` + `users.tvpik_extra_screens` | Add-on Stripe: 1 pantalla (5 €) o pack 5 (20 €) |
-| `plus` | `1` incluida + extras | Pantallas adicionales vía add-on |
-| `franchise` | Ilimitado (`null`) | Asignación manual |
-| Superadmin | Ilimitado | Bypass |
+| Plan | `tvpik_max_screens` | Plantillas TV | Notas |
+|------|---------------------|---------------|--------|
+| `free` | `0` | — | Sin hub TV |
+| `pro` | `0` + `users.tvpik_extra_screens` | **7 estándar** | Add-on Stripe: 1 pantalla (5 €) o pack 5 (20 €) |
+| `plus` | `1` incluida + extras | **13** (7 + 6 premium) | Pantallas adicionales vía add-on |
+| `franchise` | Ilimitado (`null`) | Todas | Asignación manual |
+| Superadmin | Ilimitado | Todas | Bypass |
 
 `GET /api/signage/account` devuelve `limits.tvpik_max_screens` desde [`UserPlanService::signageEntitlements()`](../app/Services/UserPlanService.php).
 
@@ -110,6 +110,7 @@ Implementado en [`UserPlanService::signageEntitlements()`](../app/Services/UserP
 | `plan.trial_expired` | bool | Trial caducado sin suscripción |
 | `plan.trial_ends_at` | string\|null | ISO8601 |
 | `features.tvpik` | bool | **Clave para TVPik** — si `false`, no publicar pantallas |
+| `features.tvpik_premium_templates` | bool | Plantillas TV premium (Cinema, Marquee, etc.); requiere **Plus** o Franquicias |
 | `features.videos` | bool | Vídeos en platos (carta Webnu) |
 | `features.translation` | bool | Carta multilingüe |
 | `features.menu_scan` | bool | Escaneo IA disponible (con cupo) |
@@ -194,9 +195,10 @@ sequenceDiagram
 
 1. **Tras login o guardar token Webnu:** llamar `GET /api/signage/account` y guardar en sesión/cache (TTL 5–15 min).
 2. **Antes de publicar o vincular pantalla:** si `features.tvpik !== true` → mostrar CTA con `billing.upgrade_url` y `required_plan_for.tvpik`.
-3. **Límite de pantallas:** si `limits.tvpik_max_screens` es número, contar pantallas vinculadas del usuario; si `null`, sin tope.
-4. **No duplicar precios** en UI de TVPik; texto tipo: “Facturación gestionada en Webnu”.
-5. **Refresh:** al abrir integración Webnu o error 403, refrescar `account`.
+3. **Antes de publicar plantilla premium:** si `template.premium && features.tvpik_premium_templates !== true` → CTA upgrade (`required_plan_for.tvpik_premium_templates`, normalmente «Plus»). Vista previa puede seguir permitida.
+4. **Límite de pantallas:** si `limits.tvpik_max_screens` es número, contar pantallas vinculadas del usuario; si `null`, sin tope.
+5. **No duplicar precios** en UI de TVPik; texto tipo: “Facturación gestionada en Webnu”.
+6. **Refresh:** al abrir integración Webnu o error 403, refrescar `account`.
 
 ## Comportamiento en Webnu (panel)
 

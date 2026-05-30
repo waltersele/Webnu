@@ -116,6 +116,15 @@ class CompaniesController extends Controller
                 ->with('flash', 'Diseño actualizado correctamente');
         }
 
+        if ($step === 'favorites') {
+            $company->menu_favorites_enabled = $request->boolean('menu_favorites_enabled');
+            $company->save();
+
+            return redirect()
+                ->to(route('admin.sections.index') . '#tab-personalizacion')
+                ->with('flash', 'Lista de favoritos actualizada.');
+        }
+
         $this->validate($request, [
             'name' => 'required',
             'slug' => 'nullable|string|max:64',

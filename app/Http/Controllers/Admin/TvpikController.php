@@ -166,6 +166,8 @@ class TvpikController extends Controller
                 $validated['gallery_id'] ?? null,
                 $menuId
             );
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return back()->withErrors($e->errors());
         } catch (\Throwable $e) {
             return back()->withErrors(['publish' => $e->getMessage()]);
         }

@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 180" role="img" aria-label="Vista previa Firma del chef">
+  <rect width="320" height="180" fill="#0a0e14"/>
+  <rect x="16" y="24" width="170" height="132" rx="10" fill="#2a3040"/>
+  <rect x="200" y="40" width="90" height="14" rx="4" fill="#004ac6"/>
+  <text x="208" y="50" fill="#fff" font-size="6" font-weight="700">SUGERENCIA</text>
+  <text x="200" y="78" fill="#fff" font-family="system-ui,sans-serif" font-size="13" font-weight="700">Rabo de toro</text>
+  <text x="200" y="96" fill="#ccc" font-size="7">Estofado 12 horas</text>
+  <text x="200" y="140" fill="#7eb8ff" font-size="12" font-weight="700">26,00 ¬</text>
+</svg>

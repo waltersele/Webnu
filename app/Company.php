@@ -8,11 +8,12 @@ use Illuminate\Database\Eloquent\Model;
 
 class Company extends Model
 {
-    protected $fillable = ['name', 'chef_name', 'slug', 'public_url_format', 'public_slug_locked_at', 'logo', 'logo_luminance', 'logo_has_solid_bg', 'logo_dominant_hex', 'logo_chip_variant', 'background_header', 'address', 'postal_code', 'city', 'province', 'country', 'phone', 'mobile_phone', 'email', 'web', 'whatsapp', 'facebook', 'instagram', 'comments', 'schedule', 'template', 'theme_settings', 'menu_type', 'menu_type_2_pdf', 'combine_menus', 'enabled', 'reservation', 'user_id', 'sales_rep_user_id', 'sales_converted_at', 'default_locale', 'enabled_locales', 'suggest_translation_upgrade', 'daily_spotlight', 'daily_spotlight_price', 'daily_highlights', 'created_at', 'updated_at'];
+    protected $fillable = ['name', 'chef_name', 'slug', 'public_url_format', 'public_slug_locked_at', 'logo', 'logo_luminance', 'logo_has_solid_bg', 'logo_dominant_hex', 'logo_chip_variant', 'background_header', 'address', 'postal_code', 'city', 'province', 'country', 'phone', 'mobile_phone', 'email', 'web', 'whatsapp', 'facebook', 'instagram', 'comments', 'schedule', 'template', 'theme_settings', 'menu_type', 'menu_type_2_pdf', 'combine_menus', 'menu_favorites_enabled', 'enabled', 'reservation', 'user_id', 'sales_rep_user_id', 'sales_converted_at', 'default_locale', 'enabled_locales', 'suggest_translation_upgrade', 'daily_spotlight', 'daily_spotlight_price', 'daily_highlights', 'created_at', 'updated_at'];
 
     protected $attributes = [
         'reservation' => false,
         'default_locale' => 'es',
+        'menu_favorites_enabled' => true,
     ];
 
     protected $casts = [
@@ -21,6 +22,7 @@ class Company extends Model
         'daily_highlights' => 'array',
         'enabled' => 'boolean',
         'combine_menus' => 'boolean',
+        'menu_favorites_enabled' => 'boolean',
         'reservation' => 'boolean',
         'suggest_translation_upgrade' => 'boolean',
         'sales_converted_at' => 'datetime',
@@ -231,6 +233,11 @@ class Company extends Model
             $this->public_slug_locked_at = now();
             $this->save();
         }
+    }
+
+    public function menuFavoritesEnabled(): bool
+    {
+        return (bool) ($this->menu_favorites_enabled ?? true);
     }
 
     /**

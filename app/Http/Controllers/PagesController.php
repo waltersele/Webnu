@@ -166,7 +166,21 @@ class PagesController extends Controller
                 ? app(UserPlanService::class)->shouldShowWebnuBadge($company->user)
                 : false;
 
-            return view($viewName, compact('company', 'sections', 'menuLocale', 'menuLocaleService', 'dailyHighlights', 'showWebnuBadge'));
+            $favoritesEnabled = $company->menuFavoritesEnabled();
+            $favoritesCatalog = $favoritesEnabled
+                ? app(\App\Services\MenuFavoritesCatalog::class)->build($company, $sections, $menuLocale)
+                : null;
+
+            return view($viewName, compact(
+                'company',
+                'sections',
+                'menuLocale',
+                'menuLocaleService',
+                'dailyHighlights',
+                'showWebnuBadge',
+                'favoritesEnabled',
+                'favoritesCatalog'
+            ));
         }
 
         if ($company->menu_type != 2 || empty($company->menu_type_2_pdf)) {

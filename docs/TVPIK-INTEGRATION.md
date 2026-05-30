@@ -6,12 +6,41 @@ Webnu es la **fuente de verdad** de la carta (secciones, platos, especial del d�
 
 **Facturación:** Webnu cobra todos los planes (incluido TVPik). TVPik solo consulta permisos — ver **[PLATFORM-BILLING-TVPIK.md](PLATFORM-BILLING-TVPIK.md)**.
 
+## Dos flujos de conexión (coexisten)
+
+| Dirección | Quién inicia | Rutas | Uso |
+|-----------|--------------|-------|-----|
+| **Webnu → TVPik** | Panel Webnu | `POST /admin/tvpik/connect`, `TVPIK_API_URL` | Pegar token TVPik, publicar pantallas desde `/admin/tvpik` |
+| **TVPik → Webnu** | Workspace TVPik | `GET/POST /integrations/tvpik/connect` | OAuth: login Webnu y devolver `code` (= `api_token`) al callback de TVPik |
+
+El flujo OAuth **no sustituye** el hub en Webnu; solo permite conectar desde la app TVPik.
+
 ## Flujo del restaurante (hub en Webnu)
 
 1. Plan **Ilimitado** → menú **TV / TVPik** en el panel.
 2. **Conectar TVPik** — pegar token de la app TVPik (Integraciones → Webnu).
 3. En **Mis pantallas**, por cada TV: elegir carta, plantilla TV y **Publicar**.
 4. Editar platos en **Mi carta** → republicación automática en pantallas vinculadas (cola de jobs).
+
+## OAuth outbound (TVPik → Webnu)
+
+TVPik redirige al usuario a:
+
+```
+GET {WEBNU_BASE}/integrations/tvpik/connect?state=...&redirect_uri={TVPIK_CALLBACK}
+```
+
+1. Si ya hay sesión Webnu → redirect inmediato al `redirect_uri` con `code` y `state`.
+2. Si no → formulario email/contraseña (`POST /integrations/tvpik/connect`).
+3. `code` = `users.api_token` (mismo token que `POST /api/signage/login`).
+4. TVPik callback: `GET /api/v1/integrations/webnu/callback?code=...&state=...` → `GET /api/signage/account` con Bearer.
+
+Controlador: [`app/Http/Controllers/Integrations/TvpikConnectController.php`](../app/Http/Controllers/Integrations/TvpikConnectController.php).  
+Paquete de referencia: `c:\Users\Walter\tvpik\integrations\webnu-laravel\`.
+
+**Usuarios solo Google:** sin contraseña local no pueden usar el formulario OAuth; si ya tienen sesión abierta en Webnu, `GET` autoriza sin formulario.
+
+**Allowlist** (`TVPIK_ALLOWED_REDIRECT_URIS`, URIs exactas, separadas por coma). En `local` sin lista configurada se aceptan URIs que contengan `/integrations/webnu/callback`.
 
 ## URLs de reproducción (TV)
 
@@ -50,11 +79,14 @@ El menú incluye `sections`, `daily_spotlight`, `highlights`, `tv_urls` y `sync_
 
 ```env
 DIGITAL_SIGNAGE_APP_KEY=clave_compartida
+TVPIK_ALLOWED_REDIRECT_URIS=http://127.0.0.1:8001/api/v1/integrations/webnu/callback,http://localhost:8001/api/v1/integrations/webnu/callback
 TVPIK_API_URL=https://api.tvpik.es
 TVPIK_APP_KEY=clave_compartida
 TVPIK_WEB_URL=https://tvpik.es
 TVPIK_STUB_SCREENS=false
 ```
+
+`DIGITAL_SIGNAGE_APP_KEY` debe coincidir con `WEBNU_DIGITAL_SIGNAGE_APP_KEY` (o `WEBNU_APP_KEY`) en `tvpik-api`.
 
 Si `TVPIK_API_URL` está vacía, el panel muestra pantallas de demostración y guarda URLs localmente (útil en desarrollo).
 
@@ -117,27 +149,68 @@ php artisan queue:work   # si usas cola para auto-sync
 
 ## Desarrollo local
 
+**Webnu** (puerto 8000):
+
 ```bash
-# Pantallas demo sin API TVPik
+.\run-local.ps1
+# o: php artisan serve --host=127.0.0.1 --port=8000
+```
+
+**TVPik API** (puerto 8001, reiniciar tras cambiar env):
+
+```env
+WEBNU_BASE_URL=http://127.0.0.1:8000
+WEBNU_REDIRECT_URI=http://127.0.0.1:8001/api/v1/integrations/webnu/callback
+WEBNU_DIGITAL_SIGNAGE_APP_KEY=dev-signage-key-compartida
+```
+
+**Webnu `.env`:**
+
+```env
+DIGITAL_SIGNAGE_APP_KEY=dev-signage-key-compartida
+TVPIK_ALLOWED_REDIRECT_URIS=http://127.0.0.1:8001/api/v1/integrations/webnu/callback,http://localhost:8001/api/v1/integrations/webnu/callback
+TVPIK_API_URL=http://127.0.0.1:8001
+```
+
+Comprobar OAuth:
+
+```text
+GET http://127.0.0.1:8000/integrations/tvpik/connect?state=test&redirect_uri=http%3A%2F%2F127.0.0.1%3A8001%2Fapi%2Fv1%2Fintegrations%2Fwebnu%2Fcallback
+→ 200 (formulario), no 404
+```
+
+```bash
+# Pantallas demo sin API TVPik (solo hub Webnu)
 TVPIK_STUB_SCREENS=true
 
-php artisan serve
 # Vista TV: http://127.0.0.1:8000/tv/demo/spotlight?preview=1
 ```
 
 ## Plantillas TV (vistas Blade)
 
-| Clave | Vista | Carpeta |
-|-------|-------|---------|
-| `menu` | `tv.templates.menu` | `resources/views/tv/templates/menu.blade.php` |
-| `spotlight` | `tv.templates.spotlight` | `resources/views/tv/templates/spotlight.blade.php` |
-| `featured` | `tv.templates.featured` | `resources/views/tv/templates/featured.blade.php` |
-| `video` | `tv.templates.video` | `resources/views/tv/templates/video.blade.php` |
+| Clave | Vista | Tipo |
+|-------|-------|------|
+| `menu` | `tv.templates.menu` | Estándar |
+| `spotlight` | `tv.templates.spotlight` | Estándar |
+| `featured` | `tv.templates.featured` | Estándar |
+| `video` | `tv.templates.video` | Estándar |
+| `daily` | `tv.templates.daily` | Estándar |
+| `hero` | `tv.templates.hero` | Estándar |
+| `tapas` | `tv.templates.tapas` | Estándar |
+| `cinema` | `tv.templates.cinema` | **Premium** |
+| `sommelier` | `tv.templates.sommelier` | **Premium** |
+| `degustacion` | `tv.templates.degustacion` | **Premium** |
+| `signature` | `tv.templates.signature` | **Premium** |
+| `lounge` | `tv.templates.lounge` | **Premium** |
+| `marquee` | `tv.templates.marquee` | **Premium** |
+
+Detalle de las premium: [`docs/TV-TEMPLATES-PREMIUM-PROPOSAL.md`](TV-TEMPLATES-PREMIUM-PROPOSAL.md).
 
 Estilos: `public/css/webnu-tv.css` · Scripts: `public/js/webnu-tv.js` · Registro: `App\Services\Tv\TvTemplateRegistry`.
 
 ## Referencias en código
 
+- [`app/Http/Controllers/Integrations/TvpikConnectController.php`](../app/Http/Controllers/Integrations/TvpikConnectController.php) — OAuth TVPik → Webnu
 - [`app/Http/Controllers/TvMenuController.php`](../app/Http/Controllers/TvMenuController.php)
 - [`app/Services/Tv/TvTemplateRegistry.php`](../app/Services/Tv/TvTemplateRegistry.php)
 - [`app/Http/Controllers/Admin/TvpikController.php`](../app/Http/Controllers/Admin/TvpikController.php)

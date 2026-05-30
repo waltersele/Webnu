@@ -22,6 +22,13 @@ Route::get('pre-alta/media/{id}', 'PreAltaPreviewController@media')->name('pre-a
 Route::get('activar/{token}', 'PreAltaClaimController@show')->name('pre-alta.claim.show')->where('token', '[a-fA-F0-9]{64}');
 Route::post('activar/{token}', 'PreAltaClaimController@store')->name('pre-alta.claim.store')->where('token', '[a-fA-F0-9]{64}');
 
+// OAuth outbound TVPik → Webnu (workspace TVPik inicia la conexión)
+Route::get('integrations/tvpik/connect', 'Integrations\TvpikConnectController@show')
+    ->name('integrations.tvpik.connect');
+Route::post('integrations/tvpik/connect', 'Integrations\TvpikConnectController@login')
+    ->middleware('throttle:10,1')
+    ->name('integrations.tvpik.login');
+
 // Menú en carta con URL simple: /carta/{company}/menu/{menu}
 Route::get('carta/{companySlug}/menu/{menuSlug}', function ($companySlug, $menuSlug) {
     $qs = request()->getQueryString();

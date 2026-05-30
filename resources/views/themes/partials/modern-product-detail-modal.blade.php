@@ -10,6 +10,16 @@
             <button type="button" class="wn-dish-modal__close" data-dismiss="modal" aria-label="Cerrar">
                 <i class="fas fa-times"></i>
             </button>
+            @if(!empty($favoritesEnabled))
+                <button type="button"
+                        class="wn-fav-btn wn-fav-btn--modal"
+                        data-fav-toggle
+                        data-product-id="{{ $product->id }}"
+                        aria-pressed="false"
+                        aria-label="{{ config('menu_locales.ui.' . ($menuLocale ?? 'es') . '.favorites_add', 'Añadir a favoritos') }}">
+                    <i class="far fa-heart" aria-hidden="true"></i>
+                </button>
+            @endif
 
             @if($hasMedia)
                 <div class="wn-dish-modal__hero">

@@ -332,18 +332,92 @@ Menú completo para render propio en TVPik o para inspección en el workspace.
 
 [`MenuSyncService::syncVersion()`](../app/Services/MenuSyncService.php): ISO8601 del máximo entre `companies.updated_at`, última sección y último producto del negocio. Cualquier cambio de plato, precio, especial del día o sección invalida la versión.
 
+### 4.8 `GET /tv-templates`
+
+Catálogo de plantillas TV con metadatos para el selector del workspace TVPik. **Fuente de verdad:** [`config/tvpik_templates.php`](../config/tvpik_templates.php).
+
+**Auth:** mismo Bearer + `X-Digital-Signage-Key` que el resto de `/api/signage`.
+
+**Respuesta 200:**
+
+```json
+{
+  "api_version": "1.0",
+  "default_key": "menu",
+  "categories": [
+    { "key": "restaurant", "label": "Restauración" },
+    { "key": "retail", "label": "Comercio" }
+  ],
+  "templates": [
+    {
+      "key": "menu",
+      "label": "Carta completa",
+      "description": "Secciones y platos con precios…",
+      "duration_hint": "Rotación automática de secciones",
+      "layout": "menu",
+      "thumbnail_url": "https://webnu.es/img/tvpik/previews/menu.svg",
+      "category": "restaurant",
+      "locked": false
+    }
+  ]
+}
+```
+
+| Campo | Descripción |
+|-------|-------------|
+| `categories[]` | Categorías **distintas** usadas por al menos una plantilla del catálogo. Etiqueta desde `tvpik_templates.categories.{key}.label`; si falta, se humaniza la clave. |
+| `templates[].category` | Motivo/sector opcional (`restaurant`, `retail`, `events`, …). |
+| `templates[].locked` | `true` si la cuenta no tiene plan TVPik (`UserPlanService::canUseTvpik`). |
+| `thumbnail_url` | URL absoluta del SVG de preview en WebNU. |
+
+**Implementación:** [`SignageTvTemplateController`](../app/Http/Controllers/Api/SignageTvTemplateController.php).
+
+**Proxy TVPik:** `GET /integrations/webnu/tv-templates` (requiere conexión WebNU). Caché ~10 min. Si WebNU aún no expone el endpoint (404), TVPik construye un catálogo mínimo desde las keys de `tv_urls`.
+
 ---
 
 ## 5. Plantillas TV (distintas de la carta QR)
 
 Definidas en [`config/tvpik_templates.php`](../config/tvpik_templates.php). **No** son las 16 plantillas móviles de [`config/company_templates.php`](../config/company_templates.php).
 
+### 5.1 Plantillas actuales (restauración)
+
 | `template_key` | `layout` | Ruta Webnu | Uso en pantalla |
 |----------------|----------|------------|-----------------|
 | `menu` | `menu` | `/tv/{slug}/menu` | Carta completa, rotación de secciones |
 | `spotlight` | `spotlight` | `/tv/{slug}/spotlight` | Especial del día + destacados |
 | `featured` | `featured` | `/tv/{slug}/featured` | Carrusel platos con `highlight` o foto |
+| `menu_video` | `menu_video` | `/tv/{slug}/menu_video` | Carta + carrusel de vídeos de platos (split lateral) |
+| `menu_banner` | `menu_banner` | `/tv/{slug}/menu_banner` | Banner vídeo arriba + carta abajo |
 | `video` | `video` | `/tv/{slug}/video` | Vídeos cortos de platos |
+| `daily` | `daily` | `/tv/{slug}/daily` | Menú del día (primeros/segundos/postres) |
+| `hero` | `hero` | `/tv/{slug}/hero` | Plato destacado a pantalla completa |
+| `tapas` | `tapas` | `/tv/{slug}/tapas` | Rejilla 2×2 de platos estrella |
+
+Todas llevan `category: restaurant` en el config actual.
+
+### 5.2 Categorías / motivos
+
+Bloque `categories` en `tvpik_templates.php`:
+
+```php
+'categories' => [
+    'restaurant' => ['label' => 'Restauración'],
+    'retail'     => ['label' => 'Comercio'],
+    'events'     => ['label' => 'Eventos'],
+    'general'    => ['label' => 'General'],
+],
+```
+
+Cada plantilla puede declarar `'category' => 'retail'`. El endpoint `GET /tv-templates` devuelve solo las categorías **presentes** en el catálogo. TVPik muestra **filtros por chips** cuando hay **más de una** categoría activa.
+
+**Añadir una plantilla nueva (checklist WebNU):**
+
+1. Entrada en `templates` con `key`, `label`, `description`, `layout`, `view`, `thumbnail`, opcional `category`.
+2. Si la categoría es nueva → añadirla en `categories` con su `label`.
+3. Asegurar vista Blade en `resources/views/tv/templates/…` y ruta en [`routes/web.php`](../routes/web.php) si el `layout` es nuevo.
+4. `MenuSyncService::tvUrls()` ya itera `config('tvpik_templates.templates')` → cada negocio recibe la URL en `GET /menus`.
+5. Desplegar WebNU. TVPik detecta la plantilla al refrescar el catálogo (sin cambios de código en TVPik).
 
 **Parámetros URL útiles:**
 
@@ -355,11 +429,12 @@ Definidas en [`config/tvpik_templates.php`](../config/tvpik_templates.php). **No
 
 **Regla de publicación:** `publish_url` debe ser la URL **`/tv/{slug}/{layout}`**, no `/carta/{slug}` (diseño móvil).
 
-El workspace TVPik debe:
+El workspace TVPik:
 
-1. Mostrar catálogo de plantillas TV (metadatos: `label`, `description`, `thumbnail` desde Webnu o copia en TVPik).
-2. Por pantalla: elegir **carta** (`company_slug` / `menu id`) + **`template_key`**.
-3. Resolver URL: usar `tv_urls[template_key]` de `GET /menus` o construir con el mismo patrón de rutas.
+1. Obtiene catálogo con `GET /api/signage/tv-templates` (vía proxy TVPik).
+2. Por pantalla: elige **negocio** (`slug`) + **`template_key`**.
+3. Filtra plantillas disponibles cruzando catálogo × `tv_urls` del negocio.
+4. Resuelve preview/publicación: `tv_urls[template_key]` o `/tv/{slug}/{layout}?player=1`.
 
 ---
 
@@ -669,7 +744,7 @@ php artisan queue:work
 |---------|--------|
 | **1.0** (actual) | Signage menus, `tv_urls`, publish screens, entitlements |
 | **1.1** (propuesto) | `daily_highlights[]` completo en `GET menus/{slug}`; webhook `carta.updated` hacia TVPik |
-| **1.2** (propuesto) | `GET /api/signage/tv-templates` metadatos plantillas TV; SSO compartido |
+| **1.2** (parcial) | `GET /api/signage/tv-templates` — catálogo metadatos plantillas TV (`SignageTvTemplateController`); SSO compartido pendiente |
 | **1.3** (propuesto) | Control remoto pantalla (reload, siguiente slide) vía API TVPik |
 
 ---

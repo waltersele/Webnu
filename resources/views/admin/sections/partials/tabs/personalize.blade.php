@@ -68,6 +68,26 @@
 
     @if((int) $company->menu_type === 1)
         <div class="wn-personalize-card">
+            <h6 class="mb-1"><i class="ri ri-heart-line text-primary me-1"></i> Lista de favoritos</h6>
+            <p class="text-muted small mb-3">Los comensales marcan platos con un clic y muestran la lista al camarero (nombre en su idioma y en el de la carta).</p>
+            <form method="POST" action="{{ route('admin.companies.update', $company) }}" class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+                @csrf
+                @method('PUT')
+                <input type="hidden" name="studio_step" value="favorites">
+                <div class="form-check form-switch mb-0">
+                    <input type="checkbox"
+                           class="form-check-input"
+                           name="menu_favorites_enabled"
+                           id="menu-favorites-enabled"
+                           value="1"
+                           @checked(old('menu_favorites_enabled', $company->menuFavoritesEnabled()))>
+                    <label class="form-check-label" for="menu-favorites-enabled">Activar favoritos en la carta pública</label>
+                </div>
+                <button type="submit" class="btn btn-outline-primary btn-sm">Guardar</button>
+            </form>
+        </div>
+
+        <div class="wn-personalize-card">
             <h6 class="mb-1"><i class="ri ri-star-line text-primary me-1"></i> Destacados del día</h6>
             <p class="text-muted small mb-3">Sube hasta 3 platos a la portada de tu carta.</p>
             @include('admin.sections.partials.daily-highlights-form', ['company' => $company])

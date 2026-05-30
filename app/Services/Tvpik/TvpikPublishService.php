@@ -4,6 +4,7 @@ namespace App\Services\Tvpik;
 
 use App\Company;
 use App\Services\MenuSyncService;
+use App\Services\UserPlanService;
 use App\TvpikScreenLink;
 use App\User;
 use Illuminate\Support\Facades\Log;
@@ -12,11 +13,13 @@ class TvpikPublishService
 {
     protected $api;
     protected $menuSync;
+    protected $plans;
 
-    public function __construct(TvpikApiClient $api, MenuSyncService $menuSync)
+    public function __construct(TvpikApiClient $api, MenuSyncService $menuSync, UserPlanService $plans)
     {
         $this->api = $api;
         $this->menuSync = $menuSync;
+        $this->plans = $plans;
     }
 
     public function publishScreen(
@@ -28,6 +31,8 @@ class TvpikPublishService
         ?string $galleryId = null,
         ?int $menuId = null
     ): TvpikScreenLink {
+        $this->plans->assertCanUseTvpikTemplate($user, $templateKey);
+
         $templates = config('tvpik_templates.templates', []);
         if (! isset($templates[$templateKey])) {
             $templateKey = config('tvpik_templates.default', 'menu');

@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 180" role="img" aria-label="Vista previa Marquee">
+  <rect width="320" height="180" fill="#06080c"/>
+  <rect x="0" y="0" width="320" height="126" fill="#1a2430"/>
+  <rect x="0" y="126" width="320" height="54" fill="#000"/>
+  <rect x="0" y="126" width="320" height="2" fill="#004ac6"/>
+  <text x="20" y="100" fill="#fff" font-size="16" font-weight="700">Pulpo a la gallega</text>
+  <text x="20" y="150" fill="#f5f7fa" font-size="9" font-weight="600">Jamón ibérico 18¬ · Croquetas 9¬ · Pulpo 22¬ ·</text>
+</svg>

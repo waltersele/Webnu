@@ -146,5 +146,9 @@
     </main>
 
     @include('themes.partials.modern-footer', ['variant' => $variant])
+
+    @if(!empty($favoritesEnabled) && !empty($favoritesCatalog))
+        @include('themes.partials.menu-favorites')
+    @endif
 </div>
 

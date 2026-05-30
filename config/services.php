@@ -43,4 +43,11 @@ return [
         'redirect' => env('GOOGLE_REDIRECT_URI', env('APP_URL') . '/auth/google/callback'),
     ],
 
+    /*
+    | OAuth outbound: TVPik redirige a /integrations/tvpik/connect
+    */
+    'tvpik_oauth' => [
+        'allowed_redirect_uris' => array_values(array_filter(array_map('trim', explode(',', (string) env('TVPIK_ALLOWED_REDIRECT_URIS', ''))))),
+    ],
+
 ];

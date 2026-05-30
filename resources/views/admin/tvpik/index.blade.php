@@ -6,6 +6,7 @@
 @section('content')
 @php
     $defaultCompanyId = $company ? $company->id : ($companies->first()->id ?? null);
+    $canTvpikPremium = ! empty($planFeatures['tvpik_premium_templates'] ?? false);
 @endphp
 
 <div class="row g-4">
@@ -20,7 +21,7 @@
                     <div class="flex-grow-1">
                         <h5 class="mb-1">Pantallas TV</h5>
                         <p class="text-muted mb-0 small">
-                            Muestra tu carta en cualquier TV del local en tiempo real. Disponible en el plan <strong>Plus</strong> (1 pantalla incluida) o como add-on en Pro.
+                            Muestra tu carta en cualquier TV del local en tiempo real. Disponible en el plan <strong>Plus</strong> (1 pantalla incluida y plantillas premium) o como add-on en Pro (plantillas estándar).
                         </p>
                     </div>
                     <a href="{{ route('admin.settings') }}#plan" class="btn btn-primary flex-shrink-0">
@@ -89,10 +90,16 @@
                                                 <label class="form-label small">Plantilla TV</label>
                                                 <select name="template_key" class="form-select form-select-sm" required data-tvpik-template-select>
                                                     @foreach($templates as $key => $tpl)
+                                                        @php
+                                                            $isPremiumTpl = ! empty($tpl['premium']);
+                                                            $tplLocked = $isPremiumTpl && ! $canTvpikPremium;
+                                                        @endphp
                                                         <option value="{{ $key }}"
                                                                 {{ ($link && $link->template_key === $key) ? 'selected' : '' }}
-                                                                data-supports-menu="{{ ! empty($tpl['supports_menu_selector']) ? '1' : '0' }}">
-                                                            {{ $tpl['label'] }}
+                                                                {{ $tplLocked ? 'disabled' : '' }}
+                                                                data-supports-menu="{{ ! empty($tpl['supports_menu_selector']) ? '1' : '0' }}"
+                                                                data-premium="{{ $isPremiumTpl ? '1' : '0' }}">
+                                                            {{ $tpl['label'] }}{{ $isPremiumTpl ? ' ★' : '' }}{{ $tplLocked ? ' (Plus)' : '' }}
                                                         </option>
                                                     @endforeach
                                                 </select>
@@ -180,7 +187,7 @@
                     </p>
                 @else
                     <p class="text-muted small mb-3">
-                        Cada plantilla genera una URL distinta para la pantalla. Usa la miniatura como referencia y abre la vista previa con tu carta actual.
+                        Cada plantilla genera una URL distinta para la pantalla. Las <span class="badge bg-warning text-dark">Premium</span> requieren plan Plus; en Pro con add-on de pantalla puedes usar las 7 estándar. La vista previa siempre está disponible.
                     </p>
                 @endif
                 <div class="row g-3">
@@ -189,32 +196,48 @@
                             $thumb = $tpl['thumbnail'] ?? ('img/tvpik/previews/' . ($tpl['layout'] ?? $key) . '.svg');
                             $previewCompany = $company ?? $companies->firstWhere('id', $defaultCompanyId);
                             $previewSlug = $previewCompany ? $previewCompany->slug : null;
+                            $isPremiumTpl = ! empty($tpl['premium']);
+                            $tplLocked = ! $canTvpik || ($isPremiumTpl && ! $canTvpikPremium);
                         @endphp
                         <div class="col-md-6 col-lg-3">
-                            <article class="wn-tvpik-template-card {{ !$canTvpik ? 'wn-tvpik-template-card--locked' : '' }}">
+                            <article class="wn-tvpik-template-card {{ $tplLocked ? 'wn-tvpik-template-card--locked' : '' }}">
                                 <div class="wn-tvpik-template-card__thumb">
                                     <img src="{{ asset($thumb) }}" alt="{{ $tpl['label'] }}" width="320" height="180" loading="lazy">
                                     <span class="wn-tvpik-template-card__badge">
                                         <i class="ti {{ $tpl['icon'] ?? 'ti-layout' }}"></i>
                                         {{ $tpl['label'] }}
                                     </span>
-                                    @if(!$canTvpik)
+                                    @if($tplLocked)
                                         <div class="wn-tvpik-template-card__lock-overlay">
                                             <i class="ti ti-lock"></i>
+                                            @if($canTvpik && $isPremiumTpl && ! $canTvpikPremium)
+                                                <span class="small d-block mt-1">Plus</span>
+                                            @endif
                                         </div>
                                     @endif
                                 </div>
                                 <div class="wn-tvpik-template-card__body">
-                                    <h6 class="wn-tvpik-template-card__title">{{ $tpl['label'] }}</h6>
+                                    <h6 class="wn-tvpik-template-card__title">
+                                        {{ $tpl['label'] }}
+                                        @if(!empty($tpl['premium']))
+                                            <span class="badge bg-warning text-dark ms-1">Premium</span>
+                                        @endif
+                                    </h6>
                                     <p class="wn-tvpik-template-card__desc">{{ $tpl['description'] }}</p>
                                     @if(!empty($tpl['duration_hint']))
                                         <p class="wn-tvpik-template-card__hint">{{ $tpl['duration_hint'] }}</p>
                                     @endif
                                     <div class="wn-tvpik-template-card__actions">
-                                        @if(!$canTvpik)
-                                            <a href="{{ route('admin.settings') }}#plan" class="btn btn-sm btn-outline-primary">
-                                                <i class="ti ti-crown me-1"></i> Activar plan
-                                            </a>
+                                        @if($tplLocked)
+                                            @if(! $canTvpik)
+                                                <a href="{{ route('admin.settings') }}#plan" class="btn btn-sm btn-outline-primary">
+                                                    <i class="ti ti-crown me-1"></i> Activar plan
+                                                </a>
+                                            @elseif($isPremiumTpl && ! $canTvpikPremium)
+                                                <a href="{{ route('admin.settings') }}#plan" class="btn btn-sm btn-outline-primary">
+                                                    <i class="ti ti-crown me-1"></i> Plantillas premium en Plus
+                                                </a>
+                                            @endif
                                         @elseif($defaultCompanyId)
                                             <form method="GET"
                                                   action="{{ route('admin.tvpik.preview') }}"
@@ -322,7 +345,7 @@
                 </summary>
                 <div class="card-body">
                     <p class="text-muted small mb-3">
-                        Cada plantilla genera una URL distinta para la pantalla. Usa la miniatura como referencia y abre la vista previa con tu carta actual.
+                        Cada plantilla genera una URL distinta para la pantalla. Las marcadas <span class="badge bg-warning text-dark">Premium</span> requieren plan Plus (Pro + add-on pantalla usa solo plantillas estándar). La vista previa está siempre disponible.
                     </p>
                     <div class="row g-3">
                         @foreach($templates as $key => $tpl)
@@ -330,18 +353,31 @@
                                 $thumb = $tpl['thumbnail'] ?? ('img/tvpik/previews/' . ($tpl['layout'] ?? $key) . '.svg');
                                 $previewCompany = $company ?? $companies->firstWhere('id', $defaultCompanyId);
                                 $previewSlug = $previewCompany ? $previewCompany->slug : null;
+                                $isPremiumTpl = ! empty($tpl['premium']);
+                                $tplLocked = $isPremiumTpl && ! $canTvpikPremium;
                             @endphp
                             <div class="col-md-6 col-lg-3">
-                                <article class="wn-tvpik-template-card">
+                                <article class="wn-tvpik-template-card {{ $tplLocked ? 'wn-tvpik-template-card--locked' : '' }}">
                                     <div class="wn-tvpik-template-card__thumb">
                                         <img src="{{ asset($thumb) }}" alt="{{ $tpl['label'] }}" width="320" height="180" loading="lazy">
                                         <span class="wn-tvpik-template-card__badge">
                                             <i class="ti {{ $tpl['icon'] ?? 'ti-layout' }}"></i>
                                             {{ $tpl['label'] }}
                                         </span>
+                                        @if($tplLocked)
+                                            <div class="wn-tvpik-template-card__lock-overlay">
+                                                <i class="ti ti-lock"></i>
+                                                <span class="small d-block mt-1">Plus</span>
+                                            </div>
+                                        @endif
                                     </div>
                                     <div class="wn-tvpik-template-card__body">
-                                        <h6 class="wn-tvpik-template-card__title">{{ $tpl['label'] }}</h6>
+                                        <h6 class="wn-tvpik-template-card__title">
+                                            {{ $tpl['label'] }}
+                                            @if(!empty($tpl['premium']))
+                                                <span class="badge bg-warning text-dark ms-1">Premium</span>
+                                            @endif
+                                        </h6>
                                         <p class="wn-tvpik-template-card__desc">{{ $tpl['description'] }}</p>
                                         @if(!empty($tpl['duration_hint']))
                                             <p class="wn-tvpik-template-card__hint">{{ $tpl['duration_hint'] }}</p>

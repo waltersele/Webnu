@@ -27,9 +27,21 @@
                     @include('themes.partials.product-highlight-badge', ['product' => $product])
                 @endif
             </h3>
-            <button type="button" class="wn-modern-card__detail-btn" data-toggle="modal" data-target="#wnDish{{ $product->id }}" aria-label="Ver detalle">
-                <i class="fas fa-chevron-right"></i>
-            </button>
+            <div class="wn-modern-card__actions">
+                @if(!empty($favoritesEnabled))
+                    <button type="button"
+                            class="wn-fav-btn"
+                            data-fav-toggle
+                            data-product-id="{{ $product->id }}"
+                            aria-pressed="false"
+                            aria-label="{{ config('menu_locales.ui.' . ($menuLocale ?? 'es') . '.favorites_add', 'Añadir a favoritos') }}">
+                        <i class="far fa-heart" aria-hidden="true"></i>
+                    </button>
+                @endif
+                <button type="button" class="wn-modern-card__detail-btn" data-toggle="modal" data-target="#wnDish{{ $product->id }}" aria-label="Ver detalle">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
         </div>
         @if($product->description)
             <p class="wn-modern-card__desc">{{ $product->description }}</p>
