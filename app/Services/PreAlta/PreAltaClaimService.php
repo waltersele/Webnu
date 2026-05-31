@@ -105,7 +105,7 @@ class PreAltaClaimService
             $locked->status = MenuPreRegistration::STATUS_CLAIMED;
             $locked->claimed_user_id = $user->id;
             $locked->claimed_at = now();
-            $locked->menu_json = null;
+            $locked->menu_json = [];
             $locked->save();
 
             $registration = $locked;

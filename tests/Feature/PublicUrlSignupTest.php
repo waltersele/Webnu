@@ -26,8 +26,8 @@ class PublicUrlSignupTest extends TestCase
             'user_id' => $user->id,
         ]);
 
-        $this->assertStringContainsString('/carta/la-brasa', $company->publicUrl());
-        $this->assertSame('carta/la-brasa', $company->publicPath());
+        $this->assertStringContainsString('/la-brasa', $company->publicUrl());
+        $this->assertSame('la-brasa', $company->publicPath());
     }
 
     public function test_company_nested_public_url(): void
@@ -43,7 +43,8 @@ class PublicUrlSignupTest extends TestCase
             'user_id' => $user->id,
         ]);
 
-        $this->assertStringContainsString('/carta/grupo-brasa/terraza', $company->publicUrl());
+        $this->assertStringContainsString('/terraza', $company->publicUrl());
+        $this->assertSame('terraza', $company->publicPath());
     }
 
     public function test_simple_hub_route_serves_company_without_redirect_to_nested(): void
@@ -59,10 +60,10 @@ class PublicUrlSignupTest extends TestCase
             'user_id' => $user->id,
         ]);
 
-        $response = $this->get('/carta/la-brasa');
+        $response = $this->get('/la-brasa');
         $this->assertTrue(in_array($response->status(), [200, 302], true));
         if ($response->isRedirect()) {
-            $this->assertStringNotContainsString('/carta/grupo-brasa/la-brasa', $response->headers->get('Location') ?? '');
+            $this->assertStringNotContainsString('/grupo-brasa/la-brasa', $response->headers->get('Location') ?? '');
         }
     }
 

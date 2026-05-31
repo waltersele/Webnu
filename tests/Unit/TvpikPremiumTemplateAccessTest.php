@@ -13,7 +13,7 @@ class TvpikPremiumTemplateAccessTest extends TestCase
 
     public function test_plus_user_can_use_premium_tv_templates(): void
     {
-        $user = User::factory()->create(['plan' => 'plus']);
+        $user = User::factory()->create(['plan' => 'unlimited']);
         $plans = app(UserPlanService::class);
 
         $this->assertTrue($plans->canUseTvpikPremiumTemplates($user));

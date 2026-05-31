@@ -57,7 +57,7 @@ class PreAltaClaimServiceTest extends TestCase
 
         $registration->refresh();
         $this->assertEquals(MenuPreRegistration::STATUS_CLAIMED, $registration->status);
-        $this->assertNull($registration->menu_json);
+        $this->assertSame([], $registration->menu_json);
 
         $this->assertEquals(1, $result['company']->sections()->count());
         $this->assertEquals(1, $result['company']->sections()->first()->products()->count());

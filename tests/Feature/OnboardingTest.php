@@ -76,7 +76,9 @@ class OnboardingTest extends TestCase
 
         $response = $this->actingAs($user)->post(route('admin.onboarding.update'), [
             'step' => 2,
+            'business_name' => 'Casa María',
             'name' => 'Casa María',
+            'company_slug' => 'casa-maria-' . $user->id,
         ]);
 
         $response->assertRedirect(route('admin.onboarding', ['step' => 3]));
