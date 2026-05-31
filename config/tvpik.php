@@ -14,6 +14,7 @@ return [
     | Rutas relativas a api_url (tvpik-api). Ajustar si el contrato cambia.
     */
     'paths' => [
+        'bootstrap' => '/integrations/webnu/hub/bootstrap',
         'screens' => '/integrations/webnu/screens',
         'galleries' => '/integrations/webnu/galleries',
         'publish' => '/integrations/webnu/publish',

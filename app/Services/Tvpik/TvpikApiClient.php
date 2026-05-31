@@ -16,6 +16,110 @@ class TvpikApiClient
     /**
      * @return array{screens: array<int, array>, raw: mixed}
      */
+    /**
+     * @return array<string, mixed>
+     */
+    public function bootstrap(User $user): array
+    {
+        if (! $this->isConfigured()) {
+            throw new RuntimeException('TVPik API no configurada.');
+        }
+
+        $response = Http::timeout(config('tvpik.timeout', 15))
+            ->acceptJson()
+            ->withHeaders($this->bootstrapHeaders($user))
+            ->post(config('tvpik.api_url') . $this->path('bootstrap'), [
+                'base_url' => rtrim(config('app.url'), '/'),
+                'app_key' => config('tvpik.app_key'),
+            ]);
+
+        if (! $response->successful()) {
+            throw new RuntimeException('No se pudo activar Pantallas TVPik: ' . $response->body());
+        }
+
+        return $response->json() ?? [];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function createScreen(User $user, string $name): array
+    {
+        if (! $this->isConfigured()) {
+            return $this->stubCreateScreen($name);
+        }
+
+        $response = $this->request($user)->post($this->path('screens'), [
+            'name' => $name,
+        ]);
+
+        if (! $response->successful()) {
+            throw new RuntimeException('No se pudo crear la pantalla: ' . $response->body());
+        }
+
+        $data = $response->json();
+
+        return $data['screen'] ?? $data;
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function updateScreen(User $user, string $screenId, string $name): array
+    {
+        if (! $this->isConfigured()) {
+            return ['id' => $screenId, 'name' => $name, 'online' => false];
+        }
+
+        $response = $this->request($user)->patch($this->path('screens') . '/' . rawurlencode($screenId), [
+            'name' => $name,
+        ]);
+
+        if (! $response->successful()) {
+            throw new RuntimeException('No se pudo renombrar la pantalla: ' . $response->body());
+        }
+
+        $data = $response->json();
+
+        return $data['screen'] ?? $data;
+    }
+
+    public function deleteScreen(User $user, string $screenId): void
+    {
+        if (! $this->isConfigured()) {
+            return;
+        }
+
+        $response = $this->request($user)->delete($this->path('screens') . '/' . rawurlencode($screenId));
+
+        if (! $response->successful()) {
+            throw new RuntimeException('No se pudo eliminar la pantalla: ' . $response->body());
+        }
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function pairScreen(User $user, string $screenId, string $code): array
+    {
+        if (! $this->isConfigured()) {
+            return ['id' => $screenId, 'online' => true, 'code' => strtoupper($code)];
+        }
+
+        $response = $this->request($user)->post(
+            $this->path('screens') . '/' . rawurlencode($screenId) . '/pair',
+            ['code' => $code]
+        );
+
+        if (! $response->successful()) {
+            throw new RuntimeException('No se pudo emparejar la TV: ' . $response->body());
+        }
+
+        $data = $response->json();
+
+        return $data['screen'] ?? $data;
+    }
+
     public function listScreens(User $user): array
     {
         if (! $this->isConfigured()) {
@@ -94,6 +198,22 @@ class TvpikApiClient
             ->withHeaders($this->baseHeaders($user, true));
     }
 
+    protected function bootstrapHeaders(User $user): array
+    {
+        $headers = [];
+
+        if ($appKey = config('tvpik.app_key')) {
+            $headers['X-Digital-Signage-Key'] = $appKey;
+            $headers['X-Webnu-App-Key'] = $appKey;
+        }
+
+        if ($user->api_token) {
+            $headers['X-Webnu-Token'] = $user->api_token;
+        }
+
+        return $headers;
+    }
+
     protected function baseHeaders(User $user, bool $includeTvpikToken): array
     {
         $headers = [];
@@ -128,15 +248,34 @@ class TvpikApiClient
             [
                 'id' => 'demo-bar',
                 'name' => 'Pantalla barra (demo)',
-                'online' => true,
+                'code' => 'DEMO01',
+                'status' => 'pending',
+                'online' => false,
                 'gallery_id' => null,
             ],
             [
                 'id' => 'demo-sala',
                 'name' => 'Pantalla comedor (demo)',
-                'online' => true,
+                'code' => 'DEMO02',
+                'status' => 'pending',
+                'online' => false,
                 'gallery_id' => null,
             ],
+        ];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    protected function stubCreateScreen(string $name): array
+    {
+        return [
+            'id' => 'demo-' . substr(md5($name . microtime()), 0, 8),
+            'name' => $name,
+            'code' => 'STUB01',
+            'status' => 'pending',
+            'online' => false,
+            'gallery_id' => null,
         ];
     }
 }

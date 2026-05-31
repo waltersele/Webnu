@@ -29,13 +29,6 @@
         @endif
     </div>
 
-    @if(session('flash'))
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            {{ session('flash') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
-        </div>
-    @endif
-
     @if($menus->where('enabled', true)->count() >= 2)
         <form method="POST" action="{{ route('admin.menus.combine') }}" class="wn-menus-combine card border-0 shadow-sm mb-4">
             @csrf

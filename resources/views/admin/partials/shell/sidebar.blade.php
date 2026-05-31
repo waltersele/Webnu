@@ -85,6 +85,7 @@
                                   class="wn-shell-subnav__form">
                                 @csrf
                                 <input type="hidden" name="company_selection" value="{{ $cmp->id }}">
+                                <input type="hidden" name="redirect_after" value="/admin/sections">
                                 <button type="submit"
                                         class="wn-shell-subnav__item"
                                         title="Cambiar a {{ $cmp->name }} ({{ $statusLabel }})">

@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Menu;
 use App\Services\MenuSyncService;
 use App\Services\Tvpik\TvpikApiClient;
+use App\Services\Tvpik\TvpikHubService;
 use App\Services\Tvpik\TvpikPublishService;
 use App\Services\UserPlanService;
 use App\TvpikScreenLink;
@@ -19,6 +20,7 @@ class TvpikController extends Controller
     public function index(
         MenuSyncService $menuSync,
         TvpikApiClient $tvpikApi,
+        TvpikHubService $hub,
         UserPlanService $plans,
         Request $request
     ) {
@@ -30,6 +32,16 @@ class TvpikController extends Controller
         }
 
         $canTvpik = $plans->canUseTvpik($user);
+        $bootstrapError = null;
+
+        if ($canTvpik && ! $user->isTvpikConnected()) {
+            if (! $hub->ensureConnected($user)) {
+                $bootstrapError = 'No se pudo conectar con TVPik. Comprueba que el servicio esté activo o usa el reproductor HDMI.';
+            } else {
+                $user->refresh();
+            }
+        }
+
         $company = $request->attributes->get('selected_company')
             ?? $user->companies()->orderBy('updated_at', 'desc')->first();
 
@@ -67,10 +79,13 @@ class TvpikController extends Controller
             'apiToken' => $user->api_token,
             'appKeyConfigured' => ! empty(config('digital_signage.app_key')),
             'tvpikConnected' => $user->isTvpikConnected(),
+            'bootstrapError' => $bootstrapError,
             'tvpikWebUrl' => config('tvpik.web_app_url'),
             'tvpikApiConfigured' => $tvpikApi->isConfigured(),
             'screens' => $screens,
             'screensError' => $screensError,
+            'screenCount' => count($screens),
+            'maxScreens' => $plans->tvpikMaxScreens($user),
             'links' => $links,
             'templates' => $templates,
             'menus' => $menus,
@@ -79,6 +94,96 @@ class TvpikController extends Controller
             'companies' => $companies,
             'planFeatures' => $plans->featureFlags($user),
         ]);
+    }
+
+    public function screensJson(TvpikApiClient $tvpikApi)
+    {
+        $this->authorizeTvpik();
+
+        $user = auth()->user();
+        if (! $user->isTvpikConnected()) {
+            return response()->json(['screens' => []], 403);
+        }
+
+        try {
+            $result = $tvpikApi->listScreens($user);
+        } catch (\Throwable $e) {
+            return response()->json(['message' => $e->getMessage()], 502);
+        }
+
+        return response()->json(['screens' => $result['screens']]);
+    }
+
+    public function storeScreen(Request $request, TvpikApiClient $tvpikApi)
+    {
+        $this->authorizeTvpik();
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+        ]);
+
+        $user = auth()->user();
+        if (! $user->isTvpikConnected()) {
+            return back()->withErrors(['screen' => 'Pantallas no conectadas. Recarga la página.']);
+        }
+
+        try {
+            $tvpikApi->createScreen($user, $validated['name']);
+        } catch (\Throwable $e) {
+            return back()->withErrors(['screen' => $e->getMessage()]);
+        }
+
+        return redirect()
+            ->route('admin.tvpik.index')
+            ->with('flash', 'Pantalla creada. Empareja la TV con el código que aparece en la app del televisor.');
+    }
+
+    public function pairScreen(Request $request, TvpikApiClient $tvpikApi)
+    {
+        $this->authorizeTvpik();
+
+        $validated = $request->validate([
+            'screen_id' => 'required|string|max:64',
+            'code' => 'required|string|min:4|max:8',
+        ]);
+
+        $user = auth()->user();
+
+        try {
+            $tvpikApi->pairScreen($user, $validated['screen_id'], $validated['code']);
+        } catch (\Throwable $e) {
+            return back()->withErrors(['pair' => $e->getMessage()]);
+        }
+
+        return redirect()
+            ->route('admin.tvpik.index')
+            ->with('flash', 'TV emparejada correctamente.');
+    }
+
+    public function destroyScreen(Request $request, TvpikApiClient $tvpikApi)
+    {
+        $this->authorizeTvpik();
+
+        $validated = $request->validate([
+            'screen_id' => 'required|string|max:64',
+        ]);
+
+        $user = auth()->user();
+        $screenId = $validated['screen_id'];
+
+        try {
+            $tvpikApi->deleteScreen($user, $screenId);
+        } catch (\Throwable $e) {
+            return back()->withErrors(['screen' => $e->getMessage()]);
+        }
+
+        TvpikScreenLink::where('user_id', $user->id)
+            ->where('tvpik_screen_id', $screenId)
+            ->delete();
+
+        return redirect()
+            ->route('admin.tvpik.index')
+            ->with('flash', 'Pantalla eliminada.');
     }
 
     public function connect(Request $request, TvpikApiClient $tvpikApi)

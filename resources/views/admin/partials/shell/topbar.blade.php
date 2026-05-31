@@ -38,6 +38,7 @@
             @if($available_companies->count() > 1)
                 <form method="POST" action="{{ route('admin.companies.changecompany') }}" class="wn-shell-business-form" id="wn-topbar-company-form">
                     @csrf
+                    <input type="hidden" name="redirect_after" value="/admin/sections">
                     <label class="visually-hidden" for="wn-topbar-company-select">Negocio activo</label>
                     <select name="company_selection" id="wn-topbar-company-select" class="wn-shell-business-select" onchange="this.form.submit()">
                         @foreach($available_companies as $company)

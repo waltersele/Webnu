@@ -123,7 +123,7 @@
                                 <form method="POST" action="{{ route('admin.companies.changecompany') }}" class="d-contents">
                                     @csrf
                                     <input type="hidden" name="company_selection" value="{{ $company->id }}">
-                                    <input type="hidden" name="redirect_after" value="{{ route('admin.sections.index') }}">
+                                    <input type="hidden" name="redirect_after" value="/admin/sections">
                                     <button type="submit" class="btn btn-outline-secondary btn-sm">
                                         <i class="ri ri-restaurant-line"></i>
                                         <span class="ms-1 d-none d-sm-inline">Platos</span>

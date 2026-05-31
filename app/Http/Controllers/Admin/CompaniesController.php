@@ -380,11 +380,14 @@ class CompaniesController extends Controller
         Cookie::queue(Cookie::forever('selected_company', $company->id));
 
         $redirectAfter = $request->get('redirect_after');
-        if ($redirectAfter && str_starts_with($redirectAfter, '/admin/')) {
-            return redirect($redirectAfter);
+        if (is_string($redirectAfter) && $redirectAfter !== '') {
+            $path = parse_url($redirectAfter, PHP_URL_PATH) ?? $redirectAfter;
+            if (is_string($path) && str_starts_with($path, '/admin/')) {
+                return redirect($path);
+            }
         }
 
-        return redirect()->route('admin.dashboard');
+        return redirect()->route('admin.sections.index');
     }
 
     public function toggleEnabled(Request $request, Company $company)

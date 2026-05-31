@@ -74,7 +74,7 @@ $env:SUPER_ADMIN_EMAILS = "demo@webnu.local"
 $env:MENU_SCAN_SCANS_PER_HOUR = "30"
 $env:DIGITAL_SIGNAGE_APP_KEY = "dev-signage-key-compartida"
 $env:TVPIK_ALLOWED_REDIRECT_URIS = "http://127.0.0.1:8001/api/v1/integrations/webnu/callback,http://localhost:8001/api/v1/integrations/webnu/callback"
-$env:TVPIK_API_URL = "http://127.0.0.1:8001"
+$env:TVPIK_API_URL = "http://127.0.0.1:8001/api/v1"
 
 Set-Location $PSScriptRoot
 

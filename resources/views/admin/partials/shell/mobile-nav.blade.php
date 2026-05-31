@@ -74,6 +74,7 @@
                                       class="wn-shell-offcanvas-sublink__form">
                                     @csrf
                                     <input type="hidden" name="company_selection" value="{{ $cmp->id }}">
+                                    <input type="hidden" name="redirect_after" value="/admin/sections">
                                     <button type="submit" class="wn-shell-offcanvas-sublink">
                                         <span class="wn-shell-offcanvas-sublink__dot {{ $dotClass }}" aria-hidden="true"></span>
                                         <span>{{ $cmp->name }}</span>

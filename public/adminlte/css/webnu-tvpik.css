@@ -75,3 +75,300 @@
     gap: 0.5rem;
     margin-top: auto;
 }
+
+/* Lock overlay */
+.wn-tvpik-template-card__lock-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.48);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    font-size: 1.5rem;
+    color: #fff;
+}
+
+.wn-tvpik-template-card--locked {
+    opacity: 0.88;
+}
+
+/* Upgrade CTA */
+.wn-tvpik-upgrade-cta {
+    border-left: 4px solid var(--wn-primary, #004ac6) !important;
+}
+
+.wn-tvpik-upgrade-cta__icon {
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
+    background: var(--wn-primary-container, #e6f0ff);
+    color: var(--wn-primary, #004ac6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 26px;
+    flex-shrink: 0;
+}
+
+/* Connection banner */
+.wn-tvpik-connection-banner {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.25rem;
+    border-radius: 0.75rem;
+    border: 1px solid rgba(67, 89, 113, 0.12);
+    background: #fff;
+}
+
+.wn-tvpik-connection-banner.is-connected {
+    border-color: rgba(40, 199, 111, 0.35);
+    background: rgba(40, 199, 111, 0.06);
+}
+
+.wn-tvpik-connection-banner.is-disconnected {
+    border-color: rgba(255, 159, 67, 0.35);
+    background: rgba(255, 159, 67, 0.06);
+}
+
+.wn-tvpik-connection-banner__icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 74, 198, 0.1);
+    color: #004ac6;
+    font-size: 1.25rem;
+}
+
+.wn-tvpik-connection-banner__body {
+    flex: 1;
+    min-width: 180px;
+}
+
+.wn-tvpik-connection-banner__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+/* Screen cards */
+.wn-tvpik-screen-card {
+    border: 1px solid rgba(67, 89, 113, 0.12);
+    border-radius: 0.75rem;
+    padding: 1rem;
+    background: #fff;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.wn-tvpik-screen-card:hover {
+    border-color: rgba(0, 74, 198, 0.3);
+    box-shadow: 0 0.25rem 0.75rem rgba(0, 74, 198, 0.06);
+}
+
+.wn-tvpik-screen-card__header {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+}
+
+.wn-tvpik-screen-card__preview {
+    width: 96px;
+    height: 54px;
+    border-radius: 0.5rem;
+    overflow: hidden;
+    background: #0f1419;
+    flex-shrink: 0;
+}
+
+.wn-tvpik-screen-card__preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.wn-tvpik-screen-card__meta {
+    flex: 1;
+    min-width: 0;
+}
+
+.wn-tvpik-screen-card__title {
+    font-size: 1rem;
+    margin: 0 0 0.25rem;
+}
+
+.wn-tvpik-screen-card__summary {
+    font-size: 0.8125rem;
+    color: #697a8d;
+}
+
+.wn-tvpik-screen-card__status {
+    flex-shrink: 0;
+}
+
+.wn-tvpik-screen-card__sync {
+    margin-bottom: 0.75rem;
+}
+
+.wn-tvpik-screen-card__actions {
+    margin-bottom: 0.75rem;
+}
+
+.wn-tvpik-screen-card__config-toggle {
+    cursor: pointer;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #004ac6;
+    list-style: none;
+    user-select: none;
+}
+
+.wn-tvpik-screen-card__config-toggle::-webkit-details-marker {
+    display: none;
+}
+
+.wn-tvpik-screen-card__form {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(67, 89, 113, 0.1);
+}
+
+/* Template picker (inline en screen card) */
+.wn-tvpik-template-picker__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(88px, 1fr));
+    gap: 0.5rem;
+}
+
+.wn-tvpik-template-picker__item {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.35rem;
+    padding: 0.35rem;
+    border: 2px solid rgba(67, 89, 113, 0.12);
+    border-radius: 0.5rem;
+    background: #fff;
+    cursor: pointer;
+    text-align: left;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.wn-tvpik-template-picker__item:hover:not(:disabled) {
+    border-color: rgba(0, 74, 198, 0.35);
+}
+
+.wn-tvpik-template-picker__item.is-active {
+    border-color: #004ac6;
+    box-shadow: 0 0 0 2px rgba(0, 74, 198, 0.15);
+}
+
+.wn-tvpik-template-picker__item.is-locked,
+.wn-tvpik-template-picker__item:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+.wn-tvpik-template-picker__thumb {
+    position: relative;
+    aspect-ratio: 16 / 9;
+    border-radius: 0.35rem;
+    overflow: hidden;
+    background: #0f1419;
+}
+
+.wn-tvpik-template-picker__thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.wn-tvpik-template-picker__lock {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(15, 23, 42, 0.45);
+    color: #fff;
+}
+
+.wn-tvpik-template-picker__label {
+    font-size: 0.6875rem;
+    font-weight: 600;
+    line-height: 1.2;
+    color: #566a7f;
+}
+
+.wn-tvpik-template-picker__tag {
+    font-size: 0.625rem;
+    color: #ff9f43;
+    font-weight: 600;
+}
+
+/* Gallery filters */
+.wn-tvpik-gallery__filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.wn-tvpik-gallery__filter {
+    border: 1px solid rgba(67, 89, 113, 0.2);
+    background: #fff;
+    border-radius: 999px;
+    padding: 0.35rem 0.85rem;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: #566a7f;
+    cursor: pointer;
+    transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.wn-tvpik-gallery__filter.is-active {
+    background: #004ac6;
+    border-color: #004ac6;
+    color: #fff;
+}
+
+/* Player row */
+.wn-tvpik-player-card__icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    background: rgba(0, 74, 198, 0.1);
+    color: #004ac6;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.wn-tvpik-player-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.wn-tvpik-player-row .form-select {
+    min-width: 140px;
+    max-width: 220px;
+}
+
+/* Empty state */
+.wn-tvpik-empty {
+    text-align: center;
+    padding: 2rem 1rem;
+}
+
+.wn-tvpik-empty__icon {
+    font-size: 2.5rem;
+    color: #a1acb8;
+    margin-bottom: 0.75rem;
+}
+

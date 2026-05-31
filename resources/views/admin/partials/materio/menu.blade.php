@@ -118,6 +118,7 @@
             <label for="company_selection">Negocio</label>
             <form method="POST" action="{{ route('admin.companies.changecompany') }}" id="company-selection-form">
                 @csrf
+                <input type="hidden" name="redirect_after" value="/admin/sections">
                 <select name="company_selection" id="company_selection" class="form-select form-select-sm">
                     @foreach ($available_companies as $company)
                         <option value="{{ $company->id }}" {{ $company->id == $selected_company ? 'selected' : '' }}>{{ $company->name }}</option>

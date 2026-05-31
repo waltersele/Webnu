@@ -220,6 +220,10 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['aut
     Route::post('integrations/token', 'SignageIntegrationController@regenerateToken')->name('admin.integrations.regenerate');
 
     Route::get('tvpik', 'TvpikController@index')->name('admin.tvpik.index');
+    Route::get('tvpik/screens.json', 'TvpikController@screensJson')->name('admin.tvpik.screens-json');
+    Route::post('tvpik/screens', 'TvpikController@storeScreen')->name('admin.tvpik.screens.store');
+    Route::post('tvpik/screens/pair', 'TvpikController@pairScreen')->name('admin.tvpik.screens.pair');
+    Route::delete('tvpik/screens', 'TvpikController@destroyScreen')->name('admin.tvpik.screens.destroy');
     Route::post('tvpik/connect', 'TvpikController@connect')->name('admin.tvpik.connect');
     Route::post('tvpik/disconnect', 'TvpikController@disconnect')->name('admin.tvpik.disconnect');
     Route::post('tvpik/publish', 'TvpikController@publish')->name('admin.tvpik.publish');
