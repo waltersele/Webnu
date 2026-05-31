@@ -12,6 +12,11 @@
         }
     }
 
+    function templateHtml(id) {
+        var tpl = document.getElementById(id);
+        return tpl ? tpl.innerHTML.trim() : '';
+    }
+
     function storageKey(companyId) {
         return 'webnu_favs_' + companyId;
     }
@@ -37,6 +42,14 @@
         }
     }
 
+    function escapeHtml(str) {
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;');
+    }
+
     function init() {
         var root = document.getElementById('webnu-favorites-root');
         var catalogEl = document.getElementById('webnu-favorites-catalog');
@@ -59,18 +72,18 @@
         var companyId = catalog.companyId;
         var products = catalog.products || {};
         var defaultLocale = catalog.defaultLocale || 'es';
+        var menuLocale = catalog.menuLocale || defaultLocale;
         var defaultLocaleLabel = labels.defaultLocaleLabel || defaultLocale;
-        var originalLabelTemplate = labels.originalLabel || 'En :locale';
+        var menuLocaleLabel = labels.menuLocaleLabel || menuLocale;
         var ids = loadIds(companyId);
-        var waiterMode = false;
+        var removeIcon = templateHtml('wn-fav-icon-remove');
+        var placeholderIcon = templateHtml('wn-fav-icon-placeholder');
 
         var countEl = root.querySelector('[data-fav-count]');
         var listEl = root.querySelector('[data-fav-list]');
         var emptyEl = root.querySelector('[data-fav-empty]');
         var panelEl = root.querySelector('[data-fav-panel]');
         var openBtn = root.querySelector('[data-fav-open]');
-        var waiterBtn = root.querySelector('[data-fav-waiter-mode]');
-        var sheetEl = root.querySelector('.wn-favorites-panel__sheet');
 
         function isFavorited(id) {
             return ids.indexOf(String(id)) !== -1;
@@ -103,6 +116,16 @@
             }
         }
 
+        function showBilingual(item) {
+            if (!item) {
+                return false;
+            }
+            if (menuLocale !== defaultLocale) {
+                return true;
+            }
+            return item.nameOriginal && item.nameLocale && item.nameOriginal !== item.nameLocale;
+        }
+
         function renderList() {
             if (!listEl) {
                 return;
@@ -117,17 +140,26 @@
                 }
                 hasItems = true;
 
+                var bilingual = showBilingual(item);
                 var li = document.createElement('li');
-                li.className = 'wn-favorites-item' + (waiterMode ? ' wn-favorites-item--waiter' : '');
+                li.className = 'wn-favorites-item';
 
                 var imgHtml = item.imageUrl
-                    ? '<img class="wn-favorites-item__img" src="' + item.imageUrl + '" alt="" loading="lazy">'
-                    : '<div class="wn-favorites-item__img wn-favorites-item__img--placeholder"><i class="fas fa-utensils"></i></div>';
+                    ? '<img class="wn-favorites-item__img" src="' + escapeHtml(item.imageUrl) + '" alt="" loading="lazy">'
+                    : '<div class="wn-favorites-item__img wn-favorites-item__img--placeholder" aria-hidden="true">' + placeholderIcon + '</div>';
 
-                var originalLine = '';
-                if (item.nameOriginal && item.nameOriginal !== item.nameLocale) {
-                    var origLabel = originalLabelTemplate.replace(':locale', defaultLocaleLabel);
-                    originalLine = '<p class="wn-favorites-item__original"><span class="wn-favorites-item__original-label">' + origLabel + '</span> ' + escapeHtml(item.nameOriginal) + '</p>';
+                var localeTag = '';
+                if (bilingual) {
+                    localeTag = '<span class="wn-favorites-item__locale-tag">' + escapeHtml(menuLocaleLabel) + '</span>';
+                }
+
+                var originalBlock = '';
+                if (bilingual) {
+                    originalBlock =
+                        '<div class="wn-favorites-item__original">' +
+                            '<span class="wn-favorites-item__original-label">' + escapeHtml(defaultLocaleLabel) + '</span>' +
+                            '<span class="wn-favorites-item__original-name">' + escapeHtml(item.nameOriginal) + '</span>' +
+                        '</div>';
                 }
 
                 var priceLine = item.priceLabel
@@ -137,12 +169,13 @@
                 li.innerHTML =
                     '<div class="wn-favorites-item__media">' + imgHtml + '</div>' +
                     '<div class="wn-favorites-item__body">' +
+                        localeTag +
                         '<p class="wn-favorites-item__name">' + escapeHtml(item.nameLocale) + '</p>' +
-                        originalLine +
+                        originalBlock +
                         priceLine +
                     '</div>' +
                     '<button type="button" class="wn-favorites-item__remove" data-fav-remove="' + id + '" aria-label="' + escapeHtml(labels.remove || 'Quitar') + '">' +
-                        '<i class="fas fa-times"></i>' +
+                        removeIcon +
                     '</button>';
 
                 listEl.appendChild(li);
@@ -154,14 +187,9 @@
             if (listEl) {
                 listEl.hidden = !hasItems;
             }
-        }
-
-        function escapeHtml(str) {
-            return String(str)
-                .replace(/&/g, '&amp;')
-                .replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;')
-                .replace(/"/g, '&quot;');
+            if (panelEl) {
+                panelEl.classList.toggle('wn-favorites-panel--has-items', hasItems);
+            }
         }
 
         function toggle(id) {
@@ -200,20 +228,6 @@
                 openBtn.setAttribute('aria-expanded', 'false');
             }
             document.body.classList.remove('wn-favorites-open');
-            setWaiterMode(false);
-        }
-
-        function setWaiterMode(on) {
-            waiterMode = !!on;
-            if (sheetEl) {
-                sheetEl.classList.toggle('wn-favorites-panel__sheet--waiter', waiterMode);
-            }
-            if (waiterBtn) {
-                waiterBtn.textContent = waiterMode
-                    ? (labels.closeWaiter || 'Volver')
-                    : (labels.showWaiter || 'Mostrar al camarero');
-            }
-            renderList();
         }
 
         document.addEventListener('click', function (e) {
@@ -244,12 +258,12 @@
             if (e.target.closest('[data-fav-close]')) {
                 e.preventDefault();
                 closePanel();
-                return;
             }
+        });
 
-            if (e.target.closest('[data-fav-waiter-mode]')) {
-                e.preventDefault();
-                setWaiterMode(!waiterMode);
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape' && panelEl && !panelEl.hidden) {
+                closePanel();
             }
         });
 

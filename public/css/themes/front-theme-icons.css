@@ -33,9 +33,10 @@
 
 .wn-modern-footer__links a,
 .wn-modern-footer__meta {
-  display: flex;
+  display: inline-flex;
   align-items: flex-start;
   gap: 0.35rem;
+  max-width: 100%;
 }
 
 .wn-modern-footer__links a .wn-svg-icon--inline,

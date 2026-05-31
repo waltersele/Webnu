@@ -1,6 +1,6 @@
 # Sistema de cabecera móvil (Menu Hero)
 
-Documentación del sistema unificado de banner, logo y contraste para las 16 plantillas QR.
+Documentación del sistema unificado de banner, logo y contraste para las 15 plantillas QR.
 
 **Estándar completo (condiciones inamovibles):** [MENU-TEMPLATE-STANDARD.md](MENU-TEMPLATE-STANDARD.md)
 
@@ -10,11 +10,10 @@ Cada plantilla tiene un preset fijo en `config/company_templates.php` (`template
 
 | Preset | Plantillas |
 |--------|------------|
-| `dark_bleed` | lumiere, otaku, japo, fastfood, asador, oriental |
-| `compact_card` | basic, pasion, temporada, pizza, mar, visual |
-| `circle_emblem` | elegance |
-| `spotlight_dish` | bistro (fallback → compact_card) |
-| `typographic_dark` | nocturne |
+| `dark_bleed` | lumiere, otaku, japo, fastfood, asador |
+| `compact_card` | pasion, temporada, pizza |
+| `circle_emblem` | elegance, saffron, mar |
+| `typographic_dark` | nocturne, maison |
 | `minimal_bar` | catalogo |
 
 ## Metadatos de banner

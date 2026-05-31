@@ -1,223 +1,324 @@
 /**
- * Terciopelo — speakeasy / wine lounge (hero bleed + tarjetas apiladas)
+ * Velvet Bloom — artesanal claro: crema, salvia, plato destacado y tarjetas horizontales
  */
 body.wn-theme-velvet {
-  --wn-card-radius: 18px;
+  --wn-card-radius: 12px;
+  --wn-card-shadow: 0 10px 30px -5px rgba(45, 45, 45, 0.05);
   background: var(--wn-bg) !important;
   color: var(--wn-text);
   -webkit-font-smoothing: antialiased;
+}
+
+.wn-theme-velvet .wn-menu-shell {
   position: relative;
 }
 
-body.wn-theme-velvet::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 0;
-  background:
-    radial-gradient(ellipse 100% 50% at 50% -8%, rgba(166, 61, 92, 0.22) 0%, transparent 58%),
-    radial-gradient(ellipse 55% 35% at 100% 100%, rgba(212, 165, 116, 0.1) 0%, transparent 50%);
+/* —— Spotlight plato destacado —— */
+.wn-theme-velvet .wn-menu-spotlight {
+  margin-left: 0;
+  margin-right: 0;
 }
 
-body.wn-theme-velvet::after {
-  content: '';
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 0;
-  opacity: 0.045;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+.wn-theme-velvet .wn-menu-spotlight--velvet .wn-menu-spotlight__media {
+  aspect-ratio: 16 / 9;
+  max-height: min(56vw, 420px);
 }
 
-body.wn-theme-velvet .wn-menu-shell {
-  position: relative;
-  z-index: 1;
+.wn-theme-velvet .wn-menu-spotlight--velvet .wn-menu-spotlight__media img,
+.wn-theme-velvet .wn-menu-spotlight--velvet .wn-menu-spotlight__media video {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  max-height: none;
+  object-fit: cover;
 }
 
-/* —— Hero bleed cinematográfico —— */
-.wn-theme-velvet .wn-menu-hero--preset-dark-bleed {
-  box-shadow: inset 0 -1px 0 rgba(212, 165, 116, 0.22);
+.wn-theme-velvet .wn-menu-spotlight--velvet .wn-menu-spotlight__gradient {
+  background: linear-gradient(180deg, transparent 35%, rgba(0, 0, 0, 0.62) 100%);
 }
 
-.wn-theme-velvet .wn-menu-hero__title {
-  font-family: var(--wn-font-heading) !important;
-  font-size: clamp(2.15rem, 9.5vw, 3.35rem) !important;
-  font-weight: 600 !important;
-  letter-spacing: -0.025em;
-  line-height: 1.02;
+.wn-theme-velvet .wn-menu-spotlight--velvet .wn-menu-spotlight__content {
+  padding: max(1.25rem, env(safe-area-inset-bottom, 0px)) max(1.25rem, env(safe-area-inset-right, 0px)) 1.35rem max(1.25rem, env(safe-area-inset-left, 0px));
+  align-items: flex-start;
+  text-align: left;
+}
+
+.wn-theme-velvet .wn-menu-spotlight--velvet .wn-menu-spotlight__brand {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  margin-bottom: 0.65rem;
+}
+
+.wn-theme-velvet .wn-menu-spotlight--velvet .wn-menu-spotlight__brand .wn-logo-chip {
+  width: 3rem;
+  height: 3rem;
+  border: 2px solid rgba(255, 255, 255, 0.82);
+  box-shadow: var(--wn-card-shadow);
+  background: #fff;
+}
+
+.wn-theme-velvet .wn-menu-spotlight--velvet .wn-menu-spotlight__badge .webnu-product-badge {
+  background: color-mix(in srgb, var(--wn-primary) 90%, transparent) !important;
   color: #fff !important;
-  -webkit-text-fill-color: #fff;
-  text-shadow:
-    0 4px 28px rgba(0, 0, 0, 0.55),
-    0 0 40px rgba(166, 61, 92, 0.35);
+  border: none !important;
+  font-size: 0.6875rem !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 0.3rem 0.75rem !important;
+  border-radius: 999px !important;
+  backdrop-filter: blur(8px);
 }
 
-.wn-theme-velvet .wn-menu-hero__eyebrow {
-  color: var(--wn-accent) !important;
-  letter-spacing: 0.28em;
+.wn-theme-velvet .wn-menu-spotlight--velvet h2 {
+  font-family: var(--wn-font-heading);
+  font-size: clamp(1.75rem, 5.5vw, 2.25rem);
   font-weight: 700;
-  text-shadow: 0 0 16px rgba(212, 165, 116, 0.35);
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  margin: 0 0 0.35rem;
+  color: #fff;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.35);
 }
 
-.wn-theme-velvet .wn-menu-hero__subtitle {
+.wn-theme-velvet .wn-menu-spotlight--velvet .wn-menu-spotlight__content p {
   font-size: 0.9375rem;
-  line-height: 1.55;
-  max-width: 34ch;
-  opacity: 0.9;
+  line-height: 1.45;
+  color: rgba(255, 255, 255, 0.92);
+  max-width: 36ch;
+  margin: 0;
 }
 
-.wn-theme-velvet .wn-menu-hero__logo-chip {
-  box-shadow:
-    0 0 0 2px rgba(212, 165, 116, 0.45),
-    0 8px 28px rgba(0, 0, 0, 0.45);
-}
-
-/* —— Nav —— */
+/* —— Nav categorías sticky —— */
 .wn-theme-velvet .wn-menu-nav {
-  background: rgba(10, 9, 12, 0.96) !important;
-  backdrop-filter: blur(14px);
-  border-bottom: 2px solid rgba(166, 61, 92, 0.35);
-  box-shadow: 0 10px 32px rgba(0, 0, 0, 0.42);
+  position: sticky;
+  top: 0;
+  z-index: 180;
+  background: color-mix(in srgb, var(--wn-bg) 92%, transparent);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid color-mix(in srgb, var(--wn-text) 10%, transparent);
+  padding: 0.85rem 0 0.9rem;
+}
+
+.wn-theme-velvet .wn-menu-nav__track {
+  padding-left: max(1.25rem, env(safe-area-inset-left, 0px));
+  padding-right: max(1.25rem, env(safe-area-inset-right, 0px));
+  gap: 0.65rem;
 }
 
 .wn-theme-velvet .wn-menu-chip {
-  background: rgba(255, 255, 255, 0.05);
+  background: transparent;
   color: var(--wn-text-muted);
-  border: 1px solid rgba(166, 61, 92, 0.28);
+  border: none;
+  font-size: 0.6875rem;
   font-weight: 700;
-  font-size: 0.8125rem;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
-  transition: background 0.12s, color 0.12s, border-color 0.12s, box-shadow 0.12s, transform 0.1s;
+  padding: 0.5rem 1rem;
+  border-radius: 999px;
 }
 
 .wn-theme-velvet .wn-menu-chip.is-active,
 .wn-theme-velvet .wn-menu-chip:hover {
-  background: var(--wn-primary);
-  color: #fff;
-  border-color: var(--wn-accent);
-  box-shadow: 0 0 22px rgba(166, 61, 92, 0.45);
-}
-
-.wn-theme-velvet .wn-menu-chip:active {
-  transform: scale(0.98);
+  background: var(--wn-accent);
+  color: color-mix(in srgb, var(--wn-primary) 85%, #000);
 }
 
 /* —— Secciones —— */
-.wn-theme-velvet .wn-menu-section__title {
-  display: flex !important;
-  align-items: center;
-  gap: 0.65rem;
+.wn-theme-velvet .wn-menu-main--velvet {
+  padding: 1.75rem max(1.25rem, env(safe-area-inset-right, 0px)) 2rem max(1.25rem, env(safe-area-inset-left, 0px));
+}
+
+.wn-menu-section__title--velvet {
   font-family: var(--wn-font-heading) !important;
-  font-size: clamp(1.35rem, 4.8vw, 1.65rem) !important;
+  font-size: clamp(1.5rem, 4.5vw, 2rem) !important;
   font-weight: 600 !important;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--wn-accent) !important;
-  margin: 1.65rem 0 0.85rem !important;
-  padding: 0 0 0.55rem !important;
-  border-bottom: 2px solid rgba(212, 165, 116, 0.32) !important;
+  line-height: 1.25 !important;
+  color: var(--wn-primary) !important;
+  margin: 0 0 1.25rem !important;
+  padding: 0 !important;
+  border: none !important;
+  text-transform: none !important;
 }
 
-.wn-theme-velvet .wn-menu-section__title .wn-section-icon {
-  color: var(--wn-primary);
-  filter: drop-shadow(0 0 10px rgba(166, 61, 92, 0.45));
+.wn-theme-velvet .wn-menu-section {
+  margin-bottom: 2.5rem;
 }
 
-.wn-theme-velvet .wn-menu-main {
-  padding: 0.35rem max(1rem, env(safe-area-inset-right, 0px)) 2rem max(1rem, env(safe-area-inset-left, 0px));
+/* —— Tarjetas horizontales —— */
+.wn-theme-velvet .wn-modern-card--horizontal {
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  gap: 1rem;
+  padding: 1rem;
+  margin-bottom: 0.85rem;
+  background: var(--wn-surface);
+  border: 1px solid color-mix(in srgb, var(--wn-text) 6%, transparent);
+  border-radius: var(--wn-card-radius);
+  box-shadow: var(--wn-card-shadow);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
-/* —— Tarjetas apiladas —— */
-.wn-theme-velvet .wn-modern-card--stacked {
-  background: linear-gradient(180deg, color-mix(in srgb, var(--wn-surface) 92%, var(--wn-primary)) 0%, var(--wn-surface) 100%);
-  border: 1px solid rgba(166, 61, 92, 0.2);
-  border-top: 2px solid rgba(212, 165, 116, 0.5);
-  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.48);
-  transition: transform 0.1s;
+.wn-theme-velvet .wn-modern-card--horizontal:active {
+  transform: scale(0.99);
 }
 
-.wn-theme-velvet .wn-modern-card--stacked:active {
-  transform: scale(0.985);
+.wn-theme-velvet .wn-modern-card--horizontal .wn-modern-card__media {
+  width: 6rem;
+  height: 6rem;
+  min-height: 0;
+  flex-shrink: 0;
+  border-radius: calc(var(--wn-card-radius) - 2px);
+  overflow: hidden;
+  background: color-mix(in srgb, var(--wn-text) 5%, transparent);
 }
 
-.wn-theme-velvet .wn-modern-card--stacked .wn-modern-card__media::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background: linear-gradient(180deg, transparent 48%, rgba(10, 9, 12, 0.55) 100%);
-  z-index: 1;
+.wn-theme-velvet .wn-modern-card--horizontal .wn-modern-card__body {
+  flex: 1;
+  min-width: 0;
+  padding: 0;
 }
 
 .wn-theme-velvet .wn-modern-card__title {
   font-family: var(--wn-font-heading);
-  font-size: 1.0625rem;
+  font-size: 1.125rem;
   font-weight: 600;
   line-height: 1.25;
+  margin: 0;
+  padding-right: 0;
+}
+
+.wn-theme-velvet .wn-modern-card__title .webnu-product-badge {
+  display: none;
+}
+
+.wn-theme-velvet .wn-modern-card .wn-price-item {
+  font-family: var(--wn-font-body);
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--wn-primary) !important;
+  white-space: nowrap;
 }
 
 .wn-theme-velvet .wn-modern-card__desc {
   font-size: 0.875rem;
-  line-height: 1.55;
-  color: var(--wn-text-muted);
+  line-height: 1.45;
+  color: color-mix(in srgb, var(--wn-text) 72%, transparent);
+  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
-.wn-theme-velvet .wn-modern-card .wn-price-item {
-  font-family: var(--wn-font-heading);
-  font-size: 1.125rem;
+.wn-theme-velvet .wn-allergens {
+  margin-top: 0.15rem;
+}
+
+.wn-theme-velvet .wn-modern-card__badges .webnu-product-badge {
+  font-size: 0.625rem !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  background: color-mix(in srgb, var(--wn-primary) 10%, transparent) !important;
+  color: var(--wn-primary) !important;
+  border: none !important;
+  padding: 0.15rem 0.5rem !important;
+  border-radius: 999px !important;
+}
+
+.wn-theme-velvet .wn-allergens--text-only .wn-allergens__item--text-only {
+  background: color-mix(in srgb, var(--wn-primary) 10%, transparent);
+  border-color: transparent;
+  color: var(--wn-primary);
+  font-size: 0.625rem;
   font-weight: 700;
-  color: var(--wn-accent) !important;
-  text-shadow: 0 0 14px rgba(212, 165, 116, 0.22);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
 }
 
-.wn-theme-velvet .wn-modern-card__detail-btn {
-  min-width: 44px;
-  min-height: 44px;
-  background: rgba(166, 61, 92, 0.25);
-  color: var(--wn-accent);
-  border: 1px solid rgba(212, 165, 116, 0.38);
-}
 
 .wn-theme-velvet .wn-fav-btn {
-  min-width: 44px;
-  min-height: 44px;
-  color: var(--wn-text-muted);
+  background: color-mix(in srgb, var(--wn-primary) 8%, var(--wn-surface));
+  border: 1px solid color-mix(in srgb, var(--wn-primary) 18%, transparent);
 }
 
-.wn-theme-velvet .wn-modern-card__badges .webnu-product-badge--featured {
-  background: linear-gradient(135deg, var(--wn-accent), var(--wn-primary)) !important;
-  color: #0a090c !important;
+.wn-theme-velvet .wn-modern-card--no-media .wn-fav-btn {
+  background: var(--wn-surface);
 }
 
+.wn-theme-velvet .wn-fav-btn.is-favorited,
+.wn-theme-velvet .wn-fav-btn[aria-pressed='true'] {
+  color: var(--wn-primary);
+  background: color-mix(in srgb, var(--wn-primary) 12%, #fff);
+  border-color: color-mix(in srgb, var(--wn-primary) 35%, transparent);
+}
+
+.wn-theme-velvet .wn-modern-card--no-media.wn-modern-card--horizontal {
+  min-height: 6.5rem;
+  padding-top: 1rem;
+}
+
+/* —— Info flotante —— */
 .wn-theme-velvet .wn-floating-info {
-  width: 48px;
-  height: 48px;
-  background: var(--wn-primary);
-  color: var(--wn-accent);
-  border: 2px solid rgba(212, 165, 116, 0.45);
-  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.45), 0 0 20px rgba(166, 61, 92, 0.25);
+  background: var(--wn-surface);
+  color: var(--wn-primary);
+  border: 1px solid color-mix(in srgb, var(--wn-primary) 25%, transparent);
+  box-shadow: var(--wn-card-shadow);
 }
 
+/* —— Footer —— */
 .wn-theme-velvet .wn-modern-footer {
-  background: linear-gradient(180deg, var(--wn-bg) 0%, #050408 100%);
-  border-top: 1px solid rgba(166, 61, 92, 0.25);
+  background: var(--wn-bg);
+  border-top: 1px solid color-mix(in srgb, var(--wn-text) 10%, transparent);
 }
 
+/* —— Favoritos —— */
+.wn-theme-velvet .wn-favorites-bar__btn {
+  background: var(--wn-surface);
+  color: var(--wn-primary);
+  border-color: color-mix(in srgb, var(--wn-primary) 30%, transparent);
+}
+
+.wn-theme-velvet .wn-favorites-bar__badge {
+  background: var(--wn-primary);
+  color: #fff;
+}
+
+.wn-theme-velvet .wn-favorites-item {
+  border-color: color-mix(in srgb, var(--wn-primary) 18%, transparent);
+}
+
+.wn-theme-velvet .wn-favorites-item__original-name,
+.wn-theme-velvet .wn-favorites-item__price {
+  color: var(--wn-primary);
+}
+
+/* —— Modal —— */
 .wn-theme-velvet .wn-dish-modal .modal-content.wn-dish-modal__content {
-  border: 1px solid rgba(166, 61, 92, 0.3);
+  background: var(--wn-surface);
+  border: 1px solid color-mix(in srgb, var(--wn-primary) 15%, transparent);
+  border-radius: var(--wn-card-radius);
+  box-shadow: 0 24px 64px rgba(45, 45, 45, 0.12);
 }
 
 .wn-theme-velvet .wn-dish-modal .wn-price-item {
-  color: var(--wn-accent) !important;
-  font-family: var(--wn-font-heading);
-  font-size: 1.5rem;
+  color: var(--wn-primary) !important;
+  font-weight: 700;
 }
 
 @media (min-width: 768px) {
-  .wn-theme-velvet .wn-menu-main {
-    max-width: 440px;
+  .wn-theme-velvet .wn-menu-main--velvet {
+    max-width: 960px;
     margin: 0 auto;
+  }
+
+  .wn-theme-velvet .wn-menu-spotlight--velvet .wn-menu-spotlight__media {
+    aspect-ratio: 21 / 9;
+    max-height: 380px;
   }
 }

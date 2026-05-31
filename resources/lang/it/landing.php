@@ -107,9 +107,9 @@ return [
         'more_desc' => 'Giapponese, fast food, pesce, fine dining, grill, cocktail bar… Il catalogo cresce ogni stagione.',
         'cta' => 'Crea il mio menu',
         'showcase' => [
-            'basic' => [
-                'label' => 'Base',
-                'description' => 'Menu chiaro e compatto, ideale per ristoranti e bistrot.',
+            'pasion' => [
+                'label' => 'Passione',
+                'description' => 'Menu chiaro e tradizionale, ideale per ristoranti classici.',
             ],
             'nocturne' => [
                 'label' => 'Notturno',

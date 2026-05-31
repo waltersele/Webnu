@@ -227,6 +227,6 @@ class ProfileWizardService
     protected function isTemplateSelected(Company $company): bool
     {
         $template = (string) $company->template;
-        return $template !== '' && $template !== 'basic';
+        return in_array($template, array_keys(config('company_templates.templates', [])), true);
     }
 }

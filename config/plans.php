@@ -11,9 +11,8 @@ return [
     | Plantillas de carta QR incluidas en Free (el resto requiere Pro o superior).
     */
     'free_template_keys' => [
-        'basic',
+        'pasion',
         'lumiere',
-        'bistro',
         'nocturne',
         'catalogo',
     ],

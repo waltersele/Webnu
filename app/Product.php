@@ -25,7 +25,6 @@ class Product extends Model
 
     protected $casts = [
         'sales_demo_highlight' => 'boolean',
-        'highlight' => 'boolean',
         'enabled' => 'boolean',
         'individual_sale' => 'boolean',
         'weight_sale' => 'boolean',

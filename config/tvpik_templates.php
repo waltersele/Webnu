@@ -139,7 +139,7 @@ return [
         'tapas' => [
             'key' => 'tapas',
             'label' => 'Tapas / Destacados',
-            'description' => 'Rejilla 2x2 con tus platos estrella y precio destacado.',
+            'description' => 'Rejilla 2x2 editorial con sello hallmark, badges y precios en acento del local.',
             'category' => 'restaurant',
             'layout' => 'tapas',
             'view' => 'tv.templates.tapas',

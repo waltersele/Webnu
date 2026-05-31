@@ -17,7 +17,7 @@ return [
         'ca' => ['label' => 'Català', 'native' => 'Català', 'hreflang' => 'ca', 'flag' => 'es-ct'],
     ],
 
-    'template_showcase_keys' => ['basic', 'nocturne', 'otaku'],
+    'template_showcase_keys' => ['pasion', 'nocturne', 'otaku'],
 
     'pricing_order' => ['free', 'pro', 'plus', 'franchise'],
 
@@ -26,7 +26,7 @@ return [
     'franchise_contact_email' => env('WEBNU_FRANCHISE_EMAIL', 'hola@webnu.es'),
 
     'template_demo_urls' => [
-        'basic' => '/carta/demo',
+        'pasion' => '/carta/demo',
         'nocturne' => '/carta/demo-cocktails',
         'otaku' => '/carta/demo-fuego',
         'japo' => '/carta/demo-japo',
@@ -36,8 +36,6 @@ return [
         'elegance' => '/carta/demo-elegance',
         'asador' => '/carta/demo-asador',
         'saffron' => '/carta/demo?tpl=saffron',
-        'velvet' => '/carta/demo?tpl=velvet',
-        'atelier' => '/carta/demo?tpl=atelier',
         'maison' => '/carta/demo-maison',
     ],
 

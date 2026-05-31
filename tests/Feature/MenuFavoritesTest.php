@@ -33,9 +33,8 @@ class MenuFavoritesTest extends TestCase
         $response = $this->get(route('public.company', ['companySlug' => $company->slug]));
 
         $response->assertOk();
+        $response->assertDontSee('class="wn-fav-btn"', false);
         $response->assertDontSee('id="webnu-favorites-catalog"', false);
-        $response->assertDontSee('webnu-menu-favorites.js', false);
-        $response->assertDontSee('data-fav-toggle', false);
     }
 
     private function createDigitalMenuCompany(bool $favoritesEnabled): Company
@@ -45,7 +44,7 @@ class MenuFavoritesTest extends TestCase
         $company = Company::create([
             'name' => 'Carta favoritos test',
             'slug' => 'fav-feature-' . uniqid(),
-            'template' => 'basic',
+            'template' => 'pasion',
             'menu_type' => 1,
             'enabled' => true,
             'user_id' => $user->id,

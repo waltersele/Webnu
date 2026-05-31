@@ -108,9 +108,9 @@ return [
         'more_desc' => 'Japanese, fast food, seafood, fine dining, grill, cocktail bar… The catalogue grows every season.',
         'cta' => 'Create my menu',
         'showcase' => [
-            'basic' => [
-                'label' => 'Basic',
-                'description' => 'Clear, compact menu — ideal for restaurants and bistros.',
+            'pasion' => [
+                'label' => 'Pasión',
+                'description' => 'Clear, warm traditional menu — ideal for classic restaurants.',
             ],
             'nocturne' => [
                 'label' => 'Nocturne',

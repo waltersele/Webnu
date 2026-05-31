@@ -168,7 +168,7 @@ class OnboardingController extends Controller
                     ? array_keys(config('company_templates.templates', []))
                     : $plans->freeTemplateKeys();
                 if (count($allowed) === 0) {
-                    $allowed = ['basic'];
+                    $allowed = ['pasion'];
                 }
                 $data = $request->validate([
                     'template' => 'required|string|in:' . implode(',', $allowed),
@@ -330,7 +330,7 @@ class OnboardingController extends Controller
     protected function templatePreviewUrls(): array
     {
         $fallbackSlugs = [
-            'basic' => 'demo',
+            'pasion' => 'demo',
             'nocturne' => 'demo-cocktails',
             'otaku' => 'demo-fuego',
             'japo' => 'demo-japo',
@@ -340,16 +340,10 @@ class OnboardingController extends Controller
             'elegance' => 'demo-elegance',
             'asador' => 'demo-asador',
             'lumiere' => 'demo-elegance',
-            'bistro' => 'demo',
             'temporada' => 'demo',
             'catalogo' => 'demo',
-            'pasion' => 'demo',
-            'oriental' => 'demo-japo',
-            'visual' => 'demo',
             'maison' => 'demo-maison',
-            'atelier' => 'demo-elegance',
             'saffron' => 'demo',
-            'velvet' => 'demo-elegance',
         ];
 
         $urls = [];

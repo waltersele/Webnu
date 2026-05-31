@@ -1,83 +1,235 @@
-/**
- * Mar — pescado y mariscos, azules oceánicos
- */
-body.wn-theme-mar {
-  background: var(--wn-bg) !important;
-}
-
-body.wn-theme-mar::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 0;
-  opacity: 0.06;
-  background: linear-gradient(180deg, transparent 60%, rgba(0, 119, 182, 0.15) 100%);
-}
-
-body.wn-theme-mar .wn-menu-shell {
-  position: relative;
-  z-index: 1;
-}
-
-.wn-theme-mar .wn-menu-hero--light .wn-menu-hero__overlay--light {
-  background: linear-gradient(180deg, rgba(224, 247, 250, 0.3) 0%, var(--wn-bg) 100%);
-}
-
-.wn-theme-mar .wn-menu-hero__title {
-  color: var(--wn-primary) !important;
-  font-family: var(--wn-font-heading);
-  letter-spacing: -0.02em;
-}
-
-.wn-theme-mar .wn-menu-nav {
-  background: rgba(255, 255, 255, 0.92) !important;
-  backdrop-filter: blur(8px);
-  border-bottom: 1px solid rgba(2, 119, 189, 0.12);
-}
-
-.wn-theme-mar .wn-menu-chip {
-  background: #fff;
-  color: var(--wn-text-muted);
-  border: 1px solid rgba(2, 119, 189, 0.15);
-  border-radius: 999px;
-}
-
-.wn-theme-mar .wn-menu-chip.is-active,
-.wn-theme-mar .wn-menu-chip:hover {
-  background: var(--wn-primary);
-  color: #fff;
-  border-color: var(--wn-primary);
-}
-
-.wn-theme-mar .wn-menu-section__title {
-  font-family: var(--wn-font-heading) !important;
-  color: var(--wn-primary) !important;
-  font-size: 1.35rem !important;
-  border-bottom: 2px solid rgba(0, 180, 216, 0.35) !important;
-  padding-bottom: 0.45rem !important;
-}
-
-.wn-theme-mar .wn-menu-section__title::after {
-  content: ' ~';
-  color: var(--wn-accent);
-  font-weight: 400;
-}
-
-.wn-theme-mar .wn-modern-card--stacked {
-  background: var(--wn-surface);
-  border: 1px solid rgba(2, 119, 189, 0.1);
-  border-radius: 16px;
-  box-shadow: 0 4px 24px rgba(2, 119, 189, 0.08);
-  overflow: hidden;
-}
-
-.wn-theme-mar .wn-modern-card .wn-price-item {
-  color: var(--wn-primary) !important;
-  font-weight: 600;
-}
-
-.wn-theme-mar .wn-modern-footer {
-  background: var(--wn-surface);
-  border-top: 1px solid rgba(2, 119, 189, 0.12);
-}
+/**
+ * Azure Waves (mar) — acentos: tokens, tipografía, color y sombras
+ */
+body.wn-theme-mar {
+  --wn-card-radius: 12px;
+  --wn-card-shadow: 0 8px 20px rgba(27, 54, 93, 0.06);
+  --wn-mar-primary-container: #1b365d;
+  --wn-mar-secondary-container: #b3e9f5;
+  --wn-mar-secondary-fixed: #b6ebf8;
+  background: var(--wn-bg) !important;
+  color: var(--wn-text);
+  -webkit-font-smoothing: antialiased;
+}
+
+.wn-theme-mar .wn-menu-hero--circle .wn-menu-hero__logo-chip--circle {
+  box-shadow:
+    0 0 0 3px rgba(255, 255, 255, 0.22),
+    var(--wn-card-shadow);
+}
+
+.wn-theme-mar .wn-menu-hero--text-light .wn-menu-hero__title {
+  font-family: var(--wn-font-heading);
+  font-size: clamp(2rem, 7vw, 2.25rem) !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+  text-shadow: 0 2px 16px rgba(0, 0, 0, 0.35);
+}
+
+.wn-theme-mar .wn-menu-hero--text-dark .wn-menu-hero__title {
+  font-family: var(--wn-font-heading);
+  font-size: clamp(2rem, 7vw, 2.25rem) !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+  color: var(--wn-text) !important;
+  -webkit-text-fill-color: var(--wn-text);
+  text-shadow: none;
+}
+
+.wn-theme-mar .wn-menu-hero__eyebrow {
+  color: var(--wn-mar-secondary-fixed) !important;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+}
+
+.wn-theme-mar .wn-menu-hero--text-dark .wn-menu-hero__eyebrow {
+  color: var(--wn-accent) !important;
+}
+
+.wn-theme-mar .wn-menu-hero__subtitle {
+  font-family: var(--wn-font-body);
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--wn-mar-secondary-fixed) !important;
+  opacity: 1;
+  max-width: none;
+  margin: 0 auto;
+}
+
+.wn-theme-mar .wn-menu-hero--text-dark .wn-menu-hero__subtitle {
+  color: var(--wn-text-muted) !important;
+}
+
+.wn-theme-mar .wn-menu-featured-card__inner {
+  background: var(--wn-surface);
+  border-radius: var(--wn-card-radius);
+  box-shadow: var(--wn-card-shadow);
+}
+
+.wn-theme-mar .wn-menu-featured-card__eyebrow {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-family: var(--wn-font-body);
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--wn-accent);
+}
+
+.wn-theme-mar .wn-menu-featured-card__title {
+  font-family: var(--wn-font-heading);
+  font-size: clamp(1.5rem, 4.5vw, 2rem);
+  font-weight: 600;
+  line-height: 1.25;
+  color: var(--wn-primary);
+  margin: 0 0 0.75rem;
+}
+
+.wn-theme-mar .wn-menu-featured-card__desc {
+  font-size: 1rem;
+  line-height: 1.5;
+  color: var(--wn-text-muted);
+  margin: 0 0 1rem;
+}
+
+.wn-theme-mar .wn-menu-featured-card__foot .wn-price-item {
+  font-family: var(--wn-font-heading);
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--wn-primary) !important;
+}
+
+.wn-theme-mar .wn-menu-nav {
+  background: color-mix(in srgb, var(--wn-bg) 92%, transparent);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: none;
+}
+
+.wn-theme-mar .wn-menu-chip {
+  background: transparent;
+  color: var(--wn-text-muted);
+  border: 1.5px solid #c4c6cf;
+  border-radius: 999px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  padding: 0.5rem 1.5rem;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.wn-theme-mar .wn-menu-chip.is-active,
+.wn-theme-mar .wn-menu-chip:hover {
+  background: var(--wn-mar-primary-container);
+  color: #fff;
+  border-color: var(--wn-mar-primary-container);
+}
+
+.wn-menu-section__title--mar {
+  font-family: var(--wn-font-heading) !important;
+  font-size: clamp(1.35rem, 4vw, 1.5rem) !important;
+  font-weight: 600 !important;
+  line-height: 1.3 !important;
+  color: var(--wn-primary) !important;
+  margin: 0 0 1rem !important;
+  padding: 0 0.25rem !important;
+  border: none !important;
+  text-transform: none !important;
+}
+
+.wn-theme-mar .wn-modern-card--horizontal.wn-modern-card--no-media {
+  border-left: 4px solid var(--wn-mar-secondary-container);
+}
+
+.wn-theme-mar .wn-modern-card__title {
+  font-family: var(--wn-font-body);
+  font-size: 0.875rem;
+  font-weight: 700;
+  line-height: 1.25;
+  color: var(--wn-primary);
+}
+
+.wn-theme-mar .wn-modern-card__desc {
+  font-size: 0.75rem;
+  line-height: 1.35;
+  color: var(--wn-text-muted);
+}
+
+.wn-theme-mar .wn-modern-card .wn-price-item {
+  font-family: var(--wn-font-body);
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--wn-primary) !important;
+}
+
+.wn-theme-mar .wn-fav-btn {
+  background: color-mix(in srgb, var(--wn-accent) 12%, var(--wn-surface));
+  border: 1px solid color-mix(in srgb, var(--wn-accent) 25%, transparent);
+  color: var(--wn-accent);
+}
+
+.wn-theme-mar .wn-fav-btn.is-favorited,
+.wn-theme-mar .wn-fav-btn[aria-pressed='true'] {
+  color: var(--wn-primary);
+  background: color-mix(in srgb, var(--wn-primary) 10%, var(--wn-surface));
+  border-color: color-mix(in srgb, var(--wn-primary) 30%, transparent);
+}
+
+.wn-theme-mar .wn-floating-info {
+  background: color-mix(in srgb, var(--wn-bg) 90%, transparent);
+  backdrop-filter: blur(12px);
+  color: var(--wn-primary);
+  border: 1px solid color-mix(in srgb, var(--wn-primary) 15%, transparent);
+  box-shadow: var(--wn-card-shadow);
+}
+
+.wn-theme-mar .wn-modern-footer {
+  background: var(--wn-bg);
+  border-top: 1px solid color-mix(in srgb, var(--wn-primary) 10%, transparent);
+}
+
+.wn-theme-mar .wn-favorites-bar__btn {
+  background: var(--wn-surface);
+  color: var(--wn-primary);
+  border-color: color-mix(in srgb, var(--wn-primary) 20%, transparent);
+  box-shadow: var(--wn-card-shadow);
+}
+
+.wn-theme-mar .wn-favorites-bar__badge {
+  background: var(--wn-mar-primary-container);
+  color: #fff;
+}
+
+.wn-theme-mar .wn-favorites-item {
+  border-color: color-mix(in srgb, var(--wn-primary) 12%, transparent);
+}
+
+.wn-theme-mar .wn-favorites-item__original-name,
+.wn-theme-mar .wn-favorites-item__price {
+  color: var(--wn-primary);
+}
+
+.wn-theme-mar .wn-dish-modal .modal-content.wn-dish-modal__content {
+  background: var(--wn-surface);
+  border-radius: var(--wn-card-radius);
+  box-shadow: 0 24px 64px rgba(27, 54, 93, 0.12);
+}
+
+.wn-theme-mar .wn-dish-modal .wn-price-item {
+  color: var(--wn-primary) !important;
+  font-weight: 700;
+}
+
+@media (min-width: 768px) {
+  .wn-theme-mar .wn-menu-main--mar {
+    max-width: 720px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+

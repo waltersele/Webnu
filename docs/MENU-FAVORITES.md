@@ -7,11 +7,11 @@ Lista de platos marcados por el comensal en la carta pública digital. Persisten
 1. En la carta (`menu_type = 1`, plantillas modernas), cada producto muestra un botón corazón.
 2. Un clic añade o quita el plato de la lista.
 3. La barra inferior **Mis favoritos** muestra un badge con el total.
-4. Al abrir el panel, cada plato incluye:
-   - Nombre en el **idioma del comensal** (`?lang=` / detección).
-   - Subtítulo con el nombre en el **idioma base de la carta** (`company.default_locale`) para el camarero.
+4. Al abrir el panel a pantalla completa, cada plato incluye:
+   - Nombre en el **idioma del comensal** (`?lang=` / detección), con etiqueta del idioma.
+   - Nombre en el **idioma base de la carta** (`company.default_locale`) para el camarero.
    - Foto y precio formateado.
-5. **Mostrar al camarero** amplía tipografía y destaca el nombre original.
+5. Texto de ayuda bajo el título: *«Muestra esta pantalla al camarero…»* (sin botón extra).
 
 ## Almacenamiento
 
@@ -36,13 +36,13 @@ En **Personalizar** → **Lista de favoritos** (solo cartas digitales): activar/
 
 - Partial: `resources/views/themes/partials/menu-favorites.blade.php`
 - JS: `public/js/webnu-menu-favorites.js`
-- CSS mínimo: `public/css/themes/front-menu-ui.css` (clases `wn-favorites-*`, `wn-fav-btn`)
-- Textos UI: `config/menu_locales.php` → `ui.{locale}.favorites_*`
+- CSS: `public/css/themes/front-menu-ui.css` (clases `wn-favorites-*`, `wn-fav-btn`) + overrides por plantilla (p. ej. `front-lumiere.css`)
+- Textos UI: `config/menu_locales.php` → `ui.{locale}.favorites_*` (incl. `favorites_hint`)
 
 ## Alcance v1
 
 - Cartas digitales con `modern-menu-layout` (no PDF, no `menus-combined`).
-- Estilos compartidos; pulido por plantilla en fase posterior.
+- Estilos base con variables del tema (`--wn-bg`, `--wn-surface`, `--wn-primary`); pulido por plantilla en CSS propio.
 
 ## Verificación manual
 

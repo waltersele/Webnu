@@ -48,12 +48,25 @@ $(function () {
         }
     });
 
+    function portalDishModal($modal) {
+        if (!$modal.length || $modal.data('portalBody')) {
+            return;
+        }
+        document.body.appendChild($modal[0]);
+        $modal.data('portalBody', true);
+    }
+
+    $('.wn-dish-modal').each(function () {
+        portalDishModal($(this));
+    });
+
     function openDishModal(selector) {
         if (!selector) {
             return;
         }
         var $modal = $(selector);
         if ($modal.length) {
+            portalDishModal($modal);
             $modal.modal('show');
         }
     }
@@ -69,14 +82,21 @@ $(function () {
     });
 
     $('.wn-modern-card--interactive, .wn-card-overlay, .wn-card-temporada, .wn-card-catalogo').on('click', function (e) {
-        if ($(e.target).closest('.wn-fav-btn, .wn-allergens, .modal, a[href]:not([data-target])').length) {
+        if ($(e.target).closest('.wn-fav-btn, [data-fav-toggle], .modal, a[href]:not([data-target])').length) {
             return;
         }
         var $trigger = $(this).find('[data-target^="#wnDish"]').not('.wn-card-reel__open').first();
         if (!$trigger.length) {
             $trigger = $(this).find('[data-target^="#wnDish"]').first();
         }
-        openDishModal($trigger.attr('data-target'));
+        var target = $trigger.length ? $trigger.attr('data-target') : null;
+        if (!target) {
+            var productId = $(this).data('product-id');
+            if (productId) {
+                target = '#wnDish' + productId;
+            }
+        }
+        openDishModal(target);
     });
 
     if ('IntersectionObserver' in window && $nav.length) {
@@ -109,4 +129,5 @@ $(function () {
 @if(!empty($favoritesEnabled))
 <script src="{{ asset('js/webnu-menu-favorites.js') }}" defer></script>
 @endif
+<script src="{{ asset('js/webnu-card-reels.js') }}" defer></script>
 <script src="{{ asset('js/webnu-logo-autocontrast.js') }}" defer></script>

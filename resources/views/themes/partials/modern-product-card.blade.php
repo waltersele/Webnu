@@ -6,6 +6,7 @@
     if (! $hasMenuMedia) {
         $cardClass .= ' wn-modern-card--no-media';
     }
+    $showCardFooter = ! empty($favoritesEnabled) || $product->allergens->count() > 0;
 @endphp
 
 <article class="{{ $cardClass }}" data-product-id="{{ $product->id }}">
@@ -17,6 +18,9 @@
                     @include('themes.partials.product-highlight-badge', ['product' => $product])
                 </div>
             @endif
+            <span class="wn-modern-card__detail-hint" aria-hidden="true">
+                @include('themes.partials.icons.svg-search')
+            </span>
         </div>
     @endif
     <div class="wn-modern-card__body">
@@ -27,8 +31,18 @@
                     @include('themes.partials.product-highlight-badge', ['product' => $product])
                 @endif
             </h3>
-            <div class="wn-modern-card__actions">
-                @if(!empty($favoritesEnabled))
+            @include('themes.partials.product-prices', ['product' => $product])
+        </div>
+        @if($product->description)
+            <p class="wn-modern-card__desc">{{ $product->description }}</p>
+        @endif
+        @if($showCardFooter)
+        <div class="wn-modern-card__footer">
+            <div class="wn-modern-card__allergens-slot">
+                @include('themes.partials.menu-product-allergens', ['product' => $product])
+            </div>
+            @if(!empty($favoritesEnabled))
+                <div class="wn-modern-card__fav-slot">
                     <button type="button"
                             class="wn-fav-btn"
                             data-fav-toggle
@@ -37,17 +51,10 @@
                             aria-label="{{ config('menu_locales.ui.' . ($menuLocale ?? 'es') . '.favorites_add', 'Añadir a favoritos') }}">
                         @include('themes.partials.icons.svg-heart')
                     </button>
-                @endif
-                <button type="button" class="wn-modern-card__detail-btn" data-toggle="modal" data-target="#wnDish{{ $product->id }}" aria-label="Ver detalle">
-                    @include('themes.partials.icons.svg-chevron-right')
-                </button>
-            </div>
+                </div>
+            @endif
         </div>
-        @if($product->description)
-            <p class="wn-modern-card__desc">{{ $product->description }}</p>
         @endif
-        @include('themes.partials.product-prices', ['product' => $product])
-        @include('themes.partials.menu-product-allergens', ['product' => $product])
     </div>
 </article>
 

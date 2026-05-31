@@ -119,7 +119,7 @@ foreach ($clients as $data) {
                 'user_id' => $user->id,
                 'enabled' => true,
                 'menu_type' => 1,
-                'template' => 'basic',
+                'template' => 'pasion',
                 'chef_name' => '',
                 'address' => 'Calle Demo 1',
                 'postal_code' => '03001',

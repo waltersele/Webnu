@@ -162,8 +162,8 @@ $fastfoodDishes = [
 ];
 
 $marDishes = [
-    ['section' => 'Del mar', 'name' => 'Lubina a la espalda', 'description' => 'Lubina salvaje, refrito de ajos tiernos y guindilla.', 'price' => '22.00', 'image' => 'brasa-lubina.jpg', 'allergens' => ['Pescados'], 'highlight' => 'bestseller', 'video' => 'fish'],
-    ['section' => 'Del mar', 'name' => 'Gambas al ajillo', 'description' => 'Gambas rojas de Vinaròs, ajo confitado y guindilla.', 'price' => '16.50', 'image' => 'brasa-lubina.jpg', 'allergens' => ['Crustáceos'], 'highlight' => 'featured', 'video' => 'fish'],
+    ['section' => 'Del mar', 'name' => 'Lubina a la espalda', 'description' => 'Lubina salvaje, refrito de ajos tiernos y guindilla.', 'price' => '22.00', 'image' => 'brasa-lubina.jpg', 'allergens' => ['Pescados'], 'highlight' => 'featured', 'video' => 'fish'],
+    ['section' => 'Del mar', 'name' => 'Gambas al ajillo', 'description' => 'Gambas rojas de Vinaròs, ajo confitado y guindilla.', 'price' => '16.50', 'image' => 'brasa-lubina.jpg', 'allergens' => ['Crustáceos'], 'highlight' => 'bestseller', 'video' => 'fish'],
     ['section' => 'Del mar', 'name' => 'Arroz meloso de mar', 'description' => 'Arroz bomba con caldo de pescado, sepia y alioli.', 'price' => '19.00', 'image' => 'brasa-arroz-setas.jpg', 'allergens' => ['Pescados', 'Crustáceos', 'Gluten'], 'video' => 'pasta_rice'],
     ['section' => 'Para compartir', 'name' => 'Gazpacho de tomate', 'description' => 'Tomate pera, pepino y aceite de oliva virgen extra.', 'price' => '7.50', 'image' => 'brasa-gazpacho.jpg', 'allergens' => ['Apio'], 'video' => null],
     ['section' => 'Postres', 'name' => 'Tarta de limón', 'description' => 'Merengue suave y crema de limón de la huerta.', 'price' => '6.50', 'image' => 'brasa-tarta-queso.jpg', 'allergens' => ['Gluten', 'Lácteos', 'Huevos'], 'video' => null],
@@ -200,7 +200,7 @@ $demoCompanies = [
         'slug' => 'demo',
         'name' => 'La Brasa del Puerto',
         'chef_name' => 'Ana García',
-        'template' => 'basic',
+        'template' => 'pasion',
         'comments' => 'Cocina mediterránea con brasa a la vista y pescado del día en el puerto.',
         'background_header' => 'demo/demo-header.jpg',
         'logo' => 'demo/demo-logo.jpg',

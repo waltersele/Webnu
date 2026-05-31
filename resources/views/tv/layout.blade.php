@@ -5,11 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{ $company->name }} — TV{{ !empty($templateMeta['label']) ? ' · ' . $templateMeta['label'] : '' }}</title>
     <link rel="stylesheet" href="{{ asset('css/webnu-tv.css') }}">
-    <style>
-        :root {
-            --wn-tv-accent: {{ $accent ?? '#004ac6' }};
-        }
-    </style>
+    @include('tv.partials.theme-vars')
 </head>
 <body class="wn-tv wn-tv--{{ $layout }}{{ !empty($isPreview) ? ' wn-tv--preview' : '' }}{{ !empty($isPlayerMode) ? ' wn-tv--player' : '' }}{{ empty($showHeader) ? ' wn-tv--no-header' : '' }}">
     @include('tv.partials.background')

@@ -413,6 +413,8 @@ Cada plantilla puede declarar `'category' => 'retail'`. El endpoint `GET /tv-tem
 
 **Añadir una plantilla nueva (checklist WebNU):**
 
+Estándar completo (arquitectura, personalización, tokens, QA): [`TV-TEMPLATE-STANDARD.md`](TV-TEMPLATE-STANDARD.md).
+
 1. Entrada en `templates` con `key`, `label`, `description`, `layout`, `view`, `thumbnail`, opcional `category`.
 2. Si la categoría es nueva → añadirla en `categories` con su `label`.
 3. Asegurar vista Blade en `resources/views/tv/templates/…` y ruta en [`routes/web.php`](../routes/web.php) si el `layout` es nuevo.

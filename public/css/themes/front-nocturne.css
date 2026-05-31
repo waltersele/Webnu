@@ -278,6 +278,26 @@ body.wn-theme-nocturne {
   background: var(--wn-surface);
 }
 
+.wn-theme-nocturne .wn-modern-footer__about {
+  display: none;
+}
+
+.wn-theme-nocturne .wn-menu-hero--preset-typographic .wn-menu-hero__typographic {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.wn-theme-nocturne .wn-menu-hero--preset-typographic .wn-menu-hero__brand-label,
+.wn-theme-nocturne .wn-menu-hero--preset-typographic .wn-menu-hero__title,
+.wn-theme-nocturne .wn-menu-hero--preset-typographic .wn-menu-hero__subtitle {
+  width: 100%;
+  max-width: 36ch;
+  margin-left: auto;
+  margin-right: auto;
+  text-align: center;
+}
+
 .wn-theme-nocturne .wn-modern-card__detail-btn {
   background: rgba(255, 255, 255, 0.08);
   color: var(--wn-primary);

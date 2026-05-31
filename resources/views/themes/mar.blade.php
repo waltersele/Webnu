@@ -2,7 +2,7 @@
 
 @include('themes.partials.modern-menu-layout', [
     'variant' => 'mar',
-    'cardLayout' => 'stacked',
+    'cardLayout' => 'horizontal',
 ])
 
 @include('themes.partials.modern-scripts')

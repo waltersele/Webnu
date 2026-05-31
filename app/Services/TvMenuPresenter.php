@@ -39,7 +39,7 @@ class TvMenuPresenter
             return ! empty($product->video);
         })->values();
 
-        $settings = $company->resolvedThemeSettings();
+        $themeTokens = $this->themeTokens($company);
         $registry = app(TvTemplateRegistry::class);
         $templateMeta = $registry->templateByLayout($layout) ?? [];
 
@@ -71,9 +71,56 @@ class TvMenuPresenter
             'headerUrl' => $company->background_header
                 ? url('img/' . ltrim($company->background_header, '/'))
                 : null,
-            'accent' => $settings['primary'] ?? '#004ac6',
+            'accent' => $themeTokens['accent'],
+            'themeAccent' => $themeTokens['themeAccent'],
+            'themeBg' => $themeTokens['themeBg'],
+            'themeSurface' => $themeTokens['themeSurface'],
+            'themeText' => $themeTokens['themeText'],
+            'themeTextMuted' => $themeTokens['themeTextMuted'],
+            'themeFontDisplay' => $themeTokens['themeFontDisplay'],
+            'themeFontBody' => $themeTokens['themeFontBody'],
+            'themeBadgeFg' => $themeTokens['themeBadgeFg'],
             'isPreview' => request()->boolean('preview'),
         ];
+    }
+
+    /**
+     * Tokens de tema carta → TV (Personalización en admin).
+     *
+     * @return array<string, string>
+     */
+    protected function themeTokens(Company $company): array
+    {
+        $settings = $company->resolvedThemeSettings();
+        $primary = $settings['primary'] ?? '#004ac6';
+        $accent = $settings['accent'] ?? $primary;
+
+        return [
+            'accent' => $primary,
+            'themeAccent' => $accent,
+            'themeBg' => $settings['background'] ?? '#0a0e14',
+            'themeSurface' => $settings['surface'] ?? 'rgba(255, 255, 255, 0.06)',
+            'themeText' => $settings['text'] ?? '#f5f7fa',
+            'themeTextMuted' => $settings['text_muted'] ?? 'rgba(245, 247, 250, 0.65)',
+            'themeFontDisplay' => $company->themeFontFamily('font_heading'),
+            'themeFontBody' => $company->themeFontFamily('font_body'),
+            'themeBadgeFg' => $this->contrastingTextColor($accent),
+        ];
+    }
+
+    protected function contrastingTextColor(string $hex): string
+    {
+        $hex = ltrim($hex, '#');
+        if (strlen($hex) !== 6 || ! ctype_xdigit($hex)) {
+            return '#0f0e0d';
+        }
+
+        $r = hexdec(substr($hex, 0, 2));
+        $g = hexdec(substr($hex, 2, 2));
+        $b = hexdec(substr($hex, 4, 2));
+        $lum = (0.2126 * $r + 0.7152 * $g + 0.0722 * $b) / 255;
+
+        return $lum < 0.55 ? '#f5f7fa' : '#0f0e0d';
     }
 
     protected function menusData(Company $company): Collection

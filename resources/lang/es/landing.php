@@ -108,9 +108,9 @@ return [
         'more_desc' => 'Japonés, fast food, marisquería, fine dining, asador, coctelería… El catálogo crece cada temporada.',
         'cta' => 'Crear mi carta',
         'showcase' => [
-            'basic' => [
-                'label' => 'Básica',
-                'description' => 'Carta clara y compacta, ideal para restaurantes y bistros.',
+            'pasion' => [
+                'label' => 'Pasión',
+                'description' => 'Carta clara y tradicional, ideal para restaurantes clásicos.',
             ],
             'nocturne' => [
                 'label' => 'Nocturno',

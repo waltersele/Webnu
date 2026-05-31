@@ -2,7 +2,7 @@
     $hero = $company->heroConfig();
     $preset = $hero['preset'] ?? 'compact_card';
     $featuredProduct = $featuredProduct ?? null;
-    $variant = $variant ?? ($company->template ?? 'basic');
+    $variant = $variant ?? ($company->template ?? 'pasion');
 
     if ($preset === 'spotlight_dish') {
         if (! $featuredProduct) {
@@ -52,7 +52,7 @@
 @endphp
 
 @if($preset === 'spotlight_dish' && $featuredProduct)
-    <section class="wn-menu-spotlight wn-menu-spotlight--premium">
+    <section class="wn-menu-spotlight wn-menu-spotlight--premium{{ $variant === 'velvet' ? ' wn-menu-spotlight--velvet' : '' }}">
         <div class="wn-menu-spotlight__media">
             @if(($featuredProduct->display_image ?? $featuredProduct->image) || $featuredProduct->video)
                 @include('themes.partials.product-inline-thumb', ['product' => $featuredProduct])

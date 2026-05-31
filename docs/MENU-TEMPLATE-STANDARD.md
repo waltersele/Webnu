@@ -2,7 +2,7 @@
 
 Documento de referencia **inamovible** para diseñar, implementar y revisar las 16 plantillas QR de Webnu. Todo template nuevo o refactor debe cumplir estas condiciones sin excepción.
 
-Relacionado: [MENU-HERO-SYSTEM.md](MENU-HERO-SYSTEM.md) · [MENU-FAVORITES.md](MENU-FAVORITES.md)
+Relacionado: [MENU-HERO-SYSTEM.md](MENU-HERO-SYSTEM.md) · [MENU-FAVORITES.md](MENU-FAVORITES.md) · [TV-TEMPLATE-STANDARD.md](TV-TEMPLATE-STANDARD.md)
 
 ---
 
@@ -12,7 +12,7 @@ Carta móvil **premium**, **siempre legible** y con **calidad de construcción**
 
 El cliente personaliza **colores, fuentes, logo, banner y textos**. La **estructura** (preset de hero, layout de tarjetas, navegación) está **bloqueada por plantilla**.
 
-Hay **20 plantillas** QR registradas (ver mapa §14).
+Hay **15 plantillas** QR registradas (ver mapa §14). Plantillas retiradas en consolidación 2026-05: `basic`, `bistro`, `oriental`, `visual`, `atelier` (empresas migradas automáticamente). La clave `velvet` se **reintrodujo** en 2026-05 con diseño «Velvet Bloom» (las empresas migradas previamente de `velvet` → `lumiere` no vuelven solas).
 
 ---
 
@@ -60,11 +60,11 @@ Cada plantilla tiene **exactamente un** preset en `template_hero`. No editable p
 
 | Preset | Ratio crop | Bleed | Logo | Chef | Plantillas |
 |--------|------------|-------|------|------|------------|
-| `dark_bleed` | 16:9 | sí | rounded | sí | lumiere, otaku, japo, fastfood, asador, oriental |
-| `compact_card` | 4:3 | no | rounded | sí | basic, pasion, temporada, pizza, mar, visual |
-| `circle_emblem` | 16:9 | sí | circle | sí | elegance |
-| `spotlight_dish` | 16:9 | no | rounded | no | bistro (fallback → `compact_card`) |
-| `typographic_dark` | 16:9 | sí | rounded | no | nocturne |
+| `dark_bleed` | 16:9 | sí | rounded | sí | lumiere, otaku, japo, fastfood, asador |
+| `compact_card` | 4:3 | no | rounded | sí | pasion, temporada, pizza |
+| `circle_emblem` | 16:9 | sí | circle | sí | elegance, saffron, mar |
+| `spotlight_dish` | 16:9 | no | rounded | no | velvet |
+| `typographic_dark` | 16:9 | sí | rounded | no | nocturne, maison |
 | `minimal_bar` | 16:9 | no | rounded | no | catalogo |
 
 Reglas de preset:
@@ -119,6 +119,7 @@ Definidos en `theme-vars.blade.php`. **No duplicar** valores fijos en CSS por pl
 - **Siempre** dentro de `logo-chip` (`--bg-light` | `--bg-dark` | `--bg-glass`).
 - Tamaños: `--sm` (44px) en barra compacta; tamaño hero en cabecera principal.
 - Variante calculada en servidor (`logo_chip_variant`); JS (`webnu-logo-autocontrast.js`) solo fallback.
+- Preset `circle_emblem`: forma circular con imagen a `object-fit: cover` (sin padding interior ni foto cuadrada dentro del círculo). Solo acentos de tema (sombra/anillo), no fondo blanco fijo.
 - **Prohibido**: `<img class="wn-modern-header__logo">` u otro logo crudo sobre fondo variable.
 
 ### Texto en hero
@@ -161,6 +162,13 @@ Variantes specialty (mantener alineadas visualmente):
 - **Prohibido**: scroll horizontal accidental.
 - Un solo control de info de negocio (`#wn-info-toggle`); no duplicar en header y floating salvo preset que lo exija (`minimal_bar` vs hero).
 
+### Footer
+
+- Partial compartido: `themes/partials/modern-footer.blade.php`.
+- **Alineación centrada** en todos los bloques (logo, contacto, horario, dirección, descripción, badge, ©).
+- **Prohibido** mezclar filas alineadas a izquierda con otras centradas.
+- Estilos base: `front-modern.css` + `front-theme-icons.css`; los temas solo pueden ajustar color/borde, no `text-align` ni `align-items` del footer.
+
 ---
 
 ## 8. Tema y color
@@ -172,6 +180,7 @@ Personalizable vía `theme_settings` + defaults en `config/company_templates.php
 - Modo oscuro: `surface` elevada sobre `bg`; bordes `rgba` sutiles.
 - Modo claro: sombras suaves; evitar bordes negros duros.
 - CSS por plantilla (`front-{template}.css`): **solo** overrides de color, tipografía, acentos decorativos — **nunca** estructura de hero, tarjetas o nav.
+- Los mismos `theme_settings` alimentan las plantillas TV vía `TvMenuPresenter`. Ver [TV-TEMPLATE-STANDARD.md](TV-TEMPLATE-STANDARD.md). Las plantillas QR no deben asumir colores que contradigan lo que el cliente verá en pantalla.
 
 ---
 
@@ -281,30 +290,47 @@ Si algún □ falla → no válido.
 
 ---
 
-## 14. Mapa de las 16 plantillas
+## 14. Mapa de plantillas QR (15)
 
 | Template | Preset | cardLayout típico | Nav | Tarjeta specialty |
 |----------|--------|-------------------|-----|-------------------|
 | lumiere | dark_bleed | stacked | chips | modern |
+| velvet | spotlight_dish | horizontal | sticky chips light | modern |
 | otaku | dark_bleed | stacked | chips | modern |
 | japo | dark_bleed | stacked | chips | modern |
-| fastfood | dark_bleed | stacked / horizontal | chips | modern |
+| fastfood | dark_bleed | stacked | chips | modern |
 | asador | dark_bleed | stacked | chips | modern |
-| oriental | dark_bleed | stacked | chips | modern |
-| basic | compact_card | horizontal | chips | modern |
-| pasion | compact_card | stacked | chips | modern |
+| pasion | compact_card | stacked | chips light | modern |
 | temporada | compact_card | stacked | sticky | product-temporada |
-| pizza | compact_card | stacked | chips | modern |
-| mar | compact_card | stacked | chips | modern |
-| visual | compact_card | horizontal | chips | modern |
-| elegance | circle_emblem | stacked | chips | modern |
-| bistro | spotlight_dish | horizontal | chips light | modern |
+| pizza | compact_card | stacked | chips light | modern |
+| mar | circle_emblem | horizontal | chips light | modern + plato estrella (solo Destacado) |
+| elegance | circle_emblem | stacked | chips light | modern |
 | nocturne | typographic_dark | stacked | sticky | product-overlay |
 | catalogo | minimal_bar | horizontal | sticky | product-catalogo |
 | saffron | circle_emblem | horizontal | chips light | modern |
-| velvet | dark_bleed | stacked | chips | modern |
-| atelier | typographic_dark | overlay (todos) | chips sticky | modern |
-| maison | typographic_dark | stacked + overlay estrella | chips sticky | modern |
+| maison | typographic_dark | stacked + overlay estrella | sticky | product-overlay |
+
+### Plato estrella (mar / Azure Waves)
+
+- Tarjeta promocional bajo el hero, **independiente** del bloque de marca (logo + nombre).
+- Solo se muestra si existe al menos un plato con etiqueta admin **Destacado** (`highlight = featured`).
+- Si hay varios Destacados, se usa el **primero** en orden de carta; ese plato no se repite en el listado.
+- Best seller, Nuevo u otros highlights **no** activan la tarjeta.
+- Sin ningún Destacado: no hay tarjeta; la carta sigue con hero + chips + platos.
+- Incluye modal de detalle, media, alérgenos y favoritos (paridad con tarjeta estándar).
+- `--wn-card-radius: 12px` en Azure Waves (excepción respecto al default 16px).
+
+### Migración de plantillas retiradas
+
+| Retirada | Sustituto |
+|----------|-----------|
+| basic | pasion |
+| bistro | catalogo |
+| visual | catalogo |
+| oriental | japo |
+| atelier | maison |
+
+*(La clave `velvet` antigua migró a `lumiere`; el Velvet Bloom actual es plantilla nueva con la misma clave.)*
 
 ---
 
@@ -316,6 +342,8 @@ Si algún □ falla → no válido.
 
 # Preview por plantilla
 http://127.0.0.1:8000/carta/demo?tpl=lumiere
+http://127.0.0.1:8000/carta/demo?tpl=velvet
+http://127.0.0.1:8000/carta/demo?tpl=mar
 http://127.0.0.1:8000/carta/demo-cocktails   # nocturne curada
 ```
 
@@ -339,4 +367,4 @@ php artisan webnu:headers:reanalyze
 
 ---
 
-*Última revisión: alineado con sistema menu-hero unificado y 16 plantillas QR en `main`.*
+*Última revisión: Azure Waves (mar) refactorizado (2026-05).*

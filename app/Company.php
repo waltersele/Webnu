@@ -41,7 +41,7 @@ class Company extends Model
      */
     public function heroConfig(): array
     {
-        $template = $this->template ?: 'basic';
+        $template = $this->template ?: 'pasion';
         $map = config('company_templates.template_hero', []);
         $presets = config('company_templates.hero_presets', []);
         $key = $map[$template] ?? 'compact_card';
@@ -135,8 +135,8 @@ class Company extends Model
 
     public function themeColor(string $key): string
     {
-        $template = $this->template ?: 'basic';
-        $defaults = config('company_templates.defaults.' . $template, config('company_templates.defaults.basic', []));
+        $template = $this->template ?: 'pasion';
+        $defaults = config('company_templates.defaults.' . $template, config('company_templates.defaults.pasion', []));
         $settings = is_array($this->theme_settings) ? $this->theme_settings : [];
 
         if (!empty($settings[$key])) {
@@ -148,8 +148,8 @@ class Company extends Model
 
     public function resolvedThemeSettings(): array
     {
-        $template = $this->template ?: 'basic';
-        $defaults = config('company_templates.defaults.' . $template, config('company_templates.defaults.basic', []));
+        $template = $this->template ?: 'pasion';
+        $defaults = config('company_templates.defaults.' . $template, config('company_templates.defaults.pasion', []));
         $fontDefaults = config('company_templates.font_defaults', []);
         $saved = is_array($this->theme_settings) ? $this->theme_settings : [];
 

@@ -107,9 +107,9 @@ return [
         'more_desc' => 'Japanisch, Fast Food, Meeresfrüchte, Fine Dining, Grill, Cocktailbar… Der Katalog wächst jede Saison.',
         'cta' => 'Meine Karte erstellen',
         'showcase' => [
-            'basic' => [
-                'label' => 'Basis',
-                'description' => 'Klare, kompakte Karte — ideal für Restaurants und Bistros.',
+            'pasion' => [
+                'label' => 'Pasión',
+                'description' => 'Klare, traditionelle Karte — ideal für klassische Restaurants.',
             ],
             'nocturne' => [
                 'label' => 'Nocturno',

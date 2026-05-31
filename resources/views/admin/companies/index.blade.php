@@ -36,7 +36,7 @@
     <div class="row g-4">
         @foreach ($companies as $company)
             @php
-                $tplKey = $company->template ?: 'basic';
+                $tplKey = $company->template ?: 'pasion';
                 $tplLabel = $templateLabels[$tplKey] ?? ucfirst($tplKey);
                 $sectionsCount = (int) ($company->sections_count ?? $company->sections->count());
             @endphp

@@ -7,13 +7,12 @@
     <div class="wn-card-reel" data-product-id="{{ $product->id }}">
         <video
             class="wn-card-reel__video"
-            src="{{ asset('img/' . $videoPath) }}"
+            data-src="{{ asset('img/' . $videoPath) }}"
             @if($imagePath) poster="{{ asset('img/' . $imagePath) }}" @endif
-            autoplay
             muted
             loop
             playsinline
-            preload="metadata"
+            preload="none"
             aria-label="Vídeo de {{ $product->name }}"
         ></video>
         <span class="wn-card-reel__badge" aria-hidden="true">@include('themes.partials.icons.svg-video') Reel</span>

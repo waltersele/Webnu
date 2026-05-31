@@ -74,7 +74,7 @@ class CompaniesController extends Controller
         $defaultTemplate = 'lumiere';
         if (! $plans->canUseTemplate($request->user(), $defaultTemplate)) {
             $freeKeys = $plans->freeTemplateKeys();
-            $defaultTemplate = $freeKeys[0] ?? 'basic';
+            $defaultTemplate = $freeKeys[0] ?? 'pasion';
         }
 
         $company = Company::create([
@@ -101,8 +101,8 @@ class CompaniesController extends Controller
         $step = $request->get('studio_step', 'identity');
 
         if ($step === 'design') {
-            $newTemplate = $request->get('template', $company->template ?: 'basic');
-            if ($newTemplate !== ($company->template ?: 'basic')) {
+            $newTemplate = $request->get('template', $company->template ?: 'pasion');
+            if ($newTemplate !== ($company->template ?: 'pasion')) {
                 $plans->assertCanUseTemplate($request->user(), $newTemplate);
             }
 
@@ -131,8 +131,8 @@ class CompaniesController extends Controller
             'slug' => 'nullable|string|max:64',
         ]);
 
-        $newTemplate = $request->get('template', $company->template ?: 'basic');
-        if ($newTemplate !== ($company->template ?: 'basic')) {
+        $newTemplate = $request->get('template', $company->template ?: 'pasion');
+        if ($newTemplate !== ($company->template ?: 'pasion')) {
             $plans->assertCanUseTemplate($request->user(), $newTemplate);
         }
 

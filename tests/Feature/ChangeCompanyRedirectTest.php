@@ -26,7 +26,7 @@ class ChangeCompanyRedirectTest extends TestCase
         $first = Company::create([
             'name' => 'Carta A',
             'slug' => 'carta-a-' . $user->id,
-            'template' => 'basic',
+            'template' => 'pasion',
             'menu_type' => 1,
             'enabled' => true,
             'user_id' => $user->id,
@@ -35,7 +35,7 @@ class ChangeCompanyRedirectTest extends TestCase
         Company::create([
             'name' => 'Carta B',
             'slug' => 'carta-b-' . $user->id,
-            'template' => 'basic',
+            'template' => 'pasion',
             'menu_type' => 1,
             'enabled' => true,
             'user_id' => $user->id,
@@ -61,7 +61,7 @@ class ChangeCompanyRedirectTest extends TestCase
         $company = Company::create([
             'name' => 'Mi carta',
             'slug' => 'mi-carta-' . $user->id,
-            'template' => 'basic',
+            'template' => 'pasion',
             'menu_type' => 1,
             'enabled' => true,
             'user_id' => $user->id,

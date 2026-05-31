@@ -247,6 +247,7 @@ Por plantilla:
 3. CSS bajo bloque `.wn-tv--{layout}` en `public/css/webnu-tv.css`.
 4. Miniatura PNG/WebP real (captura con carta demo), no solo SVG genérico.
 5. Exponer en `GET /api/signage/tv-templates` (ya existe catálogo) con campo `premium`.
+6. Cumplir nivel **A** de integración tema ([`TV-TEMPLATE-STANDARD.md`](TV-TEMPLATE-STANDARD.md) §5).
 
 ### Mejoras transversales recomendadas (una vez, benefician a todas)
 

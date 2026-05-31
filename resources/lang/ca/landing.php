@@ -107,9 +107,9 @@ return [
         'more_desc' => 'Japonès, fast food, marisqueria, fine dining, graella, cocteleria… El catàleg creix cada temporada.',
         'cta' => 'Crear la meva carta',
         'showcase' => [
-            'basic' => [
-                'label' => 'Bàsica',
-                'description' => 'Carta clara i compacta, ideal per restaurants i bistros.',
+            'pasion' => [
+                'label' => 'Passió',
+                'description' => 'Carta clara i tradicional, ideal per restaurants clàssics.',
             ],
             'nocturne' => [
                 'label' => 'Nocturn',

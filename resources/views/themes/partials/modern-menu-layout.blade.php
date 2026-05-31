@@ -5,20 +5,31 @@
     $preset = $hero['preset'] ?? 'compact_card';
 
     $featuredProduct = $featuredProduct ?? null;
-    if ($preset === 'spotlight_dish' && ! $featuredProduct) {
-        foreach ($sections as $section) {
-            foreach ($section->products as $product) {
-                if (! empty($product->highlight)) {
-                    $featuredProduct = $product;
-                    break 2;
+    if (! $featuredProduct) {
+        if ($variant === 'mar') {
+            foreach ($sections as $section) {
+                foreach ($section->products as $product) {
+                    if (($product->highlight ?? '') === 'featured') {
+                        $featuredProduct = $product;
+                        break 2;
+                    }
                 }
             }
-        }
-        if (! $featuredProduct) {
+        } elseif ($preset === 'spotlight_dish') {
             foreach ($sections as $section) {
-                if ($section->products->count()) {
-                    $featuredProduct = $section->products->first();
-                    break;
+                foreach ($section->products as $product) {
+                    if (! empty($product->highlight)) {
+                        $featuredProduct = $product;
+                        break 2;
+                    }
+                }
+            }
+            if (! $featuredProduct) {
+                foreach ($sections as $section) {
+                    if ($section->products->count()) {
+                        $featuredProduct = $section->products->first();
+                        break;
+                    }
                 }
             }
         }
@@ -31,7 +42,7 @@
 
     $hasHeroBanner = $effectivePreset !== 'minimal_bar';
     $usesTopHeader = $effectivePreset === 'minimal_bar';
-    $usesStickyNav = in_array($variant, ['nocturne', 'catalogo', 'temporada', 'atelier', 'maison'], true);
+    $usesStickyNav = in_array($variant, ['nocturne', 'catalogo', 'temporada', 'maison'], true);
 
     $shellClass = 'wn-menu-shell';
     if ($variant) {
@@ -65,8 +76,12 @@
         'variant' => $variant,
     ])
 
+    @if($variant === 'mar' && $featuredProduct)
+        @include('themes.partials.menu-featured-card-mar', ['product' => $featuredProduct])
+    @endif
+
     @if($hasHeroBanner)
-        <button type="button" class="wn-floating-info{{ $variant === 'nocturne' ? ' wn-floating-info--nocturne' : '' }}{{ $variant === 'atelier' ? ' wn-floating-info--atelier' : '' }}{{ $variant === 'maison' ? ' wn-floating-info--maison' : '' }}" id="wn-info-toggle" aria-label="Información del negocio">
+        <button type="button" class="wn-floating-info{{ $variant === 'nocturne' ? ' wn-floating-info--nocturne' : '' }}{{ $variant === 'maison' ? ' wn-floating-info--maison' : '' }}" id="wn-info-toggle" aria-label="Información del negocio">
             @include('themes.partials.icons.svg-info')
         </button>
     @endif
@@ -74,7 +89,7 @@
     @if($usesStickyNav)
         @include('themes.partials.sticky-category-nav', ['variant' => $variant])
     @else
-        <nav class="wn-menu-nav {{ in_array($variant, ['bistro', 'basic', 'visual', 'mar', 'elegance', 'temporada', 'catalogo', 'saffron', 'pizza', 'fastfood'], true) ? 'wn-menu-nav--light' : '' }}" id="sticker" aria-label="Secciones">
+        <nav class="wn-menu-nav {{ in_array($variant, ['pasion', 'mar', 'elegance', 'temporada', 'catalogo', 'saffron', 'pizza', 'fastfood', 'velvet'], true) ? 'wn-menu-nav--light' : '' }}" id="sticker" aria-label="Secciones">
             <div class="wn-menu-nav__track">
                 @foreach ($sections as $index => $section)
                     <a href="#" class="wn-menu-chip linkTo {{ $index === 0 ? 'is-active' : '' }}" id="{{ $section->id }}">{{ $section->name }}</a>
@@ -84,7 +99,7 @@
     @endif
 
     @php
-        $lightSurface = in_array($variant, ['bistro', 'basic', 'visual', 'fastfood', 'pizza', 'mar', 'elegance', 'temporada', 'catalogo', 'saffron'], true);
+        $lightSurface = in_array($variant, ['pasion', 'fastfood', 'pizza', 'mar', 'elegance', 'temporada', 'catalogo', 'saffron', 'velvet'], true);
         $mainClass = 'wn-menu-main' . ($lightSurface ? ' wn-menu-main--light' : '');
         if ($variant) {
             $mainClass .= ' wn-menu-main--' . $variant;
@@ -100,8 +115,6 @@
                         @include('themes.partials.icons.svg-fastfood-bolt')
                     @elseif($variant === 'saffron')
                         @include('themes.partials.icons.svg-saffron-leaf')
-                    @elseif($variant === 'velvet')
-                        @include('themes.partials.icons.svg-velvet-wine')
                     @elseif($variant === 'maison')
                         @include('themes.partials.icons.svg-maison-mark')
                     @elseif(in_array($variant, ['nocturne', 'temporada'], true))
@@ -110,7 +123,10 @@
                     {{ $section->name }}
                 </h2>
                 @foreach ($section->products as $index => $product)
-                    @if((in_array($variant, ['nocturne', 'maison'], true) && ($index === 0 || ! empty($product->highlight))) || $variant === 'atelier')
+                    @if($variant === 'mar' && $featuredProduct && (int) $product->id === (int) $featuredProduct->id)
+                        @continue
+                    @endif
+                    @if((in_array($variant, ['nocturne', 'maison'], true)) && ($index === 0 || ! empty($product->highlight)))
                         @include('themes.partials.cards.product-overlay', ['product' => $product])
                     @elseif($variant === 'temporada')
                         @include('themes.partials.cards.product-temporada', ['product' => $product])

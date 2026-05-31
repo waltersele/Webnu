@@ -200,29 +200,15 @@ class MenuService
 
     public function themeViewName(Company $company): string
     {
-        $templates = array_keys(config('company_templates.templates', [
-            'basic' => [],
-            'pasion' => [],
-            'oriental' => [],
-            'visual' => [],
-            'lumiere' => [],
-            'bistro' => [],
-            'otaku' => [],
-            'japo' => [],
-            'fastfood' => [],
-            'pizza' => [],
-            'mar' => [],
-            'elegance' => [],
-            'asador' => [],
-        ]));
+        $templates = array_keys(config('company_templates.templates', []));
 
         if (in_array($company->template, $templates, true)) {
             return 'themes.' . $company->template;
         }
 
-        $company->template = 'basic';
+        $company->template = 'pasion';
 
-        return 'themes.basic';
+        return 'themes.pasion';
     }
 
     public function applyStudioPreview(Company $company, Request $request): Company

@@ -604,6 +604,9 @@ body.wn-theme-nocturne .wn-menu-hero__eyebrow {
 
 /* —— Footer —— */
 .wn-modern-footer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   margin-top: 0.5rem;
   padding: 2rem 1.25rem 1rem;
   text-align: center;
@@ -619,14 +622,17 @@ body.wn-theme-nocturne .wn-menu-hero__eyebrow {
 }
 
 .wn-modern-footer__logo {
+  display: block;
   max-height: 44px;
-  margin-bottom: 1rem;
+  margin: 0 auto 1rem;
 }
 
 .wn-modern-footer__links {
   display: flex;
   flex-direction: column;
+  align-items: center;
   gap: 0.5rem;
+  width: 100%;
   margin-bottom: 0.75rem;
 }
 
@@ -1003,6 +1009,21 @@ body.wn-theme-nocturne .wn-menu-hero__eyebrow {
 
 .wn-menu-hero__logo-chip--circle {
   border-radius: 50%;
+  overflow: hidden;
+}
+
+/* Emblema circular (circle_emblem): foto/logo rellena el círculo, sin marco cuadrado interior */
+.wn-menu-hero__logo-chip--circle:not(.wn-menu-hero__logo-chip--sm) {
+  padding: 0;
+}
+
+.wn-menu-hero__logo-chip--circle:not(.wn-menu-hero__logo-chip--sm) img {
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  max-height: none;
+  object-fit: cover;
+  display: block;
 }
 
 .wn-menu-hero__logo-chip--bg-light {
@@ -1152,4 +1173,81 @@ body.wn-theme-nocturne .wn-menu-hero__eyebrow {
 .wn-theme-visual .fixed-bottom-bar .whatsapp-btn {
   background: #25d366 !important;
   color: #fff !important;
+}
+
+/* Azure Waves (mar) — plato estrella */
+.wn-menu-featured-card--mar {
+  position: relative;
+  z-index: 20;
+  margin: -3rem max(1.25rem, env(safe-area-inset-right, 0px)) 0 max(1.25rem, env(safe-area-inset-left, 0px));
+}
+
+.wn-menu-featured-card--mar .wn-menu-featured-card__inner {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.wn-menu-featured-card--mar .wn-menu-featured-card__inner:active {
+  transform: scale(0.99);
+}
+
+.wn-menu-featured-card--mar .wn-menu-featured-card__inner--has-media {
+  flex-direction: row;
+  align-items: stretch;
+}
+
+.wn-menu-featured-card--mar .wn-menu-featured-card__media {
+  position: relative;
+  flex-shrink: 0;
+  width: 120px;
+  aspect-ratio: 4 / 3;
+  min-height: 0;
+  overflow: hidden;
+  background: rgba(0, 0, 0, 0.04);
+}
+
+.wn-menu-featured-card--mar .wn-menu-featured-card__media img,
+.wn-menu-featured-card--mar .wn-menu-featured-card__media video,
+.wn-menu-featured-card--mar .wn-menu-featured-card__media .wn-card-reel {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.wn-menu-featured-card--mar .wn-menu-featured-card__content {
+  flex: 1;
+  min-width: 0;
+  padding: 1.5rem;
+}
+
+.wn-menu-featured-card--mar .wn-menu-featured-card__inner--has-media .wn-menu-featured-card__content {
+  padding: 1rem 1.25rem;
+}
+
+.wn-menu-featured-card--mar .wn-menu-featured-card__foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.wn-menu-featured-card--mar .wn-menu-featured-card__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+}
+
+@media (min-width: 768px) {
+  .wn-menu-featured-card--mar {
+    max-width: 720px;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: -3rem;
+  }
 }

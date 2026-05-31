@@ -72,7 +72,7 @@ class MenuHeroSystemTest extends TestCase
         $company = Company::create([
             'name' => 'Crop test',
             'slug' => 'crop-' . uniqid(),
-            'template' => 'basic',
+            'template' => 'pasion',
             'menu_type' => 1,
             'enabled' => true,
             'user_id' => $user->id,
@@ -92,7 +92,49 @@ class MenuHeroSystemTest extends TestCase
         $this->assertSame(0.5, $company->header_crop['h']);
     }
 
-    private function createMenuCompany(string $template, bool $withLogo): Company
+    public function test_mar_renders_featured_card_and_modal_for_featured_product(): void
+    {
+        $company = $this->createMenuCompany('mar', true, 'featured');
+
+        $response = $this->get(route('public.company', ['companySlug' => $company->slug]));
+
+        $response->assertOk();
+        $response->assertSee('wn-menu-featured-card--mar', false);
+        $response->assertSee('wn-menu-hero--preset-circle-emblem', false);
+        $response->assertSee('Lubina estrella', false);
+        $response->assertSee('id="wnDish', false);
+        $this->assertSame(
+            0,
+            preg_match_all(
+                '/<article class="wn-modern-card wn-modern-card--horizontal[^"]*" data-product-id="1"/',
+                $response->getContent()
+            )
+        );
+    }
+
+    public function test_mar_hides_featured_card_without_featured_highlight(): void
+    {
+        $company = $this->createMenuCompany('mar', true, null);
+
+        $response = $this->get(route('public.company', ['companySlug' => $company->slug]));
+
+        $response->assertOk();
+        $response->assertDontSee('wn-menu-featured-card--mar', false);
+        $response->assertSee('Plato normal', false);
+    }
+
+    public function test_mar_does_not_use_featured_card_for_bestseller_only(): void
+    {
+        $company = $this->createMenuCompany('mar', true, 'bestseller');
+
+        $response = $this->get(route('public.company', ['companySlug' => $company->slug]));
+
+        $response->assertOk();
+        $response->assertDontSee('wn-menu-featured-card--mar', false);
+        $response->assertSee('Plato normal', false);
+    }
+
+    private function createMenuCompany(string $template, bool $withLogo, ?string $featuredHighlight = null): Company
     {
         $user = User::factory()->create(['slug' => 'owner-' . uniqid()]);
 
@@ -115,12 +157,24 @@ class MenuHeroSystemTest extends TestCase
         ]);
 
         Product::create([
-            'name' => 'Plato',
-            'description' => 'Test',
-            'price_unit' => '9,00',
+            'name' => 'Lubina estrella',
+            'description' => 'Plato destacado',
+            'price_unit' => '22,00',
             'individual_sale' => true,
             'order' => 1,
             'enabled' => true,
+            'highlight' => $featuredHighlight === 'featured' ? 'featured' : ($featuredHighlight === 'bestseller' ? 'bestseller' : null),
+            'section_id' => $section->id,
+        ]);
+
+        Product::create([
+            'name' => 'Plato normal',
+            'description' => 'Otro plato',
+            'price_unit' => '9,00',
+            'individual_sale' => true,
+            'order' => 2,
+            'enabled' => true,
+            'highlight' => $featuredHighlight === 'bestseller' ? null : 'bestseller',
             'section_id' => $section->id,
         ]);
 

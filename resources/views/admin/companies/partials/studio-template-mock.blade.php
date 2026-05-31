@@ -1,6 +1,6 @@
 @php
-    $d = config('company_templates.defaults.' . $key, config('company_templates.defaults.basic'));
-    $isDark = in_array($key, ['lumiere', 'nocturne', 'oriental'], true);
+    $d = config('company_templates.defaults.' . $key, config('company_templates.defaults.pasion'));
+    $isDark = in_array($key, ['lumiere', 'nocturne', 'japo', 'otaku', 'asador', 'maison'], true);
     $isCatalog = $key === 'catalogo';
 
     $sampleMenu = config('menu_demo.sample_menu', []);

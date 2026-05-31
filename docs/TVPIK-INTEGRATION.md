@@ -229,7 +229,9 @@ TVPIK_STUB_SCREENS=true
 
 Detalle de las premium: [`docs/TV-TEMPLATES-PREMIUM-PROPOSAL.md`](TV-TEMPLATES-PREMIUM-PROPOSAL.md).
 
-Estilos: `public/css/webnu-tv.css` · Scripts: `public/js/webnu-tv.js` · Registro: `App\Services\Tv\TvTemplateRegistry`.
+Estándar completo (arquitectura, personalización, tokens, checklist): [`docs/TV-TEMPLATE-STANDARD.md`](TV-TEMPLATE-STANDARD.md).
+
+Estilos: `public/css/webnu-tv.css` · Scripts: `public/js/webnu-tv.js` · Presenter: `App\Services\TvMenuPresenter` · Registro: `App\Services\Tv\TvTemplateRegistry`.
 
 ## Referencias en código
 

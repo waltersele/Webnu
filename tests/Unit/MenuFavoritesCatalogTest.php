@@ -36,16 +36,16 @@ class MenuFavoritesCatalogTest extends TestCase
     public function test_build_catalog_formats_price_label(): void
     {
         $company = new Company([
-            'id' => 99,
             'default_locale' => 'es',
         ]);
+        $company->id = 99;
 
         $product = new Product([
-            'id' => 7,
             'name' => 'Ensalada',
             'price_unit' => '9,50',
             'enabled' => true,
         ]);
+        $product->id = 7;
         $product->setAttribute('name_locale', 'Ensalada');
         $product->setAttribute('name_original', 'Ensalada');
 
@@ -66,7 +66,7 @@ class MenuFavoritesCatalogTest extends TestCase
         $company = Company::create([
             'name' => 'Restaurante test',
             'slug' => 'fav-catalog-' . uniqid(),
-            'template' => 'basic',
+            'template' => 'pasion',
             'menu_type' => 1,
             'enabled' => true,
             'user_id' => $user->id,

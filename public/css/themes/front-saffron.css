@@ -22,7 +22,6 @@ body.wn-theme-saffron::before {
 
 body.wn-theme-saffron .wn-menu-shell {
   position: relative;
-  z-index: 1;
 }
 
 /* —— Hero emblema circular —— */
@@ -198,6 +197,17 @@ body.wn-theme-saffron .wn-menu-shell {
   color: var(--wn-primary) !important;
   font-family: var(--wn-font-heading);
   font-size: 1.5rem;
+}
+
+.wn-theme-saffron .wn-dish-modal__close {
+  z-index: 20;
+  background: rgba(255, 255, 255, 0.94);
+  color: var(--wn-text);
+  box-shadow: 0 2px 12px rgba(44, 24, 16, 0.22);
+}
+
+.wn-theme-saffron .wn-dish-modal__hero-shade {
+  pointer-events: none;
 }
 
 @media (min-width: 768px) {

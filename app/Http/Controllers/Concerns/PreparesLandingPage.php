@@ -48,7 +48,7 @@ trait PreparesLandingPage
     {
         $templates = config('company_templates.templates', []);
         $demoUrls = config('landing.template_demo_urls', []);
-        $showcaseKeys = config('landing.template_showcase_keys', ['basic', 'nocturne', 'otaku']);
+        $showcaseKeys = config('landing.template_showcase_keys', ['pasion', 'nocturne', 'otaku']);
         $items = [];
 
         foreach ($showcaseKeys as $key) {
@@ -71,7 +71,7 @@ trait PreparesLandingPage
                 'description' => $description,
                 'group' => $meta['group'] ?? 'modern',
                 'recommended' => ! empty($meta['recommended']),
-                'preview' => asset($meta['preview_image'] ?? 'img/admin/templates/basic.svg'),
+                'preview' => asset($meta['preview_image'] ?? 'img/admin/templates/pasion.svg'),
                 'demo_url' => $demoPath ? url($demoPath) : null,
             ];
         }
