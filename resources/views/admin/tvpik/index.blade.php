@@ -7,6 +7,9 @@
 @php
     $defaultCompanyId = $company ? $company->id : ($companies->first()->id ?? null);
     $canTvpikPremium = ! empty($planFeatures['tvpik_premium_templates'] ?? false);
+    $linkedCount = $company
+        ? $links->where('company_id', $company->id)->count()
+        : $links->count();
 @endphp
 
 <div class="row g-4 wn-tvpik-page">
@@ -39,10 +42,17 @@
             @include('admin.tvpik.partials.advanced-panel')
         </div>
 
+        @include('admin.tvpik.partials.player-mode-card', [
+            'defaultCompanyId' => $defaultCompanyId,
+            'companies' => $companies,
+            'menusByCompany' => $menusByCompany,
+            'templates' => $templates,
+        ])
+
         <div class="col-12">
             <div class="card border-0 shadow-sm">
                 <div class="card-header bg-transparent d-flex flex-wrap justify-content-between align-items-center gap-2">
-                    <h5 class="card-title mb-0">Mis pantallas</h5>
+                    <h5 class="card-title mb-0">Tus pantallas activas</h5>
                     <div class="d-flex flex-wrap gap-2">
                         @if($tvpikConnected)
                             <button type="button"
@@ -52,10 +62,10 @@
                                 <i class="ti ti-plus me-1"></i> Nueva pantalla
                             </button>
                         @endif
-                        @if($company && (int) $company->menu_type === 1)
+                        @if($company && (int) $company->menu_type === 1 && $linkedCount > 0)
                             <form method="POST" action="{{ route('admin.tvpik.publish-all') }}" class="mb-0">
                                 @csrf
-                                <button type="submit" class="btn btn-outline-primary btn-sm">
+                                <button type="submit" class="btn btn-outline-primary btn-sm" title="Actualiza el contenido en todas las TVs vinculadas">
                                     <i class="ti ti-refresh me-1"></i> Republicar todas
                                 </button>
                             </form>
@@ -73,12 +83,12 @@
                         <div class="alert alert-warning mb-3">{{ $screensError }}</div>
                     @endif
                     @if(empty($screens))
-                        <div class="wn-tvpik-empty">
-                            <div class="wn-tvpik-empty__icon"><i class="ti ti-device-tv"></i></div>
-                            <p class="mb-2">Aún no hay pantallas</p>
+                        <div class="wn-tvpik-empty wn-tvpik-empty--dashed">
+                            <div class="wn-tvpik-empty__icon"><i class="ti ti-device-tv-off"></i></div>
+                            <p class="mb-2 fw-medium">No hay pantallas configuradas</p>
                             <p class="text-muted small mb-3">
-                                Crea una pantalla, instala la app TVPik en la TV e introduce el código de emparejamiento.
-                                También puedes usar el reproductor rápido para emitir por HDMI.
+                                Aún no has asignado ninguna plantilla a una pantalla específica.
+                                Explora las plantillas abajo para empezar a publicar tu menú.
                             </p>
                             @if($tvpikConnected)
                                 <button type="button"
@@ -87,6 +97,10 @@
                                         data-bs-target="#wn-tvpik-new-screen-modal">
                                     <i class="ti ti-plus me-1"></i> Nueva pantalla
                                 </button>
+                            @else
+                                <p class="text-muted small mb-0">
+                                    Mientras tanto, usa el <a href="#wn-tvpik-player-tools">reproductor rápido</a> para emitir por HDMI, navegador o compartir pantalla.
+                                </p>
                             @endif
                         </div>
                     @else
@@ -109,22 +123,18 @@
         </div>
 
         @include('admin.tvpik.partials.modals')
-
-        @include('admin.tvpik.partials.player-mode-card', [
-            'defaultCompanyId' => $defaultCompanyId,
-            'companies' => $companies,
-            'templates' => $templates,
-        ])
     @endif
 
     <div class="col-12">
         <div class="card border-0 shadow-sm wn-tvpik-gallery-wrap {{ !$canTvpik ? 'wn-tvpik-gallery-wrap--locked' : '' }}">
-            <div class="card-header bg-transparent d-flex align-items-center gap-2">
+            <div class="card-header bg-transparent d-flex flex-wrap align-items-center justify-content-between gap-2">
                 <h5 class="card-title mb-0">Explorar plantillas</h5>
                 @if(!$canTvpik)
-                    <span class="badge bg-label-warning ms-auto">
+                    <span class="badge bg-label-warning">
                         <i class="ti ti-lock me-1"></i> Requiere plan Plus
                     </span>
+                @elseif($canTvpik)
+                    @include('admin.tvpik.partials.template-gallery-filters', ['galleryId' => 'wn-tvpik-gallery'])
                 @endif
             </div>
             <div class="card-body">
@@ -134,7 +144,8 @@
                     </p>
                 @else
                     <p class="text-muted small mb-3">
-                        Cada plantilla genera una URL distinta. Las premium requieren plan Plus.
+                        Pulsa <strong>Usar</strong> para cargar la plantilla en la vista previa del reproductor rápido.
+                        Luego emítela por HDMI, enlace o compartir pantalla. Las premium requieren plan Plus.
                     </p>
                 @endif
                 @include('admin.tvpik.partials.template-gallery', [
@@ -144,7 +155,7 @@
                     'defaultCompanyId' => $defaultCompanyId,
                     'company' => $company,
                     'companies' => $companies,
-                    'showFilter' => true,
+                    'showFilter' => false,
                 ])
             </div>
         </div>

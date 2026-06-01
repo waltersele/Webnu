@@ -297,10 +297,11 @@ COMMIT_MSG="$(cd "$REPO_ROOT" && git log -1 --pretty=%B "$NEW_SHA" 2>/dev/null |
 say "Limpiando bootstrap cache"
 run "rm -f $SITE_ROOT/bootstrap/cache/services.php $SITE_ROOT/bootstrap/cache/packages.php $SITE_ROOT/bootstrap/cache/config.php"
 
-say "Regenerando autoload (composer dump-autoload)"
 if should_sync_vendor; then
-    run "cd $SITE_ROOT && $PHP_BIN $COMPOSER_BIN install --no-dev --no-interaction --prefer-dist --optimize-autoloader"
+    say "Instalando dependencias (composer install --no-dev)"
+    run "cd $SITE_ROOT && $COMPOSER_BIN install --no-dev --no-interaction --prefer-dist --optimize-autoloader"
 else
+    say "Regenerando autoload (composer dump-autoload)"
     run "cd $SITE_ROOT && $COMPOSER_BIN dump-autoload --no-scripts --optimize --no-interaction --ignore-platform-reqs"
 fi
 

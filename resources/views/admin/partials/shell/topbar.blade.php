@@ -17,6 +17,8 @@
         default     => 'bg-label-secondary',
     };
     $hasActivePaidPlan = $user && $user->hasActiveSubscription();
+    $hasManualPlan = $user && app(\App\Services\UserPlanService::class)->manualPlanIsActive($user);
+    $hasPlanEntitlement = $hasActivePaidPlan || $showTrial || $hasManualPlan;
 @endphp
 
 <header class="wn-shell-topbar">
@@ -74,9 +76,13 @@
                 {{ $planPresentation['trial_days_remaining'] }} {{ $planPresentation['trial_days_remaining'] === 1 ? 'día' : 'días' }} gratis
             </a>
         @endif
-        @if($user && !$user->hasActiveSubscription())
+        @if($user && ! $hasActivePaidPlan && ($showTrial || $hasManualPlan))
             <a href="{{ $billingUrl }}" class="wn-shell-topbar__plan-btn d-none d-md-inline-flex">
-                {{ $showTrial ? 'Gestionar plan' : 'Activar plan' }}
+                Gestionar plan
+            </a>
+        @elseif($user && ! $hasPlanEntitlement)
+            <a href="{{ $billingUrl }}" class="wn-shell-topbar__plan-btn d-none d-md-inline-flex">
+                Activar plan
             </a>
         @endif
         <div class="dropdown d-none" id="wn-pwa-topbar-wrap" data-pwa-topbar-wrap>
@@ -108,7 +114,7 @@
                             </small>
                         @endif
                     </div>
-                    @if(! $hasActivePaidPlan)
+                    @if(! $hasPlanEntitlement && $planKey === 'free')
                         <a href="{{ $billingUrl }}" class="d-block mt-2 small fw-medium text-primary text-decoration-none">
                             Mejorar plan <i class="ti ti-arrow-right" style="font-size:12px"></i>
                         </a>

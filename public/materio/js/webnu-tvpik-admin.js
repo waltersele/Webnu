@@ -1,65 +1,229 @@
 (function () {
     'use strict';
 
-    function initPlayerTools() {
-        var tools = document.getElementById('wn-tvpik-player-tools');
-        if (!tools) return;
+    function filterPlayerMenus() {
+        var companySel = document.getElementById('wn-player-company');
+        var menuSel = document.getElementById('wn-player-menu');
+        if (!companySel || !menuSel) return;
 
-        var adminBase = tools.getAttribute('data-player-admin');
-        var tvRoot = tools.getAttribute('data-tv-root') || '';
+        var cid = String(companySel.value || '');
+        Array.from(menuSel.options).forEach(function (opt) {
+            if (!opt.value) {
+                opt.hidden = false;
+                return;
+            }
+            var optCid = opt.getAttribute('data-company-id');
+            opt.hidden = optCid !== cid;
+        });
+        if (menuSel.selectedOptions[0]?.hidden) {
+            menuSel.value = '';
+        }
+    }
+
+    function getPlayerTools() {
+        var tools = document.getElementById('wn-tvpik-player-tools');
+        if (!tools) return null;
+
         var layouts = {};
+        var labels = {};
         try {
             layouts = JSON.parse(tools.getAttribute('data-layouts') || '{}');
         } catch (e) {}
+        try {
+            labels = JSON.parse(tools.getAttribute('data-template-labels') || '{}');
+        } catch (e) {}
 
-        var companySel = document.getElementById('wn-player-company');
-        var tplSel = document.getElementById('wn-player-template');
-        var hint = document.getElementById('wn-player-url-hint');
+        return {
+            el: tools,
+            adminBase: tools.getAttribute('data-player-admin') || '',
+            tvRoot: tools.getAttribute('data-tv-root') || '',
+            defaultTemplate: tools.getAttribute('data-default-template') || 'menu',
+            layouts: layouts,
+            labels: labels,
+            companySel: document.getElementById('wn-player-company'),
+            menuSel: document.getElementById('wn-player-menu'),
+        };
+    }
 
-        function adminPlayerUrl() {
-            var cid = companySel && companySel.value;
-            var tpl = tplSel && tplSel.value;
-            if (!cid || !tpl) return '';
-            return adminBase + '?company_id=' + encodeURIComponent(cid) + '&template_key=' + encodeURIComponent(tpl);
-        }
+    function getSelectedTemplateKey(tools) {
+        return tools.el.getAttribute('data-selected-template') || tools.defaultTemplate;
+    }
 
-        function tvPlayerUrl() {
-            var opt = companySel && companySel.options[companySel.selectedIndex];
-            var slug = opt && opt.getAttribute('data-slug');
-            var tpl = tplSel && tplSel.value;
-            var layout = layouts[tpl] || tpl || 'menu';
-            if (!slug) return '';
-            return tvRoot.replace(/\/$/, '') + '/' + slug + '/' + layout + '?player=1';
-        }
+    function setSelectedTemplateKey(tools, key) {
+        tools.el.setAttribute('data-selected-template', key);
+    }
 
-        function updateHint() {
-            if (hint) {
-                var direct = tvPlayerUrl();
-                hint.textContent = direct ? 'URL para la TV: ' + direct : '';
+    function syncGalleryContext() {
+        var tools = getPlayerTools();
+        if (!tools || !tools.companySel) return;
+
+        var opt = tools.companySel.options[tools.companySel.selectedIndex];
+        var slug = opt && opt.getAttribute('data-slug');
+
+        document.querySelectorAll('.wn-tvpik-copy-template-url, .wn-tvpik-use-template').forEach(function (btn) {
+            if (slug) {
+                btn.setAttribute('data-slug', slug);
             }
+        });
+    }
+
+    function tvUrls(tools, templateKey, mode) {
+        var opt = tools.companySel && tools.companySel.options[tools.companySel.selectedIndex];
+        var slug = opt && opt.getAttribute('data-slug');
+        var tpl = templateKey || getSelectedTemplateKey(tools);
+        var layout = tools.layouts[tpl] || tpl || 'menu';
+        if (!slug) return { slug: '', preview: '', player: '' };
+
+        var query = mode === 'preview' ? 'preview=1' : 'player=1';
+        var base = tools.tvRoot.replace(/\/$/, '') + '/' + slug + '/' + layout + '?' + query;
+        var mid = tools.menuSel && tools.menuSel.value;
+        if (mid) {
+            base += '&menu=' + encodeURIComponent(mid);
         }
 
-        companySel && companySel.addEventListener('change', updateHint);
-        tplSel && tplSel.addEventListener('change', updateHint);
-        updateHint();
+        return {
+            slug: slug,
+            preview: base,
+            player: base.replace('preview=1', 'player=1'),
+        };
+    }
+
+    function loadPreview(tools, templateKey, label) {
+        var iframe = document.getElementById('wn-tvpik-preview-iframe');
+        var placeholder = document.getElementById('wn-tvpik-preview-placeholder');
+        var titleEl = document.getElementById('wn-tvpik-preview-title');
+        var openTab = document.getElementById('wn-tvpik-preview-open-tab');
+        if (!iframe) return;
+
+        setSelectedTemplateKey(tools, templateKey);
+
+        document.querySelectorAll('.wn-tvpik-template-card').forEach(function (card) {
+            card.classList.remove('is-selected');
+        });
+        document.querySelectorAll('.wn-tvpik-use-template[data-template-key="' + templateKey + '"]').forEach(function (btn) {
+            var card = btn.closest('.wn-tvpik-template-card');
+            if (card) card.classList.add('is-selected');
+        });
+
+        var urls = tvUrls(tools, templateKey, 'preview');
+        if (!urls.preview) return;
+
+        var resolvedLabel = label || tools.labels[templateKey] || templateKey;
+        if (titleEl) titleEl.textContent = resolvedLabel;
+        if (openTab) {
+            openTab.href = urls.preview;
+            openTab.classList.remove('d-none');
+        }
+
+        iframe.src = urls.preview;
+        iframe.classList.remove('d-none');
+        if (placeholder) placeholder.classList.add('d-none');
+
+        var hint = document.getElementById('wn-player-url-hint');
+        if (hint) {
+            hint.textContent = 'Enlace para la TV: ' + urls.player;
+        }
+    }
+
+    function initPlayerTools() {
+        var tools = getPlayerTools();
+        if (!tools) return;
+
+        var hint = document.getElementById('wn-player-url-hint');
+        var shareHint = document.getElementById('wn-player-screenshare-hint');
+
+        function onContextChange() {
+            filterPlayerMenus();
+            syncGalleryContext();
+            loadPreview(tools, getSelectedTemplateKey(tools));
+        }
+
+        tools.companySel && tools.companySel.addEventListener('change', onContextChange);
+        tools.menuSel && tools.menuSel.addEventListener('change', onContextChange);
+
+        filterPlayerMenus();
+        syncGalleryContext();
+        loadPreview(tools, tools.defaultTemplate, tools.labels[tools.defaultTemplate]);
 
         document.getElementById('wn-player-open')?.addEventListener('click', function () {
-            var url = adminPlayerUrl();
-            if (!url) return;
-            var w = window.open(url, 'webnu_tv_player', 'noopener,noreferrer');
+            var urls = tvUrls(tools, getSelectedTemplateKey(tools), 'player');
+            if (!urls.player) return;
+            var w = window.open(urls.player, 'webnu_tv_player', 'noopener,noreferrer');
             if (w) w.focus();
         });
 
         document.getElementById('wn-player-copy')?.addEventListener('click', function () {
-            var url = tvPlayerUrl();
-            if (!url || !navigator.clipboard) return;
-            navigator.clipboard.writeText(url).then(function () {
+            var urls = tvUrls(tools, getSelectedTemplateKey(tools), 'player');
+            if (!urls.player || !navigator.clipboard) return;
+            navigator.clipboard.writeText(urls.player).then(function () {
                 var btn = document.getElementById('wn-player-copy');
                 if (btn) {
                     var t = btn.innerHTML;
                     btn.innerHTML = '<i class="ti ti-check me-1"></i> Copiado';
                     setTimeout(function () { btn.innerHTML = t; }, 2000);
                 }
+            });
+        });
+
+        document.getElementById('wn-player-screenshare')?.addEventListener('click', function () {
+            var urls = tvUrls(tools, getSelectedTemplateKey(tools), 'player');
+            if (!urls.player) return;
+
+            function showShareHint(msg) {
+                if (shareHint) {
+                    shareHint.textContent = msg;
+                    shareHint.classList.remove('d-none');
+                }
+            }
+
+            if (typeof PresentationRequest !== 'undefined') {
+                try {
+                    var request = new PresentationRequest([urls.player]);
+                    request.start().catch(function () {
+                        var w = window.open(urls.player, 'webnu_tv_player', 'noopener,noreferrer');
+                        if (w) w.focus();
+                        showShareHint('Si no aparece la TV: en la pestaña abierta usa el menú del navegador (⋮) → Transmitir / Cast.');
+                    });
+                    return;
+                } catch (e) {}
+            }
+
+            var win = window.open(urls.player, 'webnu_tv_player', 'noopener,noreferrer');
+            if (win) win.focus();
+            showShareHint('Comparte esa pestaña: menú del navegador → Transmitir / Cast, o compartir pantalla en Zoom/Meet.');
+        });
+    }
+
+    function initTemplateUseButtons() {
+        var tools = getPlayerTools();
+        if (!tools) return;
+
+        document.querySelectorAll('.wn-tvpik-use-template').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                var key = btn.getAttribute('data-template-key');
+                var label = btn.getAttribute('data-template-label');
+                if (!key) return;
+                loadPreview(tools, key, label);
+                document.getElementById('wn-tvpik-preview')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            });
+        });
+    }
+
+    function initGalleryCopyButtons() {
+        var tools = getPlayerTools();
+        if (!tools) return;
+
+        document.querySelectorAll('.wn-tvpik-copy-template-url').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                var templateKey = btn.getAttribute('data-template-key');
+                var urls = tvUrls(tools, templateKey, 'player');
+                if (!urls.player || !navigator.clipboard) return;
+
+                navigator.clipboard.writeText(urls.player).then(function () {
+                    var icon = btn.innerHTML;
+                    btn.innerHTML = '<i class="ti ti-check"></i>';
+                    setTimeout(function () { btn.innerHTML = icon; }, 2000);
+                });
             });
         });
     }
@@ -174,23 +338,36 @@
         });
     }
 
-    function initGalleryFilters() {
-        document.querySelectorAll('.wn-tvpik-gallery').forEach(function (gallery) {
-            var filters = gallery.querySelectorAll('.wn-tvpik-gallery__filter');
-            var items = gallery.querySelectorAll('[data-template-filter]');
-            if (!filters.length) return;
+    function bindGalleryFilters(gallery, filters) {
+        var items = gallery.querySelectorAll('[data-template-filter]');
+        if (!filters.length) return;
 
-            filters.forEach(function (filterBtn) {
-                filterBtn.addEventListener('click', function () {
-                    var filter = filterBtn.getAttribute('data-filter');
-                    filters.forEach(function (b) { b.classList.toggle('is-active', b === filterBtn); });
-                    items.forEach(function (item) {
-                        var kind = item.getAttribute('data-template-filter');
-                        var show = filter === 'all' || kind === filter;
-                        item.classList.toggle('d-none', !show);
-                    });
+        filters.forEach(function (filterBtn) {
+            filterBtn.addEventListener('click', function () {
+                var filter = filterBtn.getAttribute('data-filter');
+                filters.forEach(function (b) { b.classList.toggle('is-active', b === filterBtn); });
+                items.forEach(function (item) {
+                    var kind = item.getAttribute('data-template-filter');
+                    var show = filter === 'all' || kind === filter;
+                    item.classList.toggle('d-none', !show);
                 });
             });
+        });
+    }
+
+    function initGalleryFilters() {
+        document.querySelectorAll('[data-gallery-filters-for]').forEach(function (filterBar) {
+            var galleryId = filterBar.getAttribute('data-gallery-filters-for');
+            var gallery = document.getElementById(galleryId);
+            if (!gallery) return;
+            bindGalleryFilters(gallery, filterBar.querySelectorAll('.wn-tvpik-gallery__filter'));
+        });
+
+        document.querySelectorAll('.wn-tvpik-gallery').forEach(function (gallery) {
+            var filters = gallery.querySelectorAll('.wn-tvpik-gallery__filter');
+            if (filters.length) {
+                bindGalleryFilters(gallery, filters);
+            }
         });
     }
 
@@ -261,6 +438,8 @@
 
     function init() {
         initPlayerTools();
+        initTemplateUseButtons();
+        initGalleryCopyButtons();
         initCopyToken();
         initTemplatePickers();
         initGalleryFilters();
