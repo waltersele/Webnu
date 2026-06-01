@@ -801,6 +801,12 @@ class UserPlanService
                 'translation_max_locales' => $this->maxTranslationLocales($user),
                 'tvpik_max_screens' => $this->tvpikMaxScreens($user),
             ],
+            'tvpik_pricing' => [
+                'min_professional_screens' => (int) config('tvpik_pricing.min_professional_screens', 2),
+                'max_screens' => (int) config('tvpik_pricing.max_screens', 20),
+                'tiers' => config('tvpik_pricing.tiers', []),
+                'annual_discount_percent' => (int) round((float) config('tvpik_pricing.annual_discount', 0.20) * 100),
+            ],
             'required_plan_for' => [
                 'tvpik' => $this->requiredPlanLabel('tvpik'),
                 'tvpik_premium_templates' => $this->requiredPlanLabel('tvpik_premium_templates'),

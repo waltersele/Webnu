@@ -27,14 +27,15 @@
     </header>
 
     @if (! $canTranslate)
-        <div class="alert alert-primary d-flex flex-wrap align-items-center gap-3 mb-4">
-            <i class="ri-global-line fs-4 shrink-0"></i>
-            <div class="flex-grow-1">
-                <strong>Plan {{ $planLabel }}</strong>
-                <p class="mb-0 small">La carta multilingüe y la traducción automática con IA están incluidas en los planes superiores.</p>
-            </div>
-            <button type="button" class="btn btn-sm btn-primary" data-upgrade-trigger="translation">Activar idiomas (Plus)</button>
-            <a href="{{ $billingUrl }}" class="btn btn-sm btn-label-secondary">Ver planes</a>
+        <div class="mb-4">
+            @include('admin.partials.upgrade-teaser-inline', [
+                'trigger' => 'translation',
+                'icon' => 'ri-global-line',
+                'title' => 'Carta para turistas',
+                'text' => 'La carta multilingüe y la traducción automática con IA están incluidas en Pro.',
+                'tier' => 'Pro',
+                'cta' => 'Activar idiomas · Pro',
+            ])
         </div>
     @endif
 

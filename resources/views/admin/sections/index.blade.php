@@ -34,13 +34,15 @@
     $bannerCopy = $ut['copy']['translation_banner']['body'] ?? ($ut['copy']['translation_banner'] ?? 'Activa idiomas en tu carta con Pro.');
 @endphp
 @if ($showLangBanner)
-    <div class="alert alert-primary d-flex flex-wrap align-items-center gap-3 mb-3 wn-upgrade-lang-banner">
-        <i class="ri-global-line fs-4 shrink-0"></i>
-        <div class="flex-grow-1">
-            <strong>Clientes internacionales</strong>
-            <p class="mb-0 small">{{ $bannerCopy }}</p>
-        </div>
-        <button type="button" class="btn btn-sm btn-primary" data-upgrade-trigger="translation">Activar idiomas (Pro)</button>
+    <div class="mb-3">
+        @include('admin.partials.upgrade-teaser-inline', [
+            'trigger' => 'translation',
+            'icon' => 'ri-global-line',
+            'title' => 'Clientes internacionales',
+            'text' => $bannerCopy,
+            'tier' => 'Pro',
+            'cta' => 'Activar idiomas · Pro',
+        ])
     </div>
 @endif
 
@@ -463,14 +465,6 @@ $(document).on('click','.product-modify',function(){
     if (window.WebnuProductMediaUI) {
         window.WebnuProductMediaUI.loadModifyImage(dataImage || '');
         window.WebnuProductMediaUI.loadModifyVideo(dataVideo || '');
-    } else if (dataImage) {
-        $('#product-modify-image-ok').attr('src', "{{ URL::to('/') }}/img/" + dataImage);
-        $('#product-modify-image-existing').show();
-        $('#product-modify-image').closest('.webnu-file-drop').hide();
-    } else {
-        $('#product-modify-image-ok').attr('src', '');
-        $('#product-modify-image-existing').hide();
-        $('#product-modify-image').closest('.webnu-file-drop').show();
     }
 
     $('#product-modify-enabled').prop('checked', dataEnabled == 1 || dataEnabled == '1');
@@ -523,9 +517,6 @@ $(document).on('click','.product-image-delete',function(){
         success: function(result) {
             if (window.WebnuProductMediaUI) {
                 window.WebnuProductMediaUI.loadModifyImage('');
-            } else {
-                $('#product-modify-image-existing').hide();
-                $('#product-modify-image').closest('.webnu-file-drop').show();
             }
         },
         error: function(request,msg,error) { // What to do if we fail
@@ -549,8 +540,9 @@ $(document).on('click','.product-video-delete',function(){
             },
         cache: false,
         success: function(result) {
-            $('#product-modify-video-ok').attr('src', '').hide();
-            $('#product-modify-video').parent().removeClass('hidden');
+            if (window.WebnuProductMediaUI) {
+                window.WebnuProductMediaUI.loadModifyVideo('');
+            }
         },
         error: function() {
             alert('Se produjo un error al intentar eliminar el vídeo del producto.');

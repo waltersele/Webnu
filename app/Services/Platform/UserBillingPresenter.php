@@ -171,7 +171,8 @@ class UserBillingPresenter
      * @return array{
      *   mode: string,
      *   current: array{label_caps: string, title: string, items: array<int, array{label: string, ok: bool}>, footer: array{label: string, disabled: bool}},
-     *   upgrade: array{label_caps: string, title: string, badge: ?string, items: array<int, array{label: string, ok: bool}>, cta: array{label: string, href: ?string, portal: bool}},
+     *   upgrade: array{label_caps: string, title: string, badge: ?string, price_label: ?string, items: array<int, array{label: string, ok: bool}>, cta: array{label: string, href: ?string, portal: bool}},
+     *   upgrades: array<int, array{label_caps: string, title: string, badge: ?string, price_label: ?string, items: array<int, array{label: string, ok: bool}>, cta: array{label: string, href: ?string, portal: bool}}>,
      *   bento: array{title: string, items: array<int, array{key: string, title: string, desc: string, icon: string, locked: bool}>}
      * }
      */
@@ -187,11 +188,8 @@ class UserBillingPresenter
         $trialEnds = $presentation['trial_ends_at_formatted'] ?? null;
         $isManual = !empty($presentation['manual_active']);
 
-        $upgradeTierKey = $tierKey === 'free' ? 'pro' : ($tierKey === 'pro' ? 'plus' : 'plus');
-        $upgradeTier = array_merge(['key' => $upgradeTierKey], config('plans.tiers.' . $upgradeTierKey, []));
-
         $currentItems = $this->comparisonItemsForTier($tierKey, $tier);
-        $upgradeItems = $this->comparisonItemsForTier($upgradeTierKey, $upgradeTier);
+        $upgrades = $this->buildPlanUpgradeOptions($user, $tierKey, $hasAccess);
 
         $mode = 'default';
         if ($isTrial) {
@@ -209,28 +207,6 @@ class UserBillingPresenter
             $currentTitle = ($tier['label'] ?? 'Plan') . ' (manual)';
         }
 
-        $upgradeTitle = $upgradeTier['label'] ?? 'Pro';
-        $upgradeCaps = $tierKey === 'free' ? 'Revoluciona tu negocio' : 'Mejora tu plan';
-
-        $cta = [
-            'label' => $tierKey === 'free' ? 'Mejorar a Pro ahora' : 'Mejorar ahora',
-            'href' => null,
-            'portal' => false,
-        ];
-
-        if ($user->stripe_id) {
-            $cta['href'] = route('admin.billing.portal');
-            $cta['portal'] = true;
-        } else {
-            $cta['href'] = route('welcome');
-        }
-
-        if ($hasAccess) {
-            $cta['label'] = 'Gestionar suscripción';
-            $cta['href'] = route('admin.billing.portal');
-            $cta['portal'] = true;
-        }
-
         $bento = $this->bentoForUser($user);
 
         if ($isTrial) {
@@ -244,6 +220,15 @@ class UserBillingPresenter
             $currentItems = array_merge($extra, $currentItems);
         }
 
+        $upgrade = $upgrades[0] ?? [
+            'label_caps' => 'Mejora tu plan',
+            'title' => 'Pro',
+            'badge' => null,
+            'price_label' => null,
+            'items' => [],
+            'cta' => ['label' => 'Contratar', 'href' => route('welcome'), 'portal' => false],
+        ];
+
         return [
             'mode' => $mode,
             'current' => [
@@ -255,14 +240,84 @@ class UserBillingPresenter
                     'disabled' => true,
                 ],
             ],
-            'upgrade' => [
-                'label_caps' => $upgradeCaps,
-                'title' => $upgradeTitle,
-                'badge' => $tierKey === 'free' ? 'Recomendado' : null,
-                'items' => $upgradeItems,
-                'cta' => $cta,
-            ],
+            'upgrade' => $upgrade,
+            'upgrades' => $upgrades,
             'bento' => $bento,
+        ];
+    }
+
+    /**
+     * @return array<int, array{label_caps: string, title: string, badge: ?string, price_label: ?string, items: array<int, array{label: string, ok: bool}>, cta: array{label: string, href: ?string, portal: bool}}>
+     */
+    protected function buildPlanUpgradeOptions(User $user, string $currentTierKey, bool $hasAccess): array
+    {
+        if (in_array($currentTierKey, ['plus', 'franchise'], true)) {
+            return [];
+        }
+
+        $targets = $currentTierKey === 'free' ? ['pro', 'plus'] : ['plus'];
+        $options = [];
+
+        foreach ($targets as $index => $targetKey) {
+            $targetTier = array_merge(['key' => $targetKey], config('plans.tiers.' . $targetKey, []));
+            $options[] = $this->buildPlanUpgradeCard($user, $currentTierKey, $targetKey, $targetTier, $hasAccess, $index === 0 && $currentTierKey === 'free');
+        }
+
+        return $options;
+    }
+
+    /**
+     * @param  array<string, mixed>  $targetTier
+     * @return array{label_caps: string, title: string, badge: ?string, price_label: ?string, items: array<int, array{label: string, ok: bool}>, cta: array{label: string, href: ?string, portal: bool}}
+     */
+    protected function buildPlanUpgradeCard(User $user, string $currentTierKey, string $targetKey, array $targetTier, bool $hasAccess, bool $recommended): array
+    {
+        $items = $this->comparisonItemsForTier($targetKey, $targetTier);
+
+        if ($targetKey === 'plus') {
+            $items[] = ['label' => '1 pantalla TV incluida (carta + TV)', 'ok' => true];
+        }
+
+        $priceLabel = $targetTier['price_label'] ?? null;
+        if ($targetKey === 'plus') {
+            $priceLabel = '19,90 €/mes · carta + 1 pantalla';
+        }
+
+        $labelCaps = $currentTierKey === 'free' && $targetKey === 'pro'
+            ? 'Revoluciona tu negocio'
+            : ($targetKey === 'plus' ? 'Carta + pantalla TV' : 'Mejora tu plan');
+
+        $badge = null;
+        if ($recommended && $targetKey === 'pro') {
+            $badge = 'Recomendado';
+        } elseif ($targetKey === 'plus') {
+            $badge = 'Carta + 1 pantalla';
+        }
+
+        $cta = [
+            'label' => $targetKey === 'plus' ? 'Contratar Plus' : 'Mejorar a Pro',
+            'href' => route('welcome'),
+            'portal' => false,
+        ];
+
+        if ($user->stripe_id) {
+            $cta['href'] = route('admin.billing.portal');
+            $cta['portal'] = true;
+        }
+
+        if ($hasAccess) {
+            $cta['label'] = 'Gestionar suscripción';
+            $cta['href'] = route('admin.billing.portal');
+            $cta['portal'] = true;
+        }
+
+        return [
+            'label_caps' => $labelCaps,
+            'title' => $targetTier['label'] ?? ucfirst($targetKey),
+            'badge' => $badge,
+            'price_label' => $priceLabel,
+            'items' => $items,
+            'cta' => $cta,
         ];
     }
 

@@ -12,6 +12,7 @@ return [
         'plus_yearly' => env('STRIPE_PRICE_PLUS_YEARLY', ''),
         'tvpik_screen_1' => env('STRIPE_PRICE_TVPIK_1', ''),
         'tvpik_pack_5' => env('STRIPE_PRICE_TVPIK_PACK5', ''),
+        // TVPik actual: precio dinámico por tramos en checkout (createTvpikScreensPrice).
     ],
 
     'subscription_names' => [
@@ -21,6 +22,7 @@ return [
         'plus_yearly' => 'planqr_plus_anual',
         'tvpik_screen_1' => 'planqr_tvpik_1',
         'tvpik_pack_5' => 'planqr_tvpik_pack5',
+        'tvpik_screens' => 'planqr_tvpik',
         'monthly' => 'planqrmensual',
         'yearly' => 'planqranual',
     ],

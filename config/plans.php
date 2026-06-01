@@ -136,20 +136,11 @@ return [
         ],
     ],
 
-    'tvpik_addons' => [
-        'screen_1' => [
-            'label' => '1 pantalla TVPik',
-            'price_label' => '5,00 €/mes',
-            'price_cents' => 500,
-            'screens' => 1,
-        ],
-        'pack_5' => [
-            'label' => 'Pack 5 pantallas TVPik',
-            'price_label' => '20,00 €/mes',
-            'price_cents' => 2000,
-            'screens' => 5,
-        ],
-    ],
+    /*
+    | TVPik: tarifa por tramos (ver config/tvpik_pricing.php).
+    | Legacy Stripe: screen_1 / pack_5 en subscription_addon_map.
+    */
+    'tvpik_addons' => [],
 
     /*
     | Mapeo de suscripciones Stripe (nombre Cashier) → plan interno.

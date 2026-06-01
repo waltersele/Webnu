@@ -140,6 +140,7 @@ class UpgradeTriggerService
                     : $text;
             }
             $resolved[$key]['price_label'] = $price;
+            $resolved[$key]['tier'] = $tierKey;
         }
 
         return $resolved;

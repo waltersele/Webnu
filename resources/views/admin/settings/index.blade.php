@@ -101,6 +101,7 @@
 @endsection
 
 @push('styles')
+<link rel="stylesheet" href="{{ asset('materio/css/webnu-upgrade-modal.css') }}">
 <link rel="stylesheet" href="{{ asset('materio/css/webnu-settings.css') }}">
 @endpush
 

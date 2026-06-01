@@ -32,6 +32,7 @@
         <link rel="stylesheet" href="{{ asset('materio/css/webnu-admin-tokens.css') }}">
         <link rel="stylesheet" href="{{ asset('materio/css/webnu-admin-shell.css') }}">
         <link rel="stylesheet" href="{{ asset('materio/css/webnu-admin.css') }}">
+        <link rel="stylesheet" href="{{ asset('materio/css/webnu-upgrade-modal.css') }}">
         <link rel="stylesheet" href="{{ asset('materio/css/webnu-dashboard.css') }}">
         <link rel="stylesheet" href="{{ asset('materio/css/webnu-onboarding-anim.css') }}">
         <link rel="stylesheet" href="{{ asset('materio/css/webnu-wizard.css') }}">

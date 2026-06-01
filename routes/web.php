@@ -10,6 +10,7 @@ Route::get('/landing-preview', 'PagesController@landingPreview')->name('landing.
 Route::view('/welcome', 'welcome')->name('welcome');
 Route::post('/pay_product', 'PaymentController@pay_product')->name('pay_product');
 Route::post('/process_subscription', 'PaymentController@process_subscription')->name('process_subscription');
+Route::get('/api/tvpik/pricing/quote', 'TvpikPricingController@quote')->name('tvpik.pricing.quote');
 Route::post('/te_llamamos', 'PagesController@te_llamamos')->middleware('throttle:10,1')->name('te_llamamos');
 Route::post('/sugerencia', 'PagesController@suggestion')->middleware('throttle:10,1')->name('suggestion');
 Route::post('/table_reservation', 'PagesController@table_reservation')->middleware('throttle:10,1')->name('table_reservation');

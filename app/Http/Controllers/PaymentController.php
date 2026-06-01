@@ -3,8 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Mail\OrderShipped;
+use App\Services\Billing\TvpikScreenPricing;
 use App\Services\Platform\BillingPriceResolver;
+use App\Services\Platform\StripePriceService;
 use App\User;
+use Illuminate\Validation\ValidationException;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -48,8 +51,12 @@ class PaymentController extends Controller
         }
     }
 
-    public function process_subscription(Request $request, BillingPriceResolver $priceResolver)
-    {
+    public function process_subscription(
+        Request $request,
+        BillingPriceResolver $priceResolver,
+        TvpikScreenPricing $tvpikPricing,
+        StripePriceService $stripePrices
+    ) {
         try {
             DB::beginTransaction();
 
@@ -59,7 +66,7 @@ class PaymentController extends Controller
                 'payment_method' => 'required|string',
                 'plan_tier' => 'required|in:pro,plus',
                 'billing_cycle' => 'required|in:monthly,yearly',
-                'tvpik_addon' => 'nullable|in:,screen_1,pack_5',
+                'tvpik_screens' => 'nullable|integer|min:0|max:20',
                 'privacy_policy' => 'accepted',
             ]);
 
@@ -88,19 +95,32 @@ class PaymentController extends Controller
             $user->newSubscription($subscriptionName, $priceId)
                 ->create($request->payment_method);
 
-            $addon = $request->input('tvpik_addon');
-            $addonPriceId = $addon ? $priceResolver->priceId('tvpik_' . $addon) : null;
-            if ($addonPriceId) {
-                $addonName = config('billing.subscription_names.tvpik_' . $addon);
-                if ($addonName) {
-                    $user->newSubscription($addonName, $addonPriceId)
-                        ->create($request->payment_method);
-                }
-                if ($addon === 'screen_1') {
-                    $user->tvpik_extra_screens = max((int) $user->tvpik_extra_screens, 1);
-                } elseif ($addon === 'pack_5') {
-                    $user->tvpik_extra_screens = max((int) $user->tvpik_extra_screens, 5);
-                }
+            $requestedScreens = $request->has('tvpik_screens')
+                ? (int) $request->input('tvpik_screens')
+                : 0;
+            $totalLicensed = $tvpikPricing->normalizeTotalScreens($tier, $requestedScreens);
+
+            if ($requestedScreens > 0 && ! $tvpikPricing->isValidTotalForTier($tier, $requestedScreens)) {
+                throw ValidationException::withMessages([
+                    'tvpik_screens' => 'Número de pantallas no válido. En Pro el mínimo es 2; en Plus, de 1 a 20.',
+                ]);
+            }
+
+            $addonCents = $tvpikPricing->addonRecurringCents($totalLicensed, $tier, $cycle);
+            if ($addonCents > 0) {
+                $stripeInterval = $cycle === 'yearly' ? 'year' : 'month';
+                $created = $stripePrices->createTvpikScreensPrice($addonCents, $stripeInterval, [
+                    'webnu_tvpik_screens' => (string) $totalLicensed,
+                    'webnu_plan_tier' => $tier,
+                ]);
+                $addonName = config('billing.subscription_names.tvpik_screens', 'planqr_tvpik');
+                $user->newSubscription($addonName, $created['price_id'])
+                    ->create($request->payment_method);
+            }
+
+            $extra = $tvpikPricing->extraScreensBeyondIncluded($tier, $totalLicensed);
+            if ($extra > 0) {
+                $user->tvpik_extra_screens = max((int) $user->tvpik_extra_screens, $extra);
                 $user->save();
             }
 

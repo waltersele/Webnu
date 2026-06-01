@@ -123,6 +123,12 @@
 @endsection
 
 @push('scripts')
+<script>
+    window.WebnuProductMedia = {
+        baseUrl: '{{ URL::to('/') }}',
+        maxVideoSeconds: {{ config('product_media.max_video_seconds', 30) }}
+    };
+</script>
 <script src="{{ asset('adminlte/js/product-media.js') }}"></script>
 <script>
 $(function () {

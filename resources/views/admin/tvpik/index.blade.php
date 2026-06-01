@@ -20,7 +20,7 @@
                     <div class="flex-grow-1">
                         <h5 class="mb-1">Pantallas TV</h5>
                         <p class="text-muted mb-0 small">
-                            Muestra tu carta en cualquier TV del local en tiempo real. Disponible en el plan <strong>Plus</strong> (1 pantalla incluida y plantillas premium) o como add-on en Pro (plantillas estándar).
+                            Muestra tu carta en cualquier TV del local. <strong>Plus 19,90 €</strong> = carta + 1 pantalla incluida; en <strong>Pro</strong>, TV desde 2 pantallas (ej. 25,90 €/mes total).
                         </p>
                     </div>
                     <a href="{{ route('admin.settings') }}#plan" class="btn btn-primary flex-shrink-0">

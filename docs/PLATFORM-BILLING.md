@@ -53,7 +53,7 @@ SUPER_ADMIN_EMAILS=tu@email.com
 | `plus` | 19,90 €/mes | Todo Pro + cartas/idiomas ∞, 1 pantalla TVPik |
 | `franchise` | A medida | Asignación manual en plataforma |
 
-Add-ons TVPik: 1 pantalla 5 €/mes · pack 5 pantallas 20 €/mes (`users.tvpik_extra_screens`).
+TVPik (pantallas): tarifa por tramos en [`config/tvpik_pricing.php`](../config/tvpik_pricing.php) — 2–3 a 8 €/ud, 4–5 a 7 €/ud, 6–20 a 6 €/ud; anual −20 % en la parte TV. Cotización: `GET /api/tvpik/pricing/quote`.
 
 ### Migración de claves legacy
 

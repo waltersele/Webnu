@@ -85,7 +85,8 @@
                 'message' => 'Muestra tu carta Webnu en las TVs del local con el plan Plus o add-on TVPik en Pro.',
             ])
             <div class="card-body">
-                <p class="text-muted">Plus incluye 1 pantalla TVPik. En Pro puedes añadir pantallas desde 5 €/mes.</p>
+                <p class="text-muted mb-1">Plus (19,90 €/mes) incluye carta + 1 pantalla. Pro + TV desde 2 pantallas (ej. 25,90 €/mes con 2 TVs).</p>
+                <p class="text-muted small mb-0">Más pantallas: tramos TVPik 8/7/6 € (misma tarifa que tvpik.es).</p>
                 <div class="input-group mb-3">
                     <input type="text" class="form-control" readonly value="••••••••••••••••••••••••••••••••">
                     <button type="button" class="btn btn-outline-primary" disabled>Copiar</button>

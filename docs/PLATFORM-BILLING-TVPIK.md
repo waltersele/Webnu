@@ -17,8 +17,8 @@ TVPik **no implementa Stripe ni precios**. Solo consulta permisos vía API y blo
 | Plan | `tvpik_max_screens` | Plantillas TV | Notas |
 |------|---------------------|---------------|--------|
 | `free` | `0` | — | Sin hub TV |
-| `pro` | `0` + `users.tvpik_extra_screens` | **7 estándar** | Add-on Stripe: 1 pantalla (5 €) o pack 5 (20 €) |
-| `plus` | `1` incluida + extras | **13** (7 + 6 premium) | Pantallas adicionales vía add-on |
+| `pro` | `0` + `users.tvpik_extra_screens` | **7 estándar** | TVPik add-on por tramos (misma tarifa que tvpik.es) |
+| `plus` | `1` incluida + extras | **13** (7 + 6 premium) | Suplemento = tarifa total − valor 1 pantalla incluida |
 | `franchise` | Ilimitado (`null`) | Todas | Asignación manual |
 | Superadmin | Ilimitado | Todas | Bypass |
 
@@ -31,6 +31,32 @@ UPDATE users SET plan = 'plus', tvpik_extra_screens = 4 WHERE email = 'cliente@e
 ```
 
 Tras el cambio, TVPik debe **volver a llamar** la API de cuenta (o re-login).
+
+### Tarifa pantallas (paridad TVPik)
+
+Definida en [`config/tvpik_pricing.php`](../config/tvpik_pricing.php) y [`TvpikScreenPricing`](../app/Services/Billing/TvpikScreenPricing.php):
+
+| Pantallas (total) | €/pantalla/mes | Ejemplo |
+|-------------------|----------------|---------|
+| 2–3 | 8 | 3 → 24 € |
+| 4–5 | 7 | 5 → 35 € |
+| 6–20 | 6 | 10 → 60 € |
+
+- **Plus (19,90 €/mes):** bundle **carta + 1 pantalla**; sin línea TVPik extra si solo usas esa pantalla.
+- **Plus con más pantallas:** suplemento = `tarifa(N) − crédito 8 €` (valor de la pantalla incluida).
+- **Pro:** mínimo 2 pantallas si contratas TV; cobro `tarifa(N)` completa.
+- **Anual:** −20 % solo en la línea TVPik.
+- **Checkout Webnu:** precio Stripe dinámico por importe calculado (`StripePriceService::createTvpikScreensPrice`).
+- **Cotización pública:** `GET /api/tvpik/pricing/quote?tier=pro|plus&screens=N&cycle=monthly|yearly`.
+
+**Totales mensuales de ejemplo (sin IVA):**
+
+| Caso | Webnu | TVPik | Total |
+|------|-------|-------|-------|
+| Plus, 1 pantalla | 19,90 € | — | **19,90 €** |
+| Pro + 2 pantallas | 9,90 € | 16,00 € | **25,90 €** |
+| Plus + 2 pantallas (total) | 19,90 € | 8,00 € | **27,90 €** |
+| Plus + 5 pantallas (total) | 19,90 € | 27,00 € | **46,90 €** |
 
 ---
 

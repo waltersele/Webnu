@@ -151,6 +151,45 @@ class StripePriceService
     }
 
     /**
+     * Precio recurrente TVPik según tramos (importe calculado en checkout).
+     *
+     * @param  array<string, string|int>  $metadata
+     * @return array{price_id: string, product_id: string}
+     */
+    public function createTvpikScreensPrice(int $amountCents, string $interval, array $metadata = []): array
+    {
+        $this->ensureStripe();
+
+        if ($amountCents <= 0) {
+            throw new \InvalidArgumentException('El importe TVPik debe ser mayor que 0.');
+        }
+
+        if (! in_array($interval, ['month', 'year'], true)) {
+            throw new \InvalidArgumentException('Intervalo no válido: ' . $interval);
+        }
+
+        $productId = $this->resolveOrCreateProduct([
+            'product_name' => 'Webnu TVPik',
+            'product_setting_key' => 'stripe_product_tvpik',
+        ]);
+
+        $price = Price::create([
+            'product' => $productId,
+            'unit_amount' => $amountCents,
+            'currency' => 'eur',
+            'recurring' => ['interval' => $interval],
+            'metadata' => array_merge([
+                'webnu_catalog_key' => 'tvpik_screens',
+            ], $metadata),
+        ]);
+
+        return [
+            'price_id' => $price->id,
+            'product_id' => $productId,
+        ];
+    }
+
+    /**
      * @param  array<string, mixed>  $meta
      */
     protected function resolveOrCreateProduct(array $meta): string

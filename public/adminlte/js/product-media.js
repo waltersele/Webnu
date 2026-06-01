@@ -2,97 +2,151 @@
     'use strict';
 
     var config = window.WebnuProductMedia || {};
-    var baseUrl = config.baseUrl || '';
+    var baseUrl = (config.baseUrl || '').replace(/\/$/, '');
 
     function idPrefixForBlock($block) {
         return $block.data('media-mode') === 'add' ? 'product-add' : 'product-modify';
     }
 
+    function $panel($block, kind) {
+        return $block.find('[data-media-kind="' + kind + '"]');
+    }
+
+    function setPhotoState($block, state, src) {
+        var $photo = $panel($block, 'photo');
+        var $empty = $photo.find('[data-photo-empty]');
+        var $filled = $photo.find('[data-photo-filled]');
+        var $badge = $photo.find('[data-photo-status]');
+        var $img = $photo.find('[data-photo-preview-img]');
+
+        if (state === 'empty') {
+            $empty.prop('hidden', false);
+            $filled.prop('hidden', true);
+            $badge.prop('hidden', true);
+            $img.attr('src', '');
+            $('#' + idPrefixForBlock($block) + '-image-preview').hide();
+            return;
+        }
+
+        $empty.prop('hidden', true);
+        $filled.prop('hidden', false);
+        $badge.prop('hidden', false);
+        if (src) {
+            $img.attr('src', src);
+        }
+        $('#' + idPrefixForBlock($block) + '-image-preview').hide();
+    }
+
+    function setVideoState($block, state, src) {
+        var $video = $panel($block, 'video');
+        if (!$video.length) {
+            return;
+        }
+
+        var $empty = $video.find('[data-video-empty]');
+        var $filled = $video.find('[data-video-filled]');
+        var $badge = $video.find('[data-video-status]');
+        var $el = $video.find('[data-video-preview]');
+
+        if (state === 'empty') {
+            $empty.prop('hidden', false);
+            $filled.prop('hidden', true);
+            $badge.prop('hidden', true);
+            $el.attr('src', '');
+            $('#' + idPrefixForBlock($block) + '-video-preview').hide().find('video').attr('src', '');
+            return;
+        }
+
+        $empty.prop('hidden', true);
+        $filled.prop('hidden', false);
+        $badge.prop('hidden', false);
+        if (src) {
+            $el.attr('src', src);
+        }
+        $('#' + idPrefixForBlock($block) + '-video-preview').hide();
+    }
+
     function initImagePreview($block) {
+        var $block = $($block);
         var idPrefix = idPrefixForBlock($block);
         var $input = $block.find('.product-image-input');
-        var $previewWrap = $('#' + idPrefix + '-image-preview');
-        var $previewImg = $previewWrap.find('img');
 
         $input.on('change', function () {
             var file = this.files && this.files[0];
             if (!file) {
-                $previewWrap.hide();
                 return;
             }
             var reader = new FileReader();
             reader.onload = function (e) {
-                $previewImg.attr('src', e.target.result);
-                $previewWrap.show();
+                setPhotoState($block, 'filled', e.target.result);
+                var $legacy = $('#' + idPrefix + '-image-preview');
+                $legacy.find('img').attr('src', e.target.result);
             };
             reader.readAsDataURL(file);
         });
     }
 
     function initVideoFilePreview($block) {
+        var $block = $($block);
         var idPrefix = idPrefixForBlock($block);
         var $input = $block.find('.product-video-file-input');
-        var $previewWrap = $('#' + idPrefix + '-video-preview');
-        var $previewVideo = $previewWrap.find('video');
 
         $input.on('change', function () {
             var file = this.files && this.files[0];
             if (!file) {
-                $previewWrap.hide();
                 return;
             }
             var url = URL.createObjectURL(file);
-            $previewVideo.attr('src', url);
-            $previewWrap.show();
+            setVideoState($block, 'filled', url);
+            $('#' + idPrefix + '-video-preview').find('video').attr('src', url);
         });
     }
 
     function resetMediaBlock($block) {
-        var idPrefix = idPrefixForBlock($block);
+        var $block = $($block);
+        setPhotoState($block, 'empty');
+        setVideoState($block, 'empty');
         $block.find('input[type="file"]').val('');
-        $('#' + idPrefix + '-image-preview').hide();
-        $('#' + idPrefix + '-video-preview').hide().find('video').attr('src', '');
+    }
+
+    function modifyBlock() {
+        return $('.product-media-block[data-media-mode="modify"]').first();
     }
 
     window.WebnuProductMediaUI = {
         resetAdd: function () {
             $('.product-media-block[data-media-mode="add"]').each(function () {
-                resetMediaBlock($(this));
+                resetMediaBlock(this);
             });
         },
         loadModifyVideo: function (videoPath) {
-            var $wrap = $('#product-modify-video-existing');
-            var $existing = $('#product-modify-video-ok');
-
+            var $block = modifyBlock();
+            if (!$block.length) {
+                return;
+            }
             if (videoPath) {
-                $existing.attr('src', baseUrl + '/img/' + videoPath);
-                $wrap.show();
+                setVideoState($block, 'filled', baseUrl + '/img/' + videoPath);
             } else {
-                $existing.attr('src', '');
-                $wrap.hide();
+                setVideoState($block, 'empty');
             }
         },
         loadModifyImage: function (imagePath) {
-            var $wrap = $('#product-modify-image-existing');
-            var $existing = $('#product-modify-image-ok');
-            var $preview = $('#product-modify-image-preview');
-
+            var $block = modifyBlock();
+            if (!$block.length) {
+                return;
+            }
             if (imagePath) {
-                $existing.attr('src', baseUrl + '/img/' + imagePath);
-                $wrap.show();
-                $preview.hide();
+                setPhotoState($block, 'filled', baseUrl + '/img/' + imagePath);
             } else {
-                $existing.attr('src', '');
-                $wrap.hide();
+                setPhotoState($block, 'empty');
             }
         }
     };
 
     $(function () {
         $('.product-media-block').each(function () {
-            var $block = $(this);
-            initImagePreview($block);
-            initVideoFilePreview($block);
+            initImagePreview(this);
+            initVideoFilePreview(this);
         });
 
         $('#modal-add-product').on('hidden.bs.modal', function () {
