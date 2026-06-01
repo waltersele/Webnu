@@ -30,9 +30,6 @@
             @if ($selected)
                 <span class="wn-template-card__check"><i class="ri-check-line"></i></span>
             @endif
-            @if (!empty($meta['recommended']))
-                <span class="wn-template-card__badge">Recomendada</span>
-            @endif
         </label>
     @endif
 </div>

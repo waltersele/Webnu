@@ -46,8 +46,9 @@
             return;
         }
 
-        var selected = form.querySelector('input[data-locale-base-radio]:checked');
-        var base = selected ? selected.value : null;
+        var select = form.querySelector('select[data-locale-base-select]');
+        var selectedRadio = form.querySelector('input[data-locale-base-radio]:checked');
+        var base = select ? select.value : (selectedRadio ? selectedRadio.value : null);
         var extrasWrap = form.querySelector('[data-locale-role="extras"], #onb-locale-extras, [data-locale-limit]');
         if (!extrasWrap) {
             return;
@@ -79,12 +80,26 @@
 
     document.querySelectorAll('[data-locale-limit]').forEach(initContainer);
 
+    function syncSkipFormDefaultLocale(form) {
+        var skipForm = document.getElementById('onb-locales-skip-form');
+        if (!skipForm || !form || form.id !== 'onb-locales-form') {
+            return;
+        }
+        var hidden = skipForm.querySelector('[data-locale-skip-default]');
+        var select = form.querySelector('select[data-locale-base-select]');
+        if (hidden && select) {
+            hidden.value = select.value;
+        }
+    }
+
     document.querySelectorAll('#onb-locales-form, form[data-locale-form]').forEach(function (form) {
         form.addEventListener('change', function (event) {
-            if (event.target.matches('input[data-locale-base-radio]')) {
+            if (event.target.matches('select[data-locale-base-select], input[data-locale-base-radio]')) {
                 syncBaseLocaleExtras(form);
+                syncSkipFormDefaultLocale(form);
             }
         });
         syncBaseLocaleExtras(form);
+        syncSkipFormDefaultLocale(form);
     });
 })();

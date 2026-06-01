@@ -2,7 +2,7 @@
     $currentTemplate = old('template', $company->template ?: 'lumiere');
     $templatePresets = $themePresets[$currentTemplate] ?? [];
     $allTemplates = collect($templates)->sortBy(function ($meta, $key) {
-        return [!empty($meta['recommended']) ? 0 : 1, $meta['label'] ?? $key];
+        return $meta['label'] ?? $key;
     });
     $asStudioStep = $asStudioStep ?? true;
 @endphp

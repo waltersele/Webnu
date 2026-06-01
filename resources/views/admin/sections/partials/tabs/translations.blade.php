@@ -9,10 +9,9 @@
     $canTranslate = $plansSrv->canUseTranslation($user);
     $maxExtraLocales = $plansSrv->maxTranslationLocales($user);
     $maxPublicLocales = $maxExtraLocales !== null ? $maxExtraLocales + 1 : null;
-    $hasMenuContent = $company->sections()->whereHas('products')->exists();
+    $browserLocale = app(\App\Services\MenuLocaleService::class)->detectSupportedLocaleFromRequest(request());
     $planLabel = $plansSrv->tier($user)['label'] ?? 'Gratis';
     $stats = $translationsSrv->statsForCompany($company);
-    $defaultMeta = $supportedLocales[$defaultLocale] ?? ['native' => strtoupper($defaultLocale)];
     $billingUrl = route('admin.settings');
     $languagesEditUrl = route('admin.companies.languages', $company);
 @endphp
@@ -49,18 +48,20 @@
                     @endif
                 </div>
                 <div class="card-body">
-                    <p class="text-muted small mb-2">
-                        Idioma principal: <strong>{{ $defaultMeta['native'] ?? strtoupper($defaultLocale) }}</strong>
-                        (platos y categorías que editas en la carta).
-                    </p>
-                    @if (! $hasMenuContent)
-                        <p class="text-muted small mb-3">Puedes cambiar el idioma principal mientras la carta esté vacía desde el paso de idiomas al editar la empresa.</p>
-                    @endif
-
                     <form method="POST" action="{{ route('admin.companies.languages.update', $company) }}" data-locale-form>
                         @csrf
                         @method('PUT')
                         <input type="hidden" name="redirect_to" value="sections">
+
+                        @include('admin.partials.menu-base-locale-select', [
+                            'selectId' => 'sections-base-locale',
+                            'currentValue' => old('default_locale', $defaultLocale),
+                            'browserLocale' => $browserLocale,
+                            'supportedLocales' => $supportedLocales,
+                            'wrapperClass' => 'mb-3',
+                        ])
+
+                        <p class="text-muted small mb-3">Idiomas extra visibles en la carta pública para tus clientes.</p>
 
                         <div class="vstack gap-2 mb-3"
                              data-locale-limit

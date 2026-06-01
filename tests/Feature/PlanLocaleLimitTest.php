@@ -69,6 +69,38 @@ class PlanLocaleLimitTest extends TestCase
         $this->assertSame('de', $locale);
     }
 
+    public function test_idiomas_permite_cambiar_idioma_base_con_carta_con_contenido(): void
+    {
+        $user = $this->createTrialProUser();
+        $company = $user->companies()->first();
+        $company->default_locale = 'es';
+        $company->enabled_locales = ['en', 'ca'];
+        $company->save();
+
+        $section = \App\Section::create([
+            'company_id' => $company->id,
+            'name'       => 'Entrantes',
+            'order'      => 1,
+        ]);
+        \App\Product::create([
+            'section_id'   => $section->id,
+            'name'         => 'Ensalada',
+            'description'  => 'Fresca',
+            'price_unit'   => 8.5,
+            'order'        => 1,
+        ]);
+
+        $response = $this->actingAs($user)->put(route('admin.companies.languages.update', $company), [
+            'default_locale' => 'ca',
+            'locales'        => ['en', 'es'],
+        ]);
+
+        $response->assertRedirect(route('admin.companies.languages', $company));
+        $company->refresh();
+        $this->assertSame('ca', $company->default_locale);
+        $this->assertSame(['en', 'es'], $company->enabled_locales);
+    }
+
     private function createTrialProUser(): User
     {
         $user = User::factory()->create([

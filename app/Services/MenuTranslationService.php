@@ -23,6 +23,33 @@ class MenuTranslationService
         $this->provider = $provider;
     }
 
+    public function setDefaultLocale(Company $company, string $locale): Company
+    {
+        $supported = array_keys(config('menu_locales.supported', []));
+        if (! in_array($locale, $supported, true)) {
+            throw ValidationException::withMessages([
+                'default_locale' => 'Idioma no soportado.',
+            ]);
+        }
+
+        $previous = $company->defaultLocale();
+        if ($locale === $previous) {
+            return $company;
+        }
+
+        $company->default_locale = $locale;
+
+        $extra = is_array($company->enabled_locales) ? $company->enabled_locales : [];
+        $company->enabled_locales = array_values(array_filter(
+            $extra,
+            fn ($code) => $code !== $locale && in_array($code, $supported, true)
+        ));
+
+        $company->save();
+
+        return $company->fresh();
+    }
+
     public function updateCompanyLocales(Company $company, User $user, array $locales): Company
     {
         $default = $company->defaultLocale();

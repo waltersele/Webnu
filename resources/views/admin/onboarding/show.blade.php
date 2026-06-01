@@ -163,8 +163,8 @@
 
         {{-- Paso 4: Idiomas --}}
         @php
-            $onbBaseLocale = old('default_locale', $defaultLocale);
             $onbSuggestedBase = $suggestedBaseLocale ?? $defaultLocale;
+            $onbBaseLocale = old('default_locale', $onbSuggestedBase);
         @endphp
         <section class="wn-onb-step {{ $step === 4 ? 'is-active' : '' }}" data-onb-step="4">
             <div class="wn-onb-card wn-onb-card--wide">
@@ -179,24 +179,18 @@
                     @csrf
                     <input type="hidden" name="step" value="4">
 
-                    <p class="wn-onb-label">Idioma principal de la carta</p>
-                    <div class="wn-onb-locales wn-onb-locales--base" data-locale-role="base">
-                        @foreach($supportedLocales as $code => $meta)
-                            <label class="wn-onb-locale wn-onb-locale--radio {{ $onbBaseLocale === $code ? 'is-selected' : '' }}">
-                                <input type="radio" name="default_locale" value="{{ $code }}"
-                                    {{ $onbBaseLocale === $code ? 'checked' : '' }}
-                                    data-locale-base-radio>
-                                <span>
-                                    <strong>{{ $meta['native'] ?? $meta['label'] }}</strong>
-                                    <small>{{ strtoupper($code) }}</small>
-                                    @if($code === $onbSuggestedBase)
-                                        <span class="wn-onb-locale__hint">Recomendado (tu navegador)</span>
-                                    @endif
-                                </span>
-                            </label>
-                        @endforeach
+                    <div data-locale-role="base">
+                        @include('admin.partials.menu-base-locale-select', [
+                            'selectId' => 'onb-base-locale',
+                            'currentValue' => $onbBaseLocale,
+                            'browserLocale' => $onbSuggestedBase,
+                            'supportedLocales' => $supportedLocales,
+                            'wrapperClass' => 'mb-4',
+                            'selectClass' => 'form-select wn-onb-input',
+                            'labelClass' => 'wn-onb-label mb-2',
+                            'hintClass' => 'wn-onb-hint mb-0',
+                        ])
                     </div>
-                    @error('default_locale')<p class="wn-onb-error">{{ $message }}</p>@enderror
 
                     @if($canTranslate)
                         <hr class="wn-onb-divider">
@@ -242,10 +236,10 @@
 
                     <button type="submit" class="wn-onb-btn wn-onb-btn--primary w-100 mt-3">Guardar y continuar <i class="ri-arrow-right-line"></i></button>
                 </form>
-                <form method="POST" action="{{ route('admin.onboarding.update') }}" class="mt-3">
+                <form method="POST" action="{{ route('admin.onboarding.update') }}" class="mt-3" id="onb-locales-skip-form">
                     @csrf
                     <input type="hidden" name="step" value="4">
-                    <input type="hidden" name="default_locale" value="{{ $onbBaseLocale }}">
+                    <input type="hidden" name="default_locale" value="{{ $onbBaseLocale }}" data-locale-skip-default>
                     <button type="submit" class="wn-onb-btn wn-onb-btn--ghost w-100">Saltar · sin idiomas extra por ahora</button>
                 </form>
             </div>

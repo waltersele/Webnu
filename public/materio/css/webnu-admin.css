@@ -1152,7 +1152,12 @@
 
 .wn-plan-feature-lock__card {
   text-align: center;
-  max-width: 240px;
+  max-width: 280px;
+}
+
+.wn-plan-feature-lock__card .wn-upgrade-teaser__cta {
+  width: 100%;
+  max-width: 100%;
 }
 
 .wn-plan-feature-lock__text {

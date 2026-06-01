@@ -13,10 +13,6 @@
 @endsection
 
 @section('content')
-@php
-    $defaultMeta = $supportedLocales[$defaultLocale] ?? ['native' => strtoupper($defaultLocale)];
-@endphp
-
 @if (! $canTranslate)
     @php $ut = $upgradeTriggers ?? []; @endphp
     <div class="mb-4">
@@ -41,12 +37,22 @@
                 @endif
             </div>
             <div class="card-body">
-                <p class="text-muted small">Idioma base: <strong>{{ $defaultMeta['native'] ?? strtoupper($defaultLocale) }}</strong> (textos que editas en Mi carta).</p>
-
-                <form method="POST" action="{{ route('admin.companies.languages.update', $company) }}">
+                <form method="POST" action="{{ route('admin.companies.languages.update', $company) }}" data-locale-form>
                     @csrf
                     @method('PUT')
-                    @php $maxPublicLocales = $maxExtraLocales !== null ? $maxExtraLocales + 1 : null; @endphp
+                    @php
+                        $maxPublicLocales = $maxExtraLocales !== null ? $maxExtraLocales + 1 : null;
+                        $baseLocaleValue = old('default_locale', $defaultLocale);
+                    @endphp
+
+                    @include('admin.partials.menu-base-locale-select', [
+                        'selectId' => 'languages-base-locale',
+                        'currentValue' => $baseLocaleValue,
+                        'browserLocale' => $browserLocale ?? null,
+                        'supportedLocales' => $supportedLocales,
+                    ])
+
+                    <p class="text-muted small mb-3">Activa idiomas extra para que tus clientes vean traducciones al escanear el QR.</p>
                     <div class="vstack gap-2 mb-4"
                          data-locale-limit
                          data-max-extra-locales="{{ $maxExtraLocales ?? '' }}"
@@ -120,32 +126,19 @@
             </div>
         @elseif(! $canTranslate)
             <div class="card">
-                <div class="card-header d-flex align-items-center justify-content-between">
+                <div class="card-header">
                     <h5 class="card-title mb-0">Traducir con IA</h5>
-                    @include('admin.partials.plan-pro-badge', ['label' => 'Plus'])
                 </div>
-                @component('admin.partials.plan-feature-lock', [
-                    'feature' => 'translation',
-                    'message' => 'Genera traducciones automáticas de toda tu carta con el plan Plus.',
-                ])
-                <div class="card-body vstack gap-3">
-                    <p class="text-muted small mb-0">Genera traducciones automáticas con Gemini. No sobrescribe textos que hayas editado manualmente.</p>
-                    @foreach($supportedLocales as $code => $meta)
-                        @if($code === $defaultLocale)
-                            @continue
-                        @endif
-                        @if($loop->iteration > 2)
-                            @break
-                        @endif
-                        <div class="d-flex gap-2 align-items-center">
-                            <span class="flex-grow-1 fw-medium">{{ $meta['native'] ?? strtoupper($code) }}</span>
-                            <button type="button" class="btn btn-sm btn-outline-primary" disabled>
-                                <i class="ri-sparkling-line me-1"></i> Generar
-                            </button>
-                        </div>
-                    @endforeach
+                <div class="card-body">
+                    @include('admin.partials.upgrade-teaser-inline', [
+                        'trigger' => 'translation',
+                        'icon' => 'ri-sparkling-line',
+                        'title' => 'Traducción automática',
+                        'text' => 'Genera traducciones de toda tu carta con IA. No sobrescribe textos editados a mano.',
+                        'tier' => 'Pro',
+                        'cta' => 'Activar idiomas · Pro',
+                    ])
                 </div>
-                @endcomponent
             </div>
         @endif
     </div>
@@ -158,22 +151,16 @@
             </div>
             <div class="card-body p-0">
                 @if(! $canTranslate)
-                    @component('admin.partials.plan-feature-lock', [
-                        'feature' => 'translation',
-                        'message' => 'Edita traducciones plato a plato cuando actives idiomas con Plus.',
-                    ])
                     <div class="p-4">
-                        <div class="border rounded p-3 mb-2 bg-light">
-                            <span class="badge bg-label-secondary mb-2">EN</span>
-                            <input type="text" class="form-control form-control-sm mb-2" value="Ej. Starters" disabled>
-                            <textarea class="form-control form-control-sm" rows="2" disabled placeholder="Descripción traducida…"></textarea>
-                        </div>
-                        <div class="border rounded p-3 bg-light opacity-75">
-                            <span class="badge bg-label-secondary mb-2">FR</span>
-                            <input type="text" class="form-control form-control-sm" value="Ej. Entrées" disabled>
-                        </div>
+                        @include('admin.partials.upgrade-teaser-inline', [
+                            'trigger' => 'translation',
+                            'icon' => 'ri-edit-line',
+                            'title' => 'Edición manual',
+                            'text' => 'Revisa y ajusta cada plato en inglés, francés y más cuando actives idiomas con Pro.',
+                            'tier' => 'Pro',
+                            'cta' => 'Activar idiomas · Pro',
+                        ])
                     </div>
-                    @endcomponent
                 @elseif(count($enabledExtra) === 0)
                     <div class="p-4 text-muted">Activa al menos un idioma extra para editar traducciones.</div>
                 @else

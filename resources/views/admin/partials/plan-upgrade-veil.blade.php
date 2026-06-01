@@ -1,13 +1,24 @@
 @php
     $feature = $feature ?? 'videos';
-    $planLabel = $planLabel ?? app(\App\Services\UserPlanService::class)->requiredPlanLabel($feature) ?? 'Plus';
-    $billingUrl = $planFeatures['billing_url'] ?? route('admin.settings');
-    $message = $message ?? "Disponible con el plan {$planLabel}. Mejora tu suscripción para desbloquear esta función.";
+    $copy = config('upgrade_triggers.copy.' . $feature, []);
+    if (! is_array($copy)) {
+        $copy = [];
+    }
+    $planLabel = $planLabel ?? app(\App\Services\UserPlanService::class)->requiredPlanLabel($feature) ?? ucfirst($copy['price_tier'] ?? 'Plus');
+    $badgeLabel = ! empty($copy['price_tier'])
+        ? ucfirst($copy['price_tier'])
+        : $planLabel;
+    $message = $message ?? ($copy['body'] ?? "Disponible con el plan {$planLabel}. Mejora tu suscripción para desbloquear esta función.");
+    $cta = $copy['cta'] ?? 'Saber más';
 @endphp
 <div class="wn-plan-feature-lock__veil">
     <div class="wn-plan-feature-lock__card">
-        @include('admin.partials.plan-pro-badge', ['label' => $planLabel])
+        @include('admin.partials.plan-pro-badge', ['label' => $badgeLabel, 'size' => 'xs'])
         <p class="wn-plan-feature-lock__text">{{ $message }}</p>
-        <a href="{{ $billingUrl }}" class="btn btn-sm btn-primary">Ver planes</a>
+        <button type="button"
+                class="wn-upgrade-teaser__cta"
+                data-upgrade-trigger="{{ $feature }}">
+            {{ $cta }}
+        </button>
     </div>
 </div>

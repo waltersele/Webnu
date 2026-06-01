@@ -13,7 +13,7 @@ use Illuminate\Http\Request;
 
 class TranslationController extends Controller
 {
-    public function edit(MenuTranslationService $translations, UserPlanService $plans, MenuLocaleService $locales, Company $company)
+    public function edit(Request $request, MenuTranslationService $translations, UserPlanService $plans, MenuLocaleService $locales, Company $company)
     {
         $this->authorize('update', $company);
 
@@ -28,6 +28,7 @@ class TranslationController extends Controller
             'sections' => $sections,
             'supportedLocales' => $supported,
             'defaultLocale' => $defaultLocale,
+            'browserLocale' => $locales->detectSupportedLocaleFromRequest($request),
             'enabledExtra' => $enabledExtra,
             'stats' => $translations->statsForCompany($company),
             'canTranslate' => $plans->canUseTranslation($user),
@@ -44,9 +45,12 @@ class TranslationController extends Controller
 
         $supported = array_keys(config('menu_locales.supported', []));
         $validated = $request->validate([
+            'default_locale' => 'required|string|in:' . implode(',', $supported),
             'locales' => 'nullable|array',
             'locales.*' => 'string|in:' . implode(',', $supported),
         ]);
+
+        $company = $translations->setDefaultLocale($company, $validated['default_locale']);
 
         $default = $company->defaultLocale();
         $locales = array_values(array_filter(
