@@ -1,6 +1,10 @@
 <!DOCTYPE html>
 @php
-    $usePlatformShell = auth()->check() && auth()->user()->isSuperAdmin() && request()->is('admin/platform*');
+    $impersonatorIsSuperAdmin = session()->has('impersonator_id')
+        && optional(\App\User::find((int) session('impersonator_id')))->isSuperAdmin();
+    $usePlatformShell = auth()->check()
+        && request()->is('admin/platform*')
+        && (auth()->user()->isSuperAdmin() || $impersonatorIsSuperAdmin);
     $useClientShell = auth()->check() && !$usePlatformShell;
     $isDashboard = request()->routeIs('admin.dashboard');
 @endphp

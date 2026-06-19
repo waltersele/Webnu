@@ -154,19 +154,23 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['aut
         Route::post('billing/clear-catalog', 'PlatformBillingController@clearCatalog')->name('admin.platform.billing.clear-catalog');
         Route::post('billing/save-price-id', 'PlatformBillingController@savePriceId')->name('admin.platform.billing.save-price-id');
         Route::get('users', 'PlatformUsersController@index')->name('admin.platform.users.index');
-        Route::get('users/{user}', 'PlatformUsersController@show')->name('admin.platform.users.show');
+        Route::get('users/{user}', 'PlatformUsersController@show')->name('admin.platform.users.show')->where('user', '[0-9]+');
         Route::post('users/{user}/grant-super-admin', 'PlatformUsersController@grantSuperAdmin')
             ->name('admin.platform.users.grant-super-admin')
-            ->middleware('throttle:30,1');
+            ->middleware('throttle:30,1')
+            ->where('user', '[0-9]+');
         Route::post('users/{user}/cancel-subscription', 'PlatformUsersController@cancelSubscription')
             ->name('admin.platform.users.cancel-subscription')
-            ->middleware('throttle:30,1');
+            ->middleware('throttle:30,1')
+            ->where('user', '[0-9]+');
         Route::post('users/{user}/resume-subscription', 'PlatformUsersController@resumeSubscription')
             ->name('admin.platform.users.resume-subscription')
-            ->middleware('throttle:30,1');
+            ->middleware('throttle:30,1')
+            ->where('user', '[0-9]+');
         Route::put('users/{user}/billing', 'PlatformUsersController@updateBilling')
             ->name('admin.platform.users.update-billing')
-            ->middleware('throttle:20,1');
+            ->middleware('throttle:20,1')
+            ->where('user', '[0-9]+');
         Route::get('comercial', 'PlatformSalesController@index')->name('admin.platform.sales.index');
         Route::put('comercial', 'PlatformSalesController@update')->name('admin.platform.sales.update');
         Route::get('comercial/export', 'PlatformSalesController@export')->name('admin.platform.sales.export');
@@ -174,25 +178,32 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['aut
         Route::post('comercial/comerciales/{user}/reenviar-acceso', 'PlatformSalesController@resendRepAccess')->name('admin.platform.sales.reps.resend-access')->middleware('throttle:20,1');
         Route::post('users/{user}/grant-sales-rep', 'PlatformSalesController@grantSalesRep')
             ->name('admin.platform.users.grant-sales-rep')
-            ->middleware('throttle:30,1');
+            ->middleware('throttle:30,1')
+            ->where('user', '[0-9]+');
         Route::post('users/{user}/revoke-sales-rep', 'PlatformSalesController@revokeSalesRep')
             ->name('admin.platform.users.revoke-sales-rep')
-            ->middleware('throttle:30,1');
+            ->middleware('throttle:30,1')
+            ->where('user', '[0-9]+');
         Route::post('users/{user}/impersonate', 'PlatformUsersController@impersonate')
             ->name('admin.platform.users.impersonate')
-            ->middleware('throttle:30,1');
+            ->middleware('throttle:30,1')
+            ->where('user', '[0-9]+');
         Route::post('users/{user}/suspend', 'PlatformUsersController@suspend')
             ->name('admin.platform.users.suspend')
-            ->middleware('throttle:30,1');
+            ->middleware('throttle:30,1')
+            ->where('user', '[0-9]+');
         Route::post('users/{user}/unsuspend', 'PlatformUsersController@unsuspend')
             ->name('admin.platform.users.unsuspend')
-            ->middleware('throttle:30,1');
+            ->middleware('throttle:30,1')
+            ->where('user', '[0-9]+');
         Route::delete('users/{user}', 'PlatformUsersController@destroy')
             ->name('admin.platform.users.destroy')
-            ->middleware('throttle:10,1');
-        Route::patch('users/{user}/companies/{company}/toggle-enabled', 'PlatformUsersController@toggleCompanyEnabled')
+            ->middleware('throttle:10,1')
+            ->where('user', '[0-9]+');
+        Route::patch('users/{user}/companies/{platformCompany}/toggle-enabled', 'PlatformUsersController@toggleCompanyEnabled')
             ->name('admin.platform.users.companies.toggle-enabled')
-            ->middleware('throttle:60,1');
+            ->middleware('throttle:60,1')
+            ->where(['user' => '[0-9]+', 'platformCompany' => '[0-9]+']);
     });
 });
 

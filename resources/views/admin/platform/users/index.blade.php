@@ -20,6 +20,7 @@
                     <tr>
                         <th>Cliente</th>
                         <th>Negocios</th>
+                        <th>Cuenta</th>
                         <th>Suscripción</th>
                         <th>Plan</th>
                         <th>Tarjeta</th>
@@ -36,6 +37,14 @@
                             </td>
                             <td>{{ $user->companies_count }}</td>
                             <td>
+                                <span class="badge {{ $presenter->accountStatusBadgeClass($user) }}">
+                                    {{ $presenter->accountStatusLabel($user) }}
+                                </span>
+                                @if ($hint = $presenter->accountStatusHint($user))
+                                    <div><small class="text-muted">{{ $hint }}</small></div>
+                                @endif
+                            </td>
+                            <td>
                                 <span class="badge {{ $presenter->statusBadgeClass($user) }}">
                                     {{ $presenter->statusLabel($user) }}
                                 </span>
@@ -49,7 +58,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="7" class="text-center text-muted py-4">No hay usuarios registrados.</td>
+                            <td colspan="8" class="text-center text-muted py-4">No hay usuarios registrados.</td>
                         </tr>
                     @endforelse
                 </tbody>

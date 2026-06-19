@@ -219,13 +219,13 @@ class PlatformUsersController extends Controller
             ->with('flash', 'Cuenta eliminada.');
     }
 
-    public function toggleCompanyEnabled(Request $request, User $user, Company $company)
+    public function toggleCompanyEnabled(Request $request, User $user, int $platformCompany)
     {
         $this->authorize('platform.access');
 
-        if ((int) $company->user_id !== (int) $user->id) {
-            abort(404);
-        }
+        $company = Company::where('id', $platformCompany)
+            ->where('user_id', $user->id)
+            ->firstOrFail();
 
         $enabled = $request->boolean('enabled');
         $company->enabled = $enabled;

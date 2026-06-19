@@ -18,7 +18,7 @@
             </button>
         </form>
     @endif
-    @if (! $user->isSuperAdmin())
+    @if (! session()->has('impersonator_id') && ! $user->isSuperAdmin())
         @if ($user->isSuspended())
             <form method="POST" action="{{ route('admin.platform.users.unsuspend', $user) }}" class="d-inline">
                 @csrf
@@ -40,6 +40,11 @@
 @endsection
 
 @section('content')
+@if (session()->has('impersonator_id'))
+    <div class="alert alert-warning mb-4">
+        Estás impersonando a un cliente. Para suspender, reactivar o eliminar cuentas, vuelve a tu cuenta superadmin con el botón del banner superior.
+    </div>
+@endif
 @php
     $subscription = $user->primarySubscription();
     $stripeUrl = $presenter->stripeCustomerUrl($user);
@@ -226,7 +231,7 @@
                         <td>{{ $company->name }}</td>
                         <td><code>{{ $company->slug }}</code></td>
                         <td>
-                            <form method="POST" action="{{ route('admin.platform.users.companies.toggle-enabled', [$user, $company]) }}" class="d-inline">
+                            <form method="POST" action="{{ route('admin.platform.users.companies.toggle-enabled', [$user, $company->id]) }}" class="d-inline">
                                 @csrf
                                 @method('PATCH')
                                 <input type="hidden" name="enabled" value="0">

@@ -28,7 +28,18 @@ class AuthServiceProvider extends ServiceProvider
         $this->registerPolicies();
 
         Gate::define('platform.access', function ($user) {
-            return $user->isSuperAdmin();
+            if ($user->isSuperAdmin()) {
+                return true;
+            }
+
+            $impersonatorId = (int) session('impersonator_id', 0);
+            if ($impersonatorId <= 0) {
+                return false;
+            }
+
+            $impersonator = \App\User::find($impersonatorId);
+
+            return $impersonator && $impersonator->isSuperAdmin();
         });
     }
 }

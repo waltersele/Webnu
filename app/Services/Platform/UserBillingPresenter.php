@@ -72,6 +72,36 @@ class UserBillingPresenter
         }
     }
 
+    public function accountStatusLabel(User $user): string
+    {
+        if ($user->isSuspended()) {
+            return 'Suspendida';
+        }
+
+        return 'Activa';
+    }
+
+    public function accountStatusBadgeClass(User $user): string
+    {
+        return $user->isSuspended() ? 'bg-label-warning' : 'bg-label-success';
+    }
+
+    public function accountStatusHint(User $user): ?string
+    {
+        if (! $user->isSuspended() || ! $user->suspended_reason) {
+            return null;
+        }
+
+        $labels = [
+            'trial_expired' => 'Trial caducado',
+            'subscription_ended' => 'Suscripción finalizada',
+            'admin' => 'Manual (admin)',
+            'payment_failed' => 'Pago fallido',
+        ];
+
+        return $labels[$user->suspended_reason] ?? $user->suspended_reason;
+    }
+
     public function effectivePlanLabel(User $user): string
     {
         return $this->plans->planPresentation($user)['label'] ?? '—';
