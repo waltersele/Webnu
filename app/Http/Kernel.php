@@ -73,5 +73,6 @@ class Kernel extends HttpKernel
         'sales.rep' => \App\Http\Middleware\EnsureSalesRep::class,
         'sales.guest' => \App\Http\Middleware\RedirectSalesGuest::class,
         'redirect.sales.from.admin' => \App\Http\Middleware\RedirectSalesRepFromAdmin::class,
+        'noindex' => \App\Http\Middleware\NoIndexResponse::class,
     ];
 }

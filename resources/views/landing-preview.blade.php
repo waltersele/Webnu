@@ -2,6 +2,40 @@
 <html class="scroll-smooth" lang="{{ str_replace('_', '-', $locale ?? app()->getLocale()) }}">
 <head>
     @include('landing.partials.head')
+    @php
+        $schema = [
+            '@context' => 'https://schema.org',
+            '@graph' => [
+                [
+                    '@type' => 'WebSite',
+                    'name' => 'Webnu',
+                    'url' => url('/'),
+                    'description' => __('landing.meta.description'),
+                ],
+                [
+                    '@type' => 'Organization',
+                    'name' => 'Webnu',
+                    'url' => url('/'),
+                    'logo' => \App\PlatformSetting::brandUrl('logo'),
+                    'email' => \App\PlatformSetting::contactPublicEmail(),
+                ],
+                [
+                    '@type' => 'SoftwareApplication',
+                    'name' => 'Webnu',
+                    'applicationCategory' => 'BusinessApplication',
+                    'operatingSystem' => 'Web',
+                    'url' => url('/'),
+                    'description' => __('landing.meta.description'),
+                    'offers' => [
+                        '@type' => 'Offer',
+                        'price' => '0',
+                        'priceCurrency' => 'EUR',
+                    ],
+                ],
+            ],
+        ];
+    @endphp
+    <script type="application/ld+json">{!! json_encode($schema, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) !!}</script>
 </head>
 <body class="bg-background text-on-surface text-body-md">
 @php
@@ -777,6 +811,13 @@
                     <li><a href="#tvpik" class="hover:text-primary">{{ __('landing.nav.tvpik') }}</a></li>
                     <li><a href="#process" class="hover:text-primary">{{ __('landing.nav.scan') }}</a></li>
                     <li><a href="#pricing" class="hover:text-primary">{{ __('landing.nav.pricing') }}</a></li>
+                </ul>
+            </div>
+            <div>
+                <h5 class="font-label-md font-semibold mb-3">Legal</h5>
+                <ul class="space-y-2 text-text-muted text-sm">
+                    <li><a href="{{ route('legal.privacy') }}" class="hover:text-primary">Política de privacidad</a></li>
+                    <li><a href="{{ route('legal.terms') }}" class="hover:text-primary">Términos y condiciones</a></li>
                 </ul>
             </div>
             <div>

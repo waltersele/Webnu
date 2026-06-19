@@ -74,7 +74,7 @@
 
 <div class="form-check">
     <input type="checkbox" name="privacy_policy" value="1" @if(old('privacy_policy') == '1') checked @endif class="form-check-input" id="privacy-check">
-    <label class="form-check-label" for="privacy-check">Acepto la política de privacidad</label>
+    <label class="form-check-label" for="privacy-check">Acepto la <a href="{{ route('legal.privacy') }}" target="_blank" rel="noopener">política de privacidad</a></label>
 </div>
 <div class="alert alert-danger" id="privacy-check-not-checked" style="display: none">
     <p>Debe aceptar la política de privacidad</p>

@@ -3,6 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noindex, nofollow">
     <title>Configura tu carta — Webnu</title>
     <link rel="icon" type="image/png" href="{{ \App\PlatformSetting::brandUrl('favicon') }}">
     <link rel="manifest" href="{{ asset('manifest-admin.webmanifest') }}">

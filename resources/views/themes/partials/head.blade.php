@@ -34,20 +34,6 @@
 
     <link rel="icon" type="image/png" href="{{ \App\PlatformSetting::brandUrl('favicon') }}" />
 
-    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-167367604-1"></script>
-
-    <script>
-
-    window.dataLayer = window.dataLayer || [];
-
-    function gtag(){dataLayer.push(arguments);}
-
-    gtag('js', new Date());
-
-    gtag('config', 'UA-167367604-1');
-
-    </script>
-
 </head>
 
 <body class="wn-theme-{{ $company->template }}">

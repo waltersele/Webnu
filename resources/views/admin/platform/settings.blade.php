@@ -426,6 +426,56 @@
                 </div>
             </div>
 
+            {{-- Medición y Search Console --}}
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Medición y Search Console</h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted mb-3">
+                        Analytics de la landing pública. Las cartas de clientes no cargan estas herramientas.
+                        GA4/GTM/Clarity solo se activan tras aceptar cookies.
+                    </p>
+                    <div class="form-check mb-3">
+                        <input type="checkbox" class="form-check-input" name="measurement_enabled" value="1" id="measurement_enabled"
+                               @if(old('measurement_enabled', $measurement['measurement_enabled'])) checked @endif>
+                        <label class="form-check-label" for="measurement_enabled">Activar medición en landing</label>
+                    </div>
+                    <div class="form-check mb-3">
+                        <input type="checkbox" class="form-check-input" name="cookie_banner_enabled" value="1" id="cookie_banner_enabled"
+                               @if(old('cookie_banner_enabled', $measurement['cookie_banner_enabled'])) checked @endif>
+                        <label class="form-check-label" for="cookie_banner_enabled">Mostrar banner de cookies (si hay herramientas con consentimiento)</label>
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="google_site_verification" class="form-label">Google Search Console (meta verification)</label>
+                            <input type="text" name="google_site_verification" id="google_site_verification" class="form-control"
+                                   value="{{ old('google_site_verification', $measurement['google_site_verification']) }}"
+                                   placeholder="código de verificación">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="gtag_measurement_id" class="form-label">Google Analytics 4 (G-XXXX)</label>
+                            <input type="text" name="gtag_measurement_id" id="gtag_measurement_id" class="form-control"
+                                   value="{{ old('gtag_measurement_id', $measurement['gtag_measurement_id']) }}"
+                                   placeholder="G-XXXXXXXXXX">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="gtm_container_id" class="form-label">Google Tag Manager (GTM-XXXX)</label>
+                            <input type="text" name="gtm_container_id" id="gtm_container_id" class="form-control"
+                                   value="{{ old('gtm_container_id', $measurement['gtm_container_id']) }}"
+                                   placeholder="GTM-XXXXXXX">
+                            <div class="form-text">Opcional. Si usas GTM, configura GA4 dentro del contenedor.</div>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="clarity_project_id" class="form-label">Microsoft Clarity (project id)</label>
+                            <input type="text" name="clarity_project_id" id="clarity_project_id" class="form-control"
+                                   value="{{ old('clarity_project_id', $measurement['clarity_project_id']) }}"
+                                   placeholder="abc123xyz">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             {{-- Contacto landing --}}
             <div class="card mb-4">
                 <div class="card-header">

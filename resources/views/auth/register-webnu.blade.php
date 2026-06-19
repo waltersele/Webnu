@@ -101,7 +101,7 @@
 
             <label class="flex items-start gap-2 text-label-md text-text-muted cursor-pointer">
                 <input type="checkbox" name="privacy_policy" value="1" required class="mt-1 rounded border-border-subtle"/>
-                Acepto la política de privacidad
+                Acepto la <a href="{{ route('legal.privacy') }}" class="text-primary hover:underline" target="_blank" rel="noopener">política de privacidad</a>
             </label>
 
             <button type="submit" class="w-full py-4 bg-primary text-on-primary text-label-md rounded-lg hover:opacity-90 font-semibold">

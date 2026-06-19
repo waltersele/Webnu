@@ -1,2 +1,12 @@
 User-agent: *
-Disallow:
+Disallow: /admin
+Disallow: /login
+Disallow: /register
+Disallow: /auth/
+Disallow: /comercial
+Disallow: /pre-alta
+Disallow: /activar
+Disallow: /integrations/
+Disallow: /stripe/
+Disallow: /password/
+Sitemap: https://webnu.es/sitemap.xml

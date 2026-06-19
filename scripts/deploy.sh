@@ -343,6 +343,9 @@ artisan "config:cache"
 # puedes habilitar route:cache descomentando la línea siguiente.
 # artisan "route:cache"
 
+say "Comprobando salud del despliegue"
+artisan "webnu:deploy-check"
+
 # ---------- Limpieza temporales -------------------------------------------- #
 [[ -n "$NEW_FILES_LIST"     && -f "$NEW_FILES_LIST"     ]] && rm -f "$NEW_FILES_LIST"
 [[ -n "$DELETED_FILES_LIST" && -f "$DELETED_FILES_LIST" ]] && rm -f "$DELETED_FILES_LIST"

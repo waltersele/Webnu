@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\PlatformSetting;
 use App\Services\MenuScan\GeminiMenuScanProvider;
+use App\Services\Platform\MeasurementSettingsService;
 use App\Services\Platform\PlatformGoogleConfigurator;
 use App\Services\Platform\PlatformIntegrationsConfigurator;
 use App\Services\Platform\PlatformMailConfigurator;
@@ -38,6 +39,7 @@ class PlatformSettingsController extends Controller
             'mail' => $settings->mailSettingsForForm(),
             'contact' => $settings->contactSettingsForForm(),
             'integrations' => $settings->integrationsSettingsForForm(),
+            'measurement' => app(MeasurementSettingsService::class)->settingsForForm(),
             'brandAssets' => $brandAssets,
         ]);
     }
@@ -168,6 +170,12 @@ class PlatformSettingsController extends Controller
             'digital_signage_app_key' => 'nullable|string|max:500',
             'clear_digital_signage_app_key' => 'nullable|boolean',
             'digital_signage_only_enabled' => 'nullable|boolean',
+            'measurement_enabled' => 'nullable|boolean',
+            'cookie_banner_enabled' => 'nullable|boolean',
+            'google_site_verification' => 'nullable|string|max:128',
+            'gtag_measurement_id' => 'nullable|string|max:32',
+            'gtm_container_id' => 'nullable|string|max:32',
+            'clarity_project_id' => 'nullable|string|max:64',
         ]);
 
         if ($request->boolean('clear_gemini_key')) {
@@ -220,6 +228,15 @@ class PlatformSettingsController extends Controller
             'clear_digital_signage_app_key' => $request->boolean('clear_digital_signage_app_key'),
             'tvpik_stub_screens' => $request->boolean('tvpik_stub_screens'),
             'digital_signage_only_enabled' => $request->boolean('digital_signage_only_enabled'),
+        ]));
+
+        app(MeasurementSettingsService::class)->update($request->only([
+            'measurement_enabled',
+            'cookie_banner_enabled',
+            'google_site_verification',
+            'gtag_measurement_id',
+            'gtm_container_id',
+            'clarity_project_id',
         ]));
 
         app(PlatformMailConfigurator::class)->apply();

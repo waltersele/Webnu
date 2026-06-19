@@ -1,7 +1,30 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<meta name="description" content="{{ __('landing.meta.description') }}"/>
-<title>{{ __('landing.meta.title') }}</title>
+@if(!empty($noindex))
+<meta name="robots" content="noindex, nofollow">
+@endif
+@php
+    $landingTitle = __('landing.meta.title');
+    $landingDescription = __('landing.meta.description');
+    $ogImage = \App\PlatformSetting::brandUrl('og');
+    $canonicalUrl = url('/');
+    if (isset($locale) && $locale) {
+        $canonicalUrl = url('/?lang=' . $locale);
+    }
+@endphp
+<meta name="description" content="{{ $landingDescription }}"/>
+<title>{{ $landingTitle }}</title>
+<link rel="canonical" href="{{ $canonicalUrl }}"/>
+<meta property="og:type" content="website"/>
+<meta property="og:url" content="{{ $canonicalUrl }}"/>
+<meta property="og:title" content="{{ $landingTitle }}"/>
+<meta property="og:description" content="{{ $landingDescription }}"/>
+<meta property="og:image" content="{{ $ogImage }}"/>
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:title" content="{{ $landingTitle }}"/>
+<meta name="twitter:description" content="{{ $landingDescription }}"/>
+<meta name="twitter:image" content="{{ $ogImage }}"/>
+@include('partials.measurement-head')
 @isset($landingLocales, $locale)
     @php
         $homeUrl = url('/');

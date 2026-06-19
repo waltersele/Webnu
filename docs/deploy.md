@@ -62,8 +62,11 @@ El script hace:
 10. Si el commit incluye `database/seeds/ProductionDemoSeeder.php` ⇒ lo ejecuta.
 11. Si el commit incluye `app/Console/Commands/SeedDemosCommand.php` ⇒ ejecuta `webnu:seed-demos`.
 12. `view:clear` + `config:cache`.
-13. Guarda el nuevo SHA en `~/.webnu-last-deploy-sha` y registra el deploy en `storage/backups/deploys.log`.
-14. `artisan up`.
+13. `php artisan webnu:deploy-check` (salud del entorno; errores críticos detienen el deploy).
+14. Guarda el nuevo SHA en `~/.webnu-last-deploy-sha` y registra el deploy en `storage/backups/deploys.log`.
+15. `artisan up`.
+
+> Checklist completo de go-live: [PRODUCT-LAUNCH-CHECKLIST.md](./PRODUCT-LAUNCH-CHECKLIST.md).
 
 Salida típica:
 

@@ -6,6 +6,10 @@ Route::get('/', 'PagesController@index')->name('home');
 Route::get('/up', function () {
     return response('ok', 200, ['Content-Type' => 'text/plain']);
 });
+Route::get('robots.txt', 'RobotsController')->name('robots');
+Route::get('sitemap.xml', 'SitemapController')->name('sitemap');
+Route::get('legal/privacidad', 'LegalController@privacy')->name('legal.privacy');
+Route::get('legal/terminos', 'LegalController@terms')->name('legal.terms');
 Route::get('/landing-preview', 'PagesController@landingPreview')->name('landing.preview');
 Route::view('/welcome', 'welcome')->name('welcome');
 Route::post('/pay_product', 'PaymentController@pay_product')->name('pay_product');
@@ -20,17 +24,18 @@ Route::post(
     '\Laravel\Cashier\Http\Controllers\WebhookController@handleWebhook'
 );
 
-Route::get('pre-alta/{slug}', 'PreAltaPreviewController@show')->name('pre-alta.preview');
-Route::get('pre-alta/media/{id}', 'PreAltaPreviewController@media')->name('pre-alta.media')->where('id', '[0-9]+');
+Route::get('pre-alta/{slug}', 'PreAltaPreviewController@show')->name('pre-alta.preview')->middleware('noindex');
+Route::get('pre-alta/media/{id}', 'PreAltaPreviewController@media')->name('pre-alta.media')->where('id', '[0-9]+')->middleware('noindex');
 
-Route::get('activar/{token}', 'PreAltaClaimController@show')->name('pre-alta.claim.show')->where('token', '[a-fA-F0-9]{64}');
-Route::post('activar/{token}', 'PreAltaClaimController@store')->name('pre-alta.claim.store')->where('token', '[a-fA-F0-9]{64}');
+Route::get('activar/{token}', 'PreAltaClaimController@show')->name('pre-alta.claim.show')->where('token', '[a-fA-F0-9]{64}')->middleware('noindex');
+Route::post('activar/{token}', 'PreAltaClaimController@store')->name('pre-alta.claim.store')->where('token', '[a-fA-F0-9]{64}')->middleware('noindex');
 
 // OAuth outbound TVPik → Webnu (workspace TVPik inicia la conexión)
 Route::get('integrations/tvpik/connect', 'Integrations\TvpikConnectController@show')
-    ->name('integrations.tvpik.connect');
+    ->name('integrations.tvpik.connect')
+    ->middleware('noindex');
 Route::post('integrations/tvpik/connect', 'Integrations\TvpikConnectController@login')
-    ->middleware('throttle:10,1')
+    ->middleware(['throttle:10,1', 'noindex'])
     ->name('integrations.tvpik.login');
 
 // Menú en carta con URL simple: /carta/{company}/menu/{menu}
@@ -105,7 +110,7 @@ Route::get('tv/{companySlug}/sync.json', 'TvMenuController@sync')->name('tv.sync
 Route::get('tv/{companySlug}', 'TvMenuController@show')->name('tv.show');
 Route::get('tv/{companySlug}/{layout}', 'TvMenuController@show')->name('tv.show.layout');
 
-Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['auth', 'subscribed', 'redirect.sales.from.admin']], function () {
+Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['auth', 'subscribed', 'redirect.sales.from.admin', 'noindex']], function () {
     Route::get('check-public-path', 'PublicPathController@check')->name('admin.check-public-path');
 
     Route::get('onboarding', 'OnboardingController@show')->name('admin.onboarding');
@@ -174,9 +179,9 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['aut
 
 Route::post('admin/stop-impersonating', 'Admin\\PlatformUsersController@stopImpersonating')
     ->name('admin.platform.users.stop-impersonating')
-    ->middleware(['auth']);
+    ->middleware(['auth', 'noindex']);
 
-Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['auth', 'subscribed', 'onboarding.complete', 'selected.company']], function () {
+Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['auth', 'subscribed', 'onboarding.complete', 'selected.company', 'noindex']], function () {
     Route::get('/', 'AdminController@index')->name('admin.dashboard');
     Route::post('profile-wizard/dismiss', 'ProfileWizardController@dismiss')->name('admin.profile-wizard.dismiss');
     Route::get('companies', 'CompaniesController@index')->name('admin.companies.index');
@@ -266,7 +271,7 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['aut
     Route::delete('menu-scan/{job}', 'MenuScanController@destroy')->name('admin.menu-scan.destroy');
 });
 
-Route::group(['prefix' => 'comercial', 'namespace' => 'Sales'], function () {
+Route::group(['prefix' => 'comercial', 'namespace' => 'Sales', 'middleware' => ['noindex']], function () {
     Route::get('login', 'LoginController@showLoginForm')->name('sales.login');
     Route::post('login', 'LoginController@login')->middleware('throttle:10,1');
     Route::post('logout', 'LoginController@logout')->name('sales.logout')->middleware('auth');
@@ -293,18 +298,20 @@ Route::group(['prefix' => 'comercial', 'namespace' => 'Sales'], function () {
     });
 });
 
-Route::get('login', 'Auth\LoginController@showLoginForm')->name('login');
-Route::post('login', 'Auth\LoginController@login');
-Route::get('auth/google', 'Auth\GoogleAuthController@redirect')->name('auth.google.redirect');
-Route::get('auth/google/callback', 'Auth\GoogleAuthController@callback')->name('auth.google.callback');
-Route::post('logout', 'Auth\LoginController@logout')->name('logout');
-Route::get('register', 'Auth\RegisterController@index')->name('register');
-Route::post('register', 'Auth\RegisterController@register');
+Route::group(['middleware' => ['noindex']], function () {
+    Route::get('login', 'Auth\LoginController@showLoginForm')->name('login');
+    Route::post('login', 'Auth\LoginController@login');
+    Route::get('auth/google', 'Auth\GoogleAuthController@redirect')->name('auth.google.redirect');
+    Route::get('auth/google/callback', 'Auth\GoogleAuthController@callback')->name('auth.google.callback');
+    Route::post('logout', 'Auth\LoginController@logout')->name('logout');
+    Route::get('register', 'Auth\RegisterController@index')->name('register');
+    Route::post('register', 'Auth\RegisterController@register');
 
-Route::get('password/request', 'Auth\ForgotPasswordController@showLinkRequestForm')->name('password.request');
-Route::post('password/email', 'Auth\ForgotPasswordController@sendResetLinkEmail')->name('password.email');
-Route::get('password/reset/{token}', 'Auth\ResetPasswordController@showResetForm')->name('password.reset');
-Route::post('password/reset', 'Auth\ResetPasswordController@reset')->name('password.update');
+    Route::get('password/request', 'Auth\ForgotPasswordController@showLinkRequestForm')->name('password.request');
+    Route::post('password/email', 'Auth\ForgotPasswordController@sendResetLinkEmail')->name('password.email');
+    Route::get('password/reset/{token}', 'Auth\ResetPasswordController@showResetForm')->name('password.reset');
+    Route::post('password/reset', 'Auth\ResetPasswordController@reset')->name('password.update');
+});
 
 // Hub público del owner: /@{ownerSlug}
 Route::get('@{ownerSlug}', 'PagesController@ownerHub')
