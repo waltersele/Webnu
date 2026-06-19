@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Company;
 use App\Http\Controllers\Concerns\PreparesLandingPage;
+use App\Http\Controllers\Concerns\ShowsSuspendedPublicPage;
 use App\PlatformSetting;
 use App\Services\MenuService;
 use App\Services\PublicUrlRedirectService;
@@ -15,6 +16,7 @@ use Illuminate\Support\Facades\Validator;
 class PagesController extends Controller
 {
     use PreparesLandingPage;
+    use ShowsSuspendedPublicPage;
 
     /**
      * Nueva URL pública: /{companySlug}
@@ -107,16 +109,7 @@ class PagesController extends Controller
         $previewToken = $request->get('preview_token');
         $validPreviewToken = $previewToken && $company->isValidPreviewToken($previewToken);
 
-        if (! $company->enabled && ! $request->boolean('studio_preview') && ! $request->boolean('sales_demo') && ! $validPreviewToken) {
-            // Si la carta está despublicada pero tiene menús activos,
-            // dirigimos al hub del owner para que el cliente pueda verlos.
-            $hasActiveMenus = $company->menus()->where('enabled', true)->exists();
-            $resolvedOwner = $ownerSlug ?: optional($company->user)->resolveSlug();
-            if ($hasActiveMenus && $resolvedOwner) {
-                return redirect()->route('public.owner.hub', ['ownerSlug' => $resolvedOwner], 302);
-            }
-            abort(404);
-        }
+        $showSuspendedOverlay = $this->shouldShowSuspendedOverlay($request, $company);
 
         // Si la carta tiene activado "combinar todos los menús en una sola página",
         // y existen menús activos, renderizamos la vista combinada (tabs por menú).
@@ -137,12 +130,12 @@ class PagesController extends Controller
                 ? app(UserPlanService::class)->shouldShowWebnuBadge($company->user)
                 : false;
 
-            return view('themes.menus-combined', [
+            return $this->maybeSuspendedResponse('themes.menus-combined', [
                 'company' => $company,
                 'menus' => $menus,
                 'ownerSlug' => $ownerSlug ?: optional($company->user)->resolveSlug(),
                 'showWebnuBadge' => $showWebnuBadge,
-            ]);
+            ], $showSuspendedOverlay);
         }
 
         if ($companySlug === 'demo' && $request->filled('tpl')) {
@@ -157,7 +150,9 @@ class PagesController extends Controller
             }
         }
 
-        $this->recordMenuView($company, $request);
+        if (! $showSuspendedOverlay) {
+            $this->recordMenuView($company, $request);
+        }
 
         if ($company->menu_type == 1) {
             $company = $menuService->applyStudioPreview($company, request());
@@ -175,7 +170,7 @@ class PagesController extends Controller
                 ? app(\App\Services\MenuFavoritesCatalog::class)->build($company, $sections, $menuLocale)
                 : null;
 
-            return view($viewName, compact(
+            return $this->maybeSuspendedResponse($viewName, compact(
                 'company',
                 'sections',
                 'menuLocale',
@@ -184,7 +179,7 @@ class PagesController extends Controller
                 'showWebnuBadge',
                 'favoritesEnabled',
                 'favoritesCatalog'
-            ));
+            ), $showSuspendedOverlay);
         }
 
         if ($company->menu_type != 2 || empty($company->menu_type_2_pdf)) {
@@ -195,7 +190,18 @@ class PagesController extends Controller
             ? app(UserPlanService::class)->shouldShowWebnuBadge($company->user)
             : false;
 
-        return view('menu_pdf', compact('company', 'showWebnuBadge'));
+        return $this->maybeSuspendedResponse('menu_pdf', compact('company', 'showWebnuBadge'), $showSuspendedOverlay);
+    }
+
+    /** @param  array<string, mixed>  $data */
+    protected function maybeSuspendedResponse(string $view, array $data, bool $overlay)
+    {
+        $data = $this->withSuspendedOverlayFlag($data, $overlay);
+        if ($overlay) {
+            return $this->suspendedResponse($view, $data);
+        }
+
+        return view($view, $data);
     }
 
     protected function recordMenuView(Company $company, Request $request): void
@@ -222,10 +228,6 @@ class PagesController extends Controller
             abort(404);
         }
 
-        // Traemos TODAS las companies (enabled o no) con sus menús activos.
-        // Las cartas no publicadas siguen siendo invisibles como "tarjeta"
-        // en el hub, pero sus menús activos sí se listan (independencia entre
-        // visibilidad de carta y visibilidad de menú).
         $companies = $user->companies()
             ->orderBy('name')
             ->with(['menus' => function ($q) {
@@ -233,11 +235,19 @@ class PagesController extends Controller
             }])
             ->get();
 
+        if ($user->isSuspended()) {
+            $first = $companies->first();
+            if ($first) {
+                return redirect()->route('public.company', [
+                    'companySlug' => $first->slug,
+                ], 302);
+            }
+
+            abort(404);
+        }
+
         $activeCompanies = $companies->where('enabled', true)->values();
-        // Reasignamos la relación inversa: como ya tenemos la company padre del
-        // menú en mano (viene de $c->menus), evitamos un lazy-load por cada
-        // menú al pintar el hub o resolver el redirect a /carta/{owner}/{c}/{m}.
-        $menus = $companies->flatMap(function ($c) {
+        $menus = $activeCompanies->flatMap(function ($c) {
             return $c->menus->map(function ($m) use ($c) {
                 $m->setRelation('company', $c);
                 return $m;
@@ -323,9 +333,15 @@ class PagesController extends Controller
 
     protected function renderPublicMenu(Company $company, string $menuSlug, ?string $ownerSlug)
     {
-        $menu = $company->menus()
-            ->where('slug', $menuSlug)
-            ->where('enabled', true)
+        $request = request();
+        $showSuspendedOverlay = $this->shouldShowSuspendedOverlay($request, $company);
+
+        $menuQuery = $company->menus()->where('slug', $menuSlug);
+        if (! $showSuspendedOverlay) {
+            $menuQuery->where('enabled', true);
+        }
+
+        $menu = $menuQuery
             ->with(['sections' => function ($q) {
                 $q->orderBy('position');
             }, 'sections.items' => function ($q) {
@@ -341,7 +357,12 @@ class PagesController extends Controller
             ? app(UserPlanService::class)->shouldShowWebnuBadge($company->user)
             : false;
 
-        return view('themes.menu', compact('company', 'menu', 'ownerSlug', 'showWebnuBadge'));
+        return $this->maybeSuspendedResponse('themes.menu', compact(
+            'company',
+            'menu',
+            'ownerSlug',
+            'showWebnuBadge'
+        ), $showSuspendedOverlay);
     }
 
     public function te_llamamos(Request $request)

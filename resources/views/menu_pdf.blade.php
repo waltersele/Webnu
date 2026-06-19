@@ -410,5 +410,8 @@
         init();
     })();
     </script>
+    @if(!empty($showSuspendedOverlay))
+        @include('themes.partials.suspended-overlay')
+    @endif
 </body>
 </html>

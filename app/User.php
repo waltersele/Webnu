@@ -35,6 +35,7 @@ class User extends Authenticatable
         'stripe_id', 'card_brand', 'card_last_four', 'trial_ends_at',
         'manual_plan_key', 'manual_plan_until', 'manual_plan_note',
         'phone', 'legal_name', 'tax_id', 'billing_address', 'billing_postal_code', 'billing_city', 'billing_country',
+        'suspended_at', 'suspended_reason', 'suspension_snapshot', 'suspended_by',
     ];
 
     /**
@@ -58,6 +59,8 @@ class User extends Authenticatable
         'onboarding_completed_at' => 'datetime',
         'profile_wizard_dismissed_at' => 'datetime',
         'tvpik_connected_at' => 'datetime',
+        'suspended_at' => 'datetime',
+        'suspension_snapshot' => 'array',
     ];
 
     public function setTvpikApiTokenAttribute(?string $value): void
@@ -148,6 +151,16 @@ class User extends Authenticatable
     public function isSalesRep(): bool
     {
         return $this->hasRole('sales-rep');
+    }
+
+    public function isSuspended(): bool
+    {
+        return $this->suspended_at !== null;
+    }
+
+    public function suspendedBy()
+    {
+        return $this->belongsTo(self::class, 'suspended_by');
     }
 
     public function salesHandoffs()

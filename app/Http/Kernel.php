@@ -74,5 +74,6 @@ class Kernel extends HttpKernel
         'sales.guest' => \App\Http\Middleware\RedirectSalesGuest::class,
         'redirect.sales.from.admin' => \App\Http\Middleware\RedirectSalesRepFromAdmin::class,
         'noindex' => \App\Http\Middleware\NoIndexResponse::class,
+        'not.suspended' => \App\Http\Middleware\EnsureNotSuspended::class,
     ];
 }

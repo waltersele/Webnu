@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Company;
+use App\Http\Controllers\Concerns\ShowsSuspendedPublicPage;
 use App\Services\MenuService;
 use App\Services\MenuSyncService;
 use App\Services\Tv\TvTemplateRegistry;
@@ -11,6 +12,8 @@ use Illuminate\Http\Request;
 
 class TvMenuController extends Controller
 {
+    use ShowsSuspendedPublicPage;
+
     public function show(
         MenuService $menuService,
         TvMenuPresenter $presenter,
@@ -24,20 +27,16 @@ class TvMenuController extends Controller
             abort(404);
         }
 
-        $isOwnerPreview = $request->boolean('preview')
-            && auth()->check()
-            && (int) optional($company->user)->id === (int) auth()->id();
-
-        if (! $company->enabled && ! $isOwnerPreview) {
-            abort(404);
-        }
+        $showSuspendedOverlay = $this->shouldShowSuspendedOverlay($request, $company);
 
         if ((int) $company->menu_type === 2) {
-            if ($company->menu_type_2_pdf) {
+            if ($company->menu_type_2_pdf && ! $showSuspendedOverlay) {
                 return redirect(url('img/' . ltrim($company->menu_type_2_pdf, '/')));
             }
 
-            abort(404);
+            if (! $showSuspendedOverlay) {
+                abort(404);
+            }
         }
 
         $registry = app(TvTemplateRegistry::class);
@@ -45,10 +44,15 @@ class TvMenuController extends Controller
 
         $locale = $menuService->resolveMenuLocale($request, $company);
         $data = $presenter->present($company, $layout, $menuService, $locale);
+        $data = $this->withSuspendedOverlayFlag($data, $showSuspendedOverlay);
 
         $viewName = $registry->viewForLayout($layout);
         if (! view()->exists($viewName)) {
             abort(404);
+        }
+
+        if ($showSuspendedOverlay) {
+            return $this->suspendedResponse($viewName, $data);
         }
 
         return view($viewName, $data);
@@ -59,9 +63,17 @@ class TvMenuController extends Controller
      */
     public function sync(MenuSyncService $menuSync, Request $request, string $companySlug)
     {
-        $company = Company::where('slug', $companySlug)->where('enabled', true)->first();
+        $company = Company::where('slug', $companySlug)->with('user')->first();
 
         if (! $company || (int) $company->menu_type !== 1) {
+            return response()->json(['error' => 'not_found'], 404);
+        }
+
+        if ($company->user && $company->user->isSuspended()) {
+            return response()->json(['error' => 'suspended'], 403);
+        }
+
+        if (! $company->enabled) {
             return response()->json(['error' => 'not_found'], 404);
         }
 

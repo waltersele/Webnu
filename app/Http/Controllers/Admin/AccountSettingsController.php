@@ -5,9 +5,11 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\UpdateAccountBillingInfoRequest;
 use App\Http\Requests\UpdateAccountProfileRequest;
-use App\Services\UserPlanService;
 use App\Services\Platform\UserBillingPresenter;
+use App\Services\Platform\UserDeletionService;
+use App\Services\UserPlanService;
 use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 
 class AccountSettingsController extends Controller
 {
@@ -87,5 +89,32 @@ class AccountSettingsController extends Controller
         } catch (\Throwable $e) {
             report($e);
         }
+    }
+
+    public function destroyAccount(Request $request, UserDeletionService $deletion)
+    {
+        $user = $request->user();
+
+        if ($user->isSuperAdmin()) {
+            abort(403, 'Las cuentas superadmin deben contactar con soporte para eliminarse.');
+        }
+
+        $rules = [
+            'confirm_email' => 'required|email',
+        ];
+        if ($user->password) {
+            $rules['password'] = 'required|current_password';
+        }
+        $request->validate($rules);
+
+        if ($request->input('confirm_email') !== $user->email) {
+            throw ValidationException::withMessages([
+                'confirm_email' => 'El email no coincide con tu cuenta.',
+            ]);
+        }
+
+        $deletion->delete($user, $user);
+
+        return redirect('/')->with('flash', 'Tu cuenta ha sido eliminada.');
     }
 }

@@ -278,5 +278,8 @@
             </footer>
         @endif
     </main>
+    @if(!empty($showSuspendedOverlay))
+        @include('themes.partials.suspended-overlay')
+    @endif
 </body>
 </html>

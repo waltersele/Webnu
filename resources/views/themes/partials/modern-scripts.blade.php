@@ -131,3 +131,6 @@ $(function () {
 @endif
 <script src="{{ asset('js/webnu-card-reels.js') }}" defer></script>
 <script src="{{ asset('js/webnu-logo-autocontrast.js') }}" defer></script>
+@if(!empty($showSuspendedOverlay))
+    @include('themes.partials.suspended-overlay')
+@endif

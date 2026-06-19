@@ -18,6 +18,10 @@ class SignageMenuController extends Controller
 
     public function index(Request $request)
     {
+        if ($request->user()->isSuspended()) {
+            return response()->json(['error' => 'suspended'], 403);
+        }
+
         return response()->json([
             'api_version' => config('digital_signage.api_version'),
             'menus' => $this->menuSync->companiesPayload($request->user()->id),
@@ -26,11 +30,15 @@ class SignageMenuController extends Controller
 
     public function show(Request $request, string $slug)
     {
+        if ($request->user()->isSuspended()) {
+            return response()->json(['error' => 'suspended'], 403);
+        }
+
         $company = $this->findOwnedCompany($request, $slug);
 
-        if (!$company->enabled) {
+        if (! $company->enabled) {
             return response()->json([
-                'message' => 'Este negocio está desactivado.',
+                'error' => 'suspended',
             ], 403);
         }
 
@@ -48,6 +56,10 @@ class SignageMenuController extends Controller
 
     public function version(Request $request, string $slug)
     {
+        if ($request->user()->isSuspended()) {
+            return response()->json(['error' => 'suspended'], 403);
+        }
+
         $company = $this->findOwnedCompany($request, $slug);
 
         $syncVersion = $this->menuSync->syncVersion($company);

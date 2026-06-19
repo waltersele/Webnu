@@ -25,6 +25,14 @@ class LoginController extends Controller
 
     protected function authenticated(Request $request, $user)
     {
+        if ($user->isSuspended()) {
+            $this->guard()->logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+
+            return redirect()->route('account.suspended');
+        }
+
         if (! $user->isSalesRep()) {
             $this->guard()->logout();
             $request->session()->invalidate();

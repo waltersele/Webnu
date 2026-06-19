@@ -37,3 +37,42 @@
     </div>
 </div>
 
+<div class="card wn-settings-card border-danger mt-4" id="eliminar-cuenta">
+    <div class="card-body p-4">
+        <h2 class="wn-settings-section-title text-danger">Zona peligrosa</h2>
+        <p class="wn-settings-section-lead">
+            Eliminar tu cuenta borra de forma permanente tus cartas, menús y datos asociados. Esta acción no se puede deshacer.
+        </p>
+
+        <form method="POST" action="{{ route('admin.settings.account') }}"
+              onsubmit="return confirm('¿Seguro que quieres eliminar tu cuenta de forma permanente?');">
+            @csrf
+            @method('DELETE')
+
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label" for="confirm-email">Confirma tu email</label>
+                    <input type="email" class="form-control @error('confirm_email') is-invalid @enderror"
+                           id="confirm-email" name="confirm_email" value="{{ old('confirm_email') }}"
+                           placeholder="{{ $user->email }}" required autocomplete="off">
+                    @error('confirm_email')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                </div>
+                @if ($user->password)
+                    <div class="col-md-6">
+                        <label class="form-label" for="delete-password">Contraseña actual</label>
+                        <input type="password" class="form-control @error('password') is-invalid @enderror"
+                               id="delete-password" name="password" required autocomplete="current-password">
+                        @error('password')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+                @endif
+            </div>
+
+            <button type="submit" class="btn btn-danger mt-4">Eliminar mi cuenta</button>
+        </form>
+    </div>
+</div>
+

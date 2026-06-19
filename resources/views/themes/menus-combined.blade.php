@@ -359,5 +359,8 @@
         sections.forEach(function (s) { observer.observe(s); });
     })();
     </script>
+    @if(!empty($showSuspendedOverlay))
+        @include('themes.partials.suspended-overlay')
+    @endif
 </body>
 </html>

@@ -18,6 +18,25 @@
             </button>
         </form>
     @endif
+    @if (! $user->isSuperAdmin())
+        @if ($user->isSuspended())
+            <form method="POST" action="{{ route('admin.platform.users.unsuspend', $user) }}" class="d-inline">
+                @csrf
+                <button type="submit" class="btn btn-success btn-sm">Reactivar cuenta</button>
+            </form>
+        @else
+            <form method="POST" action="{{ route('admin.platform.users.suspend', $user) }}" class="d-inline"
+                  onsubmit="return confirm('¿Suspender la cuenta de {{ $user->email }}? Sus cartas dejarán de ser públicas.');">
+                @csrf
+                <button type="submit" class="btn btn-outline-warning btn-sm">Suspender cuenta</button>
+            </form>
+        @endif
+        @if ($user->id !== auth()->id())
+            <button type="button" class="btn btn-outline-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteUserModal">
+                Eliminar cuenta
+            </button>
+        @endif
+    @endif
 @endsection
 
 @section('content')
@@ -38,6 +57,17 @@
                     <dd>{{ $user->name ?: '—' }}</dd>
                     <dt>Registro</dt>
                     <dd>{{ $user->created_at->format('d/m/Y H:i') }}</dd>
+                    <dt>Estado cuenta</dt>
+                    <dd>
+                        @if ($user->isSuspended())
+                            <span class="badge bg-warning text-dark">Suspendida</span>
+                            @if ($user->suspended_reason)
+                                <span class="small text-muted">({{ $user->suspended_reason }})</span>
+                            @endif
+                        @else
+                            <span class="badge bg-success">Activa</span>
+                        @endif
+                    </dd>
                     <dt>Superadmin</dt>
                     <dd>{{ $user->isSuperAdmin() ? 'Sí' : 'No' }}</dd>
                 </dl>
@@ -195,7 +225,17 @@
                     <tr>
                         <td>{{ $company->name }}</td>
                         <td><code>{{ $company->slug }}</code></td>
-                        <td>{{ $company->enabled ? 'Sí' : 'No' }}</td>
+                        <td>
+                            <form method="POST" action="{{ route('admin.platform.users.companies.toggle-enabled', [$user, $company]) }}" class="d-inline">
+                                @csrf
+                                @method('PATCH')
+                                <input type="hidden" name="enabled" value="0">
+                                <div class="form-check form-switch mb-0">
+                                    <input type="checkbox" name="enabled" value="1" class="form-check-input"
+                                           onchange="this.form.submit()" {{ $company->enabled ? 'checked' : '' }}>
+                                </div>
+                            </form>
+                        </td>
                         @if (\Schema::hasColumn('companies', 'menu_views'))
                             <td>{{ $company->menu_views ?? 0 }}</td>
                         @endif
@@ -237,5 +277,37 @@
         </table>
     </div>
 </div>
+
+@if (! $user->isSuperAdmin() && $user->id !== auth()->id())
+<div class="modal fade" id="deleteUserModal" tabindex="-1" aria-labelledby="deleteUserModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="POST" action="{{ route('admin.platform.users.destroy', $user) }}">
+                @csrf
+                @method('DELETE')
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteUserModalLabel">Eliminar cuenta</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="mb-3">Se borrarán todas las cartas y datos de <strong>{{ $user->email }}</strong>. Esta acción es irreversible.</p>
+                    <label class="form-label" for="delete-confirm-email">Escribe el email del usuario para confirmar</label>
+                    <input type="email" class="form-control" id="delete-confirm-email" name="confirm_email" required autocomplete="off">
+                    @if ($user->isSuperAdmin())
+                        <div class="form-check mt-3">
+                            <input type="checkbox" class="form-check-input" id="delete-confirm-superadmin" name="confirm_superadmin" value="1">
+                            <label class="form-check-label" for="delete-confirm-superadmin">Confirmo eliminar una cuenta superadmin</label>
+                        </div>
+                    @endif
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-danger">Eliminar definitivamente</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+@endif
 @endsection
 

@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Services\Platform\UserSuspensionService;
 use App\User;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Schema;
@@ -12,9 +13,9 @@ class ExpireTrialsCommand extends Command
 
     protected $description = 'Transiciona trials caducados al plan free y limpia planes manuales (cortesía) caducados.';
 
-    public function handle(): int
+    public function handle(UserSuspensionService $suspension): int
     {
-        $trialsCount = $this->expireTrials();
+        $trialsCount = $this->expireTrials($suspension);
         $manualCount = $this->expireManualPlans();
 
         $this->info("Trials expirados procesados: {$trialsCount}");
@@ -23,7 +24,7 @@ class ExpireTrialsCommand extends Command
         return 0;
     }
 
-    protected function expireTrials(): int
+    protected function expireTrials(UserSuspensionService $suspension): int
     {
         $query = User::query()
             ->whereNotNull('trial_ends_at')
@@ -46,12 +47,14 @@ class ExpireTrialsCommand extends Command
         }
 
         $updated = 0;
-        $query->orderBy('id')->chunkById(500, function ($users) use (&$updated) {
-            $ids = $users->pluck('id')->all();
-            $updated += User::whereIn('id', $ids)->update([
-                'plan' => 'free',
-                'trial_plan_key' => null,
-            ]);
+        $query->orderBy('id')->chunkById(500, function ($users) use (&$updated, $suspension) {
+            foreach ($users as $user) {
+                $user->plan = 'free';
+                $user->trial_plan_key = null;
+                $user->save();
+                $suspension->suspend($user, 'trial_expired');
+                $updated++;
+            }
         });
 
         return $updated;

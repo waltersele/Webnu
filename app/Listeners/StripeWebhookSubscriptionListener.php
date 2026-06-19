@@ -5,6 +5,7 @@ namespace App\Listeners;
 use App\Mail\Subscription\PaymentFailedMail;
 use App\Mail\Subscription\PaymentSucceededMail;
 use App\Mail\Subscription\SubscriptionCanceledMail;
+use App\Services\Platform\UserSuspensionService;
 use App\User;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
@@ -16,6 +17,11 @@ use Laravel\Cashier\Events\WebhookHandled;
  */
 class StripeWebhookSubscriptionListener
 {
+    public function __construct(
+        protected UserSuspensionService $suspension
+    ) {
+    }
+
     public function handle(WebhookHandled $event): void
     {
         $payload = $event->payload;
@@ -72,13 +78,17 @@ class StripeWebhookSubscriptionListener
     {
         $object = $payload['data']['object'] ?? [];
 
-        if (($object['billing_reason'] ?? '') === 'subscription_create') {
-            return;
-        }
-
         $stripeCustomerId = $object['customer'] ?? null;
         $user = $this->resolveUser($stripeCustomerId);
         if (! $user) {
+            return;
+        }
+
+        if ($this->suspension->shouldAutoUnsuspend($user) && $user->hasActiveSubscription()) {
+            $this->suspension->unsuspend($user);
+        }
+
+        if (($object['billing_reason'] ?? '') === 'subscription_create') {
             return;
         }
 
@@ -99,17 +109,32 @@ class StripeWebhookSubscriptionListener
         $status = $object['status'] ?? null;
         $cancelAtPeriodEnd = ! empty($object['cancel_at_period_end']);
 
+        $stripeCustomerId = $object['customer'] ?? null;
+        $user = $this->resolveUser($stripeCustomerId);
+        if (! $user) {
+            return;
+        }
+
+        if ($type === 'customer.subscription.updated' && $status === 'active' && ! $cancelAtPeriodEnd) {
+            if ($this->suspension->shouldAutoUnsuspend($user)) {
+                $this->suspension->unsuspend($user);
+            }
+
+            return;
+        }
+
         $shouldNotify = $type === 'customer.subscription.deleted'
             || $status === 'canceled'
             || $cancelAtPeriodEnd;
 
-        if (! $shouldNotify) {
-            return;
+        if ($type === 'customer.subscription.deleted' || $status === 'canceled') {
+            $user->refresh();
+            if (! $user->hasActiveSubscription() && ! $user->isSuspended()) {
+                $this->suspension->suspend($user, 'subscription_ended');
+            }
         }
 
-        $stripeCustomerId = $object['customer'] ?? null;
-        $user = $this->resolveUser($stripeCustomerId);
-        if (! $user) {
+        if (! $shouldNotify) {
             return;
         }
 

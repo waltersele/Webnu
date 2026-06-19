@@ -3,11 +3,15 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Company;
 use App\Services\Platform\UserBillingPresenter;
+use App\Services\Platform\UserDeletionService;
+use App\Services\Platform\UserSuspensionService;
 use App\Services\UserPlanService;
 use App\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\ValidationException;
 
 class PlatformUsersController extends Controller
 {
@@ -152,5 +156,91 @@ class PlatformUsersController extends Controller
         return redirect()
             ->route('admin.platform.users.index')
             ->with('flash', 'Has vuelto a tu cuenta de superadmin.');
+    }
+
+    public function suspend(User $user, UserSuspensionService $suspension)
+    {
+        $this->authorize('platform.access');
+
+        if ($user->isSuperAdmin()) {
+            return back()->with('flash', 'No se puede suspender una cuenta superadmin.');
+        }
+
+        $suspension->suspend($user, 'admin', auth()->user());
+
+        return redirect()
+            ->route('admin.platform.users.show', $user)
+            ->with('flash', 'Cuenta suspendida.');
+    }
+
+    public function unsuspend(User $user, UserSuspensionService $suspension)
+    {
+        $this->authorize('platform.access');
+
+        $suspension->unsuspend($user);
+
+        return redirect()
+            ->route('admin.platform.users.show', $user)
+            ->with('flash', 'Cuenta reactivada.');
+    }
+
+    public function destroy(Request $request, User $user, UserDeletionService $deletion)
+    {
+        $this->authorize('platform.access');
+
+        if ($request->user()->id === $user->id) {
+            return back()->withErrors(['confirm_email' => 'Usa Ajustes → Perfil para eliminar tu propia cuenta.']);
+        }
+
+        $request->validate([
+            'confirm_email' => 'required|email',
+        ]);
+
+        if ($request->input('confirm_email') !== $user->email) {
+            throw ValidationException::withMessages([
+                'confirm_email' => 'El email no coincide.',
+            ]);
+        }
+
+        if ($user->isSuperAdmin() && ! $request->boolean('confirm_superadmin')) {
+            throw ValidationException::withMessages([
+                'confirm_superadmin' => 'Debes confirmar la eliminación de un superadmin.',
+            ]);
+        }
+
+        try {
+            $deletion->delete($user, $request->user());
+        } catch (\InvalidArgumentException $e) {
+            return back()->withErrors(['confirm_email' => $e->getMessage()]);
+        }
+
+        return redirect()
+            ->route('admin.platform.users.index')
+            ->with('flash', 'Cuenta eliminada.');
+    }
+
+    public function toggleCompanyEnabled(Request $request, User $user, Company $company)
+    {
+        $this->authorize('platform.access');
+
+        if ((int) $company->user_id !== (int) $user->id) {
+            abort(404);
+        }
+
+        $enabled = $request->boolean('enabled');
+        $company->enabled = $enabled;
+        $company->save();
+
+        if ($request->expectsJson() || $request->ajax()) {
+            return response()->json([
+                'ok' => true,
+                'enabled' => (bool) $company->enabled,
+                'company_id' => $company->id,
+            ]);
+        }
+
+        return back()->with('flash', $enabled
+            ? 'Carta publicada.'
+            : 'Carta despublicada.');
     }
 }

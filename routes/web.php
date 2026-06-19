@@ -106,11 +106,15 @@ Route::get('carta/{slug}', function ($slug) {
     abort(404);
 })->where('slug', '[a-z0-9][a-z0-9-]*')->name('public.hub');
 
+Route::get('account/suspended', function () {
+    return view('auth.account-suspended');
+})->name('account.suspended')->middleware('noindex');
+
 Route::get('tv/{companySlug}/sync.json', 'TvMenuController@sync')->name('tv.sync');
 Route::get('tv/{companySlug}', 'TvMenuController@show')->name('tv.show');
 Route::get('tv/{companySlug}/{layout}', 'TvMenuController@show')->name('tv.show.layout');
 
-Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['auth', 'subscribed', 'redirect.sales.from.admin', 'noindex']], function () {
+Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['auth', 'not.suspended', 'subscribed', 'redirect.sales.from.admin', 'noindex']], function () {
     Route::get('check-public-path', 'PublicPathController@check')->name('admin.check-public-path');
 
     Route::get('onboarding', 'OnboardingController@show')->name('admin.onboarding');
@@ -120,6 +124,9 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['aut
     Route::get('settings', 'AccountSettingsController@index')->name('admin.settings');
     Route::put('settings/profile', 'AccountSettingsController@updateProfile')->name('admin.settings.profile');
     Route::put('settings/billing-info', 'AccountSettingsController@updateBillingInfo')->name('admin.settings.billing-info');
+    Route::delete('settings/account', 'AccountSettingsController@destroyAccount')
+        ->name('admin.settings.account')
+        ->middleware('throttle:5,1');
     Route::post('billing/portal', 'BillingController@portal')->name('admin.billing.portal');
 
     Route::get('billing', 'BillingController@index')->name('admin.billing');
@@ -174,6 +181,18 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['aut
         Route::post('users/{user}/impersonate', 'PlatformUsersController@impersonate')
             ->name('admin.platform.users.impersonate')
             ->middleware('throttle:30,1');
+        Route::post('users/{user}/suspend', 'PlatformUsersController@suspend')
+            ->name('admin.platform.users.suspend')
+            ->middleware('throttle:30,1');
+        Route::post('users/{user}/unsuspend', 'PlatformUsersController@unsuspend')
+            ->name('admin.platform.users.unsuspend')
+            ->middleware('throttle:30,1');
+        Route::delete('users/{user}', 'PlatformUsersController@destroy')
+            ->name('admin.platform.users.destroy')
+            ->middleware('throttle:10,1');
+        Route::patch('users/{user}/companies/{company}/toggle-enabled', 'PlatformUsersController@toggleCompanyEnabled')
+            ->name('admin.platform.users.companies.toggle-enabled')
+            ->middleware('throttle:60,1');
     });
 });
 
@@ -181,7 +200,7 @@ Route::post('admin/stop-impersonating', 'Admin\\PlatformUsersController@stopImpe
     ->name('admin.platform.users.stop-impersonating')
     ->middleware(['auth', 'noindex']);
 
-Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['auth', 'subscribed', 'onboarding.complete', 'selected.company', 'noindex']], function () {
+Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['auth', 'not.suspended', 'subscribed', 'onboarding.complete', 'selected.company', 'noindex']], function () {
     Route::get('/', 'AdminController@index')->name('admin.dashboard');
     Route::post('profile-wizard/dismiss', 'ProfileWizardController@dismiss')->name('admin.profile-wizard.dismiss');
     Route::get('companies', 'CompaniesController@index')->name('admin.companies.index');
@@ -276,7 +295,7 @@ Route::group(['prefix' => 'comercial', 'namespace' => 'Sales', 'middleware' => [
     Route::post('login', 'LoginController@login')->middleware('throttle:10,1');
     Route::post('logout', 'LoginController@logout')->name('sales.logout')->middleware('auth');
 
-    Route::group(['middleware' => ['auth', 'sales.rep']], function () {
+    Route::group(['middleware' => ['auth', 'not.suspended', 'sales.rep']], function () {
         Route::get('/', 'DashboardController@index')->name('sales.dashboard');
         Route::post('visitas', 'VisitController@store')->name('sales.visit.store');
         Route::get('visitas/{company}', 'VisitController@show')->name('sales.visit.show')->where('company', '[0-9]+');

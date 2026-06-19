@@ -1,0 +1,62 @@
+.wn-suspended-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 99999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background: rgba(0, 74, 198, 0.88);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    pointer-events: auto;
+}
+
+.wn-suspended-overlay__inner {
+    text-align: center;
+    max-width: 420px;
+    color: #fff;
+}
+
+.wn-suspended-overlay__logo {
+    width: min(200px, 60vw);
+    height: auto;
+    margin: 0 auto 28px;
+    display: block;
+    animation: wn-suspended-float 2s ease-in-out infinite;
+}
+
+@keyframes wn-suspended-float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-6px); }
+}
+
+.wn-suspended-overlay__title {
+    margin: 0 0 16px;
+    font-family: Inter, system-ui, sans-serif;
+    font-size: clamp(1.125rem, 3.5vw, 1.375rem);
+    font-weight: 600;
+    line-height: 1.45;
+}
+
+.wn-suspended-overlay__hint {
+    margin: 0;
+    font-size: 1rem;
+}
+
+.wn-suspended-overlay__link {
+    color: #fff;
+    font-weight: 600;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+.wn-suspended-overlay__link:hover {
+    opacity: 0.9;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .wn-suspended-overlay__logo {
+        animation: none;
+    }
+}

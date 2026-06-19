@@ -33,6 +33,14 @@ class LoginController extends Controller
 
     protected function authenticated(Request $request, $user)
     {
+        if ($user->isSuspended()) {
+            Auth::logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+
+            return redirect()->route('account.suspended');
+        }
+
         $ownedCompanies = Company::where('user_id', $user->id)->orderBy('name')->get();
         $selectedId = Cookie::get('selected_company');
 
