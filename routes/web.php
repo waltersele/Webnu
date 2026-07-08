@@ -350,7 +350,7 @@ Route::group(['middleware' => ['noindex']], function () {
     Route::post('password/reset', 'Auth\ResetPasswordController@reset')->name('password.update');
 });
 
-Route::get('blog', 'BlogController@redirectToLocale')->name('blog.redirect');
+Route::get('blog', 'BlogController@hub')->name('blog.hub');
 Route::get('{locale}/blog', 'BlogController@index')
     ->where('locale', 'es|en|fr')
     ->name('blog.index');

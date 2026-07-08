@@ -149,9 +149,11 @@ curl -s -X POST https://webnu.es/api/content-connector/posts \
 
 ## URLs públicas del blog
 
-- `/blog` → redirige al idioma del visitante (`es` por defecto).
-- `/{locale}/blog` — listado (`es`, `en`, `fr`).
+- `/blog` — hub canónico (siempre español, HTTP 200; recomendado para Sonartop).
+- `/{locale}/blog` — listado por idioma (`es`, `en`, `fr`).
 - `/{locale}/blog/{slug}` — artículo.
+
+En Sonartop, usa **`https://webnu.es/blog`** como URL del blog. Los artículos en inglés o francés se publican con `locale: "en"` / `"fr"` en el connector y aparecen en `/en/blog` y `/fr/blog`.
 
 Sitemap: `https://webnu.es/sitemap.xml`
 

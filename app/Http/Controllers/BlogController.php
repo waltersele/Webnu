@@ -13,14 +13,13 @@ class BlogController extends Controller
 {
     use ResolvesBlogLocale;
 
-    public function redirectToLocale(Request $request)
+    /** Hub canónico del blog (200). Sonartop y crawlers deben usar /blog o /es/blog. */
+    public function hub(Request $request): View
     {
-        $locale = $this->resolveBlogLocale($request);
-
-        return redirect()->route('blog.index', ['locale' => $locale]);
+        return $this->index($request, config('blog.default', 'es'), canonicalAtHub: true);
     }
 
-    public function index(Request $request, string $locale): View
+    public function index(Request $request, string $locale, bool $canonicalAtHub = false): View
     {
         $this->assertBlogLocale($locale);
         App::setLocale($locale);
@@ -42,7 +41,22 @@ class BlogController extends Controller
             'blogLocales' => config('blog.locales', []),
             'pageTitle' => __('blog.title'),
             'metaDescription' => __('blog.meta_description'),
+            'canonicalUrl' => $canonicalAtHub
+                ? route('blog.hub')
+                : route('blog.index', ['locale' => $locale]),
+            'alternateLocaleUrls' => $this->blogAlternateLocaleUrls(),
         ]);
+    }
+
+    /** @return array<string, string> */
+    private function blogAlternateLocaleUrls(): array
+    {
+        $urls = [];
+        foreach (array_keys(config('blog.locales', [])) as $code) {
+            $urls[$code] = route('blog.index', ['locale' => $code]);
+        }
+
+        return $urls;
     }
 
     public function show(Request $request, string $locale, string $slug): View

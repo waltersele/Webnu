@@ -26,7 +26,7 @@ REPO_ROOT="${REPO_ROOT:-$HOME/webnu-deploy}"
 REPO_REMOTE="${REPO_REMOTE:-origin}"
 REPO_BRANCH="${REPO_BRANCH:-main}"
 PHP_BIN="${PHP_BIN:-php}"
-COMPOSER_BIN="${COMPOSER_BIN:-composer}"
+COMPOSER_BIN="${COMPOSER_BIN:-}"
 STATE_FILE="${STATE_FILE:-$HOME/.webnu-last-deploy-sha}"
 LOG_FILE="${LOG_FILE:-$SITE_ROOT/storage/backups/deploys.log}"
 BACKUP_DIR="${BACKUP_DIR:-$SITE_ROOT/storage/backups}"
@@ -121,6 +121,77 @@ artisan() {
     run "$PHP_BIN $SITE_ROOT/artisan $*"
 }
 
+php_version_of() {
+    local bin="$1"
+    "$bin" -r 'echo PHP_MAJOR_VERSION.".".PHP_MINOR_VERSION;' 2>/dev/null || echo '0.0'
+}
+
+php_is_modern() {
+    case "$1" in
+        8.[1-9]*) return 0 ;;
+        8.[0-9][0-9]*) return 0 ;;
+        *) return 1 ;;
+    esac
+}
+
+resolve_php_bin() {
+    if [[ -n "${PHP_BIN_OVERRIDE:-}" ]]; then
+        PHP_BIN="$PHP_BIN_OVERRIDE"
+        return
+    fi
+    if php_is_modern "$(php_version_of "$PHP_BIN")"; then
+        return
+    fi
+    local candidate ver
+    for candidate in \
+        /opt/alt/php83/usr/bin/php \
+        /opt/alt/php82/usr/bin/php \
+        /opt/alt/php81/usr/bin/php \
+        /usr/local/bin/php83 \
+        /usr/local/bin/ea-php83
+    do
+        [[ -x "$candidate" ]] || continue
+        ver="$(php_version_of "$candidate")"
+        if php_is_modern "$ver"; then
+            PHP_BIN="$candidate"
+            return
+        fi
+    done
+}
+
+resolve_composer_invocation() {
+    if [[ -n "$COMPOSER_BIN" ]]; then
+        return
+    fi
+    if command -v composer >/dev/null 2>&1; then
+        COMPOSER_BIN="$(command -v composer)"
+        return
+    fi
+    local phar
+    for phar in \
+        "$SITE_ROOT/composer.phar" \
+        "$REPO_ROOT/composer.phar" \
+        "$HOME/composer.phar" \
+        /usr/local/bin/composer.phar
+    do
+        if [[ -f "$phar" ]]; then
+            COMPOSER_BIN="$PHP_BIN $phar"
+            return
+        fi
+    done
+    for phar in /usr/local/bin/composer /opt/cpanel/composer/bin/composer; do
+        if [[ -x "$phar" ]]; then
+            COMPOSER_BIN="$phar"
+            return
+        fi
+    done
+    die "Composer no encontrado. Define COMPOSER_BIN (p. ej. export COMPOSER_BIN=\"$PHP_BIN ~/composer.phar\")"
+}
+
+composer_run() {
+    run "cd $SITE_ROOT && $COMPOSER_BIN $*"
+}
+
 # Detecta si estamos en stack Laravel 10+ (PHP >= 8.1) para permitir composer/vendor.
 should_sync_vendor() {
     if [[ $WITH_VENDOR -eq 1 ]]; then
@@ -139,7 +210,13 @@ should_sync_vendor() {
 [[ -d "$REPO_ROOT" ]]  || die "No existe REPO_ROOT: $REPO_ROOT (clona el repo en \$HOME/webnu-deploy)"
 [[ -d "$REPO_ROOT/.git" ]] || die "$REPO_ROOT no es un repositorio git"
 command -v rsync >/dev/null      || die "rsync no está instalado"
-command -v "$PHP_BIN" >/dev/null  || die "$PHP_BIN no está en el PATH"
+
+resolve_php_bin
+say "PHP: $PHP_BIN ($("$PHP_BIN" -r 'echo PHP_VERSION;' 2>/dev/null || echo desconocido))"
+resolve_composer_invocation
+say "Composer: $COMPOSER_BIN"
+
+command -v "$PHP_BIN" >/dev/null 2>&1 || [[ -x "$PHP_BIN" ]] || die "$PHP_BIN no está disponible"
 
 # ---------- ROLLBACK ------------------------------------------------------- #
 if [[ $ROLLBACK -eq 1 ]]; then
@@ -156,7 +233,7 @@ if [[ $ROLLBACK -eq 1 ]]; then
     run "cd $REPO_ROOT && git fetch --quiet $REPO_REMOTE && git reset --hard $PREV"
     run "rsync -av ${EXCLUDES[*]} $REPO_ROOT/ $SITE_ROOT/"
     run "rm -f $SITE_ROOT/bootstrap/cache/services.php $SITE_ROOT/bootstrap/cache/packages.php $SITE_ROOT/bootstrap/cache/config.php"
-    run "cd $SITE_ROOT && $COMPOSER_BIN dump-autoload --no-scripts --optimize --no-interaction --ignore-platform-reqs"
+    composer_run "dump-autoload --no-scripts --optimize --no-interaction --ignore-platform-reqs"
     artisan "package:discover"
     artisan "view:clear"
     artisan "config:cache"
@@ -299,10 +376,10 @@ run "rm -f $SITE_ROOT/bootstrap/cache/services.php $SITE_ROOT/bootstrap/cache/pa
 
 if should_sync_vendor; then
     say "Instalando dependencias (composer install --no-dev)"
-    run "cd $SITE_ROOT && $COMPOSER_BIN install --no-dev --no-interaction --prefer-dist --optimize-autoloader"
+    composer_run "install --no-dev --no-interaction --prefer-dist --optimize-autoloader"
 else
     say "Regenerando autoload (composer dump-autoload)"
-    run "cd $SITE_ROOT && $COMPOSER_BIN dump-autoload --no-scripts --optimize --no-interaction --ignore-platform-reqs"
+    composer_run "dump-autoload --no-scripts --optimize --no-interaction --ignore-platform-reqs"
 fi
 
 say "Re-descubriendo paquetes"

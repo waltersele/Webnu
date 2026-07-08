@@ -11,18 +11,26 @@ class BlogTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_blog_redirects_to_default_locale(): void
+    public function test_blog_hub_returns_200_with_default_locale_content(): void
     {
-        $this->withHeaders(['Accept-Language' => 'es'])
-            ->get('/blog')
-            ->assertRedirect(route('blog.index', ['locale' => 'es']));
-    }
+        $post = BlogPost::create([
+            'status' => BlogPost::STATUS_PUBLISHED,
+            'published_at' => now()->subHour(),
+        ]);
 
-    public function test_blog_redirect_honors_accept_language(): void
-    {
+        BlogPostTranslation::create([
+            'blog_post_id' => $post->id,
+            'locale' => 'es',
+            'slug' => 'hub-post',
+            'title' => 'Post hub',
+            'body' => '<p>ES</p>',
+            'body_format' => BlogPostTranslation::FORMAT_HTML,
+        ]);
+
         $this->withHeaders(['Accept-Language' => 'en'])
             ->get('/blog')
-            ->assertRedirect(route('blog.index', ['locale' => 'en']));
+            ->assertOk()
+            ->assertSee('Post hub');
     }
 
     public function test_blog_index_lists_published_posts(): void

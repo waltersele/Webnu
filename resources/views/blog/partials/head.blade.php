@@ -5,11 +5,16 @@
 @if (!empty($canonicalUrl))
 <link rel="canonical" href="{{ $canonicalUrl }}"/>
 @endif
-@if (!empty($alternateTranslations))
+@if (!empty($alternateLocaleUrls))
+    @foreach($alternateLocaleUrls as $code => $url)
+        <link rel="alternate" hreflang="{{ config('blog.locales.' . $code . '.hreflang', $code) }}" href="{{ $url }}"/>
+    @endforeach
+    <link rel="alternate" hreflang="x-default" href="{{ route('blog.hub') }}"/>
+@elseif (!empty($alternateTranslations))
     @foreach($alternateTranslations as $alt)
         <link rel="alternate" hreflang="{{ config('blog.locales.' . $alt->locale . '.hreflang', $alt->locale) }}" href="{{ $alt->publicUrl() }}"/>
     @endforeach
-    <link rel="alternate" hreflang="x-default" href="{{ route('blog.index', ['locale' => config('blog.fallback_locale', 'en')]) }}"/>
+    <link rel="alternate" hreflang="x-default" href="{{ route('blog.hub') }}"/>
 @endif
 <link rel="icon" type="image/png" href="{{ \App\PlatformSetting::brandUrl('favicon') }}"/>
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>

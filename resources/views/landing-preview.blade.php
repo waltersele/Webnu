@@ -811,7 +811,7 @@
                     <li><a href="#tvpik" class="hover:text-primary">{{ __('landing.nav.tvpik') }}</a></li>
                     <li><a href="#process" class="hover:text-primary">{{ __('landing.nav.scan') }}</a></li>
                     <li><a href="#pricing" class="hover:text-primary">{{ __('landing.nav.pricing') }}</a></li>
-                    <li><a href="{{ route('blog.redirect') }}" class="hover:text-primary">Blog</a></li>
+                    <li><a href="{{ route('blog.hub') }}" class="hover:text-primary">Blog</a></li>
                 </ul>
             </div>
             <div>
