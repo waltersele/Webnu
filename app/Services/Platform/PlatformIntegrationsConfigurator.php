@@ -41,6 +41,11 @@ class PlatformIntegrationsConfigurator
         if ($preAltaKey) {
             config(['pre_alta.ingest_key' => $preAltaKey]);
         }
+
+        $connectorSecret = PlatformSetting::contentConnectorSecret();
+        if ($connectorSecret) {
+            config(['blog.connector.secret' => $connectorSecret]);
+        }
     }
 
     protected function tableReady(): bool

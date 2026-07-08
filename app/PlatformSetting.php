@@ -22,6 +22,7 @@ class PlatformSetting extends Model
         'stripe_webhook_secret',
         'google_client_secret',
         'pre_alta_ingest_key',
+        'content_connector_secret',
         'tvpik_app_key',
         'digital_signage_app_key',
     ];
@@ -477,5 +478,22 @@ class PlatformSetting extends Model
     public static function preAltaIngestKeyHint(): ?string
     {
         return static::secretHint(static::preAltaIngestKey());
+    }
+
+    public static function contentConnectorSecret(): ?string
+    {
+        return static::secretFromDbOrEnv('content_connector_secret', 'CONTENT_CONNECTOR_SECRET');
+    }
+
+    public static function hasContentConnectorSecret(): bool
+    {
+        $secret = static::contentConnectorSecret();
+
+        return $secret !== null && $secret !== '';
+    }
+
+    public static function contentConnectorSecretHint(): ?string
+    {
+        return static::secretHint(static::contentConnectorSecret());
     }
 }

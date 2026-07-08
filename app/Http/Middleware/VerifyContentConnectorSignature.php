@@ -13,7 +13,7 @@ class VerifyContentConnectorSignature
 
         if (empty($secret)) {
             return response()->json([
-                'message' => 'Content connector not configured (CONTENT_CONNECTOR_SECRET).',
+                'message' => 'Content connector not configured. Añade el secreto en Admin → Plataforma → Configuración.',
             ], 503);
         }
 

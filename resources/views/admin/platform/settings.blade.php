@@ -219,6 +219,45 @@
 
                     <hr>
 
+                    <h6 class="text-primary">Blog — Content Connector</h6>
+                    <p class="text-muted small mb-3">
+                        API en Webnu: <code>/api/content-connector/health</code> y <code>/api/content-connector/posts</code>.
+                        Sonartop (u otro origen) publica artículos firmados con HMAC-SHA256.
+                        Ver <code>docs/CONNECTOR.md</code> en el repositorio.
+                    </p>
+                    @if ($integrations['content_connector_configured'])
+                        <div class="alert alert-success py-2">
+                            <i class="ri-check-line me-1"></i> Secreto del conector configurado
+                            @if ($integrations['content_connector_hint'])
+                                <span class="text-muted">({{ $integrations['content_connector_hint'] }})</span>
+                            @endif
+                        </div>
+                    @else
+                        <div class="alert alert-warning py-2 mb-3">
+                            Sin secreto. Los endpoints <code>GET/POST /api/content-connector/posts</code> responderán 503.
+                        </div>
+                    @endif
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-8">
+                            <label for="content_connector_secret" class="form-label">Secreto HMAC (Content Connector)</label>
+                            <input type="password" name="content_connector_secret" id="content_connector_secret" class="form-control font-monospace"
+                                   placeholder="{{ $integrations['content_connector_configured'] ? 'Dejar vacío para no cambiar (' . ($integrations['content_connector_hint'] ?? '') . ')' : 'Clave larga aleatoria (mín. 16 caracteres)' }}"
+                                   autocomplete="off">
+                            <div class="form-text">
+                                Mismo valor que <code>connector_secret</code> en Sonartop. Health público:
+                                <a href="{{ $integrations['content_connector_health_url'] }}" target="_blank" rel="noopener">{{ $integrations['content_connector_health_url'] }}</a>
+                            </div>
+                        </div>
+                    </div>
+                    @if ($integrations['content_connector_configured'])
+                        <div class="form-check mb-4">
+                            <input type="checkbox" class="form-check-input" name="clear_content_connector_secret" value="1" id="clear_content_connector_secret">
+                            <label class="form-check-label text-danger" for="clear_content_connector_secret">Eliminar secreto del conector guardado</label>
+                        </div>
+                    @endif
+
+                    <hr>
+
                     <h6 class="text-primary">TVPik (pantallas)</h6>
                     <div class="row g-3 mb-3">
                         <div class="col-md-6">

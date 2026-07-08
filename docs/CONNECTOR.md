@@ -4,13 +4,15 @@ Webnu expone una API HTTP para que **Sonartop** publique y consulte artículos d
 
 ## Configuración
 
-En `.env` de Webnu (y en Sonartop como `connector_secret`):
+**Recomendado (producción):** Admin → **Plataforma → Configuración** → sección *Blog — Content Connector* → *Secreto HMAC*.
+
+Alternativa en `.env` (desarrollo o fallback):
 
 ```env
 CONTENT_CONNECTOR_SECRET=una-clave-larga-y-aleatoria
 ```
 
-El valor debe ser **idéntico** en ambos sistemas.
+El valor debe ser **idéntico** al `connector_secret` configurado en Sonartop (cliente que envía los artículos).
 
 ## Autenticación (HMAC-SHA256)
 
@@ -143,7 +145,7 @@ curl -s -X POST https://webnu.es/api/content-connector/posts \
 |--------|--------|
 | `401`  | Firma ausente o incorrecta |
 | `422`  | Validación (locale, slug, campos obligatorios) |
-| `503`  | `CONTENT_CONNECTOR_SECRET` no configurado |
+| `503`  | Secreto no configurado (Admin → Plataforma → Configuración) |
 
 ## URLs públicas del blog
 

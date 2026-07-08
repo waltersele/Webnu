@@ -163,6 +163,9 @@ class PlatformSettingsService
             'google_redirect_uri_default' => rtrim((string) config('app.url'), '/') . '/auth/google/callback',
             'pre_alta_ingest_configured' => PlatformSetting::hasPreAltaIngestKey(),
             'pre_alta_ingest_hint' => PlatformSetting::preAltaIngestKeyHint(),
+            'content_connector_configured' => PlatformSetting::hasContentConnectorSecret(),
+            'content_connector_hint' => PlatformSetting::contentConnectorSecretHint(),
+            'content_connector_health_url' => rtrim((string) config('app.url'), '/') . '/api/content-connector/health',
             'tvpik_api_url' => PlatformSetting::tvpikApiUrl() ?? '',
             'tvpik_web_url' => PlatformSetting::tvpikWebUrl(),
             'tvpik_app_key_configured' => PlatformSetting::tvpikAppKey() !== null,
@@ -224,6 +227,14 @@ class PlatformSettingsService
 
         if ($data['clear_pre_alta_ingest_key'] ?? false) {
             PlatformSetting::where('key', 'pre_alta_ingest_key')->delete();
+        }
+
+        if (! empty($data['content_connector_secret'])) {
+            PlatformSetting::setValue('content_connector_secret', trim((string) $data['content_connector_secret']));
+        }
+
+        if ($data['clear_content_connector_secret'] ?? false) {
+            PlatformSetting::where('key', 'content_connector_secret')->delete();
         }
 
         if (array_key_exists('tvpik_api_url', $data)) {
