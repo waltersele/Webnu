@@ -27,5 +27,6 @@
         <server name="QUEUE_CONNECTION" value="sync"/>
         <server name="SESSION_DRIVER" value="array"/>
         <server name="TELESCOPE_ENABLED" value="false"/>
+        <server name="CONTENT_CONNECTOR_SECRET" value="test-connector-secret"/>
     </php>
 </phpunit>

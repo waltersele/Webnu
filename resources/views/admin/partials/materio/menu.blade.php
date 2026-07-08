@@ -103,6 +103,12 @@
                 <div>Comercial</div>
             </a>
         </li>
+        <li class="menu-item {{ request()->routeIs('admin.platform.blog*') ? 'active' : '' }}">
+            <a href="{{ route('admin.platform.blog.index') }}" class="menu-link">
+                <i class="menu-icon icon-base ri ri-article-line"></i>
+                <div>Blog</div>
+            </a>
+        </li>
         <li class="menu-item {{ request()->routeIs('admin.platform.settings*') ? 'active' : '' }}">
             <a href="{{ route('admin.platform.settings') }}" class="menu-link">
                 <i class="menu-icon icon-base ri ri-settings-3-line"></i>

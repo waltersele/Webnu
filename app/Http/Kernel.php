@@ -67,6 +67,7 @@ class Kernel extends HttpKernel
         'selected.company' => \App\Http\Middleware\EnsureSelectedCompany::class,
         'digital.signage' => \App\Http\Middleware\VerifyDigitalSignageApp::class,
         'pre_alta.ingest' => \App\Http\Middleware\VerifyPreAltaIngestKey::class,
+        'content_connector.signature' => \App\Http\Middleware\VerifyContentConnectorSignature::class,
         'super.admin' => \App\Http\Middleware\EnsureSuperAdmin::class,
         'subscribed' => \App\Http\Middleware\EnsureSubscribed::class,
         'onboarding.complete' => \App\Http\Middleware\EnsureOnboardingComplete::class,

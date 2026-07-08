@@ -9,4 +9,5 @@ Disallow: /activar
 Disallow: /integrations/
 Disallow: /stripe/
 Disallow: /password/
+
 Sitemap: https://webnu.es/sitemap.xml

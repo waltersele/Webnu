@@ -31,3 +31,15 @@ Route::prefix('signage')
             Route::get('tv-templates', 'SignageTvTemplateController@index');
         });
     });
+
+Route::prefix('content-connector')
+    ->middleware(['throttle:60,1'])
+    ->namespace('Api')
+    ->group(function () {
+        Route::get('health', 'ContentConnectorController@health');
+
+        Route::middleware('content_connector.signature')->group(function () {
+            Route::get('posts', 'ContentConnectorController@index');
+            Route::post('posts', 'ContentConnectorController@store');
+        });
+    });

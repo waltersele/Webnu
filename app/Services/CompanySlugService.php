@@ -20,6 +20,7 @@ class CompanySlugService
         'platform',
         'preview',
         'register',
+        'blog',
         'activar',
         'pre-alta',
         'webnu',

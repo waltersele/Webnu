@@ -204,6 +204,13 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['aut
             ->name('admin.platform.users.companies.toggle-enabled')
             ->middleware('throttle:60,1')
             ->where(['user' => '[0-9]+', 'platformCompany' => '[0-9]+']);
+
+        Route::get('blog', 'PlatformBlogController@index')->name('admin.platform.blog.index');
+        Route::get('blog/{post}/edit', 'PlatformBlogController@edit')->name('admin.platform.blog.edit');
+        Route::put('blog/{post}', 'PlatformBlogController@update')->name('admin.platform.blog.update');
+        Route::delete('blog/{post}', 'PlatformBlogController@destroy')->name('admin.platform.blog.destroy');
+        Route::post('blog/{post}/publish', 'PlatformBlogController@publish')->name('admin.platform.blog.publish');
+        Route::post('blog/{post}/draft', 'PlatformBlogController@draft')->name('admin.platform.blog.draft');
     });
 });
 
@@ -342,6 +349,15 @@ Route::group(['middleware' => ['noindex']], function () {
     Route::get('password/reset/{token}', 'Auth\ResetPasswordController@showResetForm')->name('password.reset');
     Route::post('password/reset', 'Auth\ResetPasswordController@reset')->name('password.update');
 });
+
+Route::get('blog', 'BlogController@redirectToLocale')->name('blog.redirect');
+Route::get('{locale}/blog', 'BlogController@index')
+    ->where('locale', 'es|en|fr')
+    ->name('blog.index');
+Route::get('{locale}/blog/{slug}', 'BlogController@show')
+    ->where('locale', 'es|en|fr')
+    ->where('slug', '[a-z0-9][a-z0-9-]*')
+    ->name('blog.show');
 
 // Hub público del owner: /@{ownerSlug}
 Route::get('@{ownerSlug}', 'PagesController@ownerHub')
