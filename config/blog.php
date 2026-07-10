@@ -15,7 +15,8 @@ return [
     'connector' => [
         'secret' => env('CONTENT_CONNECTOR_SECRET'),
         'signature_header' => 'X-Connector-Signature',
-        'signature_prefix' => 'sha256=',
+        // Legacy: el middleware acepta hex crudo (Sonartop) o prefijo sha256=
+        'signature_prefix' => '',
     ],
 
     'allowed_html_tags' => '<p><br><h1><h2><h3><h4><h5><h6><a><ul><ol><li><strong><em><b><i><img><blockquote><code><pre><span><div><figure><figcaption><hr>',

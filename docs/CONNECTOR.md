@@ -19,23 +19,25 @@ El valor debe ser **idéntico** al `connector_secret` configurado en Sonartop (c
 Las rutas protegidas exigen la cabecera:
 
 ```
-X-Connector-Signature: sha256=<hex>
+X-Connector-Signature: <hex64>
 ```
 
-Donde `<hex>` es:
+Donde `<hex64>` es el HMAC-SHA256 en **hexadecimal crudo** (64 caracteres), sin prefijo:
 
 ```text
 hash_hmac('sha256', <cuerpo_raw_de_la_petición>, CONTENT_CONNECTOR_SECRET)
 ```
 
-- **GET** sin cuerpo: firmar la cadena vacía `""`.
-- **POST** JSON: firmar el cuerpo **exacto** enviado (bytes raw), no un JSON reordenado.
+También se acepta el formato alternativo `sha256=<hex64>` (retrocompatibilidad).
 
-Ejemplo en PHP:
+- **GET** sin cuerpo: firmar la cadena vacía `""`.
+- **POST** JSON: firmar el cuerpo **exacto** enviado (bytes raw), no un JSON re-parseado ni re-serializado.
+
+Ejemplo en PHP (formato Sonartop):
 
 ```php
 $body = json_encode($payload, JSON_UNESCAPED_UNICODE);
-$signature = 'sha256=' . hash_hmac('sha256', $body, $secret);
+$signature = hash_hmac('sha256', $body, $secret);
 ```
 
 ## Endpoints
@@ -122,7 +124,7 @@ curl -s https://webnu.es/api/content-connector/health
 
 ```bash
 SECRET="tu-secreto"
-SIG="sha256=$(printf '' | openssl dgst -sha256 -hmac "$SECRET" | awk '{print $2}')"
+SIG=$(printf '' | openssl dgst -sha256 -hmac "$SECRET" | awk '{print $2}')
 curl -s -H "X-Connector-Signature: $SIG" \
   https://webnu.es/api/content-connector/posts
 ```
@@ -132,12 +134,14 @@ curl -s -H "X-Connector-Signature: $SIG" \
 ```bash
 SECRET="tu-secreto"
 BODY='{"title":"Hola Webnu","content":"<p>Primer post.</p>","slug":"hola-webnu","locale":"es","meta":{"group_id":"art-001"}}'
-SIG="sha256=$(printf '%s' "$BODY" | openssl dgst -sha256 -hmac "$SECRET" | awk '{print $2}')"
+SIG=$(printf '%s' "$BODY" | openssl dgst -sha256 -hmac "$SECRET" | awk '{print $2}')
 curl -s -X POST https://webnu.es/api/content-connector/posts \
   -H "Content-Type: application/json" \
   -H "X-Connector-Signature: $SIG" \
   -d "$BODY"
 ```
+
+Formato alternativo (también válido): `X-Connector-Signature: sha256=$SIG`
 
 ## Errores
 

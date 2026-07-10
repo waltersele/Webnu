@@ -244,7 +244,8 @@
                                    placeholder="{{ $integrations['content_connector_configured'] ? 'Dejar vacío para no cambiar (' . ($integrations['content_connector_hint'] ?? '') . ')' : 'Clave larga aleatoria (mín. 16 caracteres)' }}"
                                    autocomplete="off">
                             <div class="form-text">
-                                Mismo valor que <code>connector_secret</code> en Sonartop. Health público:
+                                Mismo valor que <code>connector_secret</code> en Sonartop. Firma HMAC en hex sin prefijo (<code>X-Connector-Signature</code>).
+                                Health público:
                                 <a href="{{ $integrations['content_connector_health_url'] }}" target="_blank" rel="noopener">{{ $integrations['content_connector_health_url'] }}</a>
                             </div>
                         </div>

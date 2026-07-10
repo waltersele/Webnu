@@ -85,6 +85,51 @@ class ContentConnectorTest extends TestCase
         ]);
     }
 
+    public function test_post_creates_and_publishes_article_with_raw_hex_signature(): void
+    {
+        $payload = [
+            'title' => 'Sonartop post',
+            'content' => '<p>Desde Sonartop.</p>',
+            'slug' => 'sonartop-post',
+            'locale' => 'es',
+        ];
+
+        $body = json_encode($payload, JSON_THROW_ON_ERROR);
+
+        $this->call(
+            'POST',
+            '/api/content-connector/posts',
+            [],
+            [],
+            [],
+            $this->transformHeadersToServerVars([
+                'CONTENT_TYPE' => 'application/json',
+                'HTTP_ACCEPT' => 'application/json',
+                'HTTP_X_CONNECTOR_SIGNATURE' => $this->signRaw($body),
+            ]),
+            $body
+        )->assertCreated()
+            ->assertJson([
+                'status' => 'published',
+                'locale' => 'es',
+            ]);
+    }
+
+    public function test_posts_list_accepts_raw_hex_signature(): void
+    {
+        $this->call(
+            'GET',
+            '/api/content-connector/posts',
+            [],
+            [],
+            [],
+            $this->transformHeadersToServerVars([
+                'HTTP_ACCEPT' => 'application/json',
+                'HTTP_X_CONNECTOR_SIGNATURE' => $this->signRaw(''),
+            ])
+        )->assertOk();
+    }
+
     public function test_post_rejects_invalid_signature(): void
     {
         $body = json_encode([
@@ -172,6 +217,11 @@ class ContentConnectorTest extends TestCase
 
     private function sign(string $body): string
     {
-        return 'sha256=' . hash_hmac('sha256', $body, self::SECRET);
+        return 'sha256=' . $this->signRaw($body);
+    }
+
+    private function signRaw(string $body): string
+    {
+        return hash_hmac('sha256', $body, self::SECRET);
     }
 }

@@ -18,16 +18,38 @@ class VerifyContentConnectorSignature
         }
 
         $header = config('blog.connector.signature_header', 'X-Connector-Signature');
-        $prefix = config('blog.connector.signature_prefix', 'sha256=');
-        $provided = (string) $request->header($header);
-        $expected = $prefix . hash_hmac('sha256', $request->getContent(), (string) $secret);
+        $provided = $this->normalizeSignature((string) $request->header($header));
 
-        if ($provided === '' || ! hash_equals($expected, $provided)) {
+        if ($provided === '' || ! $this->isValidHexSignature($provided)) {
+            return response()->json([
+                'message' => 'Invalid signature.',
+            ], 401);
+        }
+
+        $expectedHex = hash_hmac('sha256', $request->getContent(), (string) $secret);
+
+        if (! hash_equals($expectedHex, $provided)) {
             return response()->json([
                 'message' => 'Invalid signature.',
             ], 401);
         }
 
         return $next($request);
+    }
+
+    private function normalizeSignature(string $provided): string
+    {
+        $provided = trim($provided);
+
+        if (stripos($provided, 'sha256=') === 0) {
+            return substr($provided, 7);
+        }
+
+        return $provided;
+    }
+
+    private function isValidHexSignature(string $signature): bool
+    {
+        return (bool) preg_match('/^[a-f0-9]{64}$/i', $signature);
     }
 }
