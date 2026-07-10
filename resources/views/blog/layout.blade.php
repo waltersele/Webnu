@@ -1,13 +1,15 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', $locale ?? app()->getLocale()) }}">
+<html class="scroll-smooth" lang="{{ str_replace('_', '-', $locale ?? app()->getLocale()) }}">
 <head>
-    @include('blog.partials.head')
+    @include('landing.partials.head')
+    @include('blog.partials.styles')
 </head>
-<body class="bg-background text-on-surface text-body-md min-h-screen">
-    @include('blog.partials.header')
-    <main class="mx-auto max-w-5xl px-4 py-10">
+<body class="bg-background text-on-surface text-body-md min-h-screen overflow-x-hidden">
+    @include('marketing.partials.nav')
+    <main class="max-w-container-max mx-auto px-margin-mobile md:px-gutter py-10 md:py-16">
         @yield('content')
     </main>
-    @include('blog.partials.footer')
+    @include('marketing.partials.footer')
+    <script src="{{ asset('js/marketing-shell.js') }}"></script>
 </body>
 </html>

@@ -4,12 +4,14 @@
 <meta name="robots" content="noindex, nofollow">
 @endif
 @php
-    $landingTitle = __('landing.meta.title');
-    $landingDescription = __('landing.meta.description');
-    $ogImage = \App\PlatformSetting::brandUrl('og');
-    $canonicalUrl = url('/');
-    if (isset($locale) && $locale) {
-        $canonicalUrl = url('/?lang=' . $locale);
+    $landingTitle = $pageTitle ?? __('landing.meta.title');
+    $landingDescription = $metaDescription ?? __('landing.meta.description');
+    $ogImage = $ogImage ?? \App\PlatformSetting::brandUrl('og');
+    if (! isset($canonicalUrl)) {
+        $canonicalUrl = url('/');
+        if (isset($locale) && $locale && empty($alternateLocaleUrls)) {
+            $canonicalUrl = url('/?lang=' . $locale);
+        }
     }
 @endphp
 <meta name="description" content="{{ $landingDescription }}"/>
@@ -25,7 +27,17 @@
 <meta name="twitter:description" content="{{ $landingDescription }}"/>
 <meta name="twitter:image" content="{{ $ogImage }}"/>
 @include('partials.measurement-head')
-@isset($landingLocales, $locale)
+@if(!empty($alternateLocaleUrls))
+    @foreach($alternateLocaleUrls as $code => $url)
+        <link rel="alternate" hreflang="{{ config('blog.locales.' . $code . '.hreflang', $code) }}" href="{{ $url }}"/>
+    @endforeach
+    <link rel="alternate" hreflang="x-default" href="{{ route('blog.hub') }}"/>
+@elseif(!empty($alternateTranslations))
+    @foreach($alternateTranslations as $alt)
+        <link rel="alternate" hreflang="{{ config('blog.locales.' . $alt->locale . '.hreflang', $alt->locale) }}" href="{{ $alt->publicUrl() }}"/>
+    @endforeach
+    <link rel="alternate" hreflang="x-default" href="{{ route('blog.hub') }}"/>
+@elseif(isset($landingLocales, $locale))
     @php
         $homeUrl = url('/');
     @endphp
@@ -33,7 +45,7 @@
         <link rel="alternate" hreflang="{{ $meta['hreflang'] ?? $code }}" href="{{ $homeUrl }}?lang={{ $code }}"/>
     @endforeach
     <link rel="alternate" hreflang="x-default" href="{{ $homeUrl }}?lang={{ config('landing.fallback_locale', 'en') }}"/>
-@endisset
+@endif
 <link rel="icon" type="image/png" href="{{ \App\PlatformSetting::brandUrl('favicon') }}"/>
 <meta name="theme-color" content="#004ac6">
 <link rel="manifest" href="{{ asset('manifest.webmanifest') }}">

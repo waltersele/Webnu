@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\BlogPost;
 use App\BlogPostTranslation;
+use App\Http\Controllers\Concerns\PreparesMarketingShell;
 use App\Http\Controllers\Concerns\ResolvesBlogLocale;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
@@ -11,6 +12,7 @@ use Illuminate\View\View;
 
 class BlogController extends Controller
 {
+    use PreparesMarketingShell;
     use ResolvesBlogLocale;
 
     /** Hub canónico del blog (200). Sonartop y crawlers deben usar /blog o /es/blog. */
@@ -35,17 +37,19 @@ class BlogController extends Controller
             ->with('post')
             ->paginate(12);
 
-        return view('blog.index', [
+        return view('blog.index', array_merge($this->blogShellData($request), [
             'locale' => $locale,
             'posts' => $posts,
             'blogLocales' => config('blog.locales', []),
-            'pageTitle' => __('blog.title'),
+            'pageTitle' => __('blog.title') . ' — Webnu',
             'metaDescription' => __('blog.meta_description'),
             'canonicalUrl' => $canonicalAtHub
                 ? route('blog.hub')
                 : route('blog.index', ['locale' => $locale]),
             'alternateLocaleUrls' => $this->blogAlternateLocaleUrls(),
-        ]);
+            'blogFeaturedImage' => fn (?BlogPost $post, int $index = 0) => $this->blogFeaturedImage($post, $index),
+            'blogReadingTime' => fn (?string $html) => $this->blogReadingTimeMinutes($html),
+        ]));
     }
 
     /** @return array<string, string> */
@@ -71,15 +75,19 @@ class BlogController extends Controller
             ->with('post.translations')
             ->firstOrFail();
 
-        return view('blog.show', [
+        $post = $translation->post;
+
+        return view('blog.show', array_merge($this->blogShellData($request), [
             'locale' => $locale,
             'translation' => $translation,
-            'post' => $translation->post,
-            'alternateTranslations' => $translation->post->translations,
+            'post' => $post,
+            'alternateTranslations' => $post->translations,
             'blogLocales' => config('blog.locales', []),
-            'pageTitle' => $translation->meta_title ?: $translation->title,
+            'pageTitle' => ($translation->meta_title ?: $translation->title) . ' — Webnu',
             'metaDescription' => $translation->meta_description ?: $translation->excerpt,
             'canonicalUrl' => $translation->publicUrl(),
-        ]);
+            'featuredImage' => $this->blogFeaturedImage($post, (int) $post->id),
+            'readingTimeMinutes' => $this->blogReadingTimeMinutes($translation->body),
+        ]));
     }
 }

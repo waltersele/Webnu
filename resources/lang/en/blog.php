@@ -2,10 +2,14 @@
 
 return [
     'title' => 'Blog',
-    'heading' => 'Ideas to digitize your restaurant',
-    'intro' => 'Guides, trends and best practices for QR menus, digital menus and guest experience.',
+    'heading' => 'Hospitality innovation blog: digitize your restaurant',
+    'intro' => 'Discover trends, strategic guides and best practices to transform your business with QR menus, digital menus and guest experience.',
     'meta_description' => 'Webnu blog: digital menus, QR codes, hospitality and restaurant technology.',
-    'read_more' => 'Read article',
+    'badge' => 'Digital hospitality',
+    'featured' => 'Featured',
+    'latest_posts' => 'Latest posts',
+    'reading_time' => ':min min',
+    'read_more' => 'Read full article',
     'back_to_list' => 'Back to blog',
     'back_home' => 'Home',
     'empty' => 'No published articles in this language yet.',
