@@ -221,7 +221,7 @@
 
                     <h6 class="text-primary">Blog — Content Connector</h6>
                     <p class="text-muted small mb-3">
-                        API en Webnu: <code>/api/content-connector/health</code>, <code>POST/PUT /api/content-connector/posts</code>.
+                        API en Webnu: <code>/api/content-connector/health</code>, <code>GET /api/content-connector/categories</code>, <code>GET/POST/PUT /api/content-connector/posts</code>.
                         Sonartop (u otro origen) publica artículos firmados con HMAC-SHA256.
                         Ver <code>docs/CONNECTOR.md</code> en el repositorio.
                     </p>
@@ -234,7 +234,7 @@
                         </div>
                     @else
                         <div class="alert alert-warning py-2 mb-3">
-                            Sin secreto. Los endpoints <code>GET/POST /api/content-connector/posts</code> responderán 503.
+                            Sin secreto. Los endpoints firmados del Content Connector responderán 503.
                         </div>
                     @endif
                     <div class="row g-3 mb-3">

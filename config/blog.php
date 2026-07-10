@@ -21,4 +21,14 @@ return [
 
     'allowed_html_tags' => '<p><br><h1><h2><h3><h4><h5><h6><a><ul><ol><li><strong><em><b><i><img><blockquote><code><pre><span><div><figure><figcaption><hr>',
 
+    /** @var list<string> */
+    'default_categories' => [
+        'Cartas digitales',
+        'Reels y vídeo',
+        'Pantallas TV',
+        'Fidelización',
+        'Operativa y sala',
+        'Tendencias',
+    ],
+
 ];

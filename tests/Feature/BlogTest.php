@@ -78,6 +78,44 @@ class BlogTest extends TestCase
             ->assertSee('Hello world', false);
     }
 
+    public function test_blog_show_renders_faq_schema_in_head(): void
+    {
+        $post = BlogPost::create([
+            'status' => BlogPost::STATUS_PUBLISHED,
+            'published_at' => now()->subHour(),
+        ]);
+
+        BlogPostTranslation::create([
+            'blog_post_id' => $post->id,
+            'locale' => 'es',
+            'slug' => 'faq-head',
+            'title' => 'FAQ head',
+            'body' => '<p>Solo contenido.</p>',
+            'body_format' => BlogPostTranslation::FORMAT_HTML,
+            'faq_schema' => [
+                '@context' => 'https://schema.org',
+                '@type' => 'FAQPage',
+                'mainEntity' => [
+                    [
+                        '@type' => 'Question',
+                        'name' => '¿Pregunta SEO?',
+                        'acceptedAnswer' => [
+                            '@type' => 'Answer',
+                            'text' => 'Respuesta SEO.',
+                        ],
+                    ],
+                ],
+            ],
+        ]);
+
+        $response = $this->get('/es/blog/faq-head');
+
+        $response->assertOk()
+            ->assertSee('application/ld+json', false)
+            ->assertSee('¿Pregunta SEO?', false)
+            ->assertSee('Solo contenido.', false);
+    }
+
     public function test_draft_posts_are_not_public(): void
     {
         $post = BlogPost::create([

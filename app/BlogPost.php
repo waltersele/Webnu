@@ -17,6 +17,7 @@ class BlogPost extends Model
         'published_at',
         'featured_image',
         'connector_group_id',
+        'blog_category_id',
         'author_user_id',
     ];
 
@@ -32,6 +33,11 @@ class BlogPost extends Model
     public function author(): BelongsTo
     {
         return $this->belongsTo(User::class, 'author_user_id');
+    }
+
+    public function category(): BelongsTo
+    {
+        return $this->belongsTo(BlogCategory::class, 'blog_category_id');
     }
 
     public function translationFor(string $locale): ?BlogPostTranslation

@@ -48,6 +48,7 @@ Base: `https://webnu.es/api/content-connector`
 |--------|----------|-------|--------------------------------------|
 | GET    | `/health`| No    | Comprueba que el conector responde   |
 | GET    | `/posts` | Sí    | Lista publicaciones en todos los idiomas |
+| GET    | `/categories` | Sí | Lista categorías del blog |
 | POST   | `/posts` | Sí    | Crea un artículo                     |
 | PUT    | `/posts/{id}` | Sí | Actualiza un artículo existente      |
 
@@ -73,11 +74,28 @@ Respuesta `200`:
       "url": "https://webnu.es/es/blog/bienvenida-webnu",
       "excerpt": "Resumen del artículo…",
       "published_at": "2026-07-08T10:00:00+00:00",
-      "locale": "es"
+      "locale": "es",
+      "category_id": "3"
     }
   ]
 }
 ```
+
+### GET `/categories`
+
+Sonartop debe consultar este endpoint **antes de publicar** para obtener los IDs válidos de categoría.
+
+Respuesta `200`:
+
+```json
+{
+  "categories": [
+    { "id": "3", "name": "Reels y vídeo" }
+  ]
+}
+```
+
+Categorías iniciales en Webnu: Cartas digitales, Reels y vídeo, Pantallas TV, Fidelización, Operativa y sala, Tendencias.
 
 ### POST `/posts`
 
@@ -89,6 +107,8 @@ Cuerpo JSON:
 | `content` | string | Sí          | Cuerpo en **HTML** (se sanitiza) |
 | `slug`    | string | Sí          | Slug URL (`a-z`, `0-9`, guiones) |
 | `locale`  | string | Sí          | `es`, `en` o `fr` |
+| `category_id` | string | Sí      | ID devuelto por `GET /categories` |
+| `faq_schema` | object | Sí       | Schema FAQPage para SEO (ver abajo) |
 | `meta`    | object | No          | Metadatos opcionales |
 
 Campos útiles en `meta`:
@@ -101,6 +121,39 @@ Campos útiles en `meta`:
 | `excerpt`          | Resumen manual |
 | `meta_title`       | Título SEO |
 | `meta_description` | Descripción SEO |
+
+#### `faq_schema` (obligatorio)
+
+Sonartop debe enviar el objeto JSON-LD **aparte**, nunca dentro de `content`:
+
+```json
+{
+  "faq_schema": {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "¿Pregunta?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Respuesta."
+        }
+      }
+    ]
+  }
+}
+```
+
+Webnu lo renderiza en el `<head>` del artículo como `<script type="application/ld+json">`.  
+No lo incluyáis dentro de `content`: el sanitizador elimina `<script>` y el JSON quedaría visible como texto.
+
+Requisitos de validación:
+- `faq_schema.@type` = `FAQPage`
+- `faq_schema.mainEntity` con al menos una pregunta
+- Cada pregunta: `@type` = `Question`, `name`, `acceptedAnswer.@type` = `Answer`, `acceptedAnswer.text`
+
+El campo `content` se sanitiza: se eliminan `<script>`, `<style>` y marcadores CDATA antes de guardar.
 
 Respuesta `201`:
 

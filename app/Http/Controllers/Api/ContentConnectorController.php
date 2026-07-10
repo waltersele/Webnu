@@ -21,6 +21,13 @@ class ContentConnectorController extends Controller
         ]);
     }
 
+    public function categories(ContentConnectorService $connector): JsonResponse
+    {
+        return response()->json([
+            'categories' => $connector->listCategories(),
+        ]);
+    }
+
     public function store(ContentConnectorPostRequest $request, ContentConnectorService $connector): JsonResponse
     {
         $result = $connector->upsertFromPayload($request->validated());

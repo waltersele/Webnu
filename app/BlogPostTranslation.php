@@ -22,6 +22,11 @@ class BlogPostTranslation extends Model
         'body_format',
         'meta_title',
         'meta_description',
+        'faq_schema',
+    ];
+
+    protected $casts = [
+        'faq_schema' => 'array',
     ];
 
     public function post(): BelongsTo

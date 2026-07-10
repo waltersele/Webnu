@@ -34,7 +34,7 @@ class BlogController extends Controller
             ->whereNotNull('blog_posts.published_at')
             ->where('blog_posts.published_at', '<=', now())
             ->orderByDesc('blog_posts.published_at')
-            ->with('post')
+            ->with('post.category')
             ->paginate(12);
 
         return view('blog.index', array_merge($this->blogShellData($request), [
@@ -72,7 +72,7 @@ class BlogController extends Controller
             ->where('locale', $locale)
             ->where('slug', $slug)
             ->whereHas('post', fn ($q) => $q->published())
-            ->with('post.translations')
+            ->with(['post.translations', 'post.category'])
             ->firstOrFail();
 
         $post = $translation->post;
@@ -88,6 +88,7 @@ class BlogController extends Controller
             'canonicalUrl' => $translation->publicUrl(),
             'featuredImage' => $this->blogFeaturedImage($post, (int) $post->id),
             'readingTimeMinutes' => $this->blogReadingTimeMinutes($translation->body),
+            'faqSchema' => $translation->faq_schema,
         ]));
     }
 }

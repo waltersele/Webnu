@@ -1,5 +1,11 @@
 @extends('blog.layout')
 
+@push('head')
+    @if(!empty($faqSchema))
+        <script type="application/ld+json">{!! json_encode($faqSchema, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) !!}</script>
+    @endif
+@endpush
+
 @section('content')
     <article>
         <a href="{{ route('blog.index', ['locale' => $locale]) }}"
@@ -20,6 +26,9 @@
 
         <header class="max-w-3xl">
             <div class="flex flex-wrap items-center gap-3 text-label-md text-text-muted mb-4">
+                @if($post->category)
+                    <span class="text-primary font-semibold">{{ $post->category->name }}</span>
+                @endif
                 <span>{{ optional($post->published_at)->translatedFormat('d M Y') }}</span>
                 <span class="inline-flex items-center gap-1">
                     <span class="material-symbols-outlined text-[16px]">schedule</span>

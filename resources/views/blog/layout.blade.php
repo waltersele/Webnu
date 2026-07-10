@@ -3,6 +3,7 @@
 <head>
     @include('landing.partials.head')
     @include('blog.partials.styles')
+    @stack('head')
 </head>
 <body class="bg-background text-on-surface text-body-md min-h-screen overflow-x-hidden">
     @include('marketing.partials.nav')

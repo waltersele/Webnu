@@ -34,6 +34,9 @@
                         </a>
                         <div class="lg:w-2/5 p-8 md:p-10 flex flex-col justify-center bg-surface-container-lowest">
                             <div class="flex flex-wrap items-center gap-3 mb-5 text-label-md text-text-muted">
+                                @if($featured->post->category)
+                                    <span class="text-primary font-semibold">{{ $featured->post->category->name }}</span>
+                                @endif
                                 <span>{{ optional($featured->post->published_at)->translatedFormat('d M Y') }}</span>
                                 <span class="inline-flex items-center gap-1">
                                     <span class="material-symbols-outlined text-[16px]">schedule</span>
@@ -74,6 +77,9 @@
                                      decoding="async">
                             </a>
                             <div class="p-6 flex flex-col flex-grow bg-surface-container-lowest">
+                                @if($post->post->category)
+                                    <p class="mb-2 text-label-md text-primary font-semibold">{{ $post->post->category->name }}</p>
+                                @endif
                                 <h4 class="font-headline-sm text-headline-sm text-on-background mb-3 group-hover:text-primary transition-colors">
                                     <a href="{{ route('blog.show', ['locale' => $locale, 'slug' => $post->slug]) }}">
                                         {{ $post->title }}
