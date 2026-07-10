@@ -1,15 +1,11 @@
 @extends('blog.layout')
 
 @section('content')
-    <header class="max-w-4xl mb-12 md:mb-16">
-        <div class="inline-flex items-center gap-2 px-3 py-1 bg-secondary-container/10 text-primary rounded-full mb-6">
-            <span class="material-symbols-outlined text-[18px]">article</span>
-            <span class="font-label-md uppercase tracking-wider">{{ __('blog.badge') }}</span>
-        </div>
-        <h1 class="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-on-background mb-6 leading-tight">
+    <header class="max-w-3xl mb-10 md:mb-14">
+        <h1 class="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-on-background mb-4 leading-tight">
             {{ __('blog.heading') }}
         </h1>
-        <p class="font-body-lg text-body-lg text-text-muted leading-relaxed max-w-2xl">
+        <p class="font-body-lg text-body-lg text-text-muted leading-relaxed">
             {{ __('blog.intro') }}
         </p>
     </header>
@@ -38,7 +34,6 @@
                         </a>
                         <div class="lg:w-2/5 p-8 md:p-10 flex flex-col justify-center bg-surface-container-lowest">
                             <div class="flex flex-wrap items-center gap-3 mb-5 text-label-md text-text-muted">
-                                <span class="text-primary bg-primary-fixed px-3 py-1 rounded-lg font-semibold">{{ __('blog.featured') }}</span>
                                 <span>{{ optional($featured->post->published_at)->translatedFormat('d M Y') }}</span>
                                 <span class="inline-flex items-center gap-1">
                                     <span class="material-symbols-outlined text-[16px]">schedule</span>

@@ -2,12 +2,10 @@
 
 return [
     'title' => 'Blog',
-    'heading' => 'Blog de innovación hostelera: digitaliza tu restaurante',
-    'intro' => 'Descubre tendencias, guías estratégicas y buenas prácticas para transformar tu negocio con cartas QR, menús digitales y experiencia de cliente.',
+    'heading' => 'Blog',
+    'intro' => 'Guías y consejos sobre cartas digitales, menús QR y tecnología para restaurantes.',
     'meta_description' => 'Blog de Webnu: cartas digitales, QR, hostelería y tecnología para restaurantes.',
-    'badge' => 'Hospitalidad digital',
-    'featured' => 'Destacado',
-    'latest_posts' => 'Últimas publicaciones',
+    'latest_posts' => 'Más artículos',
     'reading_time' => ':min min',
     'read_more' => 'Leer artículo completo',
     'back_to_list' => 'Volver al blog',
