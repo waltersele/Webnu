@@ -53,6 +53,7 @@ class ContentConnectorTest extends TestCase
         $response = $this->signedGet('/api/content-connector/posts');
 
         $response->assertOk()
+            ->assertJsonPath('posts.0.id', (string) BlogPostTranslation::first()->id)
             ->assertJsonPath('posts.0.slug', 'articulo-es')
             ->assertJsonPath('posts.0.locale', 'es');
     }
@@ -69,10 +70,14 @@ class ContentConnectorTest extends TestCase
         $response = $this->signedPost('/api/content-connector/posts', $payload);
 
         $response->assertCreated()
-            ->assertJson([
-                'status' => 'published',
-                'locale' => 'es',
-            ]);
+            ->assertJsonStructure(['id', 'url'])
+            ->assertJsonMissing(['status', 'locale']);
+
+        $translation = BlogPostTranslation::where('slug', 'hola-webnu')->first();
+        $response->assertJson([
+            'id' => (string) $translation->id,
+            'url' => $translation->publicUrl(),
+        ]);
 
         $this->assertDatabaseHas('blog_post_translations', [
             'slug' => 'hola-webnu',
@@ -109,10 +114,40 @@ class ContentConnectorTest extends TestCase
             ]),
             $body
         )->assertCreated()
+            ->assertJsonStructure(['id', 'url']);
+    }
+
+    public function test_put_updates_existing_post_without_duplicate(): void
+    {
+        $createPayload = [
+            'title' => 'Original',
+            'content' => '<p>Original</p>',
+            'slug' => 'edit-me',
+            'locale' => 'es',
+        ];
+
+        $createResponse = $this->signedPost('/api/content-connector/posts', $createPayload);
+        $postId = $createResponse->json('id');
+
+        $updatePayload = [
+            'title' => 'Actualizado',
+            'content' => '<p>Actualizado</p>',
+            'slug' => 'edit-me',
+            'locale' => 'es',
+        ];
+
+        $this->signedPut("/api/content-connector/posts/{$postId}", $updatePayload)
+            ->assertOk()
             ->assertJson([
-                'status' => 'published',
-                'locale' => 'es',
+                'id' => $postId,
             ]);
+
+        $this->assertEquals(1, BlogPostTranslation::count());
+        $this->assertDatabaseHas('blog_post_translations', [
+            'id' => $postId,
+            'title' => 'Actualizado',
+            'slug' => 'edit-me',
+        ]);
     }
 
     public function test_posts_list_accepts_raw_hex_signature(): void
@@ -190,6 +225,28 @@ class ContentConnectorTest extends TestCase
                 'HTTP_ACCEPT' => 'application/json',
                 'HTTP_X_CONNECTOR_SIGNATURE' => $this->sign(''),
             ])
+        );
+    }
+
+    /**
+     * @param array<string, mixed> $payload
+     */
+    private function signedPut(string $uri, array $payload)
+    {
+        $body = json_encode($payload, JSON_THROW_ON_ERROR);
+
+        return $this->call(
+            'PUT',
+            $uri,
+            [],
+            [],
+            [],
+            $this->transformHeadersToServerVars([
+                'CONTENT_TYPE' => 'application/json',
+                'HTTP_ACCEPT' => 'application/json',
+                'HTTP_X_CONNECTOR_SIGNATURE' => $this->sign($body),
+            ]),
+            $body
         );
     }
 

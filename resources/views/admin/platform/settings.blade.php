@@ -221,7 +221,7 @@
 
                     <h6 class="text-primary">Blog — Content Connector</h6>
                     <p class="text-muted small mb-3">
-                        API en Webnu: <code>/api/content-connector/health</code> y <code>/api/content-connector/posts</code>.
+                        API en Webnu: <code>/api/content-connector/health</code>, <code>POST/PUT /api/content-connector/posts</code>.
                         Sonartop (u otro origen) publica artículos firmados con HMAC-SHA256.
                         Ver <code>docs/CONNECTOR.md</code> en el repositorio.
                     </p>

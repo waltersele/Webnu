@@ -41,5 +41,6 @@ Route::prefix('content-connector')
         Route::middleware('content_connector.signature')->group(function () {
             Route::get('posts', 'ContentConnectorController@index');
             Route::post('posts', 'ContentConnectorController@store');
+            Route::put('posts/{id}', 'ContentConnectorController@update')->where('id', '[0-9]+');
         });
     });

@@ -27,4 +27,14 @@ class ContentConnectorController extends Controller
 
         return response()->json($result, 201);
     }
+
+    public function update(
+        ContentConnectorPostRequest $request,
+        ContentConnectorService $connector,
+        int|string $id
+    ): JsonResponse {
+        $result = $connector->updateByTranslationId($id, $request->validated());
+
+        return response()->json($result);
+    }
 }

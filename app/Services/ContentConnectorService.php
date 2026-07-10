@@ -5,6 +5,8 @@ namespace App\Services;
 use App\BlogPost;
 use App\BlogPostTranslation;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class ContentConnectorService
 {
@@ -22,6 +24,7 @@ class ContentConnectorService
             ->get()
             ->sortByDesc(fn (BlogPostTranslation $translation) => $translation->post->published_at?->timestamp ?? 0)
             ->map(fn (BlogPostTranslation $translation) => [
+                'id' => (string) $translation->id,
                 'slug' => $translation->slug,
                 'title' => $translation->title,
                 'url' => $translation->publicUrl(),
@@ -35,7 +38,7 @@ class ContentConnectorService
 
     /**
      * @param array<string, mixed> $payload
-     * @return array{status: string, url: string, locale: string}
+     * @return array{id: string, url: string}
      */
     public function upsertFromPayload(array $payload): array
     {
@@ -48,38 +51,105 @@ class ContentConnectorService
         $groupId = $this->resolveGroupId($meta);
         $post = $this->resolvePost($groupId, $slug, $locale);
 
+        $translation = $this->saveTranslation($post, $locale, $slug, $title, $content, $meta);
+        $this->ensurePublished($post);
+
+        return $this->connectorResponse($translation);
+    }
+
+    /**
+     * @param array<string, mixed> $payload
+     * @return array{id: string, url: string}
+     */
+    public function updateByTranslationId(int|string $id, array $payload): array
+    {
+        $translation = BlogPostTranslation::query()->find($id);
+
+        if (! $translation) {
+            throw new NotFoundHttpException();
+        }
+
+        $locale = (string) $payload['locale'];
+        if ($translation->locale !== $locale) {
+            throw ValidationException::withMessages([
+                'locale' => ['Locale does not match the existing post translation.'],
+            ]);
+        }
+
+        $slug = $this->normalizeSlug((string) $payload['slug']);
+        $title = (string) $payload['title'];
+        $content = $this->sanitizer->sanitize((string) $payload['content']);
+        $meta = is_array($payload['meta'] ?? null) ? $payload['meta'] : [];
+
+        $translation = $this->saveTranslation(
+            $translation->post,
+            $locale,
+            $slug,
+            $title,
+            $content,
+            $meta,
+            $translation
+        );
+        $this->ensurePublished($translation->post);
+
+        return $this->connectorResponse($translation);
+    }
+
+    /** @param array<string, mixed> $meta */
+    private function saveTranslation(
+        BlogPost $post,
+        string $locale,
+        string $slug,
+        string $title,
+        string $content,
+        array $meta,
+        ?BlogPostTranslation $existing = null
+    ): BlogPostTranslation {
         $excerpt = $this->buildExcerpt($content, $meta);
         $metaTitle = $this->metaString($meta, ['title', 'meta_title']) ?? $title;
         $metaDescription = $this->metaString($meta, ['description', 'meta_description']);
 
-        BlogPostTranslation::updateOrCreate(
+        $attributes = [
+            'slug' => $slug,
+            'title' => $title,
+            'excerpt' => $excerpt,
+            'body' => $content,
+            'body_format' => BlogPostTranslation::FORMAT_HTML,
+            'meta_title' => $metaTitle,
+            'meta_description' => $metaDescription,
+        ];
+
+        if ($existing) {
+            $existing->fill($attributes);
+            $existing->save();
+
+            return $existing->fresh();
+        }
+
+        return BlogPostTranslation::updateOrCreate(
             [
                 'blog_post_id' => $post->id,
                 'locale' => $locale,
             ],
-            [
-                'slug' => $slug,
-                'title' => $title,
-                'excerpt' => $excerpt,
-                'body' => $content,
-                'body_format' => BlogPostTranslation::FORMAT_HTML,
-                'meta_title' => $metaTitle,
-                'meta_description' => $metaDescription,
-            ]
+            $attributes
         );
+    }
 
+    private function ensurePublished(BlogPost $post): void
+    {
         if ($post->status !== BlogPost::STATUS_PUBLISHED) {
             $post->status = BlogPost::STATUS_PUBLISHED;
             $post->published_at = now();
             $post->save();
         }
+    }
 
-        $translation = $post->translationFor($locale);
-
+    /** @return array{id: string, url: string} */
+    private function connectorResponse(BlogPostTranslation $translation): array
+    {
         return [
-            'status' => 'published',
-            'url' => $translation?->publicUrl() ?? route('blog.show', ['locale' => $locale, 'slug' => $slug]),
-            'locale' => $locale,
+            'id' => (string) $translation->id,
+            'url' => $translation->publicUrl(),
         ];
     }
 

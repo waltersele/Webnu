@@ -48,7 +48,8 @@ Base: `https://webnu.es/api/content-connector`
 |--------|----------|-------|--------------------------------------|
 | GET    | `/health`| No    | Comprueba que el conector responde   |
 | GET    | `/posts` | Sí    | Lista publicaciones en todos los idiomas |
-| POST   | `/posts` | Sí    | Crea o actualiza un artículo         |
+| POST   | `/posts` | Sí    | Crea un artículo                     |
+| PUT    | `/posts/{id}` | Sí | Actualiza un artículo existente      |
 
 ### GET `/health`
 
@@ -66,6 +67,7 @@ Respuesta `200`:
 {
   "posts": [
     {
+      "id": "42",
       "slug": "bienvenida-webnu",
       "title": "Bienvenida a Webnu",
       "url": "https://webnu.es/es/blog/bienvenida-webnu",
@@ -104,13 +106,27 @@ Respuesta `201`:
 
 ```json
 {
-  "status": "published",
-  "url": "https://webnu.es/es/blog/mi-articulo",
-  "locale": "es"
+  "id": "42",
+  "url": "https://webnu.es/es/blog/mi-articulo"
 }
 ```
 
-El artículo queda **publicado** automáticamente al recibir el POST.
+El `id` es el identificador de la traducción en Webnu (`blog_post_translations.id`). Sonartop debe guardarlo para futuras ediciones vía PUT.
+
+### PUT `/posts/{id}`
+
+Actualiza el artículo existente (mismo body que POST). El `id` es el devuelto en el POST anterior.
+
+Respuesta `200`:
+
+```json
+{
+  "id": "42",
+  "url": "https://webnu.es/es/blog/mi-articulo"
+}
+```
+
+El artículo queda **publicado** automáticamente al recibir POST o PUT.
 
 ## Ejemplos curl
 
@@ -142,6 +158,18 @@ curl -s -X POST https://webnu.es/api/content-connector/posts \
 ```
 
 Formato alternativo (también válido): `X-Connector-Signature: sha256=$SIG`
+
+### Actualizar artículo
+
+```bash
+SECRET="tu-secreto"
+BODY='{"title":"Título actualizado","content":"<p>Nuevo contenido.</p>","slug":"hola-webnu","locale":"es"}'
+SIG=$(printf '%s' "$BODY" | openssl dgst -sha256 -hmac "$SECRET" | awk '{print $2}')
+curl -s -X PUT https://webnu.es/api/content-connector/posts/42 \
+  -H "Content-Type: application/json" \
+  -H "X-Connector-Signature: $SIG" \
+  -d "$BODY"
+```
 
 ## Errores
 
