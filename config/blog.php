@@ -10,12 +10,15 @@ return [
         'es' => ['label' => 'Español', 'hreflang' => 'es'],
         'en' => ['label' => 'English', 'hreflang' => 'en'],
         'fr' => ['label' => 'Français', 'hreflang' => 'fr'],
+        'de' => ['label' => 'Deutsch', 'hreflang' => 'de'],
+        'it' => ['label' => 'Italiano', 'hreflang' => 'it'],
+        'pt' => ['label' => 'Português', 'hreflang' => 'pt'],
+        'ca' => ['label' => 'Català', 'hreflang' => 'ca'],
     ],
 
     'connector' => [
         'secret' => env('CONTENT_CONNECTOR_SECRET'),
         'signature_header' => 'X-Connector-Signature',
-        // Legacy: el middleware acepta hex crudo (Sonartop) o prefijo sha256=
         'signature_prefix' => '',
     ],
 
@@ -29,6 +32,12 @@ return [
         'Fidelización',
         'Operativa y sala',
         'Tendencias',
+    ],
+
+    'featured_image' => [
+        'max_bytes' => 5 * 1024 * 1024,
+        'allowed_mimes' => ['image/jpeg', 'image/png', 'image/webp', 'image/gif'],
+        'storage_dir' => 'img/blog',
     ],
 
 ];

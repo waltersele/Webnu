@@ -12,10 +12,13 @@ class BlogPost extends Model
 
     public const STATUS_PUBLISHED = 'published';
 
+    public const STATUS_SCHEDULED = 'scheduled';
+
     protected $fillable = [
         'status',
         'published_at',
         'featured_image',
+        'featured_image_alt',
         'connector_group_id',
         'blog_category_id',
         'author_user_id',
@@ -51,5 +54,21 @@ class BlogPost extends Model
         return $query->where('status', self::STATUS_PUBLISHED)
             ->whereNotNull('published_at')
             ->where('published_at', '<=', now());
+    }
+
+    public function scopePubliclyVisible($query)
+    {
+        return $query->where(function ($q) {
+            $q->where('status', self::STATUS_PUBLISHED)
+                ->whereNotNull('published_at')
+                ->where('published_at', '<=', now());
+        });
+    }
+
+    public function isPubliclyVisible(): bool
+    {
+        return $this->status === self::STATUS_PUBLISHED
+            && $this->published_at !== null
+            && $this->published_at->lte(now());
     }
 }

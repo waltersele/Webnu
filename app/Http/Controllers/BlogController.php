@@ -30,9 +30,7 @@ class BlogController extends Controller
             ->select('blog_post_translations.*')
             ->join('blog_posts', 'blog_posts.id', '=', 'blog_post_translations.blog_post_id')
             ->where('blog_post_translations.locale', $locale)
-            ->where('blog_posts.status', BlogPost::STATUS_PUBLISHED)
-            ->whereNotNull('blog_posts.published_at')
-            ->where('blog_posts.published_at', '<=', now())
+            ->whereHas('post', fn ($q) => $q->publiclyVisible())
             ->orderByDesc('blog_posts.published_at')
             ->with('post.category')
             ->paginate(12);
@@ -71,7 +69,7 @@ class BlogController extends Controller
         $translation = BlogPostTranslation::query()
             ->where('locale', $locale)
             ->where('slug', $slug)
-            ->whereHas('post', fn ($q) => $q->published())
+            ->whereHas('post', fn ($q) => $q->publiclyVisible())
             ->with(['post.translations', 'post.category'])
             ->firstOrFail();
 
@@ -87,6 +85,7 @@ class BlogController extends Controller
             'metaDescription' => $translation->meta_description ?: $translation->excerpt,
             'canonicalUrl' => $translation->publicUrl(),
             'featuredImage' => $this->blogFeaturedImage($post, (int) $post->id),
+            'featuredImageAlt' => $post->featured_image_alt ?: $translation->title,
             'readingTimeMinutes' => $this->blogReadingTimeMinutes($translation->body),
             'faqSchema' => $translation->faq_schema,
         ]));

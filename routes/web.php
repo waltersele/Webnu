@@ -351,11 +351,12 @@ Route::group(['middleware' => ['noindex']], function () {
 });
 
 Route::get('blog', 'BlogController@hub')->name('blog.hub');
+$blogLocalePattern = implode('|', array_keys(config('blog.locales', ['es' => [], 'en' => [], 'fr' => []])));
 Route::get('{locale}/blog', 'BlogController@index')
-    ->where('locale', 'es|en|fr')
+    ->where('locale', $blogLocalePattern)
     ->name('blog.index');
 Route::get('{locale}/blog/{slug}', 'BlogController@show')
-    ->where('locale', 'es|en|fr')
+    ->where('locale', $blogLocalePattern)
     ->where('slug', '[a-z0-9][a-z0-9-]*')
     ->name('blog.show');
 

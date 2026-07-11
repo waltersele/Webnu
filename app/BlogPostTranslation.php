@@ -22,6 +22,7 @@ class BlogPostTranslation extends Model
         'body_format',
         'meta_title',
         'meta_description',
+        'focus_keyword',
         'faq_schema',
     ];
 

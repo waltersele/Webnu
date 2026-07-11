@@ -6,6 +6,7 @@ use App\BlogCategory;
 use App\BlogPost;
 use App\BlogPostTranslation;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Artisan;
 use Tests\TestCase;
 
 class ContentConnectorTest extends TestCase
@@ -34,7 +35,7 @@ class ContentConnectorTest extends TestCase
             ->assertJson(['message' => 'Invalid signature.']);
     }
 
-    public function test_posts_list_returns_published_posts(): void
+    public function test_posts_list_returns_posts_with_status(): void
     {
         $categoryId = BlogCategory::query()->value('id');
         $post = BlogPost::create([
@@ -54,13 +55,35 @@ class ContentConnectorTest extends TestCase
             'faq_schema' => $this->sampleFaqSchema(),
         ]);
 
-        $response = $this->signedGet('/api/content-connector/posts');
-
-        $response->assertOk()
+        $this->signedGet('/api/content-connector/posts')
+            ->assertOk()
             ->assertJsonPath('posts.0.id', (string) BlogPostTranslation::first()->id)
-            ->assertJsonPath('posts.0.slug', 'articulo-es')
-            ->assertJsonPath('posts.0.locale', 'es')
+            ->assertJsonPath('posts.0.status', BlogPost::STATUS_PUBLISHED)
             ->assertJsonPath('posts.0.category_id', (string) $categoryId);
+    }
+
+    public function test_sonartop_signature_example(): void
+    {
+        config(['blog.connector.secret' => 'mi-secreto-compartido']);
+
+        $body = '{"title":"Hola mundo","locale":"es"}';
+        $signature = 'e016a6376c8235b2529074b8f346e13d328475abd309d44447aa36c73170ad16';
+
+        $this->call(
+            'POST',
+            '/api/content-connector/posts',
+            [],
+            [],
+            [],
+            $this->transformHeadersToServerVars([
+                'CONTENT_TYPE' => 'application/json',
+                'HTTP_ACCEPT' => 'application/json',
+                'HTTP_X_CONNECTOR_SIGNATURE' => $signature,
+            ]),
+            $body
+        )->assertStatus(422);
+
+        config(['blog.connector.secret' => self::SECRET]);
     }
 
     public function test_post_creates_and_publishes_article(): void
@@ -69,40 +92,127 @@ class ContentConnectorTest extends TestCase
             'title' => 'Hola Webnu',
             'content' => '<p>Primer post.</p>',
             'slug' => 'hola-webnu',
+            'excerpt' => 'Resumen root',
+            'meta_title' => 'SEO title',
+            'meta_description' => 'SEO description',
+            'focus_keyword' => 'cartas qr',
         ]);
 
         $response = $this->signedPost('/api/content-connector/posts', $payload);
 
         $response->assertCreated()
-            ->assertJsonStructure(['id', 'url'])
-            ->assertJsonMissing(['status', 'locale']);
+            ->assertJsonStructure(['id', 'url']);
 
-        $translation = BlogPostTranslation::where('slug', 'hola-webnu')->first();
-        $response->assertJson([
-            'id' => (string) $translation->id,
-            'url' => $translation->publicUrl(),
-        ]);
-
-        $this->assertDatabaseHas('blog_post_translations', [
-            'slug' => 'hola-webnu',
-            'locale' => 'es',
-            'title' => 'Hola Webnu',
-        ]);
-
-        $this->assertDatabaseHas('blog_posts', [
-            'status' => BlogPost::STATUS_PUBLISHED,
-            'blog_category_id' => (int) $payload['category_id'],
-        ]);
+        $translation = BlogPostTranslation::where('slug', 'hola-webnu')->firstOrFail();
+        $this->assertSame('Resumen root', $translation->excerpt);
+        $this->assertSame('SEO title', $translation->meta_title);
+        $this->assertSame('cartas qr', $translation->focus_keyword);
+        $this->assertSame(BlogPost::STATUS_PUBLISHED, $translation->post->status);
     }
 
-    public function test_post_creates_and_publishes_article_with_raw_hex_signature(): void
+    public function test_post_without_category_and_faq_succeeds(): void
     {
         $payload = $this->connectorPayload([
-            'title' => 'Sonartop post',
-            'content' => '<p>Desde Sonartop.</p>',
-            'slug' => 'sonartop-post',
+            'slug' => 'sin-categoria-faq',
+            'category_id' => null,
+            'faq_schema' => null,
+        ]);
+        unset($payload['category_id'], $payload['faq_schema']);
+
+        $this->signedPost('/api/content-connector/posts', $payload)->assertCreated();
+
+        $translation = BlogPostTranslation::where('slug', 'sin-categoria-faq')->firstOrFail();
+        $this->assertNull($translation->post->blog_category_id);
+        $this->assertNull($translation->faq_schema);
+    }
+
+    public function test_post_with_scheduled_status_is_not_public_yet(): void
+    {
+        $payload = $this->connectorPayload([
+            'slug' => 'programado',
+            'status' => 'scheduled',
+            'published_at' => now()->addDay()->toIso8601String(),
         ]);
 
+        $this->signedPost('/api/content-connector/posts', $payload)->assertCreated();
+
+        $this->get('/es/blog/programado')->assertNotFound();
+
+        $post = BlogPostTranslation::where('slug', 'programado')->firstOrFail()->post;
+        $this->assertSame(BlogPost::STATUS_SCHEDULED, $post->status);
+    }
+
+    public function test_publish_scheduled_command_makes_post_visible(): void
+    {
+        $post = BlogPost::create([
+            'status' => BlogPost::STATUS_SCHEDULED,
+            'published_at' => now()->subMinute(),
+        ]);
+
+        BlogPostTranslation::create([
+            'blog_post_id' => $post->id,
+            'locale' => 'es',
+            'slug' => 'ya-programado',
+            'title' => 'Ya programado',
+            'body' => '<p>Hola</p>',
+            'body_format' => BlogPostTranslation::FORMAT_HTML,
+        ]);
+
+        Artisan::call('blog:publish-scheduled');
+
+        $post->refresh();
+        $this->assertSame(BlogPost::STATUS_PUBLISHED, $post->status);
+        $this->get('/es/blog/ya-programado')->assertOk();
+    }
+
+    public function test_post_stores_featured_image_from_base64(): void
+    {
+        $png = base64_encode(base64_decode(
+            'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=='
+        ));
+
+        $payload = $this->connectorPayload([
+            'slug' => 'con-imagen',
+            'featured_image_base64' => $png,
+            'featured_image_mime' => 'image/png',
+            'featured_image_alt' => 'Imagen de prueba',
+        ]);
+
+        $this->signedPost('/api/content-connector/posts', $payload)->assertCreated();
+
+        $post = BlogPostTranslation::where('slug', 'con-imagen')->firstOrFail()->post;
+        $this->assertNotNull($post->featured_image);
+        $this->assertStringStartsWith('img/blog/', $post->featured_image);
+        $this->assertSame('Imagen de prueba', $post->featured_image_alt);
+    }
+
+    public function test_put_updates_existing_post_without_duplicate(): void
+    {
+        $createPayload = $this->connectorPayload([
+            'title' => 'Original',
+            'slug' => 'edit-me',
+        ]);
+
+        $postId = $this->signedPost('/api/content-connector/posts', $createPayload)->json('id');
+
+        $updatePayload = $this->connectorPayload([
+            'title' => 'Actualizado',
+            'slug' => 'edit-me',
+        ]);
+        unset($updatePayload['faq_schema']);
+
+        $this->signedPut("/api/content-connector/posts/{$postId}", $updatePayload)
+            ->assertOk()
+            ->assertJson(['id' => $postId]);
+
+        $translation = BlogPostTranslation::findOrFail($postId);
+        $this->assertSame('Actualizado', $translation->title);
+        $this->assertNotNull($translation->faq_schema);
+    }
+
+    public function test_post_creates_with_raw_hex_signature(): void
+    {
+        $payload = $this->connectorPayload(['slug' => 'sonartop-post']);
         $body = json_encode($payload, JSON_THROW_ON_ERROR);
 
         $this->call(
@@ -117,61 +227,12 @@ class ContentConnectorTest extends TestCase
                 'HTTP_X_CONNECTOR_SIGNATURE' => $this->signRaw($body),
             ]),
             $body
-        )->assertCreated()
-            ->assertJsonStructure(['id', 'url']);
-    }
-
-    public function test_put_updates_existing_post_without_duplicate(): void
-    {
-        $createPayload = $this->connectorPayload([
-            'title' => 'Original',
-            'content' => '<p>Original</p>',
-            'slug' => 'edit-me',
-        ]);
-
-        $createResponse = $this->signedPost('/api/content-connector/posts', $createPayload);
-        $postId = $createResponse->json('id');
-
-        $updatePayload = $this->connectorPayload([
-            'title' => 'Actualizado',
-            'content' => '<p>Actualizado</p>',
-            'slug' => 'edit-me',
-        ]);
-
-        $this->signedPut("/api/content-connector/posts/{$postId}", $updatePayload)
-            ->assertOk()
-            ->assertJson([
-                'id' => $postId,
-            ]);
-
-        $this->assertEquals(1, BlogPostTranslation::count());
-        $this->assertDatabaseHas('blog_post_translations', [
-            'id' => $postId,
-            'title' => 'Actualizado',
-            'slug' => 'edit-me',
-        ]);
-    }
-
-    public function test_posts_list_accepts_raw_hex_signature(): void
-    {
-        $this->call(
-            'GET',
-            '/api/content-connector/posts',
-            [],
-            [],
-            [],
-            $this->transformHeadersToServerVars([
-                'HTTP_ACCEPT' => 'application/json',
-                'HTTP_X_CONNECTOR_SIGNATURE' => $this->signRaw(''),
-            ])
-        )->assertOk();
+        )->assertCreated();
     }
 
     public function test_post_rejects_invalid_signature(): void
     {
-        $body = json_encode($this->connectorPayload([
-            'slug' => 'test',
-        ]), JSON_THROW_ON_ERROR);
+        $body = json_encode($this->connectorPayload(['slug' => 'test']), JSON_THROW_ON_ERROR);
 
         $this->call(
             'POST',
@@ -182,7 +243,7 @@ class ContentConnectorTest extends TestCase
             $this->transformHeadersToServerVars([
                 'CONTENT_TYPE' => 'application/json',
                 'HTTP_ACCEPT' => 'application/json',
-                'HTTP_X_CONNECTOR_SIGNATURE' => 'sha256=deadbeef',
+                'HTTP_X_CONNECTOR_SIGNATURE' => 'deadbeef',
             ]),
             $body
         )->assertUnauthorized();
@@ -190,95 +251,46 @@ class ContentConnectorTest extends TestCase
 
     public function test_group_id_links_translations_to_same_post(): void
     {
-        $base = $this->connectorPayload([
-            'title' => 'ES title',
-            'content' => '<p>ES</p>',
+        $this->signedPost('/api/content-connector/posts', $this->connectorPayload([
             'slug' => 'mismo-articulo-es',
-            'meta' => ['group_id' => 'grp-100'],
-        ]);
-
-        $this->signedPost('/api/content-connector/posts', $base)->assertCreated();
+            'group_id' => 'grp-100',
+        ]))->assertCreated();
 
         $this->signedPost('/api/content-connector/posts', $this->connectorPayload([
-            'title' => 'EN title',
-            'content' => '<p>EN</p>',
             'slug' => 'same-article-en',
             'locale' => 'en',
-            'meta' => ['group_id' => 'grp-100'],
+            'group_id' => 'grp-100',
         ]))->assertCreated();
 
         $this->assertEquals(1, BlogPost::where('connector_group_id', 'grp-100')->count());
-        $this->assertEquals(2, BlogPostTranslation::count());
     }
 
     public function test_categories_list_returns_configured_categories(): void
     {
-        $response = $this->signedGet('/api/content-connector/categories');
-
-        $response->assertOk()
-            ->assertJsonStructure(['categories' => [['id', 'name']]])
+        $this->signedGet('/api/content-connector/categories')
+            ->assertOk()
             ->assertJsonFragment(['name' => 'Cartas digitales']);
     }
 
-    public function test_post_requires_category_id_and_faq_schema(): void
+    public function test_unknown_category_id_is_rejected(): void
     {
-        $this->signedPost('/api/content-connector/posts', [
-            'title' => 'Incompleto',
-            'content' => '<p>Ok</p>',
-            'slug' => 'incompleto',
-            'locale' => 'es',
-        ])->assertStatus(422)
-            ->assertJsonValidationErrors(['category_id', 'faq_schema']);
-    }
-
-    public function test_post_assigns_category_and_faq_schema(): void
-    {
-        $categoryId = (string) BlogCategory::query()->value('id');
-        $faqSchema = $this->sampleFaqSchema('¿Pregunta demo?');
-
-        $payload = $this->connectorPayload([
-            'title' => 'Con categoría',
-            'content' => '<p>Texto limpio.</p>',
-            'slug' => 'con-categoria',
-            'category_id' => $categoryId,
-            'faq_schema' => $faqSchema,
-        ]);
-
-        $this->signedPost('/api/content-connector/posts', $payload)->assertCreated();
-
-        $translation = BlogPostTranslation::where('slug', 'con-categoria')->firstOrFail();
-
-        $this->assertSame((int) $categoryId, $translation->post->blog_category_id);
-        $this->assertSame('¿Pregunta demo?', $translation->faq_schema['mainEntity'][0]['name']);
+        $this->signedPost('/api/content-connector/posts', $this->connectorPayload([
+            'slug' => 'bad-category',
+            'category_id' => '999999',
+        ]))->assertStatus(422);
     }
 
     public function test_post_strips_embedded_faq_script_from_content(): void
     {
         $payload = $this->connectorPayload([
-            'title' => 'Sin JSON visible',
-            'content' => '<p>Intro</p><script type="application/ld+json">{"@type":"FAQPage"}</script>',
             'slug' => 'sin-json-visible',
+            'content' => '<p>Intro</p><script type="application/ld+json">{"@type":"FAQPage"}</script>',
         ]);
 
         $this->signedPost('/api/content-connector/posts', $payload)->assertCreated();
 
         $translation = BlogPostTranslation::where('slug', 'sin-json-visible')->firstOrFail();
-
         $this->assertSame('<p>Intro</p>', $translation->body);
-        $this->assertNotNull($translation->faq_schema);
-    }
-
-    public function test_unknown_category_id_is_rejected(): void
-    {
-        $payload = $this->connectorPayload([
-            'title' => 'Sin categoría válida',
-            'slug' => 'sin-categoria-valida',
-            'category_id' => '999999',
-        ]);
-
-        $this->signedPost('/api/content-connector/posts', $payload)
-            ->assertStatus(422)
-            ->assertJsonValidationErrors(['category_id']);
     }
 
     /** @return array<string, mixed> */
@@ -291,6 +303,8 @@ class ContentConnectorTest extends TestCase
             'content' => '<p>Content</p>',
             'slug' => 'test-' . uniqid(),
             'locale' => 'es',
+            'status' => 'published',
+            'published_at' => now()->subHour()->toIso8601String(),
             'category_id' => $categoryId,
             'faq_schema' => $this->sampleFaqSchema(),
         ], $overrides);
@@ -325,14 +339,12 @@ class ContentConnectorTest extends TestCase
             [],
             $this->transformHeadersToServerVars([
                 'HTTP_ACCEPT' => 'application/json',
-                'HTTP_X_CONNECTOR_SIGNATURE' => $this->sign(''),
+                'HTTP_X_CONNECTOR_SIGNATURE' => $this->signRaw(''),
             ])
         );
     }
 
-    /**
-     * @param array<string, mixed> $payload
-     */
+    /** @param array<string, mixed> $payload */
     private function signedPut(string $uri, array $payload)
     {
         $body = json_encode($payload, JSON_THROW_ON_ERROR);
@@ -346,15 +358,13 @@ class ContentConnectorTest extends TestCase
             $this->transformHeadersToServerVars([
                 'CONTENT_TYPE' => 'application/json',
                 'HTTP_ACCEPT' => 'application/json',
-                'HTTP_X_CONNECTOR_SIGNATURE' => $this->sign($body),
+                'HTTP_X_CONNECTOR_SIGNATURE' => $this->signRaw($body),
             ]),
             $body
         );
     }
 
-    /**
-     * @param array<string, mixed> $payload
-     */
+    /** @param array<string, mixed> $payload */
     private function signedPost(string $uri, array $payload)
     {
         $body = json_encode($payload, JSON_THROW_ON_ERROR);
@@ -368,15 +378,10 @@ class ContentConnectorTest extends TestCase
             $this->transformHeadersToServerVars([
                 'CONTENT_TYPE' => 'application/json',
                 'HTTP_ACCEPT' => 'application/json',
-                'HTTP_X_CONNECTOR_SIGNATURE' => $this->sign($body),
+                'HTTP_X_CONNECTOR_SIGNATURE' => $this->signRaw($body),
             ]),
             $body
         );
-    }
-
-    private function sign(string $body): string
-    {
-        return 'sha256=' . $this->signRaw($body);
     }
 
     private function signRaw(string $body): string

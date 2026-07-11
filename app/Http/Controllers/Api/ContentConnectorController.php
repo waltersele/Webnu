@@ -17,7 +17,7 @@ class ContentConnectorController extends Controller
     public function index(ContentConnectorService $connector): JsonResponse
     {
         return response()->json([
-            'posts' => $connector->listPublished(),
+            'posts' => $connector->listPostsForConnector(),
         ]);
     }
 

@@ -17,7 +17,7 @@
         @if($featuredImage)
             <div class="mt-8 mb-10 rounded-3xl overflow-hidden wn-blog-glass">
                 <img src="{{ $featuredImage }}"
-                     alt="{{ $translation->title }}"
+                     alt="{{ $featuredImageAlt ?? $translation->title }}"
                      class="w-full max-h-[28rem] object-cover"
                      loading="eager"
                      decoding="async">

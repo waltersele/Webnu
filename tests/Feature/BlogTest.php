@@ -136,6 +136,6 @@ class BlogTest extends TestCase
 
     public function test_invalid_blog_locale_returns_404(): void
     {
-        $this->get('/de/blog')->assertNotFound();
+        $this->get('/xx/blog')->assertNotFound();
     }
 }
