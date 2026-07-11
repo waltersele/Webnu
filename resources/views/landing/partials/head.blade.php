@@ -7,6 +7,7 @@
     $landingTitle = $pageTitle ?? __('landing.meta.title');
     $landingDescription = $metaDescription ?? __('landing.meta.description');
     $ogImage = $ogImage ?? \App\PlatformSetting::brandUrl('og');
+    $ogType = $ogType ?? 'website';
     if (! isset($canonicalUrl)) {
         $canonicalUrl = url('/');
         if (isset($locale) && $locale && empty($alternateLocaleUrls)) {
@@ -15,9 +16,12 @@
     }
 @endphp
 <meta name="description" content="{{ $landingDescription }}"/>
+@if(!empty($metaKeywords))
+<meta name="keywords" content="{{ $metaKeywords }}"/>
+@endif
 <title>{{ $landingTitle }}</title>
 <link rel="canonical" href="{{ $canonicalUrl }}"/>
-<meta property="og:type" content="website"/>
+<meta property="og:type" content="{{ $ogType }}"/>
 <meta property="og:url" content="{{ $canonicalUrl }}"/>
 <meta property="og:title" content="{{ $landingTitle }}"/>
 <meta property="og:description" content="{{ $landingDescription }}"/>

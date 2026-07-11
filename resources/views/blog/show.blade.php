@@ -4,9 +4,18 @@
     @if(!empty($faqSchema))
         <script type="application/ld+json">{!! json_encode($faqSchema, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) !!}</script>
     @endif
+    @if(!empty($blogPostingSchema))
+        <script type="application/ld+json">{!! json_encode($blogPostingSchema, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) !!}</script>
+    @endif
 @endpush
 
 @section('content')
+    @if(!empty($preview))
+        <div class="mb-6 rounded-2xl border border-amber-300 bg-amber-50 text-amber-900 px-4 py-3 font-label-md">
+            Vista previa — el artículo puede no estar publicado. No indexable.
+        </div>
+    @endif
+
     <article>
         <a href="{{ route('blog.index', ['locale' => $locale]) }}"
            class="inline-flex items-center gap-1 text-primary font-label-lg font-semibold hover:opacity-80 transition-opacity">
@@ -27,7 +36,10 @@
         <header class="max-w-3xl">
             <div class="flex flex-wrap items-center gap-3 text-label-md text-text-muted mb-4">
                 @if($post->category)
-                    <span class="text-primary font-semibold">{{ $post->category->name }}</span>
+                    <a href="{{ $post->category->publicUrl($locale) }}"
+                       class="text-primary font-semibold hover:opacity-80 transition-opacity">
+                        {{ $post->category->name }}
+                    </a>
                 @endif
                 <span>{{ optional($post->published_at)->translatedFormat('d M Y') }}</span>
                 <span class="inline-flex items-center gap-1">
@@ -46,5 +58,7 @@
         <div class="wn-blog-content mt-10 max-w-3xl wn-blog-glass rounded-3xl p-8 md:p-10 bg-surface-container-lowest">
             {!! $translation->renderedBody() !!}
         </div>
+
+        @include('blog.partials.faq', ['faqSchema' => $faqSchema ?? null])
     </article>
 @endsection

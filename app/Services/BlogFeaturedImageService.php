@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\BlogPost;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
@@ -40,6 +41,44 @@ class BlogFeaturedImageService
             $post->featured_image_alt = $alt;
         }
 
+        $post->save();
+    }
+
+    public function applyFromUpload(BlogPost $post, UploadedFile $file, ?string $alt = null): void
+    {
+        $mime = (string) $file->getMimeType();
+        $this->assertAllowedMime($mime);
+
+        $bytes = file_get_contents($file->getRealPath());
+        if ($bytes === false) {
+            throw ValidationException::withMessages([
+                'featured_image' => ['No se pudo leer la imagen subida.'],
+            ]);
+        }
+
+        $this->assertMaxSize(strlen($bytes));
+        $post->featured_image = $this->writeImage($bytes, $mime, $post->id);
+
+        if ($alt !== null) {
+            $alt = trim($alt);
+            $post->featured_image_alt = $alt !== '' ? $alt : null;
+        }
+
+        $post->save();
+    }
+
+    public function clearFeaturedImage(BlogPost $post): void
+    {
+        $path = trim((string) $post->featured_image);
+        if ($path !== '' && ! filter_var($path, FILTER_VALIDATE_URL)) {
+            $fullPath = public_path(ltrim($path, '/'));
+            if (is_file($fullPath)) {
+                @unlink($fullPath);
+            }
+        }
+
+        $post->featured_image = null;
+        $post->featured_image_alt = null;
         $post->save();
     }
 

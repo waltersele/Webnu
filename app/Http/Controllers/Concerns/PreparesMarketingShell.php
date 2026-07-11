@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Concerns;
 
 use App\BlogPost;
+use App\BlogPostTranslation;
 use Illuminate\Http\Request;
 
 trait PreparesMarketingShell
@@ -78,5 +79,59 @@ trait PreparesMarketingShell
         $words = str_word_count($text);
 
         return max(1, (int) ceil($words / 200));
+    }
+
+    protected function blogFeaturedImageAlt(?BlogPost $post, ?BlogPostTranslation $translation): string
+    {
+        if ($post && filled($post->featured_image_alt)) {
+            return (string) $post->featured_image_alt;
+        }
+
+        return $translation?->title ?? '';
+    }
+
+    protected function absoluteImageUrl(string $url): string
+    {
+        if (\Illuminate\Support\Str::startsWith($url, ['http://', 'https://'])) {
+            return $url;
+        }
+
+        return url($url);
+    }
+
+    /** @return array<string, mixed> */
+    protected function blogPostingSchema(BlogPostTranslation $translation, BlogPost $post, string $imageUrl): array
+    {
+        return [
+            '@context' => 'https://schema.org',
+            '@type' => 'BlogPosting',
+            'headline' => $translation->title,
+            'description' => $translation->meta_description ?: $translation->excerpt,
+            'datePublished' => optional($post->published_at)->toIso8601String(),
+            'dateModified' => optional($post->updated_at)->toIso8601String(),
+            'image' => $this->absoluteImageUrl($imageUrl),
+            'url' => $translation->publicUrl(),
+            'inLanguage' => $translation->locale,
+        ];
+    }
+
+    /** @return array<string, string> */
+    protected function blogAlternateLocaleUrls(?BlogPost $post = null, ?string $categorySlug = null): array
+    {
+        $urls = [];
+        foreach (array_keys(config('blog.locales', [])) as $code) {
+            if ($categorySlug) {
+                $urls[$code] = route('blog.category', ['locale' => $code, 'categorySlug' => $categorySlug]);
+            } elseif ($post) {
+                $translation = $post->translationFor($code);
+                $urls[$code] = $translation
+                    ? $translation->publicUrl()
+                    : route('blog.index', ['locale' => $code]);
+            } else {
+                $urls[$code] = route('blog.index', ['locale' => $code]);
+            }
+        }
+
+        return $urls;
     }
 }

@@ -11,5 +11,9 @@ return [
     'back_to_list' => 'Back to blog',
     'back_home' => 'Home',
     'empty' => 'No published articles in this language yet.',
+    'category_title' => ':name',
+    'category_description' => 'Articles about :name on the Webnu blog.',
+    'faq_heading' => 'Frequently asked questions',
+    'translation_missing' => 'Translation not available',
     'cta_register' => 'Start free',
 ];

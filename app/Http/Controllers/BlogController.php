@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\BlogCategory;
 use App\BlogPost;
 use App\BlogPostTranslation;
 use App\Http\Controllers\Concerns\PreparesMarketingShell;
@@ -39,6 +40,7 @@ class BlogController extends Controller
             'locale' => $locale,
             'posts' => $posts,
             'blogLocales' => config('blog.locales', []),
+            'languageContext' => 'index',
             'pageTitle' => __('blog.title') . ' — Webnu',
             'metaDescription' => __('blog.meta_description'),
             'canonicalUrl' => $canonicalAtHub
@@ -46,19 +48,46 @@ class BlogController extends Controller
                 : route('blog.index', ['locale' => $locale]),
             'alternateLocaleUrls' => $this->blogAlternateLocaleUrls(),
             'blogFeaturedImage' => fn (?BlogPost $post, int $index = 0) => $this->blogFeaturedImage($post, $index),
+            'blogFeaturedImageAlt' => fn (?BlogPost $post, ?BlogPostTranslation $translation) => $this->blogFeaturedImageAlt($post, $translation),
             'blogReadingTime' => fn (?string $html) => $this->blogReadingTimeMinutes($html),
         ]));
     }
 
-    /** @return array<string, string> */
-    private function blogAlternateLocaleUrls(): array
+    public function category(Request $request, string $locale, string $categorySlug): View
     {
-        $urls = [];
-        foreach (array_keys(config('blog.locales', [])) as $code) {
-            $urls[$code] = route('blog.index', ['locale' => $code]);
-        }
+        $this->assertBlogLocale($locale);
+        App::setLocale($locale);
 
-        return $urls;
+        $category = BlogCategory::query()->where('slug', $categorySlug)->firstOrFail();
+
+        $posts = BlogPostTranslation::query()
+            ->select('blog_post_translations.*')
+            ->join('blog_posts', 'blog_posts.id', '=', 'blog_post_translations.blog_post_id')
+            ->where('blog_post_translations.locale', $locale)
+            ->where('blog_posts.blog_category_id', $category->id)
+            ->whereHas('post', fn ($q) => $q->publiclyVisible())
+            ->orderByDesc('blog_posts.published_at')
+            ->with('post.category')
+            ->paginate(12);
+
+        $pageTitle = __('blog.category_title', ['name' => $category->name]) . ' — Webnu';
+
+        return view('blog.category', array_merge($this->blogShellData($request), [
+            'locale' => $locale,
+            'category' => $category,
+            'posts' => $posts,
+            'blogLocales' => config('blog.locales', []),
+            'languageContext' => 'category',
+            'categorySlug' => $category->slug,
+            'pageTitle' => $pageTitle,
+            'metaDescription' => __('blog.category_description', ['name' => $category->name]),
+            'canonicalUrl' => $category->publicUrl($locale),
+            'alternateLocaleUrls' => $this->blogAlternateLocaleUrls(null, $category->slug),
+            'collectionSchema' => $this->categoryCollectionSchema($category, $locale, $posts),
+            'blogFeaturedImage' => fn (?BlogPost $post, int $index = 0) => $this->blogFeaturedImage($post, $index),
+            'blogFeaturedImageAlt' => fn (?BlogPost $post, ?BlogPostTranslation $translation) => $this->blogFeaturedImageAlt($post, $translation),
+            'blogReadingTime' => fn (?string $html) => $this->blogReadingTimeMinutes($html),
+        ]));
     }
 
     public function show(Request $request, string $locale, string $slug): View
@@ -74,6 +103,7 @@ class BlogController extends Controller
             ->firstOrFail();
 
         $post = $translation->post;
+        $featuredImage = $this->blogFeaturedImage($post, (int) $post->id);
 
         return view('blog.show', array_merge($this->blogShellData($request), [
             'locale' => $locale,
@@ -81,13 +111,44 @@ class BlogController extends Controller
             'post' => $post,
             'alternateTranslations' => $post->translations,
             'blogLocales' => config('blog.locales', []),
+            'languageContext' => 'show',
             'pageTitle' => ($translation->meta_title ?: $translation->title) . ' — Webnu',
             'metaDescription' => $translation->meta_description ?: $translation->excerpt,
+            'metaKeywords' => $translation->focus_keyword,
             'canonicalUrl' => $translation->publicUrl(),
-            'featuredImage' => $this->blogFeaturedImage($post, (int) $post->id),
-            'featuredImageAlt' => $post->featured_image_alt ?: $translation->title,
+            'featuredImage' => $featuredImage,
+            'featuredImageAlt' => $this->blogFeaturedImageAlt($post, $translation),
+            'ogImage' => $this->absoluteImageUrl($featuredImage),
+            'ogType' => 'article',
             'readingTimeMinutes' => $this->blogReadingTimeMinutes($translation->body),
             'faqSchema' => $translation->faq_schema,
+            'blogPostingSchema' => $this->blogPostingSchema($translation, $post, $featuredImage),
+            'preview' => false,
         ]));
+    }
+
+    /** @return array<string, mixed> */
+    private function categoryCollectionSchema(BlogCategory $category, string $locale, $posts): array
+    {
+        $items = [];
+        foreach ($posts as $translation) {
+            /** @var BlogPostTranslation $translation */
+            $items[] = [
+                '@type' => 'ListItem',
+                'url' => $translation->publicUrl(),
+                'name' => $translation->title,
+            ];
+        }
+
+        return [
+            '@context' => 'https://schema.org',
+            '@type' => 'CollectionPage',
+            'name' => $category->name,
+            'url' => $category->publicUrl($locale),
+            'mainEntity' => [
+                '@type' => 'ItemList',
+                'itemListElement' => $items,
+            ],
+        ];
     }
 }

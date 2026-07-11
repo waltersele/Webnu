@@ -52,6 +52,7 @@ class ContentConnectorService
             ->map(fn (BlogCategory $category) => [
                 'id' => (string) $category->id,
                 'name' => $category->name,
+                'slug' => $category->slug,
             ])
             ->values()
             ->all();

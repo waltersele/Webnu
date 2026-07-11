@@ -178,3 +178,13 @@ php scripts/test-connector-e2e.php http://127.0.0.1:8765
 | 401 | Firma ausente o incorrecta |
 | 422 | Validación |
 | 503 | Secreto no configurado |
+
+## Coexistencia Sonartop + CMS manual
+
+El superadmin (**Plataforma → Blog**) puede crear y editar artículos manualmente usando las **mismas tablas** que el Content Connector. Sonartop sigue siendo el flujo principal de publicación automatizada.
+
+- **POST/PUT API:** sin cambios de contrato ni firma.
+- **GET `/categories`:** devuelve `id`, `name` y `slug` (campo extra retrocompatible).
+- **GET `/posts`:** incluye artículos creados en admin (sync bidireccional).
+- Posts manuales pueden no tener `connector_group_id`; Sonartop puede actualizarlos por `id` de traducción.
+- No eliminar categorías con artículos asignados (afecta `category_id` en Sonartop).

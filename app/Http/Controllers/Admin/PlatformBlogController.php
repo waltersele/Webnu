@@ -2,79 +2,77 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\BlogCategory;
 use App\BlogPost;
-use App\BlogPostTranslation;
 use App\Http\Controllers\Controller;
-use App\Services\BlogHtmlSanitizer;
+use App\Http\Controllers\Concerns\PreparesMarketingShell;
+use App\Http\Requests\Admin\PlatformBlogPostRequest;
+use App\Services\PlatformBlogService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
+use Illuminate\Support\Facades\App;
+use Illuminate\View\View;
 
 class PlatformBlogController extends Controller
 {
-    public function index()
-    {
-        $posts = BlogPost::query()
-            ->with('translations')
-            ->orderByDesc('published_at')
-            ->orderByDesc('id')
-            ->paginate(20);
+    use PreparesMarketingShell;
 
-        return view('admin.platform.blog.index', compact('posts'));
+    public function index(Request $request)
+    {
+        $query = BlogPost::query()
+            ->with(['translations', 'category'])
+            ->orderByDesc('published_at')
+            ->orderByDesc('id');
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->string('status'));
+        }
+
+        if ($request->filled('category_id')) {
+            $query->where('blog_category_id', (int) $request->input('category_id'));
+        }
+
+        if ($request->filled('q')) {
+            $term = '%' . $request->string('q') . '%';
+            $query->whereHas('translations', function ($q) use ($term) {
+                $q->where('locale', 'es')->where('title', 'like', $term);
+            });
+        }
+
+        $posts = $query->paginate(20)->withQueryString();
+        $categories = BlogCategory::orderBy('name')->get();
+
+        return view('admin.platform.blog.index', compact('posts', 'categories'));
+    }
+
+    public function create()
+    {
+        $locales = array_keys(config('blog.locales', []));
+        $categories = BlogCategory::orderBy('name')->get();
+
+        return view('admin.platform.blog.create', compact('locales', 'categories'));
+    }
+
+    public function store(PlatformBlogPostRequest $request, PlatformBlogService $service)
+    {
+        $post = $service->create($request->validated(), (int) $request->user()->id);
+
+        return redirect()
+            ->route('admin.platform.blog.edit', $post)
+            ->with('flash', 'Artículo creado.');
     }
 
     public function edit(BlogPost $post)
     {
-        $post->load('translations');
+        $post->load('translations', 'category');
         $locales = array_keys(config('blog.locales', []));
+        $categories = BlogCategory::orderBy('name')->get();
 
-        return view('admin.platform.blog.edit', compact('post', 'locales'));
+        return view('admin.platform.blog.edit', compact('post', 'locales', 'categories'));
     }
 
-    public function update(Request $request, BlogPost $post, BlogHtmlSanitizer $sanitizer)
+    public function update(PlatformBlogPostRequest $request, BlogPost $post, PlatformBlogService $service)
     {
-        $locales = array_keys(config('blog.locales', []));
-        $rules = [];
-        foreach ($locales as $locale) {
-            $rules["translations.$locale.slug"] = ['nullable', 'string', 'max:120', 'regex:/^[a-z0-9]+(?:-[a-z0-9]+)*$/'];
-            $rules["translations.$locale.title"] = ['nullable', 'string', 'max:255'];
-            $rules["translations.$locale.excerpt"] = ['nullable', 'string', 'max:1000'];
-            $rules["translations.$locale.body"] = ['nullable', 'string'];
-            $rules["translations.$locale.meta_title"] = ['nullable', 'string', 'max:255'];
-            $rules["translations.$locale.meta_description"] = ['nullable', 'string', 'max:500'];
-        }
-
-        $data = $request->validate($rules);
-
-        foreach ($locales as $locale) {
-            $row = $data['translations'][$locale] ?? [];
-            if (empty($row['title']) && empty($row['body'])) {
-                continue;
-            }
-
-            $slug = ! empty($row['slug'])
-                ? Str::slug($row['slug'])
-                : Str::slug((string) ($row['title'] ?? 'post'));
-
-            $body = (string) ($row['body'] ?? '');
-            $format = BlogPostTranslation::FORMAT_MARKDOWN;
-            if (str_contains($body, '<') && str_contains($body, '>')) {
-                $body = $sanitizer->sanitize($body);
-                $format = BlogPostTranslation::FORMAT_HTML;
-            }
-
-            BlogPostTranslation::updateOrCreate(
-                ['blog_post_id' => $post->id, 'locale' => $locale],
-                [
-                    'slug' => $slug,
-                    'title' => (string) ($row['title'] ?? $slug),
-                    'excerpt' => $row['excerpt'] ?? Str::limit(strip_tags($body), 300),
-                    'body' => $body,
-                    'body_format' => $format,
-                    'meta_title' => $row['meta_title'] ?? null,
-                    'meta_description' => $row['meta_description'] ?? null,
-                ]
-            );
-        }
+        $service->update($post, $request->validated());
 
         return redirect()
             ->route('admin.platform.blog.edit', $post)
@@ -105,5 +103,41 @@ class PlatformBlogController extends Controller
         $post->save();
 
         return back()->with('flash', 'Artículo en borrador.');
+    }
+
+    public function preview(Request $request, BlogPost $post, string $locale): View
+    {
+        $locales = array_keys(config('blog.locales', []));
+        abort_unless(in_array($locale, $locales, true), 404);
+
+        $post->load(['translations', 'category']);
+        App::setLocale($locale);
+
+        $translation = $post->translationFor($locale);
+        abort_if(! $translation, 404);
+
+        $featuredImage = $this->blogFeaturedImage($post, (int) $post->id);
+
+        return view('blog.show', array_merge($this->blogShellData($request), [
+            'locale' => $locale,
+            'translation' => $translation,
+            'post' => $post,
+            'alternateTranslations' => $post->translations,
+            'blogLocales' => config('blog.locales', []),
+            'languageContext' => 'show',
+            'pageTitle' => ($translation->meta_title ?: $translation->title) . ' — Webnu',
+            'metaDescription' => $translation->meta_description ?: $translation->excerpt,
+            'metaKeywords' => $translation->focus_keyword,
+            'canonicalUrl' => $translation->publicUrl(),
+            'featuredImage' => $featuredImage,
+            'featuredImageAlt' => $this->blogFeaturedImageAlt($post, $translation),
+            'ogImage' => $this->absoluteImageUrl($featuredImage),
+            'ogType' => 'article',
+            'readingTimeMinutes' => $this->blogReadingTimeMinutes($translation->body),
+            'faqSchema' => $translation->faq_schema,
+            'blogPostingSchema' => $this->blogPostingSchema($translation, $post, $featuredImage),
+            'preview' => true,
+            'noindex' => true,
+        ]));
     }
 }

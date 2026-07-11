@@ -11,5 +11,9 @@ return [
     'back_to_list' => 'Retour au blog',
     'back_home' => 'Accueil',
     'empty' => 'Aucun article publié dans cette langue pour le moment.',
+    'category_title' => ':name',
+    'category_description' => 'Articles sur :name dans le blog Webnu.',
+    'faq_heading' => 'Questions fréquentes',
+    'translation_missing' => 'Traduction indisponible',
     'cta_register' => 'Créer un compte gratuit',
 ];

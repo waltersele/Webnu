@@ -205,6 +205,16 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['aut
             ->middleware('throttle:60,1')
             ->where(['user' => '[0-9]+', 'platformCompany' => '[0-9]+']);
 
+        Route::get('blog/categories', 'PlatformBlogCategoryController@index')->name('admin.platform.blog.categories.index');
+        Route::get('blog/categories/create', 'PlatformBlogCategoryController@create')->name('admin.platform.blog.categories.create');
+        Route::post('blog/categories', 'PlatformBlogCategoryController@store')->name('admin.platform.blog.categories.store');
+        Route::get('blog/categories/{category}/edit', 'PlatformBlogCategoryController@edit')->name('admin.platform.blog.categories.edit');
+        Route::put('blog/categories/{category}', 'PlatformBlogCategoryController@update')->name('admin.platform.blog.categories.update');
+        Route::delete('blog/categories/{category}', 'PlatformBlogCategoryController@destroy')->name('admin.platform.blog.categories.destroy');
+
+        Route::get('blog/create', 'PlatformBlogController@create')->name('admin.platform.blog.create');
+        Route::post('blog', 'PlatformBlogController@store')->name('admin.platform.blog.store');
+        Route::get('blog/{post}/preview/{locale}', 'PlatformBlogController@preview')->name('admin.platform.blog.preview');
         Route::get('blog', 'PlatformBlogController@index')->name('admin.platform.blog.index');
         Route::get('blog/{post}/edit', 'PlatformBlogController@edit')->name('admin.platform.blog.edit');
         Route::put('blog/{post}', 'PlatformBlogController@update')->name('admin.platform.blog.update');
@@ -355,6 +365,10 @@ $blogLocalePattern = implode('|', array_keys(config('blog.locales', ['es' => [],
 Route::get('{locale}/blog', 'BlogController@index')
     ->where('locale', $blogLocalePattern)
     ->name('blog.index');
+Route::get('{locale}/blog/categoria/{categorySlug}', 'BlogController@category')
+    ->where('locale', $blogLocalePattern)
+    ->where('categorySlug', '[a-z0-9][a-z0-9-]*')
+    ->name('blog.category');
 Route::get('{locale}/blog/{slug}', 'BlogController@show')
     ->where('locale', $blogLocalePattern)
     ->where('slug', '[a-z0-9][a-z0-9-]*')

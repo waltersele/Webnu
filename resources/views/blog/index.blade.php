@@ -28,14 +28,17 @@
                            class="lg:w-3/5 h-64 lg:h-auto min-h-[16rem] overflow-hidden block">
                             <img class="wn-blog-card__image w-full h-full object-cover"
                                  src="{{ $blogFeaturedImage($featured->post, 0) }}"
-                                 alt="{{ $featured->title }}"
+                                 alt="{{ $blogFeaturedImageAlt($featured->post, $featured) }}"
                                  loading="eager"
                                  decoding="async">
                         </a>
                         <div class="lg:w-2/5 p-8 md:p-10 flex flex-col justify-center bg-surface-container-lowest">
                             <div class="flex flex-wrap items-center gap-3 mb-5 text-label-md text-text-muted">
                                 @if($featured->post->category)
-                                    <span class="text-primary font-semibold">{{ $featured->post->category->name }}</span>
+                                    <a href="{{ $featured->post->category->publicUrl($locale) }}"
+                                       class="text-primary font-semibold hover:opacity-80 transition-opacity">
+                                        {{ $featured->post->category->name }}
+                                    </a>
                                 @endif
                                 <span>{{ optional($featured->post->published_at)->translatedFormat('d M Y') }}</span>
                                 <span class="inline-flex items-center gap-1">
@@ -72,13 +75,16 @@
                                class="h-48 overflow-hidden block">
                                 <img class="wn-blog-card__image w-full h-full object-cover"
                                      src="{{ $blogFeaturedImage($post->post, $index + 1) }}"
-                                     alt="{{ $post->title }}"
+                                     alt="{{ $blogFeaturedImageAlt($post->post, $post) }}"
                                      loading="lazy"
                                      decoding="async">
                             </a>
                             <div class="p-6 flex flex-col flex-grow bg-surface-container-lowest">
                                 @if($post->post->category)
-                                    <p class="mb-2 text-label-md text-primary font-semibold">{{ $post->post->category->name }}</p>
+                                    <a href="{{ $post->post->category->publicUrl($locale) }}"
+                                       class="mb-2 inline-block text-label-md text-primary font-semibold hover:opacity-80 transition-opacity">
+                                        {{ $post->post->category->name }}
+                                    </a>
                                 @endif
                                 <h4 class="font-headline-sm text-headline-sm text-on-background mb-3 group-hover:text-primary transition-colors">
                                     <a href="{{ route('blog.show', ['locale' => $locale, 'slug' => $post->slug]) }}">

@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\ContentConnector;
 
+use App\Rules\FaqSchemaRules;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Validator;
@@ -18,7 +19,7 @@ class ContentConnectorPostRequest extends FormRequest
         $locales = array_keys(config('blog.locales', []));
         $allowedMimes = config('blog.featured_image.allowed_mimes', []);
 
-        return [
+        return array_merge([
             'title' => ['required', 'string', 'max:255'],
             'content' => ['required', 'string'],
             'slug' => ['required', 'string', 'max:120', 'regex:/^[a-z0-9]+(?:-[a-z0-9]+)*$/'],
@@ -34,14 +35,6 @@ class ContentConnectorPostRequest extends FormRequest
             'featured_image_alt' => ['nullable', 'string', 'max:255'],
             'featured_image_base64' => ['nullable', 'string'],
             'featured_image_mime' => ['nullable', 'string', 'max:64', Rule::in($allowedMimes)],
-            'faq_schema' => ['nullable', 'array'],
-            'faq_schema.@type' => ['required_with:faq_schema', 'string', Rule::in(['FAQPage'])],
-            'faq_schema.mainEntity' => ['required_with:faq_schema', 'array', 'min:1'],
-            'faq_schema.mainEntity.*.@type' => ['required_with:faq_schema', 'string', Rule::in(['Question'])],
-            'faq_schema.mainEntity.*.name' => ['required_with:faq_schema', 'string', 'max:500'],
-            'faq_schema.mainEntity.*.acceptedAnswer' => ['required_with:faq_schema', 'array'],
-            'faq_schema.mainEntity.*.acceptedAnswer.@type' => ['required_with:faq_schema', 'string', Rule::in(['Answer'])],
-            'faq_schema.mainEntity.*.acceptedAnswer.text' => ['required_with:faq_schema', 'string', 'max:5000'],
             'group_id' => ['nullable', 'string', 'max:191'],
             'post_id' => ['nullable', 'string', 'max:191'],
             'article_id' => ['nullable', 'string', 'max:191'],
@@ -54,7 +47,7 @@ class ContentConnectorPostRequest extends FormRequest
             'meta.group_id' => ['nullable', 'string', 'max:191'],
             'meta.post_id' => ['nullable', 'string', 'max:191'],
             'meta.article_id' => ['nullable', 'string', 'max:191'],
-        ];
+        ], FaqSchemaRules::rules());
     }
 
     public function withValidator(Validator $validator): void

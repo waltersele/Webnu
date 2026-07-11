@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\BlogCategory;
 use App\BlogPost;
 use App\BlogPostTranslation;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -137,5 +138,67 @@ class BlogTest extends TestCase
     public function test_invalid_blog_locale_returns_404(): void
     {
         $this->get('/xx/blog')->assertNotFound();
+    }
+
+    public function test_category_archive_lists_posts(): void
+    {
+        $category = BlogCategory::firstOrCreate(
+            ['slug' => 'cartas-digitales-archive'],
+            ['name' => 'Cartas digitales archive']
+        );
+
+        $post = BlogPost::create([
+            'status' => BlogPost::STATUS_PUBLISHED,
+            'published_at' => now()->subHour(),
+            'blog_category_id' => $category->id,
+        ]);
+
+        BlogPostTranslation::create([
+            'blog_post_id' => $post->id,
+            'locale' => 'es',
+            'slug' => 'en-categoria',
+            'title' => 'En categoría',
+            'body' => '<p>Contenido</p>',
+            'body_format' => BlogPostTranslation::FORMAT_HTML,
+        ]);
+
+        $this->get('/es/blog/categoria/cartas-digitales-archive')
+            ->assertOk()
+            ->assertSee('En categoría')
+            ->assertSee('Cartas digitales archive');
+    }
+
+    public function test_blog_show_renders_faq_accordion(): void
+    {
+        $post = BlogPost::create([
+            'status' => BlogPost::STATUS_PUBLISHED,
+            'published_at' => now()->subHour(),
+        ]);
+
+        BlogPostTranslation::create([
+            'blog_post_id' => $post->id,
+            'locale' => 'es',
+            'slug' => 'faq-ui',
+            'title' => 'FAQ UI',
+            'body' => '<p>Contenido</p>',
+            'body_format' => BlogPostTranslation::FORMAT_HTML,
+            'faq_schema' => [
+                '@type' => 'FAQPage',
+                'mainEntity' => [[
+                    '@type' => 'Question',
+                    'name' => '¿Visible en UI?',
+                    'acceptedAnswer' => [
+                        '@type' => 'Answer',
+                        'text' => 'Sí, en acordeón.',
+                    ],
+                ]],
+            ],
+        ]);
+
+        $this->get('/es/blog/faq-ui')
+            ->assertOk()
+            ->assertSee('Preguntas frecuentes')
+            ->assertSee('¿Visible en UI?')
+            ->assertSee('Sí, en acordeón.');
     }
 }
