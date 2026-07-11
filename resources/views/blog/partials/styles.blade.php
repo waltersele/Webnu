@@ -21,4 +21,7 @@
     }
     .wn-blog-card:hover .wn-blog-card__image { transform: scale(1.04); }
     .wn-blog-card__image { transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1); }
+    .wn-blog-breadcrumbs__sep { opacity: 0.45; user-select: none; }
+    .wn-blog-category-badge { letter-spacing: 0.01em; }
+    .wn-blog-sidebar__widget + .wn-blog-sidebar__widget { margin-top: 0; }
 </style>

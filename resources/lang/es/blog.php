@@ -14,6 +14,11 @@ return [
     'category_title' => ':name',
     'category_description' => 'Artículos sobre :name en el blog de Webnu.',
     'faq_heading' => 'Preguntas frecuentes',
+    'breadcrumb_blog' => 'Blog',
+    'sidebar_nav' => 'Navegación del blog',
+    'sidebar_latest' => 'Últimos artículos',
+    'sidebar_categories' => 'Categorías',
+    'sidebar_related' => 'Artículos relacionados',
     'translation_missing' => 'Traducción no disponible',
     'cta_register' => 'Crear cuenta gratis',
 ];

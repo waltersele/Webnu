@@ -201,4 +201,65 @@ class BlogTest extends TestCase
             ->assertSee('¿Visible en UI?')
             ->assertSee('Sí, en acordeón.');
     }
+
+    public function test_blog_show_renders_breadcrumbs_sidebar_and_related(): void
+    {
+        $category = BlogCategory::firstOrCreate(
+            ['slug' => 'sidebar-cat'],
+            ['name' => 'Sidebar Cat']
+        );
+
+        $main = BlogPost::create([
+            'status' => BlogPost::STATUS_PUBLISHED,
+            'published_at' => now()->subHour(),
+            'blog_category_id' => $category->id,
+        ]);
+        BlogPostTranslation::create([
+            'blog_post_id' => $main->id,
+            'locale' => 'es',
+            'slug' => 'articulo-principal',
+            'title' => 'Artículo principal',
+            'body' => '<p>Principal</p>',
+            'body_format' => BlogPostTranslation::FORMAT_HTML,
+        ]);
+
+        $related = BlogPost::create([
+            'status' => BlogPost::STATUS_PUBLISHED,
+            'published_at' => now()->subHours(2),
+            'blog_category_id' => $category->id,
+        ]);
+        BlogPostTranslation::create([
+            'blog_post_id' => $related->id,
+            'locale' => 'es',
+            'slug' => 'articulo-relacionado',
+            'title' => 'Artículo relacionado',
+            'body' => '<p>Relacionado</p>',
+            'body_format' => BlogPostTranslation::FORMAT_HTML,
+        ]);
+
+        $latest = BlogPost::create([
+            'status' => BlogPost::STATUS_PUBLISHED,
+            'published_at' => now()->subMinutes(30),
+        ]);
+        BlogPostTranslation::create([
+            'blog_post_id' => $latest->id,
+            'locale' => 'es',
+            'slug' => 'ultimo-articulo',
+            'title' => 'Último artículo',
+            'body' => '<p>Último</p>',
+            'body_format' => BlogPostTranslation::FORMAT_HTML,
+        ]);
+
+        $response = $this->get('/es/blog/articulo-principal');
+
+        $response->assertOk()
+            ->assertSee('wn-blog-breadcrumbs', false)
+            ->assertSee('Sidebar Cat')
+            ->assertSee(route('blog.category', ['locale' => 'es', 'categorySlug' => 'sidebar-cat']), false)
+            ->assertSee('Últimos artículos')
+            ->assertSee('Último artículo')
+            ->assertSee('Artículos relacionados')
+            ->assertSee('Artículo relacionado')
+            ->assertSee('BreadcrumbList', false);
+    }
 }

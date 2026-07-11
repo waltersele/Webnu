@@ -14,6 +14,11 @@ return [
     'category_title' => ':name',
     'category_description' => 'Articles about :name on the Webnu blog.',
     'faq_heading' => 'Frequently asked questions',
+    'breadcrumb_blog' => 'Blog',
+    'sidebar_nav' => 'Blog navigation',
+    'sidebar_latest' => 'Latest articles',
+    'sidebar_categories' => 'Categories',
+    'sidebar_related' => 'Related articles',
     'translation_missing' => 'Translation not available',
     'cta_register' => 'Start free',
 ];

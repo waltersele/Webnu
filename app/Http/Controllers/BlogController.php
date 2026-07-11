@@ -105,7 +105,7 @@ class BlogController extends Controller
         $post = $translation->post;
         $featuredImage = $this->blogFeaturedImage($post, (int) $post->id);
 
-        return view('blog.show', array_merge($this->blogShellData($request), [
+        return view('blog.show', array_merge($this->blogShellData($request), $this->blogSidebarData($locale, $post), [
             'locale' => $locale,
             'translation' => $translation,
             'post' => $post,
@@ -123,6 +123,7 @@ class BlogController extends Controller
             'readingTimeMinutes' => $this->blogReadingTimeMinutes($translation->body),
             'faqSchema' => $translation->faq_schema,
             'blogPostingSchema' => $this->blogPostingSchema($translation, $post, $featuredImage),
+            'breadcrumbSchema' => $this->blogBreadcrumbSchema($locale, $translation, $post->category),
             'preview' => false,
         ]));
     }

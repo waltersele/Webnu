@@ -1,5 +1,5 @@
 @if(!empty($faqSchema['mainEntity']) && is_array($faqSchema['mainEntity']))
-    <section class="mt-12 max-w-3xl" aria-labelledby="blog-faq-heading">
+    <section class="mt-12" aria-labelledby="blog-faq-heading">
         <h2 id="blog-faq-heading" class="font-headline-md text-headline-md text-on-background mb-6">
             {{ __('blog.faq_heading') }}
         </h2>

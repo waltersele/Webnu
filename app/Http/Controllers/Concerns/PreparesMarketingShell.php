@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers\Concerns;
 
+use App\BlogCategory;
 use App\BlogPost;
 use App\BlogPostTranslation;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 
 trait PreparesMarketingShell
 {
@@ -133,5 +135,103 @@ trait PreparesMarketingShell
         }
 
         return $urls;
+    }
+
+    /** @return array<string, mixed> */
+    protected function blogSidebarData(string $locale, BlogPost $currentPost): array
+    {
+        return [
+            'sidebarLatestPosts' => $this->blogSidebarLatestPosts($locale, $currentPost),
+            'sidebarRelatedPosts' => $this->blogSidebarRelatedPosts($locale, $currentPost),
+            'sidebarCategories' => $this->blogSidebarCategories($locale),
+        ];
+    }
+
+    /** @return Collection<int, BlogPostTranslation> */
+    protected function blogSidebarLatestPosts(string $locale, BlogPost $currentPost): Collection
+    {
+        return BlogPostTranslation::query()
+            ->select('blog_post_translations.*')
+            ->join('blog_posts', 'blog_posts.id', '=', 'blog_post_translations.blog_post_id')
+            ->where('blog_post_translations.locale', $locale)
+            ->where('blog_post_translations.blog_post_id', '!=', $currentPost->id)
+            ->whereHas('post', fn ($q) => $q->publiclyVisible())
+            ->orderByDesc('blog_posts.published_at')
+            ->with('post.category')
+            ->limit(5)
+            ->get();
+    }
+
+    /** @return Collection<int, BlogPostTranslation> */
+    protected function blogSidebarRelatedPosts(string $locale, BlogPost $currentPost): Collection
+    {
+        if (! $currentPost->blog_category_id) {
+            return collect();
+        }
+
+        return BlogPostTranslation::query()
+            ->select('blog_post_translations.*')
+            ->join('blog_posts', 'blog_posts.id', '=', 'blog_post_translations.blog_post_id')
+            ->where('blog_post_translations.locale', $locale)
+            ->where('blog_posts.blog_category_id', $currentPost->blog_category_id)
+            ->where('blog_post_translations.blog_post_id', '!=', $currentPost->id)
+            ->whereHas('post', fn ($q) => $q->publiclyVisible())
+            ->orderByDesc('blog_posts.published_at')
+            ->with('post.category')
+            ->limit(4)
+            ->get();
+    }
+
+    /** @return Collection<int, BlogCategory> */
+    protected function blogSidebarCategories(string $locale): Collection
+    {
+        return BlogCategory::query()
+            ->whereHas('posts', function ($q) use ($locale) {
+                $q->publiclyVisible()
+                    ->whereHas('translations', fn ($t) => $t->where('locale', $locale));
+            })
+            ->withCount(['posts as posts_count' => function ($q) use ($locale) {
+                $q->publiclyVisible()
+                    ->whereHas('translations', fn ($t) => $t->where('locale', $locale));
+            }])
+            ->orderBy('name')
+            ->get();
+    }
+
+    /** @return array<string, mixed> */
+    protected function blogBreadcrumbSchema(string $locale, BlogPostTranslation $translation, ?BlogCategory $category = null): array
+    {
+        $items = [
+            [
+                '@type' => 'ListItem',
+                'position' => 1,
+                'name' => __('blog.breadcrumb_blog'),
+                'item' => route('blog.index', ['locale' => $locale]),
+            ],
+        ];
+
+        $position = 2;
+        if ($category) {
+            $items[] = [
+                '@type' => 'ListItem',
+                'position' => $position,
+                'name' => $category->name,
+                'item' => $category->publicUrl($locale),
+            ];
+            $position++;
+        }
+
+        $items[] = [
+            '@type' => 'ListItem',
+            'position' => $position,
+            'name' => $translation->title,
+            'item' => $translation->publicUrl(),
+        ];
+
+        return [
+            '@context' => 'https://schema.org',
+            '@type' => 'BreadcrumbList',
+            'itemListElement' => $items,
+        ];
     }
 }
