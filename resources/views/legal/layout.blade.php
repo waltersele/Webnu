@@ -25,7 +25,9 @@
     <footer class="border-t border-gray-200 mt-12 py-6 text-center text-sm text-gray-500">
         © {{ date('Y') }} Webnu.es —
         <a href="{{ route('legal.privacy') }}" class="hover:text-[#004ac6]">Privacidad</a> ·
-        <a href="{{ route('legal.terms') }}" class="hover:text-[#004ac6]">Términos</a>
+        <a href="{{ route('legal.terms') }}" class="hover:text-[#004ac6]">Términos</a> ·
+        <a href="#" data-manage-cookies class="hover:text-[#004ac6]">Gestionar cookies</a>
     </footer>
+    @include('partials.measurement-head')
 </body>
 </html>

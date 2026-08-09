@@ -19,6 +19,10 @@ Route::post('/te_llamamos', 'PagesController@te_llamamos')->middleware('throttle
 Route::post('/sugerencia', 'PagesController@suggestion')->middleware('throttle:10,1')->name('suggestion');
 Route::post('/table_reservation', 'PagesController@table_reservation')->middleware('throttle:10,1')->name('table_reservation');
 
+// Proxy Plausible (same-origin) — antes de catch-alls de slug
+Route::get('stats/js/script.js', 'PlausibleProxyController@script')->name('stats.plausible.script');
+Route::match(['get', 'post'], 'stats/api/event', 'PlausibleProxyController@event')->name('stats.plausible.event');
+
 Route::post(
     'stripe/webhook',
     '\Laravel\Cashier\Http\Controllers\WebhookController@handleWebhook'

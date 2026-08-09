@@ -472,19 +472,25 @@
                     <h5 class="mb-0">Medición y Search Console</h5>
                 </div>
                 <div class="card-body">
+                    <input type="hidden" name="measurement_section" value="1">
                     <p class="text-muted mb-3">
-                        Analytics de la landing pública. Las cartas de clientes no cargan estas herramientas.
-                        GA4/GTM/Clarity solo se activan tras aceptar cookies.
+                        Medición de la landing pública (Consent Mode v2 + Plausible vía proxy).
+                        Las cartas de clientes no cargan estas herramientas.
                     </p>
                     <div class="form-check mb-3">
                         <input type="checkbox" class="form-check-input" name="measurement_enabled" value="1" id="measurement_enabled"
                                @if(old('measurement_enabled', $measurement['measurement_enabled'])) checked @endif>
-                        <label class="form-check-label" for="measurement_enabled">Activar medición en landing</label>
+                        <label class="form-check-label" for="measurement_enabled">Activar medición Google / Clarity / marketing</label>
                     </div>
                     <div class="form-check mb-3">
                         <input type="checkbox" class="form-check-input" name="cookie_banner_enabled" value="1" id="cookie_banner_enabled"
                                @if(old('cookie_banner_enabled', $measurement['cookie_banner_enabled'])) checked @endif>
                         <label class="form-check-label" for="cookie_banner_enabled">Mostrar banner de cookies (si hay herramientas con consentimiento)</label>
+                    </div>
+                    <div class="form-check mb-3">
+                        <input type="checkbox" class="form-check-input" name="load_google_before_consent" value="1" id="load_google_before_consent"
+                               @if(old('load_google_before_consent', $measurement['load_google_before_consent'] ?? true)) checked @endif>
+                        <label class="form-check-label" for="load_google_before_consent">Cargar Google en Consent Mode antes del consentimiento (recomendado)</label>
                     </div>
                     <div class="row g-3">
                         <div class="col-md-6">
@@ -504,13 +510,38 @@
                             <input type="text" name="gtm_container_id" id="gtm_container_id" class="form-control"
                                    value="{{ old('gtm_container_id', $measurement['gtm_container_id']) }}"
                                    placeholder="GTM-XXXXXXX">
-                            <div class="form-text">Opcional. Si usas GTM, configura GA4 dentro del contenedor.</div>
+                            <div class="form-text">Opcional. Si hay GTM y gtag, se prioriza GTM.</div>
                         </div>
                         <div class="col-md-6">
                             <label for="clarity_project_id" class="form-label">Microsoft Clarity (project id)</label>
                             <input type="text" name="clarity_project_id" id="clarity_project_id" class="form-control"
                                    value="{{ old('clarity_project_id', $measurement['clarity_project_id']) }}"
                                    placeholder="abc123xyz">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="meta_pixel_id" class="form-label">Meta Pixel (opcional)</label>
+                            <input type="text" name="meta_pixel_id" id="meta_pixel_id" class="form-control"
+                                   value="{{ old('meta_pixel_id', $measurement['meta_pixel_id'] ?? '') }}"
+                                   placeholder="1234567890">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="linkedin_partner_id" class="form-label">LinkedIn Insight (opcional)</label>
+                            <input type="text" name="linkedin_partner_id" id="linkedin_partner_id" class="form-control"
+                                   value="{{ old('linkedin_partner_id', $measurement['linkedin_partner_id'] ?? '') }}"
+                                   placeholder="123456">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="plausible_domain" class="form-label">Plausible domain</label>
+                            <input type="text" name="plausible_domain" id="plausible_domain" class="form-control"
+                                   value="{{ old('plausible_domain', $measurement['plausible_domain'] ?? '') }}"
+                                   placeholder="webnu.es">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="plausible_upstream_url" class="form-label">Plausible upstream URL</label>
+                            <input type="url" name="plausible_upstream_url" id="plausible_upstream_url" class="form-control"
+                                   value="{{ old('plausible_upstream_url', $measurement['plausible_upstream_url'] ?? '') }}"
+                                   placeholder="https://plausible.io">
+                            <div class="form-text">Si está vacío, no se carga Capa 1 (proxy /stats). En producción suele ser https://plausible.io</div>
                         </div>
                     </div>
                 </div>

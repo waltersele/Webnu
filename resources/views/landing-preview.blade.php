@@ -818,6 +818,7 @@
                 <h5 class="font-label-md font-semibold mb-3">Legal</h5>
                 <ul class="space-y-2 text-text-muted text-sm">
                     <li><a href="{{ route('legal.privacy') }}" class="hover:text-primary">Política de privacidad</a></li>
+                    <li><a href="#" data-manage-cookies class="hover:text-primary">Gestionar cookies</a></li>
                     <li><a href="{{ route('legal.terms') }}" class="hover:text-primary">Términos y condiciones</a></li>
                 </ul>
             </div>

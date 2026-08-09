@@ -172,12 +172,18 @@ class PlatformSettingsController extends Controller
             'digital_signage_app_key' => 'nullable|string|max:500',
             'clear_digital_signage_app_key' => 'nullable|boolean',
             'digital_signage_only_enabled' => 'nullable|boolean',
+            'measurement_section' => 'nullable|boolean',
             'measurement_enabled' => 'nullable|boolean',
             'cookie_banner_enabled' => 'nullable|boolean',
+            'load_google_before_consent' => 'nullable|boolean',
             'google_site_verification' => 'nullable|string|max:128',
             'gtag_measurement_id' => 'nullable|string|max:32',
             'gtm_container_id' => 'nullable|string|max:32',
             'clarity_project_id' => 'nullable|string|max:64',
+            'meta_pixel_id' => 'nullable|string|max:64',
+            'linkedin_partner_id' => 'nullable|string|max:64',
+            'plausible_domain' => 'nullable|string|max:255',
+            'plausible_upstream_url' => 'nullable|url|max:500',
         ]);
 
         if ($request->boolean('clear_gemini_key')) {
@@ -234,14 +240,23 @@ class PlatformSettingsController extends Controller
             'digital_signage_only_enabled' => $request->boolean('digital_signage_only_enabled'),
         ]));
 
-        app(MeasurementSettingsService::class)->update($request->only([
-            'measurement_enabled',
-            'cookie_banner_enabled',
-            'google_site_verification',
-            'gtag_measurement_id',
-            'gtm_container_id',
-            'clarity_project_id',
-        ]));
+        // Solo actualizar medición si el form incluye la sección (evita apagar flags
+        // cuando se guarda otra tarjeta del mismo formulario).
+        if ($request->boolean('measurement_section')) {
+            app(MeasurementSettingsService::class)->update([
+                'measurement_enabled' => $request->boolean('measurement_enabled'),
+                'cookie_banner_enabled' => $request->boolean('cookie_banner_enabled'),
+                'load_google_before_consent' => $request->boolean('load_google_before_consent'),
+                'google_site_verification' => $request->input('google_site_verification'),
+                'gtag_measurement_id' => $request->input('gtag_measurement_id'),
+                'gtm_container_id' => $request->input('gtm_container_id'),
+                'clarity_project_id' => $request->input('clarity_project_id'),
+                'meta_pixel_id' => $request->input('meta_pixel_id'),
+                'linkedin_partner_id' => $request->input('linkedin_partner_id'),
+                'plausible_domain' => $request->input('plausible_domain'),
+                'plausible_upstream_url' => $request->input('plausible_upstream_url'),
+            ]);
+        }
 
         app(PlatformMailConfigurator::class)->apply();
         app(PlatformStripeConfigurator::class)->apply();
