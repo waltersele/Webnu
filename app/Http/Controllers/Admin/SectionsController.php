@@ -143,21 +143,65 @@ class SectionsController extends Controller
     {
         $request->validate([
             'company_id' => 'required|integer',
-            'pdf_menu_file' => 'nullable|file|mimes:pdf|max:10240',
+            'pdf_menu_file' => [
+                'required',
+                'file',
+                'max:10240',
+                function ($attribute, $value, $fail) {
+                    if (! $value instanceof \Illuminate\Http\UploadedFile) {
+                        $fail('Selecciona un archivo PDF.');
+
+                        return;
+                    }
+
+                    if (! $value->isValid()) {
+                        $fail('No se pudo subir el archivo. Comprueba el tamaño (máx. 10 MB) e inténtalo de nuevo.');
+
+                        return;
+                    }
+
+                    $ext = strtolower((string) $value->getClientOriginalExtension());
+                    $mime = (string) $value->getMimeType();
+                    $allowedMimes = ['application/pdf', 'application/x-pdf', 'application/octet-stream'];
+
+                    if ($ext !== 'pdf' && ! in_array($mime, $allowedMimes, true)) {
+                        $fail('El archivo debe ser un PDF.');
+                    }
+                },
+            ],
+        ], [
+            'pdf_menu_file.required' => 'Selecciona un PDF antes de guardar.',
+            'pdf_menu_file.max' => 'El PDF no puede superar 10 MB.',
         ]);
 
         $company = Company::where('user_id', auth()->id())
             ->where('id', $request->get('company_id'))
             ->firstOrFail();
 
-        $plans->assertCanUsePdfMenu($request->user());
-
-        if ($request->hasFile('pdf_menu_file')) {
-            $company->menu_type_2_pdf = $request->file('pdf_menu_file')->store('pdf');
-            $company->save();
+        if (! $plans->canUsePdfMenu($request->user())) {
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'pdf_menu_file' => 'La carta en PDF está disponible desde el plan Pro (' . $plans->proPriceLabel() . ').',
+            ]);
         }
 
-        return redirect()->to(url()->previous())->with('flash', 'Carta PDF añadida correctamente');
+        $file = $request->file('pdf_menu_file');
+        $oldRelative = $company->menu_type_2_pdf;
+        $stored = $file->store('pdf');
+
+        $company->menu_type_2_pdf = $stored;
+        $company->menu_type = 2;
+        $company->save();
+
+        if ($oldRelative && $oldRelative !== $stored) {
+            $oldPath = public_path('img/' . ltrim($oldRelative, '/'));
+            if (is_file($oldPath)) {
+                @unlink($oldPath);
+            }
+        }
+
+        return redirect()
+            ->to(route('admin.sections.index') . '#tab-personalizacion')
+            ->with('flash', 'Carta PDF actualizada correctamente');
     }
 
     protected function selectedCompany()

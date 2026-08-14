@@ -8,7 +8,7 @@
         : 0;
 
     $pdfMenuUrl = $company->menu_type_2_pdf
-        ? url('img/' . ltrim($company->menu_type_2_pdf, '/'))
+        ? url('img/' . ltrim($company->menu_type_2_pdf, '/')) . '?v=' . optional($company->updated_at)->timestamp
         : null;
     $isPdfMenu = (int) $company->menu_type === 2;
     $hasTranslation = $pf['translation'] ?? true;
@@ -53,15 +53,26 @@
             <form method="POST" enctype="multipart/form-data" action="{{ route('admin.sections.updatepdfmenu') }}">
                 @csrf
                 @method('PUT')
+                @if ($errors->has('pdf_menu_file') || $errors->has('menu_type'))
+                    <div class="alert alert-danger py-2 px-3 small mb-2" role="alert">
+                        {{ $errors->first('pdf_menu_file') ?: $errors->first('menu_type') }}
+                    </div>
+                @endif
                 <div class="row g-2 align-items-end">
                     <div class="col-md-8">
-                        <input type="file" accept="application/pdf" name="pdf_menu_file" id="pdf-menu-file" class="form-control form-control-sm">
+                        <input type="file"
+                               accept=".pdf,application/pdf"
+                               name="pdf_menu_file"
+                               id="pdf-menu-file"
+                               class="form-control form-control-sm {{ $errors->has('pdf_menu_file') ? 'is-invalid' : '' }}"
+                               required>
                     </div>
                     <div class="col-md-4">
                         <input type="hidden" name="company_id" value="{{ $company->id }}">
                         <button type="submit" class="btn btn-primary btn-sm w-100">Guardar PDF</button>
                     </div>
                 </div>
+                <p class="text-muted small mt-2 mb-0">Máximo 10 MB. Formato PDF.</p>
             </form>
         </div>
     </div>
