@@ -406,7 +406,7 @@
                 <h2 class="font-headline text-headline-lg md:text-headline-xl mb-2">{{ __('landing.features.title') }}</h2>
                 <p class="text-body-md text-text-muted">{{ __('landing.features.subtitle') }}</p>
             </div>
-            <span class="hidden md:inline-flex items-center gap-1 text-label-sm text-text-muted">
+            <span class="inline-flex items-center gap-1 text-label-sm text-text-muted">
                 <span class="material-symbols-outlined text-[18px]">swipe</span>
                 {{ __('landing.features.swipe_hint') }}
             </span>
@@ -877,6 +877,6 @@
     </div>
 </div>
 
-<script src="{{ asset('js/landing-preview.js') }}"></script>
+<script src="{{ asset('js/landing-preview.js') }}?v={{ @filemtime(public_path('js/landing-preview.js')) ?: '1' }}"></script>
 </body>
 </html>

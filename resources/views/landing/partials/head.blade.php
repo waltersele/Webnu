@@ -2551,20 +2551,38 @@
     }
 
     /* Slider compacto de funciones */
+    .wn-feat-slider-wrap {
+        position: relative;
+        width: 100%;
+        min-width: 0;
+        max-width: 100%;
+    }
     .wn-feat-slider {
+        position: relative;
         display: flex;
+        flex-wrap: nowrap;
         gap: 16px;
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
         overflow-x: auto;
+        overflow-y: hidden;
         scroll-snap-type: x mandatory;
-        scroll-padding-left: 16px;
+        scroll-padding-inline: 16px;
         padding: 4px 16px 24px;
         margin: 0 -16px;
         -ms-overflow-style: none;
         scrollbar-width: none;
+        -webkit-overflow-scrolling: touch;
+        touch-action: pan-x;
+        overscroll-behavior-x: contain;
+        cursor: grab;
     }
     .wn-feat-slider::-webkit-scrollbar { display: none; }
     .wn-feat-card {
         flex: 0 0 240px;
+        width: 240px;
+        max-width: 80vw;
         scroll-snap-align: start;
         background: #ffffff;
         border: 1px solid #e5e7eb;
@@ -2642,9 +2660,6 @@
     }
 
     /* Slider wrap con flechas laterales y dots inferiores */
-    .wn-feat-slider-wrap {
-        position: relative;
-    }
     .wn-feat-slider__arrow {
         position: absolute;
         top: 50%;
@@ -2685,7 +2700,7 @@
     .wn-feat-slider.is-grabbing .wn-feat-card { pointer-events: none; }
 
     .wn-feat-slider__dots {
-        display: none;
+        display: flex;
         justify-content: center;
         gap: 6px;
         margin-top: 4px;
@@ -2713,17 +2728,17 @@
     }
 
     @media (min-width: 768px) {
-        .wn-feat-slider { padding-left: 0; padding-right: 0; margin: 0; cursor: grab; }
+        .wn-feat-slider { padding-left: 0; padding-right: 0; margin: 0; }
         .wn-feat-slider:active { cursor: grabbing; }
-        .wn-feat-card { flex: 0 0 260px; }
+        .wn-feat-card { flex: 0 0 260px; width: 260px; max-width: none; }
         .wn-feat-slider__arrow { display: inline-flex; }
-        .wn-feat-slider__dots { display: flex; }
         .wn-feat-slider__arrow--prev { left: -20px; }
         .wn-feat-slider__arrow--next { right: -20px; }
     }
     @media (prefers-reduced-motion: reduce) {
         .wn-feat-slider__arrow:hover { transform: translateY(-50%); }
         .wn-feat-slider__dot.is-active { transition: none; }
+        .wn-feat-slider { scroll-behavior: auto; }
     }
 
     .wn-demos-scroll {

@@ -571,7 +571,7 @@
         restartTimer();
     });
 
-    // Slider de funciones: drag con ratón en escritorio, flechas, dots y autoplay 5s
+    // Slider de funciones: swipe/drag, flechas, dots y autoplay 5s
     document.querySelectorAll('[data-feat-slider]').forEach(function (wrap) {
         const track = wrap.querySelector('[data-feat-track]');
         if (!track) return;
@@ -585,23 +585,38 @@
         const dots = dotsHost ? Array.from(dotsHost.querySelectorAll('[data-feat-dot]')) : [];
 
         const reducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-        const isDesktop = function () {
-            return window.matchMedia && window.matchMedia('(min-width: 768px)').matches;
-        };
+        let current = 0;
+        let autoplayTimer = null;
+        let restartTimer = null;
+        const intervalMs = 5000;
+
+        // Coordenadas fiables: offsetLeft falla porque el wrap es position:relative
+        // y no coincide con el sistema de scroll del track.
+        function slideScrollLeft(slide) {
+            const trackRect = track.getBoundingClientRect();
+            const slideRect = slide.getBoundingClientRect();
+            return Math.round(track.scrollLeft + (slideRect.left - trackRect.left));
+        }
 
         function indexFromScroll() {
-            const center = track.scrollLeft + (track.clientWidth / 2);
+            const trackRect = track.getBoundingClientRect();
+            const center = trackRect.left + (trackRect.width / 2);
             let best = 0;
             let bestDist = Infinity;
             slides.forEach(function (slide, i) {
-                const mid = slide.offsetLeft + (slide.offsetWidth / 2);
+                const rect = slide.getBoundingClientRect();
+                const mid = rect.left + (rect.width / 2);
                 const dist = Math.abs(mid - center);
-                if (dist < bestDist) { bestDist = dist; best = i; }
+                if (dist < bestDist) {
+                    bestDist = dist;
+                    best = i;
+                }
             });
             return best;
         }
 
         function updateActive(idx) {
+            current = idx;
             dots.forEach(function (dot, i) {
                 const active = i === idx;
                 dot.classList.toggle('is-active', active);
@@ -612,33 +627,77 @@
         }
 
         function goTo(idx, behavior) {
-            idx = Math.max(0, Math.min(slides.length - 1, idx));
+            idx = ((idx % slides.length) + slides.length) % slides.length;
             const slide = slides[idx];
             if (!slide) return;
-            const left = slide.offsetLeft - 16; // respeta padding inicial
-            track.scrollTo({ left: left, behavior: behavior || (reducedMotion ? 'auto' : 'smooth') });
+            const left = Math.max(0, slideScrollLeft(slide));
+            if (typeof track.scrollTo === 'function') {
+                track.scrollTo({
+                    left: left,
+                    behavior: behavior || (reducedMotion ? 'auto' : 'smooth'),
+                });
+            } else {
+                track.scrollLeft = left;
+            }
             updateActive(idx);
         }
 
         function nextSlide(loop) {
-            const cur = indexFromScroll();
-            if (cur >= slides.length - 1) {
+            if (current >= slides.length - 1) {
                 if (loop) goTo(0);
                 return;
             }
-            goTo(cur + 1);
+            goTo(current + 1);
         }
 
         function prevSlide() {
-            const cur = indexFromScroll();
-            goTo(cur - 1);
+            goTo(current - 1);
         }
 
-        if (prevBtn) prevBtn.addEventListener('click', function () { prevSlide(); restartAutoplay(); });
-        if (nextBtn) nextBtn.addEventListener('click', function () { nextSlide(false); restartAutoplay(); });
+        function pauseAutoplay() {
+            if (autoplayTimer) {
+                clearInterval(autoplayTimer);
+                autoplayTimer = null;
+            }
+            if (restartTimer) {
+                clearTimeout(restartTimer);
+                restartTimer = null;
+            }
+        }
+
+        function startAutoplay() {
+            pauseAutoplay();
+            if (reducedMotion || slides.length < 2) return;
+            autoplayTimer = setInterval(function () { nextSlide(true); }, intervalMs);
+        }
+
+        function restartAutoplay() {
+            pauseAutoplay();
+            if (reducedMotion || slides.length < 2) return;
+            restartTimer = setTimeout(startAutoplay, 1200);
+        }
+
+        if (prevBtn) {
+            prevBtn.addEventListener('click', function (e) {
+                e.preventDefault();
+                prevSlide();
+                restartAutoplay();
+            });
+        }
+        if (nextBtn) {
+            nextBtn.addEventListener('click', function (e) {
+                e.preventDefault();
+                nextSlide(true);
+                restartAutoplay();
+            });
+        }
 
         dots.forEach(function (dot, i) {
-            dot.addEventListener('click', function () { goTo(i); restartAutoplay(); });
+            dot.addEventListener('click', function (e) {
+                e.preventDefault();
+                goTo(i);
+                restartAutoplay();
+            });
         });
 
         let scrollSyncTimer = null;
@@ -649,50 +708,54 @@
             }, 80);
         }, { passive: true });
 
-        // Drag con ratón (solo desktop). En móvil dejamos el scroll-touch nativo.
+        // Drag con puntero (ratón / stylus). Touch nativo sigue usando overflow-x.
         let isDown = false;
         let startX = 0;
         let startScroll = 0;
         let movedDuringDrag = false;
+        let pointerId = null;
 
-        function onMouseDown(e) {
-            if (e.button !== 0) return;
-            if (!isDesktop()) return;
+        function onPointerDown(e) {
+            if (e.pointerType === 'touch') return;
+            if (e.button != null && e.button !== 0) return;
             isDown = true;
             movedDuringDrag = false;
-            startX = e.pageX - track.offsetLeft;
+            pointerId = e.pointerId;
+            startX = e.clientX;
             startScroll = track.scrollLeft;
             track.classList.add('is-grabbing');
+            try {
+                track.setPointerCapture(e.pointerId);
+            } catch (err) { /* ignore */ }
             pauseAutoplay();
         }
-        function onMouseMove(e) {
-            if (!isDown) return;
-            e.preventDefault();
-            const x = e.pageX - track.offsetLeft;
-            const dx = x - startX;
+
+        function onPointerMove(e) {
+            if (!isDown || (pointerId != null && e.pointerId !== pointerId)) return;
+            const dx = e.clientX - startX;
             if (Math.abs(dx) > 4) movedDuringDrag = true;
             track.scrollLeft = startScroll - dx;
+            if (movedDuringDrag) e.preventDefault();
         }
-        function endDrag() {
+
+        function endDrag(e) {
             if (!isDown) return;
+            if (e && pointerId != null && e.pointerId !== pointerId) return;
             isDown = false;
+            pointerId = null;
             track.classList.remove('is-grabbing');
-            // Si hubo drag real, snap al slide más cercano para corregir el suelta.
             if (movedDuringDrag) {
                 goTo(indexFromScroll());
             }
             restartAutoplay();
         }
 
-        track.addEventListener('mousedown', onMouseDown);
-        track.addEventListener('mousemove', onMouseMove);
-        track.addEventListener('mouseup', endDrag);
-        track.addEventListener('mouseleave', endDrag);
+        track.addEventListener('pointerdown', onPointerDown);
+        track.addEventListener('pointermove', onPointerMove);
+        track.addEventListener('pointerup', endDrag);
+        track.addEventListener('pointercancel', endDrag);
+        track.addEventListener('pointerleave', endDrag);
 
-        // Si el usuario soltó pero el cursor terminó fuera, cazar globalmente.
-        document.addEventListener('mouseup', endDrag);
-
-        // Evita que el click "post-drag" abra enlaces si los hubiera.
         track.addEventListener('click', function (e) {
             if (movedDuringDrag) {
                 e.preventDefault();
@@ -701,25 +764,9 @@
             }
         }, true);
 
-        // Autoplay desktop: 5s por item, pausa con hover/focus/drag/visibilitychange
-        let autoplayTimer = null;
-        const intervalMs = 5000;
-
-        function autoplayActive() {
-            return isDesktop() && !reducedMotion;
-        }
-        function pauseAutoplay() { if (autoplayTimer) { clearInterval(autoplayTimer); autoplayTimer = null; } }
-        function startAutoplay() {
-            pauseAutoplay();
-            if (!autoplayActive()) return;
-            autoplayTimer = setInterval(function () { nextSlide(true); }, intervalMs);
-        }
-        function restartAutoplay() {
-            pauseAutoplay();
-            if (!autoplayActive()) return;
-            // pequeño retraso para que la interacción del usuario tenga prioridad
-            setTimeout(startAutoplay, 1200);
-        }
+        // Pausa autoplay con interacción táctil nativa
+        track.addEventListener('touchstart', function () { pauseAutoplay(); }, { passive: true });
+        track.addEventListener('touchend', function () { restartAutoplay(); }, { passive: true });
 
         wrap.addEventListener('mouseenter', pauseAutoplay);
         wrap.addEventListener('mouseleave', startAutoplay);
@@ -727,18 +774,16 @@
         wrap.addEventListener('focusout', startAutoplay);
 
         document.addEventListener('visibilitychange', function () {
-            if (document.hidden) pauseAutoplay(); else startAutoplay();
+            if (document.hidden) pauseAutoplay();
+            else startAutoplay();
         });
 
-        if (window.matchMedia) {
-            const mq = window.matchMedia('(min-width: 768px)');
-            const onMqChange = function () { startAutoplay(); };
-            if (mq.addEventListener) mq.addEventListener('change', onMqChange);
-            else if (mq.addListener) mq.addListener(onMqChange);
-        }
-
         updateActive(0);
-        startAutoplay();
+        // Asegura overflow real tras layout (fuentes / flex)
+        window.requestAnimationFrame(function () {
+            goTo(0, 'auto');
+            startAutoplay();
+        });
     });
 
     document.querySelectorAll('[data-process-slider]').forEach(function (wrap) {
