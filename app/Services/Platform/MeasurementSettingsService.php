@@ -104,8 +104,21 @@ final class MeasurementSettingsService
     public function plausibleUpstreamUrl(): ?string
     {
         $fromDb = $this->clean(PlatformSetting::getValue('plausible_upstream_url'));
+        if ($fromDb !== null) {
+            return $fromDb;
+        }
 
-        return $fromDb ?: $this->clean(config('measurement.plausible_upstream_url'));
+        $fromConfig = $this->clean(config('measurement.plausible_upstream_url'));
+        if ($fromConfig !== null) {
+            return $fromConfig;
+        }
+
+        // Si hay dominio, no dejar Capa 1 muerta en silencio: Plausible cloud por defecto.
+        if ($this->plausibleDomain() !== null) {
+            return 'https://plausible.io';
+        }
+
+        return null;
     }
 
     public function plausibleConfigured(): bool
@@ -178,9 +191,9 @@ final class MeasurementSettingsService
             'clarity_project_id' => PlatformSetting::getValue('clarity_project_id') ?? '',
             'meta_pixel_id' => PlatformSetting::getValue('meta_pixel_id') ?? '',
             'linkedin_partner_id' => PlatformSetting::getValue('linkedin_partner_id') ?? '',
-            'plausible_domain' => PlatformSetting::getValue('plausible_domain')
-                ?? (string) config('measurement.plausible_domain', ''),
-            'plausible_upstream_url' => PlatformSetting::getValue('plausible_upstream_url') ?? '',
+            'plausible_domain' => $this->plausibleDomain() ?? '',
+            'plausible_upstream_url' => $this->plausibleUpstreamUrl() ?? '',
+            'plausible_configured' => $this->plausibleConfigured(),
         ];
     }
 

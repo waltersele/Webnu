@@ -28,6 +28,5 @@ return [
 
     'plausible_api_url' => env('PLAUSIBLE_API_URL', '/stats/api/event'),
 
-    'plausible_upstream_url' => env('PLAUSIBLE_UPSTREAM_URL', env('PLAUSIBLE_ORIGIN')),
-
+    'plausible_upstream_url' => env('PLAUSIBLE_UPSTREAM_URL', env('PLAUSIBLE_ORIGIN', 'https://plausible.io')),
 ];

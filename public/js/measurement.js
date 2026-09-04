@@ -417,15 +417,28 @@
   function applyConsent(config, consent) {
     var consented = config.consented;
 
+    function afterGoogleReady() {
+      updateConsent(consent);
+      // Tras grant, dispara page_view explícito: el config inicial pudo ir en denied
+      // y muchos paneles de GA4 no muestran esas hits cookieless.
+      if (consent.analytics && (consented.gtagId || consented.gtmId)) {
+        try {
+          window.gtag('event', 'page_view', {
+            page_title: document.title,
+            page_location: location.href,
+            page_path: location.pathname + location.search,
+          });
+        } catch (e) {
+          /* ignore */
+        }
+      }
+    }
+
     if (hasGoogleTools(consented)) {
       if (config.loadGoogleBeforeConsent) {
-        bootstrapGoogle(config).then(function () {
-          updateConsent(consent);
-        });
+        bootstrapGoogle(config).then(afterGoogleReady);
       } else if (consent.analytics || consent.marketing) {
-        bootstrapGoogle(config).then(function () {
-          updateConsent(consent);
-        });
+        bootstrapGoogle(config).then(afterGoogleReady);
       }
     }
 

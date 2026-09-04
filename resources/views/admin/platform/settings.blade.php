@@ -477,6 +477,21 @@
                         Medición de la landing pública (Consent Mode v2 + Plausible vía proxy).
                         Las cartas de clientes no cargan estas herramientas.
                     </p>
+                    @if(empty($measurement['plausible_configured']))
+                        <div class="alert alert-danger" role="alert">
+                            <strong>Plausible (Capa 1) no está activo.</strong>
+                            Sin dominio + upstream URL no se envían pageviews a <code>/stats</code>
+                            y los adblockers suelen tumbar Google Analytics. Rellena
+                            <em>Plausible domain</em> (<code>webnu.es</code>) y
+                            <em>upstream</em> (<code>https://plausible.io</code>), guarda, y verifica
+                            en DevTools que existan hits a <code>/stats/api/event</code>.
+                        </div>
+                    @else
+                        <div class="alert alert-success py-2" role="status">
+                            Plausible Capa 1 activo: <code>{{ $measurement['plausible_domain'] }}</code>
+                            → <code>{{ $measurement['plausible_upstream_url'] }}</code>
+                        </div>
+                    @endif
                     <div class="form-check mb-3">
                         <input type="checkbox" class="form-check-input" name="measurement_enabled" value="1" id="measurement_enabled"
                                @if(old('measurement_enabled', $measurement['measurement_enabled'])) checked @endif>
@@ -541,7 +556,10 @@
                             <input type="url" name="plausible_upstream_url" id="plausible_upstream_url" class="form-control"
                                    value="{{ old('plausible_upstream_url', $measurement['plausible_upstream_url'] ?? '') }}"
                                    placeholder="https://plausible.io">
-                            <div class="form-text">Si está vacío, no se carga Capa 1 (proxy /stats). En producción suele ser https://plausible.io</div>
+                            <div class="form-text">
+                                Obligatorio para Capa 1. Por defecto <code>https://plausible.io</code>.
+                                Vacío solo si quieres desactivar Plausible (no recomendado).
+                            </div>
                         </div>
                     </div>
                 </div>

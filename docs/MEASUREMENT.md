@@ -66,7 +66,8 @@ Tres botones: **Rechazar** | **Guardar selección** | **Aceptar todas**. Checkbo
 
 Variables (`.env` / Admin):
 
-- `PLAUSIBLE_DOMAIN`, `PLAUSIBLE_UPSTREAM_URL` (p. ej. `https://plausible.io`)
+- `PLAUSIBLE_DOMAIN` (p. ej. `webnu.es`)
+- `PLAUSIBLE_UPSTREAM_URL` (default `https://plausible.io`; si hay dominio y upstream vacío, se usa ese default para no dejar Capa 1 muerta)
 - `PLAUSIBLE_SCRIPT_URL`, `PLAUSIBLE_API_URL` (defaults `/stats/...`)
 - `MEASUREMENT_LOAD_GOOGLE_BEFORE_CONSENT=true`
 

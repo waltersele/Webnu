@@ -104,6 +104,28 @@ class MeasurementSettingsTest extends TestCase
         });
     }
 
+    public function test_plausible_defaults_upstream_when_domain_set(): void
+    {
+        config([
+            'measurement.enabled' => false,
+            'measurement.plausible_domain' => 'webnu.es',
+            'measurement.plausible_upstream_url' => null,
+            'measurement.gtag_measurement_id' => null,
+            'measurement.gtm_container_id' => null,
+            'measurement.clarity_project_id' => null,
+        ]);
+
+        $service = app(MeasurementSettingsService::class);
+        $config = $service->publicConfig();
+
+        $this->assertTrue($service->plausibleConfigured());
+        $this->assertSame('https://plausible.io', $service->plausibleUpstreamUrl());
+        $this->assertTrue($config['enabled']);
+        $this->assertSame('webnu.es', $config['exempt']['plausibleDomain']);
+        $this->assertSame('/stats/js/script.js', $config['exempt']['plausibleScriptUrl']);
+        $this->assertSame('/stats/api/event', $config['exempt']['plausibleApiUrl']);
+    }
+
     public function test_admin_can_persist_plausible_settings(): void
     {
         if (! class_exists(PlatformSetting::class)) {
