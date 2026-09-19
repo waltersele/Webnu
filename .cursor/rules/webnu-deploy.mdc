@@ -39,14 +39,24 @@ Dos intents claros del usuario que NO son lo mismo. Léelo siempre que vayas a h
 ## Mapa rápido del despliegue
 
 - Repo GitHub: `https://github.com/waltersele/Webnu`
-- Rama producción: `main`
-- Rama upgrade pendiente (NO desplegar): `upgrade/laravel-10`
-- Host: `webnu.es` (cPanel, PHP 7.4, MySQL)
+- Rama producción: `main` (**Laravel 10 + PHP ^8.3**)
+- Host: `webnu.es` (cPanel / LiteSpeed, **PHP 8.3 obligatorio en CLI y en MultiPHP del dominio**, MySQL)
 - Usuario SSH: `wwwwebnu`
 - Clon mirror en server: `/home/wwwwebnu/webnu-deploy/`
 - Sitio live: `/home/wwwwebnu/public_html/webnu.es/`
-- Script: `scripts/deploy.sh` (idempotente, con `--dry-run`, `--rollback`, `--skip-migrate`, `--skip-backup`, `--no-down`, `--full-rsync`).
+- Script: `scripts/deploy.sh` (idempotente; detecta `/opt/alt/php83`; flags: `--dry-run`, `--rollback`, `--skip-migrate`, `--skip-backup`, `--no-down`, `--full-rsync`, `--with-vendor`).
 - Documentación: `docs/deploy.md`.
+
+## 500 por incompatibilidad PHP (cPanel)
+
+Causa típica: el **CLI** del deploy usa PHP 8.3 (`/opt/alt/php83/...`) pero el **handler web** del dominio en MultiPHP sigue en 7.4/8.0 → parse fatal → HTTP 500.
+
+Antes de cualquier deploy gordo (composer/vendor, upgrade):
+
+1. En cPanel → **MultiPHP Manager**: `webnu.es` = **PHP 8.3** (igual que CLI).
+2. Verificar por SSH: `php -v` y `/opt/alt/php83/usr/bin/php -v`.
+3. Si el 500 ya ocurrió: mirar `storage/logs/laravel.log` y/o el error_log de LiteSpeed; rollback con `./scripts/deploy.sh --rollback` si hace falta estabilizar.
+4. Redeploy con PHP web ya en 8.3; si `vendor/` quedó a medias: `./scripts/deploy.sh --with-vendor`.
 
 ## Nunca subir (excluir de cualquier `git add`)
 
@@ -59,7 +69,7 @@ Dos intents claros del usuario que NO son lo mismo. Léelo siempre que vayas a h
 
 ## Cambios en `composer.json`
 
-Mientras producción siga en **PHP 7.4**, NO modificar `composer.json` en `main`. El `composer.json` actual ya declara `php: ^8.1`; producción funciona porque el `vendor/` instalado es anterior y nadie ha vuelto a hacer `composer install`. Cualquier cambio de dependencias va a `upgrade/laravel-10`.
+Producción y `main` van en **PHP ^8.3 / Laravel 10**. Los cambios de dependencias van en `main` con deploy normal (`deploy.sh` hará `composer install --no-dev` cuando detecte stack moderno). Tras tocar `composer.lock`, preferir un deploy con `--with-vendor` o confirmar que el script regeneró `vendor/` en el servidor.
 
 ## Mensaje de commit
 

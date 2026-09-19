@@ -22,6 +22,9 @@ Route::post('/table_reservation', 'PagesController@table_reservation')->middlewa
 // Proxy Plausible (same-origin) — antes de catch-alls de slug
 Route::get('stats/js/script.js', 'PlausibleProxyController@script')->name('stats.plausible.script');
 Route::match(['get', 'post'], 'stats/api/event', 'PlausibleProxyController@event')->name('stats.plausible.event');
+Route::post('analytics/beacon', 'AnalyticsBeaconController@store')
+    ->middleware('throttle:120,1')
+    ->name('analytics.beacon');
 
 Route::post(
     'stripe/webhook',
@@ -137,6 +140,7 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['aut
 
     Route::group(['prefix' => 'platform', 'middleware' => ['super.admin']], function () {
         Route::get('/', 'PlatformDashboardController@index')->name('admin.platform.dashboard');
+        Route::get('analytics', 'PlatformAnalyticsController@index')->name('admin.platform.analytics');
         Route::get('settings', 'PlatformSettingsController@edit')->name('admin.platform.settings');
         Route::put('settings', 'PlatformSettingsController@update')->name('admin.platform.settings.update');
         Route::match(['post', 'put'], 'settings/test-gemini', 'PlatformSettingsController@testGemini')->name('admin.platform.settings.test-gemini');

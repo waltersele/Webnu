@@ -20,7 +20,7 @@ Guía operativa del despliegue de **webnu.es** desde tu equipo a producción.
         ├── public/                      ← document root público de webnu.es
         │   └── img/                     ← uploads de clientes (NO sobreescribir)
         ├── storage/
-        ├── vendor/                      (instalado con PHP 7.4, no se sincroniza)
+        ├── vendor/                      (Laravel 10; se regenera con PHP 8.3 en deploy)
         ├── .env                         (credenciales BD, Stripe, Gemini, mail)
         └── scripts/deploy.sh            ← este script
 ```
@@ -29,6 +29,7 @@ Guía operativa del despliegue de **webnu.es** desde tu equipo a producción.
 - **Stack actual**: PHP 8.3, Laravel 10.x, MySQL/MariaDB (cPanel), Cashier 15.
 - **Rama desplegada**: `origin/main`.
 - **Nota**: el despliegue **SIEMPRE** respeta `.env`, `public/img/` (uploads) y `storage/`.
+- **Crítico**: en cPanel → MultiPHP Manager, el dominio `webnu.es` debe usar **PHP 8.3** (el mismo que CLI `/opt/alt/php83`). Si el handler web queda en 7.4/8.0 y despliegas `main`, la web responde **HTTP 500** por incompatibilidad.
 
 ## Despliegue normal (el caso del 95% de las veces)
 
@@ -209,6 +210,31 @@ El navegador puede cachear CSS/JS antiguos.
 # fuerza limpieza de view cache en producción
 php artisan view:clear
 ```
+
+### HTTP 500 tras deploy (incompatibilidad PHP)
+
+Síntoma: `artisan` por SSH funciona, pero la web da 500. Causa habitual: **CLI en PHP 8.3** y **MultiPHP del dominio** en 7.4/8.0.
+
+```bash
+# 1) Confirmar versiones
+php -v
+/opt/alt/php83/usr/bin/php -v
+
+# 2) En cPanel → Software → MultiPHP Manager: webnu.es = PHP 8.3
+#    (o ea-php83). Guarda y espera ~1 min.
+
+# 3) Ver el fatal real
+tail -n 80 storage/logs/laravel.log
+
+# 4) Si el código quedó a medias, estabiliza y redeploy
+./scripts/deploy.sh --rollback          # solo si hace falta
+./scripts/deploy.sh --with-vendor       # regenera vendor con PHP 8.3
+```
+
+Tras un deploy limpio, comprueba también medición:
+
+- `.env` (o Admin → Medición): `PLAUSIBLE_DOMAIN=webnu.es` y `PLAUSIBLE_UPSTREAM_URL=https://plausible.io`
+- `curl -I https://webnu.es/stats/js/script.js` → debe ser **200**, no 404
 
 ### Mantenimiento bloqueado (`down` no se quita)
 

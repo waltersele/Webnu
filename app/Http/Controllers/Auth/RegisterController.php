@@ -130,6 +130,12 @@ class RegisterController extends Controller
 
         Cookie::queue(Cookie::forever('selected_company', $company->id));
 
+        try {
+            app(\App\Services\Platform\PlatformAnalyticsRecorder::class)->recordSignup('email');
+        } catch (\Throwable $e) {
+            // no bloquear registro
+        }
+
         return $user;
     }
 

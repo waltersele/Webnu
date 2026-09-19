@@ -139,11 +139,11 @@
                         {{ __('landing.hero.logged_cta') }} <span class="material-symbols-outlined text-[20px]">dashboard</span>
                     </a>
                 @else
-                    <a href="{{ $registerUrl }}" class="inline-flex items-center gap-2 px-7 py-4 bg-primary text-on-primary text-label-md rounded-lg hover:opacity-90 transition-opacity font-semibold">
+                    <a href="{{ $registerUrl }}" data-wn-analytics-cta="hero_register" class="inline-flex items-center gap-2 px-7 py-4 bg-primary text-on-primary text-label-md rounded-lg hover:opacity-90 transition-opacity font-semibold">
                         {{ __('landing.hero.cta_main_short') }} <span class="material-symbols-outlined text-[20px]">arrow_forward</span>
                     </a>
                 @endif
-                <a href="#demos-carta" class="inline-flex items-center gap-2 px-6 py-4 rounded-lg bg-surface-container-lowest border border-border-subtle text-label-md text-on-surface font-semibold hover:border-primary/40 hover:text-primary transition-colors">
+                <a href="#demos-carta" data-wn-analytics-cta="hero_demos" class="inline-flex items-center gap-2 px-6 py-4 rounded-lg bg-surface-container-lowest border border-border-subtle text-label-md text-on-surface font-semibold hover:border-primary/40 hover:text-primary transition-colors">
                     <span class="material-symbols-outlined text-[20px]">play_circle</span>
                     {{ __('landing.hero.cta_demos_short') }}
                 </a>
@@ -731,7 +731,7 @@
                             </li>
                         @endforeach
                     </ul>
-                    <a href="{{ $plan['cta_url'] ?? $registerUrl }}" class="w-full rounded-lg text-center text-label-md font-semibold transition-colors {{ $isHighlight ? 'py-3 bg-primary-container text-on-primary hover:opacity-90' : 'py-3 border border-border-subtle hover:bg-surface-container' }}">{{ $plan['cta'] }}</a>
+                    <a href="{{ $plan['cta_url'] ?? $registerUrl }}" data-wn-analytics-cta="plan_{{ $plan['key'] ?? 'unknown' }}" class="w-full rounded-lg text-center text-label-md font-semibold transition-colors {{ $isHighlight ? 'py-3 bg-primary-container text-on-primary hover:opacity-90' : 'py-3 border border-border-subtle hover:bg-surface-container' }}">{{ $plan['cta'] }}</a>
                 </div>
             @endforeach
         </div>
@@ -785,8 +785,8 @@
             <h2 class="font-headline text-headline-xl mb-6 relative z-10">{{ __('landing.cta.title') }}</h2>
             <p class="text-body-lg mb-8 opacity-90 max-w-xl mx-auto relative z-10">{{ __('landing.cta.subtitle') }}</p>
             <div class="flex flex-col sm:flex-row justify-center gap-4 relative z-10">
-                <a href="#inicio" class="px-10 py-4 bg-white text-primary font-bold rounded-xl hover:scale-[1.02] transition-transform">{{ __('landing.cta.primary') }}</a>
-                <a href="{{ $demoUrl }}" target="_blank" class="px-10 py-4 border border-white/40 rounded-xl font-bold hover:bg-white/10 transition-colors">{{ __('landing.cta.secondary') }}</a>
+                <a href="#inicio" data-wn-analytics-cta="footer_register" class="px-10 py-4 bg-white text-primary font-bold rounded-xl hover:scale-[1.02] transition-transform">{{ __('landing.cta.primary') }}</a>
+                <a href="{{ $demoUrl }}" data-wn-analytics-cta="footer_demo" target="_blank" class="px-10 py-4 border border-white/40 rounded-xl font-bold hover:bg-white/10 transition-colors">{{ __('landing.cta.secondary') }}</a>
             </div>
         </div>
     </section>

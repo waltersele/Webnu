@@ -8,13 +8,16 @@
 @endpush
 
 @section('page_actions')
+    <a href="{{ route('admin.platform.analytics') }}" class="btn btn-primary btn-sm">
+        <i class="ri-bar-chart-box-line me-1"></i> Analítica
+    </a>
     <a href="{{ route('admin.platform.sales.index') }}" class="btn btn-outline-primary btn-sm">
         <i class="ri-briefcase-line me-1"></i> Comercial
     </a>
     <a href="{{ route('admin.platform.billing.index') }}" class="btn btn-outline-secondary btn-sm">
         <i class="ri-bank-card-line me-1"></i> Precios Stripe
     </a>
-    <a href="{{ route('admin.platform.users.index') }}" class="btn btn-primary btn-sm">
+    <a href="{{ route('admin.platform.users.index') }}" class="btn btn-outline-secondary btn-sm">
         <i class="ri-team-line me-1"></i> Ver clientes
     </a>
 @endsection

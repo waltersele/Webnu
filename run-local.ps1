@@ -1,7 +1,9 @@
 # Arranca Webnu en local con SQLite (solo vista previa; no usa la BD de producción)
 # PHP 8.1+ recomendado (8.3 ideal). Ajusta la ruta en $PhpCandidates si hace falta.
 # Laravel 10 en main requiere PHP 8.1+ (composer.json: ^8.3). Priorizar 8.3 del sistema.
+# Preferir PHP del PATH (p. ej. WinGet 8.3.x), luego rutas fijas.
 $PhpCandidates = @(
+    (Get-Command php -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Source),
     "C:\php83\php.exe",
     "C:\laragon\bin\php\php-8.3.16-Win32-vs16-x64\php.exe",
     "C:\laragon\bin\php\php-8.3.12-Win32-vs16-x64\php.exe",
@@ -10,7 +12,7 @@ $PhpCandidates = @(
     "C:\php\php.exe",
     (Join-Path $PSScriptRoot ".php-runtime\php.exe"),
     (Join-Path $PSScriptRoot ".php-runtime74\php.exe")
-)
+) | Where-Object { $_ }
 $Php = $null
 foreach ($candidate in $PhpCandidates) {
     if (-not (Test-Path $candidate)) { continue }

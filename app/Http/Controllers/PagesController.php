@@ -211,6 +211,16 @@ class PagesController extends Controller
         }
 
         Company::where('id', $company->id)->increment('menu_views');
+
+        try {
+            $fromQr = $request->boolean('qr')
+                || $request->query('src') === 'qr'
+                || $request->query('utm_medium') === 'qr';
+            app(\App\Services\Platform\PlatformAnalyticsRecorder::class)
+                ->recordMenuView((int) $company->id, $fromQr);
+        } catch (\Throwable $e) {
+            // no bloquear la carta pública
+        }
     }
 
     /**

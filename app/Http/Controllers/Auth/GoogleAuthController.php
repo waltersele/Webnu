@@ -74,6 +74,12 @@ class GoogleAuthController extends Controller
                 'default_locale' => app(MenuLocaleService::class)->detectSupportedLocaleFromRequest($request),
             ]);
             Cookie::queue(Cookie::forever('selected_company', $company->id));
+
+            try {
+                app(\App\Services\Platform\PlatformAnalyticsRecorder::class)->recordSignup('google');
+            } catch (\Throwable $e) {
+                // no bloquear registro
+            }
         } else {
             if (! $user->google_id) {
                 $user->google_id = $googleUser->getId();

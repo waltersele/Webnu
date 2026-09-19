@@ -34,3 +34,9 @@
     <script type="application/json" id="{{ $brand }}-measurement-labels">{!! json_encode($measurementLabels, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) !!}</script>
     <script src="{{ asset('js/measurement.js') }}?v={{ $measurementJsVersion }}" defer></script>
 @endif
+@php
+    $analyticsJsPath = public_path('js/webnu-analytics.js');
+    $analyticsJsVersion = is_file($analyticsJsPath) ? filemtime($analyticsJsPath) : time();
+@endphp
+{{-- Analítica first-party (panel Plataforma → Analítica). Sin cookies de terceros. --}}
+<script src="{{ asset('js/webnu-analytics.js') }}?v={{ $analyticsJsVersion }}" defer></script>

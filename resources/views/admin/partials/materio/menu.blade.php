@@ -85,6 +85,12 @@
                 <div>Dashboard</div>
             </a>
         </li>
+        <li class="menu-item {{ request()->routeIs('admin.platform.analytics*') ? 'active' : '' }}">
+            <a href="{{ route('admin.platform.analytics') }}" class="menu-link">
+                <i class="menu-icon icon-base ri ri-bar-chart-box-line"></i>
+                <div>Analítica</div>
+            </a>
+        </li>
         <li class="menu-item {{ request()->routeIs('admin.platform.billing*') ? 'active' : '' }}">
             <a href="{{ route('admin.platform.billing.index') }}" class="menu-link">
                 <i class="menu-icon icon-base ri ri-bank-card-line"></i>
