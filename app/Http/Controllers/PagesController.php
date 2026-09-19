@@ -116,6 +116,10 @@ class PagesController extends Controller
         if ($company->combine_menus && $company->menus()->where('enabled', true)->exists()
             && ! $request->boolean('studio_preview') && ! $request->boolean('sales_demo')
         ) {
+            if (! $showSuspendedOverlay) {
+                $this->recordMenuView($company, $request);
+            }
+
             $menus = $company->menus()
                 ->where('enabled', true)
                 ->orderBy('position')
@@ -361,6 +365,10 @@ class PagesController extends Controller
 
         if (! $menu) {
             abort(404);
+        }
+
+        if (! $showSuspendedOverlay) {
+            $this->recordMenuView($company, $request);
         }
 
         $showWebnuBadge = $company->user
