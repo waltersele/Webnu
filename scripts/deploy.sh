@@ -330,7 +330,7 @@ if [[ $NO_DOWN -eq 0 ]]; then
         MAINTENANCE=1
     else
         set +e
-        "$PHP_BIN" "$SITE_ROOT/artisan" down --retry=30 --message='Desplegando mejoras'
+        "$PHP_BIN" "$SITE_ROOT/artisan" down --retry=30
         DOWN_STATUS=$?
         set -e
         if [[ $DOWN_STATUS -eq 0 ]]; then
