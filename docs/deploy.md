@@ -31,6 +31,40 @@ Guía operativa del despliegue de **webnu.es** desde tu equipo a producción.
 - **Nota**: el despliegue **SIEMPRE** respeta `.env`, `public/img/` (uploads) y `storage/`.
 - **Crítico**: en cPanel → MultiPHP Manager, el dominio `webnu.es` debe usar **PHP 8.3** (el mismo que CLI `/opt/alt/php83`). Si el handler web queda en 7.4/8.0 y despliegas `main`, la web responde **HTTP 500** por incompatibilidad.
 
+## Cron y colas (obligatorio en producción)
+
+Sin cron, **no** corren trials, recordatorios ni publicación programada del blog.
+
+En cPanel → Cron Jobs (o crontab del usuario), cada minuto:
+
+```bash
+* * * * * cd /home/wwwwebnu/public_html/webnu.es && /opt/alt/php83/usr/bin/php artisan schedule:run >> /dev/null 2>&1
+```
+
+Comandos programados (`app/Console/Kernel.php`):
+
+| Horario | Comando |
+|---------|---------|
+| Diario 02:00 | `webnu:expire-trials` (trial → Free usable, sin suspender) |
+| Diario 03:00 | `webnu:purge-stale-pre-alta` |
+| Diario 09:00 | `webnu:send-subscription-reminders --days=3` |
+| Cada 5 min | `blog:publish-scheduled` |
+
+**Colas:** si en `.env` `QUEUE_CONNECTION=sync`, no hace falta worker. Si usas `database` o `redis`, mantén un worker:
+
+```bash
+php artisan queue:work --sleep=3 --tries=3
+```
+
+(o Supervisor / cron de reinicio según el hosting).
+
+Verificación:
+
+```bash
+php artisan schedule:list
+php artisan webnu:deploy-check
+```
+
 ## Despliegue normal (el caso del 95% de las veces)
 
 Desde tu equipo:

@@ -58,8 +58,8 @@ Credenciales de prueba: [docs/CREDENCIALES-DEMO-LOCAL.md](docs/CREDENCIALES-DEMO
 | Área | Descripción |
 |------|-------------|
 | **Landing** | Página principal en `/` (`landing-preview.blade.php`), precios freemium, registro sin Stripe en el hero |
-| **Onboarding** | Wizard de 5 pasos tras el registro (nombre, plantilla, escaneo IA o manual, QR) |
-| **Planes** | Gratis / Plus 9,90 € / Ilimitado 29,90 € — ver [docs/ONBOARDING-FREEMIUM.md](docs/ONBOARDING-FREEMIUM.md) |
+| **Onboarding** | Wizard de **6 pasos** tras el registro (negocio, plantilla, idioma, escaneo/manual, publicar QR) |
+| **Planes** | Free / **Pro 9,90 €** / **Plus 19,90 €** (+ Franquicias a medida) — ver [docs/ONBOARDING-FREEMIUM.md](docs/ONBOARDING-FREEMIUM.md) |
 | **Carta pública** | `https://tudominio/carta/{slug}` con plantillas (Lumière, Bistro, etc.) |
 | **Estudio de negocio** | Editor visual de plantilla, colores y preview en iframe |
 | **Escaneo IA** | Importar carta desde foto/PDF (Gemini + OCR) — [docs/MENU-SCAN.md](docs/MENU-SCAN.md) |
@@ -68,11 +68,16 @@ Credenciales de prueba: [docs/CREDENCIALES-DEMO-LOCAL.md](docs/CREDENCIALES-DEMO
 ## Plan Gratis (freemium)
 
 - 1 carta (negocio)
-- **5 escaneos IA** por cuenta (vitalicios, contados en `menu_scan_jobs`)
-- Sin vídeos en platos
+- **1 escaneo IA** vitalicio (contado en `menu_scan_jobs`)
+- Sin vídeos / traducción / PDF de carta
 - Panel admin accesible sin suscripción Stripe
+- Tras registro: **30 días de trial Pro**; al acabar vuelves a Free **sin suspensión** (la carta publicada sigue online)
 
 Límites en `config/plans.php` y `App\Services\UserPlanService`.
+
+## Workspace
+
+Trabaja siempre en este directorio (`Webnu/Webnu`). El árbol padre `C:\webproject\Webnu\` puede contener restos antiguos (Laravel 7); **no** es el proyecto de producción.
 
 ## Documentación
 
@@ -121,13 +126,14 @@ cd /home/wwwwebnu/public_html/webnu.es
 ./scripts/deploy.sh
 ```
 
-El script `scripts/deploy.sh` hace `git fetch`, calcula los ficheros cambiados desde el último deploy, hace `mysqldump` automático, `rsync` quirúrgico, `composer dump-autoload --ignore-platform-reqs`, `migrate --force`, ejecuta los seeders production-safe nuevos y refresca cachés. Soporta `--dry-run`, `--rollback`, `--skip-migrate`, `--skip-backup`, `--no-down` y `--full-rsync`.
+El script `scripts/deploy.sh` hace `git fetch`, rsync (delta o `--full-rsync`), backup MySQL, `composer install --no-dev` en PHP 8.3, `migrate --force` y `webnu:deploy-check`. Flags: `--dry-run`, `--rollback`, `--skip-migrate`, `--skip-backup`, `--no-down`, `--full-rsync`, `--with-vendor`.
 
 **Importante**:
-- No reemplazar `.env`, `public/.htaccess`, `public/img/`, `vendor/`, `composer.{json,lock}` ni `storage/` al subir builds (el script los excluye).
+- No reemplazar `.env`, `public/.htaccess`, `public/img/` ni `storage/` (el script los excluye).
+- `vendor/` se regenera en el servidor con Composer (no subir por FTP).
 - Configurar `GEMINI_API_KEY` o clave en Plataforma → Escaneo IA.
 - `SUPER_ADMIN_EMAILS` para acceso al panel plataforma.
-- Mientras el server siga en PHP 7.4, **no ejecutes `composer install`** (el `composer.json` apunta a PHP ^8.1).
+- En producción hace falta **cron** `schedule:run` (ver [docs/deploy.md](docs/deploy.md)).
 
 ## Licencia
 
