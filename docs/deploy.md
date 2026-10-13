@@ -98,6 +98,38 @@ Salida típica:
 | `--full-rsync` | rsync completo en lugar de delta git. Útil si sospechas archivos desincronizados. |
 | `--with-vendor` | Fuerza sincronizar `composer.json/lock` y `vendor/` + ejecutar `composer install` (útil en upgrades). |
 
+## Primer corte / upgrade mayor (Laravel 7 → 10, PHP 8.3)
+
+**Antes (una vez):** copiar el script nuevo (el rsync excluye `scripts/`):
+
+```bash
+cp ~/webnu-deploy/scripts/deploy.sh ~/public_html/webnu.es/scripts/deploy.sh
+chmod +x ~/public_html/webnu.es/scripts/deploy.sh
+```
+
+**Corte:**
+
+```bash
+cd /home/wwwwebnu/public_html/webnu.es
+# Opcional: dump manual previo
+./scripts/deploy.sh --full-rsync --with-vendor
+```
+
+Si el backup automático falla y ya tienes dump válido: añade `--skip-backup`.
+
+El script detecta upgrade mayor solo (live ≠ Laravel 10 o `composer.lock` distinto) y fuerza full-rsync + composer aunque olvides los flags.
+
+**Verificación:**
+
+```bash
+grep -n "VERSION =" vendor/laravel/framework/src/Illuminate/Foundation/Application.php | head -1
+php artisan --version
+curl -sI https://webnu.es/ | head -5
+curl -sI https://webnu.es/login | head -5
+```
+
+Esperado: `VERSION = '10.x.x'`, HTTP 200, sin `Fideloper` / `Elibyy`.
+
 ## Rollback rápido
 
 Imagina que tras un deploy notas un fallo grave:
@@ -243,6 +275,22 @@ php artisan up
 # Si sigue bloqueado:
 rm -f storage/framework/down
 ```
+
+### `Collection::offsetExists` / ArrayAccess (PHP 8.3 + Laravel 7)
+
+Vendor L7 bajo PHP 8.3. Solución: `./scripts/deploy.sh --full-rsync --with-vendor` (o dejar que la detección de upgrade mayor lo fuerce). No bajes a PHP 7.4.
+
+### `Class Elibyy\TCPDF\ServiceProvider not found`
+
+Cache de packages L7. `rm -f bootstrap/cache/{packages,services,config}.php && php artisan package:discover`.
+
+### `Class Fideloper\Proxy\TrustProxies not found`
+
+Código `app/` aún L7. Forzar full-rsync del mirror L10; `TrustProxies` debe usar `Illuminate\Http\Middleware\TrustProxies`.
+
+### Deploy se corta en «Backup MySQL» sin mensaje
+
+Versiones antiguas del script ocultaban el error. Actualiza `deploy.sh` y reintenta; o `--skip-backup` con dump manual previo.
 
 ## CI/CD (próximo paso)
 

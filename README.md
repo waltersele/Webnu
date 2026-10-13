@@ -20,7 +20,7 @@ Las conversaciones de Cursor se versionan en **`.cursor/conversations/`** para c
 
 ## Requisitos
 
-- PHP 7.4+ (proyecto Laravel 7) o PHP 8.x en local
+- PHP 8.3+ (Laravel 10)
 - Composer, Node.js (assets con Laravel Mix)
 - SQLite o MySQL para la base de datos
 - Opcional: Tesseract (OCR fallback), API Gemini (escaneo IA)

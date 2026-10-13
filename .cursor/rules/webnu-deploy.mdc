@@ -14,7 +14,7 @@ Dos intents claros del usuario que NO son lo mismo. Léelo siempre que vayas a h
 1. `git status` para revisar.
 2. `git add` solo de los ficheros relevantes (excluir lo de la sección "Nunca subir").
 3. `git commit -m "tipo: mensaje claro"` (feat / fix / chore / docs / refactor).
-4. `git push origin <rama-actual>` (normalmente `main`, salvo en `upgrade/laravel-10`).
+4. `git push origin <rama-actual>` (normalmente `main`).
 5. Termina ahí. NO conectes a webnu.es. NO ejecutes `deploy.sh`.
 
 ## "despliega" / "sube a producción" / "sube a web" / "publica" / "actualiza webnu.es"
@@ -22,10 +22,18 @@ Dos intents claros del usuario que NO son lo mismo. Léelo siempre que vayas a h
 **Implica que los cambios deben llegar al sitio live.**
 
 1. Primero el push (como arriba).
-2. Después, **imprime el comando de SSH listo para copiar** (el usuario lo ejecuta él):
+2. Después, **imprime el comando de SSH listo para copiar** (el usuario lo ejecuta él).
+
+   Deploy normal:
 
    ```bash
    ssh wwwwebnu@webnu.es "cd /home/wwwwebnu/public_html/webnu.es && ./scripts/deploy.sh"
+   ```
+
+   Upgrade mayor / vendor desfasado / primer corte L10:
+
+   ```bash
+   ssh wwwwebnu@webnu.es "cd /home/wwwwebnu/webnu-deploy && git fetch origin && git reset --hard origin/main && cp scripts/deploy.sh /home/wwwwebnu/public_html/webnu.es/scripts/deploy.sh && chmod +x /home/wwwwebnu/public_html/webnu.es/scripts/deploy.sh && cd /home/wwwwebnu/public_html/webnu.es && ./scripts/deploy.sh --full-rsync --with-vendor"
    ```
 
 3. Recuerda que si falla puede revertir con:
@@ -39,13 +47,14 @@ Dos intents claros del usuario que NO son lo mismo. Léelo siempre que vayas a h
 ## Mapa rápido del despliegue
 
 - Repo GitHub: `https://github.com/waltersele/Webnu`
-- Rama producción: `main` (**Laravel 10 + PHP ^8.3**)
-- Host: `webnu.es` (cPanel / LiteSpeed, **PHP 8.3 obligatorio en CLI y en MultiPHP del dominio**, MySQL)
+- Rama producción: `main` (Laravel 10 / PHP ^8.3)
+- Host: `webnu.es` (cPanel, PHP 8.3, MySQL)
 - Usuario SSH: `wwwwebnu`
-- Clon mirror en server: `/home/wwwwebnu/webnu-deploy/`
+- Clon mirror: `/home/wwwwebnu/webnu-deploy/`
 - Sitio live: `/home/wwwwebnu/public_html/webnu.es/`
-- Script: `scripts/deploy.sh` (idempotente; detecta `/opt/alt/php83`; flags: `--dry-run`, `--rollback`, `--skip-migrate`, `--skip-backup`, `--no-down`, `--full-rsync`, `--with-vendor`).
-- Documentación: `docs/deploy.md`.
+- Script: `scripts/deploy.sh` (`--dry-run`, `--rollback`, `--skip-migrate`, `--skip-backup`, `--no-down`, `--full-rsync`, `--with-vendor`)
+- Documentación: `docs/deploy.md`
+- Primer corte / vendor desfasado: copiar `scripts/deploy.sh` a live y `./scripts/deploy.sh --full-rsync --with-vendor`
 
 ## 500 por incompatibilidad PHP (cPanel)
 
@@ -69,7 +78,7 @@ Antes de cualquier deploy gordo (composer/vendor, upgrade):
 
 ## Cambios en `composer.json`
 
-Producción y `main` van en **PHP ^8.3 / Laravel 10**. Los cambios de dependencias van en `main` con deploy normal (`deploy.sh` hará `composer install --no-dev` cuando detecte stack moderno). Tras tocar `composer.lock`, preferir un deploy con `--with-vendor` o confirmar que el script regeneró `vendor/` en el servidor.
+Producción es PHP 8.3 / Laravel 10. Los cambios de dependencias van en `main` y se aplican en servidor con `composer install` vía `deploy.sh` (upgrade mayor o `--with-vendor`). Nunca subir `vendor/` por FTP.
 
 ## Mensaje de commit
 
