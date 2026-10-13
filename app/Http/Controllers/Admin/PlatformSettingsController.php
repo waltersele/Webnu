@@ -272,7 +272,8 @@ class PlatformSettingsController extends Controller
     {
         $this->authorize('platform.access');
 
-        $apiKey = $request->filled('gemini_api_key')
+        $fromForm = $request->filled('gemini_api_key');
+        $apiKey = $fromForm
             ? trim($request->get('gemini_api_key'))
             : $settings->geminiApiKey();
         $model = $request->filled('gemini_model')
@@ -281,9 +282,21 @@ class PlatformSettingsController extends Controller
 
         $result = GeminiMenuScanProvider::testConnection($apiKey, $model);
 
+        $message = $result['message'];
+        if ($result['ok']) {
+            // Persistimos key/modelo usados en la prueba para que el aviso
+            // "Sin API de Gemini" coincida con una conexión correcta.
+            $settings->updateGemini($fromForm ? $apiKey : null, $model);
+            if ($fromForm) {
+                $message .= ' La API key se ha guardado cifrada.';
+            } elseif ($request->filled('gemini_model')) {
+                $message .= ' Modelo guardado.';
+            }
+        }
+
         return redirect()
             ->route('admin.platform.settings')
-            ->with($result['ok'] ? 'flash' : 'flash_warning', $result['message']);
+            ->with($result['ok'] ? 'flash' : 'flash_warning', $message);
     }
 
     public function testMail(Request $request, PlatformMailConfigurator $mailConfigurator)

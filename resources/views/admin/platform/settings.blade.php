@@ -336,7 +336,9 @@
                         </div>
                     @else
                         <div class="alert alert-warning py-2">
-                            Sin API de Gemini. El escaneo con IA no estará disponible para los clientes.
+                            Sin API key <strong>guardada</strong>. Pega la clave abajo y pulsa
+                            <em>Probar conexión</em> (si va bien se guarda) o <em>Guardar cambios</em>.
+                            Hasta entonces el escaneo con IA no estará disponible para los clientes.
                         </div>
                     @endif
 
@@ -374,7 +376,10 @@
                             formmethod="post">
                         <i class="ri-link me-1"></i> Probar conexión con Gemini
                     </button>
-                    <p class="text-muted small mt-2 mb-0">La prueba usa la API key y el modelo del formulario (aunque no hayas guardado).</p>
+                    <p class="text-muted small mt-2 mb-0">
+                        La prueba usa la API key y el modelo del formulario. Si la conexión es correcta,
+                        se guardan automáticamente (no hace falta un Guardar aparte solo para Gemini).
+                    </p>
                 </div>
             </div>
 
