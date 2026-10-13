@@ -2,7 +2,6 @@
 
 namespace App\Console\Commands;
 
-use App\Services\Platform\UserSuspensionService;
 use App\User;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Schema;
@@ -11,11 +10,11 @@ class ExpireTrialsCommand extends Command
 {
     protected $signature = 'webnu:expire-trials {--dry-run : Solo muestra cuántos usuarios se actualizarían}';
 
-    protected $description = 'Transiciona trials caducados al plan free y limpia planes manuales (cortesía) caducados.';
+    protected $description = 'Pasa trials caducados a plan free usable (sin suspender) y limpia planes manuales caducados.';
 
-    public function handle(UserSuspensionService $suspension): int
+    public function handle(): int
     {
-        $trialsCount = $this->expireTrials($suspension);
+        $trialsCount = $this->expireTrials();
         $manualCount = $this->expireManualPlans();
 
         $this->info("Trials expirados procesados: {$trialsCount}");
@@ -24,7 +23,10 @@ class ExpireTrialsCommand extends Command
         return 0;
     }
 
-    protected function expireTrials(UserSuspensionService $suspension): int
+    /**
+     * Baja a Free usable (sin suspensión). La landing promete volver a Free, no bloquear la cuenta.
+     */
+    protected function expireTrials(): int
     {
         $query = User::query()
             ->whereNotNull('trial_ends_at')
@@ -47,12 +49,11 @@ class ExpireTrialsCommand extends Command
         }
 
         $updated = 0;
-        $query->orderBy('id')->chunkById(500, function ($users) use (&$updated, $suspension) {
+        $query->orderBy('id')->chunkById(500, function ($users) use (&$updated) {
             foreach ($users as $user) {
                 $user->plan = 'free';
                 $user->trial_plan_key = null;
                 $user->save();
-                $suspension->suspend($user, 'trial_expired');
                 $updated++;
             }
         });

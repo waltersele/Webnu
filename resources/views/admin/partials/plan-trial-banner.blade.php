@@ -5,22 +5,22 @@
     @if(!empty($planPresentation['trial_active']))
         <div class="alert alert-info d-flex flex-wrap align-items-center justify-content-between gap-2 mb-4" role="status">
             <div>
-                <strong>Prueba Plus gratis</strong>
+                <strong>Prueba Pro gratis</strong>
                 — Te quedan {{ $planPresentation['trial_days_remaining'] }} {{ $planPresentation['trial_days_remaining'] === 1 ? 'día' : 'días' }}
                 @if(!empty($planPresentation['trial_ends_at_formatted']))
                     (hasta {{ $planPresentation['trial_ends_at_formatted'] }}).
                 @endif
-                Disfruta de vídeos, traducciones e IA sin límite.
+                Disfruta de vídeos, traducciones e IA con los límites Pro.
             </div>
-            <a href="{{ route('admin.settings') }}" class="btn btn-sm btn-primary shrink-0">Activar suscripción</a>
+            <a href="{{ route('admin.settings') }}#plan" class="btn btn-sm btn-primary shrink-0">Activar suscripción</a>
         </div>
     @elseif(!empty($planPresentation['trial_expired']))
         <div class="alert alert-warning d-flex flex-wrap align-items-center justify-content-between gap-2 mb-4" role="status">
             <div>
-                <strong>Tu prueba Plus ha terminado.</strong>
-                Has vuelto al plan Gratis: sin vídeos en platos, sin traducciones y escaneos IA limitados.
+                <strong>Tu prueba Pro ha terminado.</strong>
+                Has vuelto al plan Gratis: sin vídeos en platos, sin traducciones y escaneos IA limitados. Tu carta sigue publicada.
             </div>
-            <a href="{{ route('admin.settings') }}" class="btn btn-sm btn-warning shrink-0">Recuperar Plus</a>
+            <a href="{{ route('admin.settings') }}#plan" class="btn btn-sm btn-warning shrink-0">Pasar a Pro</a>
         </div>
     @endif
 @endif
