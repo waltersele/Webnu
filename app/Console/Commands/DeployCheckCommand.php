@@ -57,20 +57,30 @@ class DeployCheckCommand extends Command
             $ok = false;
         }
 
-        if (config('queue.default') !== 'database' && config('app.env') === 'production') {
-            $this->warn('QUEUE_CONNECTION debería ser database en producción');
+        $queueDefault = (string) config('queue.default');
+        if ($queueDefault === 'sync') {
+            $this->info('Cola: sync (sin worker; OK en hosting sin queue:work)');
+        } elseif ($queueDefault !== 'database' && config('app.env') === 'production') {
+            $this->warn('QUEUE_CONNECTION debería ser database o sync en producción (actual: ' . $queueDefault . ')');
+        } else {
+            $this->info('Cola (driver ' . $queueDefault . '): OK');
         }
 
         try {
-            if (Schema::hasTable('jobs')) {
+            if (Schema::hasTable('jobs') && $queueDefault !== 'sync') {
                 $pendingJobs = (int) DB::table('jobs')->count();
-                if ($pendingJobs > 0) {
-                    $this->warn("Cola con {$pendingJobs} trabajo(s) pendiente(s). Ejecuta o reinicia queue:work.");
+                if ($pendingJobs > 50) {
+                    $this->warn("Cola con {$pendingJobs} trabajo(s) pendiente(s). Revisa queue:work / cron.");
+                } elseif ($pendingJobs > 0) {
+                    $this->warn("Cola con {$pendingJobs} trabajo(s) pendiente(s).");
                 }
             }
         } catch (\Throwable $e) {
             $this->warn('No se pudo comprobar la cola: ' . $e->getMessage());
         }
+
+        $this->info('Schedule: asegúrate de cron `* * * * * php artisan schedule:run` (expire-trials, reminders, blog).');
+        $this->line('  php artisan schedule:list');
 
         $pwaIcons = [
             public_path('img/pwa/icon-192.png'),

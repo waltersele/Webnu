@@ -21,8 +21,8 @@ class BillingController extends Controller
 
         if (! $user->stripe_id) {
             return redirect()
-                ->route('welcome')
-                ->with('flash_warning', 'Crea una suscripción para activar tu cuenta.');
+                ->to(route('admin.settings') . '#plan')
+                ->with('flash_warning', 'Elige un plan Pro o Plus para gestionar la facturación en Stripe.');
         }
 
         Stripe::setApiKey(config('services.stripe.secret'));
