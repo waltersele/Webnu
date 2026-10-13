@@ -75,13 +75,18 @@ class DashboardGuideService
 
     public function productCountForCompany(Company $company): int
     {
-        $sectionIds = Section::where('company_id', $company->id)->pluck('id');
+        // Misma regla que la carta pública: secciones y platos habilitados.
+        $sectionIds = Section::where('company_id', $company->id)
+            ->where('enabled', true)
+            ->pluck('id');
 
         if ($sectionIds->isEmpty()) {
             return 0;
         }
 
-        return (int) Product::whereIn('section_id', $sectionIds)->count();
+        return (int) Product::whereIn('section_id', $sectionIds)
+            ->where('enabled', true)
+            ->count();
     }
 
     public function companyHasIdentity(Company $company): bool

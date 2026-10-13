@@ -43,7 +43,8 @@ class SitemapController extends Controller
                 }
             });
 
-        $xml = view('sitemap.xml', ['urls' => $urls])->render();
+        // No usar view('sitemap.xml'): en Blade el punto es separador de carpetas.
+        $xml = view('sitemap', ['urls' => $urls])->render();
 
         return response($xml, 200, ['Content-Type' => 'application/xml; charset=UTF-8']);
     }

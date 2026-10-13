@@ -5,13 +5,14 @@ namespace App\Http\Controllers\Admin;
 use App\Company;
 use App\Http\Controllers\Controller;
 use App\Section;
+use App\Services\Admin\DashboardGuideService;
 use App\Services\CompanySlugService;
 use App\Services\ProfileWizardService;
 use Illuminate\Support\Facades\Cookie;
 
 class AdminController extends Controller
 {
-    public function index(ProfileWizardService $wizard)
+    public function index(ProfileWizardService $wizard, DashboardGuideService $guide)
     {
         $user = auth()->user();
 
@@ -36,19 +37,19 @@ class AdminController extends Controller
         $profileProgress = $profileGroups['overall_progress'];
         $showProfileWizard = $wizard->shouldShow($user, $company);
 
+        // Stats (productCount, trial, URL…) desde DashboardGuideService;
+        // el wizard de perfil puede sobrescribir progreso / siguiente paso.
+        $dashboard = array_merge($guide->build($user, $company), [
+            'progressCompleted' => $profileProgress['done'],
+            'progressCurrent' => $profileProgress['done'] + 1,
+            'progress' => $this->legacyProgressMap($profileSteps),
+            'primaryActionKey' => $this->firstPendingKey($profileSteps),
+            'nextStep' => $this->buildNextStep($profileSteps),
+        ]);
+
         return view('admin.dashboard', [
             'dashboardCompany' => $company,
-            'dashboard' => [
-                'hasCompany' => true,
-                'menuViews' => (int) ($company->menu_views ?? 0),
-                'progressCompleted' => $profileProgress['done'],
-                'progressCurrent' => $profileProgress['done'] + 1,
-                'progress' => $this->legacyProgressMap($profileSteps),
-                'primaryActionKey' => $this->firstPendingKey($profileSteps),
-                'nextStep' => $this->buildNextStep($profileSteps),
-                'canMenuScan' => true,
-                'canTvpik' => false,
-            ],
+            'dashboard' => $dashboard,
             'profileGroups'    => $profileGroups,
             'profileSteps'     => $profileSteps,
             'profileProgress'  => $profileProgress,

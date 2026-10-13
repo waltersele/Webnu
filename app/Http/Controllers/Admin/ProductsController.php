@@ -17,6 +17,7 @@ class ProductsController extends Controller
 {
     public function index()
     {
+        return redirect()->route('admin.sections.index');
     }
 
     public function edit(Product $product)

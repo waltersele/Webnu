@@ -471,7 +471,11 @@ class QrController extends Controller
     protected function writeSinglePageForContext(TCPDF $pdf, array $ctx, string $menuUrl): void
     {
         $logoPath = $ctx['logoPath'] ?? '';
-        $logoSrc = $logoPath !== '' ? '@' . $logoPath : '';
+        // TCPDF: '@' = datos binarios, no ruta. Usar ruta absoluta o '@'.file_get_contents().
+        $logoHtml = '';
+        if ($logoPath !== '' && is_file($logoPath)) {
+            $logoHtml = '<img src="' . htmlspecialchars($logoPath, ENT_QUOTES, 'UTF-8') . '" height="60">';
+        }
         $kind = $ctx['kind'] ?? '';
         $sub = match ($kind) {
             'hub' => 'NUESTRA CARTA Y MENÚS',
@@ -481,7 +485,7 @@ class QrController extends Controller
 
         $html = '
         <p></p>
-        <p style="text-align:center;">' . ($logoSrc !== '' ? '<img src="' . $logoSrc . '" height="60">' : '') . '</p>
+        <p style="text-align:center;">' . $logoHtml . '</p>
         <p style="font-weight:bold;font-size:20px;text-align:center;">ESCANEA</p>
         <p style="font-size:15px;text-align:center;">' . e($sub) . '</p>';
         $pdf->writeHTML($html, true, false, true, false, '');
