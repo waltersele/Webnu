@@ -205,6 +205,42 @@ should_sync_vendor() {
     esac
 }
 
+live_laravel_version() {
+    local f="$SITE_ROOT/vendor/laravel/framework/src/Illuminate/Foundation/Application.php"
+    if [[ ! -f "$f" ]]; then
+        echo ""
+        return
+    fi
+    grep -E "const VERSION = '" "$f" | head -1 | sed -E "s/.*'([^']+)'.*/\1/" || echo ""
+}
+
+# return 0 = sí hay upgrade mayor (forzar full-rsync + composer install)
+detect_major_upgrade() {
+    local live_ver
+    live_ver="$(live_laravel_version)"
+    if [[ -z "$live_ver" || "$live_ver" != 10.* ]]; then
+        return 0
+    fi
+    local lock_live="$SITE_ROOT/composer.lock"
+    local lock_repo="$REPO_ROOT/composer.lock"
+    if [[ ! -f "$lock_live" || ! -f "$lock_repo" ]]; then
+        return 0
+    fi
+    if ! cmp -s "$lock_live" "$lock_repo"; then
+        return 0
+    fi
+    return 1
+}
+
+assert_laravel_10() {
+    local ver
+    ver="$(live_laravel_version)"
+    if [[ "$ver" != 10.* ]]; then
+        die "Se esperaba Laravel 10.x tras composer install; encontrado: '${ver:-desconocido}'. Aborto sin marcar SHA."
+    fi
+    ok "Laravel VERSION=$ver"
+}
+
 # ---------- Comprobaciones previas ----------------------------------------- #
 [[ -d "$SITE_ROOT" ]]  || die "No existe SITE_ROOT: $SITE_ROOT"
 [[ -d "$REPO_ROOT" ]]  || die "No existe REPO_ROOT: $REPO_ROOT (clona el repo en \$HOME/webnu-deploy)"
@@ -271,6 +307,12 @@ fi
 
 say "PREV=$PREV_SHA  NEW=$NEW_SHA"
 
+if detect_major_upgrade; then
+    warn "Upgrade mayor detectado (Laravel live≠10.x y/o composer.lock distinto). Forzando --full-rsync --with-vendor."
+    FULL_RSYNC=1
+    WITH_VENDOR=1
+fi
+
 # En Laravel 10+ necesitamos composer.json/lock y vendor.
 if should_sync_vendor; then
     # Quitamos exclusiones heredadas.
@@ -280,12 +322,28 @@ if should_sync_vendor; then
 fi
 
 # ---------- Mantenimiento --------------------------------------------------- #
+MAINTENANCE=0
 if [[ $NO_DOWN -eq 0 ]]; then
-    artisan "down --retry=30 --message='Desplegando mejoras' || true"
+    say "Intentando modo mantenimiento"
+    if [[ $DRY_RUN -eq 1 ]]; then
+        dry_say "$PHP_BIN $SITE_ROOT/artisan down ..."
+        MAINTENANCE=1
+    else
+        set +e
+        "$PHP_BIN" "$SITE_ROOT/artisan" down --retry=30 --message='Desplegando mejoras'
+        DOWN_STATUS=$?
+        set -e
+        if [[ $DOWN_STATUS -eq 0 ]]; then
+            MAINTENANCE=1
+            ok "Sitio en mantenimiento"
+        else
+            warn "artisan down falló (exit $DOWN_STATUS). Continuando: probable vendor incompatible; se regenerará."
+        fi
+    fi
 fi
 
-# Aseguramos un `up` si algo falla
-trap 'if [[ $NO_DOWN -eq 0 ]]; then $PHP_BIN $SITE_ROOT/artisan up >/dev/null 2>&1 || true; fi' EXIT
+# Aseguramos un `up` si algo falla y habíamos entrado en mantenimiento
+trap 'if [[ ${MAINTENANCE:-0} -eq 1 ]]; then $PHP_BIN $SITE_ROOT/artisan up >/dev/null 2>&1 || true; fi' EXIT
 
 # ---------- Backup BD ------------------------------------------------------- #
 if [[ $SKIP_BACKUP -eq 0 ]]; then
@@ -301,14 +359,30 @@ if [[ $SKIP_BACKUP -eq 0 ]]; then
     DB_HOST="${DB_HOST:-127.0.0.1}"
 
     if [[ -z "$DB_NAME" ]]; then
-        warn "No se pudo leer DB_DATABASE de .env, salto el backup"
+        die "No se pudo leer DB_DATABASE de .env; no despliego sin backup. Usa --skip-backup si es intencional."
     else
         if [[ $DRY_RUN -eq 1 ]]; then
             dry_say "mysqldump $DB_NAME → $BACKUP_FILE"
         else
+            DUMP_ERR="$(mktemp)"
+            set +e
             MYSQL_PWD="$DB_PASS" mysqldump --single-transaction --quick \
-                -h "$DB_HOST" -u "$DB_USER" "$DB_NAME" 2>/dev/null \
+                -h "$DB_HOST" -u "$DB_USER" "$DB_NAME" 2>"$DUMP_ERR" \
                 | gzip > "$BACKUP_FILE"
+            DUMP_STATUS=${PIPESTATUS[0]}
+            set -e
+            if [[ $DUMP_STATUS -ne 0 ]]; then
+                warn "mysqldump falló (exit $DUMP_STATUS):"
+                cat "$DUMP_ERR" >&2 || true
+                rm -f "$DUMP_ERR" "$BACKUP_FILE"
+                die "Backup MySQL falló. Usa --skip-backup solo si ya tienes un dump válido, o corrige DB_* en .env"
+            fi
+            rm -f "$DUMP_ERR"
+            BACKUP_BYTES="$(wc -c < "$BACKUP_FILE" | tr -d ' ')"
+            if [[ "${BACKUP_BYTES:-0}" -lt 1024 ]]; then
+                rm -f "$BACKUP_FILE"
+                die "Backup MySQL demasiado pequeño (${BACKUP_BYTES} bytes). Aborto."
+            fi
             ok "Backup en $BACKUP_FILE ($(du -h "$BACKUP_FILE" | cut -f1))"
         fi
     fi
@@ -327,18 +401,31 @@ if [[ $FULL_RSYNC -eq 0 && -n "$PREV_SHA" && "$PREV_SHA" != "$NEW_SHA" ]]; then
     (cd "$REPO_ROOT" && git diff --name-only --diff-filter=AM "$PREV_SHA" "$NEW_SHA") > "$CHANGED_TMP"
     (cd "$REPO_ROOT" && git diff --name-only --diff-filter=D  "$PREV_SHA" "$NEW_SHA") > "$DELETED_TMP"
 
-    # Quitar ficheros vetados (.env, vendor, composer.*, etc.)
-    sed -i -E \
-        -e '/^composer\.(json|lock)$/d' \
-        -e '/^\.env$/d' -e '/^\.env\.example$/d' \
-        -e '/^php-local\.ini$/d' -e '/^run-local\.ps1$/d' \
-        -e '/^public\/img\//d' -e '/^public\/\.htaccess$/d' \
-        -e '/^vendor\//d' \
-        -e '/^storage\/(logs|framework|backups)\//d' \
-        -e '/^(tests|docs|scripts)\//d' \
-        -e '/^\.github\//d' \
-        -e '/^node_modules\//d' \
-        "$CHANGED_TMP" "$DELETED_TMP"
+    # Quitar ficheros vetados (.env, vendor, etc.). En stack moderno sí sincronizamos composer.json/lock.
+    if should_sync_vendor; then
+        sed -i -E \
+            -e '/^\.env$/d' -e '/^\.env\.example$/d' \
+            -e '/^php-local\.ini$/d' -e '/^run-local\.ps1$/d' \
+            -e '/^public\/img\//d' -e '/^public\/\.htaccess$/d' \
+            -e '/^vendor\//d' \
+            -e '/^storage\/(logs|framework|backups)\//d' \
+            -e '/^(tests|docs|scripts)\//d' \
+            -e '/^\.github\//d' \
+            -e '/^node_modules\//d' \
+            "$CHANGED_TMP" "$DELETED_TMP"
+    else
+        sed -i -E \
+            -e '/^composer\.(json|lock)$/d' \
+            -e '/^\.env$/d' -e '/^\.env\.example$/d' \
+            -e '/^php-local\.ini$/d' -e '/^run-local\.ps1$/d' \
+            -e '/^public\/img\//d' -e '/^public\/\.htaccess$/d' \
+            -e '/^vendor\//d' \
+            -e '/^storage\/(logs|framework|backups)\//d' \
+            -e '/^(tests|docs|scripts)\//d' \
+            -e '/^\.github\//d' \
+            -e '/^node_modules\//d' \
+            "$CHANGED_TMP" "$DELETED_TMP"
+    fi
 
     CHANGED_COUNT="$(wc -l < "$CHANGED_TMP" | tr -d ' ')"
     DELETED_COUNT="$(wc -l < "$DELETED_TMP" | tr -d ' ')"
@@ -377,6 +464,9 @@ run "rm -f $SITE_ROOT/bootstrap/cache/services.php $SITE_ROOT/bootstrap/cache/pa
 if should_sync_vendor; then
     say "Instalando dependencias (composer install --no-dev)"
     composer_run "install --no-dev --no-interaction --prefer-dist --optimize-autoloader"
+    if [[ $DRY_RUN -eq 0 ]]; then
+        assert_laravel_10
+    fi
 else
     say "Regenerando autoload (composer dump-autoload)"
     composer_run "dump-autoload --no-scripts --optimize --no-interaction --ignore-platform-reqs"
@@ -433,7 +523,7 @@ if [[ $DRY_RUN -eq 0 ]]; then
     log_line "DEPLOY $PREV_SHA → $NEW_SHA  msg=\"${COMMIT_MSG%%$'\n'*}\""
 fi
 
-if [[ $NO_DOWN -eq 0 ]]; then
+if [[ $MAINTENANCE -eq 1 ]]; then
     artisan "up"
 fi
 trap - EXIT
