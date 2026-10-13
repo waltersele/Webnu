@@ -80,6 +80,8 @@ class GoogleAuthController extends Controller
             } catch (\Throwable $e) {
                 // no bloquear registro
             }
+
+            event(new \Illuminate\Auth\Events\Registered($user));
         } else {
             if (! $user->google_id) {
                 $user->google_id = $googleUser->getId();
