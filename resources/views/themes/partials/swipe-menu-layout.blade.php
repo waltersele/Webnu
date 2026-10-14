@@ -3,6 +3,7 @@
     $locale = $menuLocale ?? 'es';
     $ui = $menuLocaleService ?? null;
     $menuLabel = $ui ? $ui->uiLabel('menu', $locale) : 'Carta';
+    $sectionsLabel = $ui ? $ui->uiLabel('sections', $locale) : 'Secciones';
 @endphp
 
 <div class="wn-menu-shell wn-menu-shell--swipe wn-swipe">
@@ -22,7 +23,7 @@
 
     <p class="wn-swipe-menu-label">{{ $menuLabel }}</p>
 
-    <nav class="wn-swipe-nav" id="sticker" aria-label="Secciones">
+    <nav class="wn-swipe-nav" id="sticker" aria-label="{{ $sectionsLabel }}">
         <div class="wn-swipe-nav__track">
             @foreach ($sections as $index => $section)
                 <a href="#section-{{ $section->id }}"
@@ -36,7 +37,7 @@
         @foreach ($sections as $section)
             <section class="wn-swipe-section" id="section-{{ $section->id }}">
                 <h2 class="wn-swipe-section__title">{{ $section->name }}</h2>
-                <div class="wn-swipe-rail" data-swipe-rail tabindex="0" aria-label="Platos de {{ $section->name }}">
+                <div class="wn-swipe-rail" data-swipe-rail tabindex="0" aria-label="{{ $ui ? $ui->uiLabel('dishes_of', $locale, ['name' => $section->name]) : 'Platos de '.$section->name }}">
                     <div class="wn-swipe-rail__track">
                         @foreach ($section->products as $product)
                             @include('themes.partials.cards.product-swipe', ['product' => $product])

@@ -12,7 +12,10 @@
     }
 @endphp
 
-<article class="wn-card-catalogo wn-modern-card--interactive">
+<article class="wn-card-catalogo wn-dish-card"
+         data-product-id="{{ $product->id }}"
+         data-target="#wnDish{{ $product->id }}"
+         tabindex="0">
     <div class="wn-card-catalogo__media">
         @include('themes.partials.menu-product-media', ['product' => $product])
     </div>
@@ -28,9 +31,7 @@
         @endif
         @include('themes.partials.product-prices', ['product' => $product])
     </div>
-    <button type="button" class="wn-card-catalogo__detail" data-toggle="modal" data-target="#wnDish{{ $product->id }}" aria-label="Ver detalle">
-        @include('themes.partials.icons.svg-chevron-right')
-    </button>
+    @include('themes.partials.menu-fav-button', ['product' => $product, 'favClass' => 'wn-fav-btn--action'])
 </article>
 
 @include('themes.partials.modern-product-detail-modal', ['product' => $product])

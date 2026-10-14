@@ -203,18 +203,9 @@ body.wn-theme-deck .wn-deck {
   font-weight: 800;
 }
 
-.wn-deck-card__cta {
-  width: 2.35rem;
-  height: 2.35rem;
-  border: 0;
-  border-radius: 50%;
+.wn-deck-card .wn-fav-btn--action {
   background: var(--wn-deck-accent);
   color: #fff;
-  font-size: 1.1rem;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
 }
 
 .wn-deck-dots {

@@ -133,10 +133,12 @@ body.wn-swipe--light .wn-swipe-nav__chip:hover {
   overflow-y: hidden;
   -webkit-overflow-scrolling: touch;
   scroll-snap-type: x mandatory;
-  scroll-padding-left: 1rem;
+  /* Inset de snap = padding del track; sin padding horizontal en el rail
+     para que scrollLeft=0 sea el ancla estable del primer plato. */
+  scroll-padding-inline: 1rem;
   scrollbar-width: none;
   -ms-overflow-style: none;
-  padding: 0 1rem 0.15rem;
+  padding: 0 0 0.15rem;
   touch-action: pan-x;
 }
 
@@ -146,7 +148,7 @@ body.wn-swipe--light .wn-swipe-nav__chip:hover {
   display: flex;
   gap: 0.85rem;
   width: max-content;
-  padding-right: 1rem;
+  padding-inline: 1rem;
 }
 
 .wn-swipe-card {
@@ -223,19 +225,24 @@ body.wn-swipe--light .wn-swipe-nav__chip:hover {
   margin: 0.15rem 0 0;
 }
 
-.wn-swipe-card__allergens .wn-allergens__item {
-  font-size: 0.55rem;
-  padding: 0.1rem 0.35rem;
-  display: inline-flex;
-  align-items: center;
-  justify-content: flex-start;
-  gap: 0.25rem;
+.wn-swipe-card__allergens .wn-allergens {
+  margin: 0.35rem 0 0;
+  gap: 0.4rem;
+}
+
+.wn-swipe-card__allergens .wn-allergens--icons-only .wn-allergens__item {
+  padding: 0;
+  border: 0;
+  background: transparent;
 }
 
 .wn-swipe-card__allergens .wn-allergens__icon {
-  width: 14px !important;
-  height: 14px !important;
+  width: 26px !important;
+  height: 26px !important;
+  min-width: 26px !important;
+  min-height: 26px !important;
   display: block !important;
+  border-radius: 50% !important;
 }
 
 .wn-swipe-section .wn-carousel-dots {
@@ -257,24 +264,17 @@ body.wn-swipe--light .wn-swipe-nav__chip:hover {
   color: var(--wn-text);
 }
 
-.wn-swipe-card__add {
-  width: 2.15rem;
-  height: 2.15rem;
-  border: 0;
-  border-radius: 50%;
+.wn-swipe-card .wn-fav-btn--action {
   background: var(--wn-swipe-accent);
   color: #111;
-  font-size: 1.35rem;
-  font-weight: 700;
-  line-height: 1;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
 }
 
-body.wn-swipe--light .wn-swipe-card__add {
+body.wn-swipe--light .wn-swipe-card .wn-fav-btn--action {
+  color: #fff;
+}
+
+body.wn-swipe--light .wn-swipe-card .wn-fav-btn--action.is-favorited,
+body.wn-swipe--light .wn-swipe-card .wn-fav-btn--action[aria-pressed='true'] {
   color: #fff;
 }
 

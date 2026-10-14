@@ -183,14 +183,14 @@ body.wn-theme-fastfood .wn-menu-shell {
   transform: scale(0.94);
 }
 
-.wn-theme-fastfood .wn-fav-btn {
+.wn-theme-fastfood .wn-fav-btn:not(.wn-media-chrome) {
   min-width: 44px;
   min-height: 44px;
   color: var(--wn-primary);
 }
 
-.wn-theme-fastfood .wn-fav-btn.is-favorited,
-.wn-theme-fastfood .wn-fav-btn[aria-pressed='true'] {
+.wn-theme-fastfood .wn-fav-btn:not(.wn-media-chrome).is-favorited,
+.wn-theme-fastfood .wn-fav-btn:not(.wn-media-chrome)[aria-pressed='true'] {
   color: var(--wn-primary);
 }
 

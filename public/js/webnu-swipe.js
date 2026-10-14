@@ -5,8 +5,11 @@
 
     function railOriginX(rail) {
         var style = window.getComputedStyle(rail);
-        var paddingLeft = parseFloat(style.paddingLeft) || 0;
-        return rail.getBoundingClientRect().left + paddingLeft;
+        var pad = parseFloat(style.scrollPaddingLeft);
+        if (isNaN(pad) || style.scrollPaddingLeft === 'auto') {
+            pad = parseFloat(style.paddingLeft) || 0;
+        }
+        return rail.getBoundingClientRect().left + pad;
     }
 
     function scrollLeftForCard(rail, card) {
@@ -47,9 +50,24 @@
         if (!cards.length) return;
         index = Math.max(0, Math.min(index, cards.length - 1));
 
-        // El primer plato siempre ancla a 0 (padding del rail no debe desplazar el target).
         var left = index === 0 ? 0 : scrollLeftForCard(rail, cards[index]);
+
+        // scroll-snap mandatory cancela a menudo scrollTo({behavior:'smooth'}).
+        // Desactivamos snap solo durante el scroll programado.
+        var restoreSnap = rail.style.scrollSnapType;
+        rail.style.scrollSnapType = 'none';
         rail.scrollTo({ left: left, behavior: 'smooth' });
+
+        var finished = false;
+        function restore() {
+            if (finished) return;
+            finished = true;
+            rail.style.scrollSnapType = restoreSnap;
+            rail.removeEventListener('scrollend', restore);
+        }
+
+        rail.addEventListener('scrollend', restore);
+        window.setTimeout(restore, 450);
     }
 
     function initRail(rail) {

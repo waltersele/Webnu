@@ -334,26 +334,49 @@ body.wn-theme-catalogo .wn-menu-nav--catalogo.is-pinned {
   border-color: rgba(255, 255, 255, 0.12);
 }
 
-.wn-allergens__item img,
-.wn-allergens__item svg,
+/* Iconos UE homologados — móvil-first: tamaño legible del glifo, no puntos de color */
+.wn-allergens {
+  gap: 0.4rem;
+}
+
+.wn-allergens--icons-only {
+  gap: 0.45rem;
+  margin-top: 0.45rem;
+}
+
+.wn-allergens--icons-only .wn-allergens__item {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  gap: 0;
+}
+
+.wn-allergens__item .webnu-allergen-icon,
 .wn-allergens__icon {
-  width: 18px !important;
-  height: 18px !important;
-  min-width: 0 !important;
-  min-height: 0 !important;
-  max-width: 18px !important;
-  max-height: 18px !important;
-  object-fit: contain !important;
-  flex-shrink: 0 !important;
+  width: 28px !important;
+  height: 28px !important;
+  min-width: 28px !important;
+  min-height: 28px !important;
+  max-width: none !important;
+  max-height: none !important;
   display: block !important;
-  position: static !important;
-  inset: auto !important;
+  flex-shrink: 0 !important;
+  border-radius: 50% !important;
   margin: 0 !important;
   padding: 0 !important;
   border: 0 !important;
   background: transparent !important;
-  border-radius: 0 !important;
-  align-self: center !important;
+  position: static !important;
+  object-fit: contain;
+  align-self: center;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.22);
+}
+
+.wn-allergens:not(.wn-allergens--icons-only) .webnu-allergen-icon {
+  width: 22px !important;
+  height: 22px !important;
+  min-width: 22px !important;
+  min-height: 22px !important;
 }
 
 /* Indicadores de carrusel (swipe / spotlight / deck) */
@@ -961,7 +984,72 @@ body.wn-theme-oriental .wn-menu-nav {
   position: absolute;
   top: 0.75rem;
   right: 3rem;
-  z-index: 2;
+  z-index: 5;
+  width: 2.35rem;
+  height: 2.35rem;
+  min-width: 40px;
+  min-height: 40px;
+  background: rgba(255, 255, 255, 0.95);
+  color: #1a1a1a;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.28);
+}
+
+.wn-fav-btn--modal .wn-svg-icon {
+  width: 1.15rem;
+  height: 1.15rem;
+}
+
+.wn-fav-btn--modal.is-favorited,
+.wn-fav-btn--modal[aria-pressed='true'] {
+  background: var(--wn-primary, #e11d48);
+  color: #fff;
+}
+
+.wn-fav-btn--modal.is-favorited .wn-svg-heart path,
+.wn-fav-btn--modal[aria-pressed='true'] .wn-svg-heart path {
+  fill: currentColor;
+}
+
+/* Fav en slot de acción (sustituye al +): siempre legible en cualquier card */
+.wn-dish-card {
+  cursor: pointer;
+}
+
+.wn-fav-btn--action {
+  width: 2.15rem;
+  height: 2.15rem;
+  min-width: 40px;
+  min-height: 40px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--wn-accent, var(--wn-primary, #e11d48));
+  color: #111;
+  box-shadow: none;
+  flex-shrink: 0;
+}
+
+.wn-fav-btn--action .wn-svg-icon {
+  width: 1.1rem;
+  height: 1.1rem;
+}
+
+.wn-fav-btn--action.is-favorited,
+.wn-fav-btn--action[aria-pressed='true'] {
+  color: #fff;
+  background: var(--wn-primary, #e11d48);
+}
+
+.wn-fav-btn--action.is-favorited .wn-svg-heart path,
+.wn-fav-btn--action[aria-pressed='true'] .wn-svg-heart path {
+  fill: currentColor;
+}
+
+.wn-ambre-spotlight__actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.65rem;
+  margin-top: 0.75rem;
 }
 
 .wn-favorites-bar {
@@ -1287,6 +1375,7 @@ body.wn-favorites-open {
 }
 
 .wn-card-overlay {
+  position: relative;
   border-radius: var(--wn-card-radius, 16px);
   box-shadow: var(--wn-card-shadow, 0 4px 20px rgba(15, 23, 42, 0.12));
   overflow: hidden;
@@ -1362,6 +1451,31 @@ body.wn-favorites-open {
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+}
+
+.wn-card-overlay__actions {
+  position: absolute;
+  right: 0.65rem;
+  bottom: 0.65rem;
+  z-index: 3;
+}
+
+.wn-card-overlay__body .wn-card-overlay__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.wn-card-overlay .wn-fav-btn--action {
+  background: rgba(255, 255, 255, 0.92);
+  color: var(--wn-text, #0f172a);
+}
+
+.wn-card-overlay .wn-fav-btn--action.is-favorited,
+.wn-card-overlay .wn-fav-btn--action[aria-pressed='true'] {
+  color: #fff;
+  background: var(--wn-primary, #e11d48);
 }
 
 .wn-card-overlay__open {

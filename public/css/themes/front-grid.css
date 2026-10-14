@@ -196,7 +196,7 @@ body.wn-theme-grid .wn-grid {
   gap: 0.85rem;
 }
 
-.wn-grid-card__hit {
+.wn-grid-card {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -208,7 +208,6 @@ body.wn-theme-grid .wn-grid {
   box-shadow: 0 1px 4px color-mix(in srgb, var(--wn-text) 8%, transparent);
   color: inherit;
   text-align: center;
-  cursor: pointer;
   min-height: 100%;
 }
 
@@ -267,10 +266,26 @@ body.wn-theme-grid .wn-grid {
   gap: 0.35rem;
 }
 
+.wn-grid-card__footer-end {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-shrink: 0;
+}
+
 .wn-grid-card__price {
   font-weight: 700;
   color: var(--wn-grid-accent);
   font-size: 0.95rem;
+}
+
+.wn-grid-card .wn-fav-btn--action {
+  width: 1.85rem;
+  height: 1.85rem;
+  min-width: 36px;
+  min-height: 36px;
+  background: var(--wn-grid-accent);
+  color: #111;
 }
 
 .wn-grid-card__allergens .wn-allergens {

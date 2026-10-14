@@ -145,18 +145,30 @@ body.wn-theme-harbor .wn-harbor::before {
   background: var(--wn-harbor-accent);
 }
 
-.wn-harbor-item__hit {
+.wn-harbor-item {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 0.65rem;
+  width: 100%;
+  padding: 0.85rem 0.5rem;
+  color: inherit;
+  text-align: center;
+}
+
+.wn-harbor-item__main {
   display: flex;
   flex-direction: column;
   align-items: center;
-  width: 100%;
-  padding: 0.85rem 0.5rem;
-  border: 0;
-  background: transparent;
-  color: inherit;
-  text-align: center;
-  cursor: pointer;
   gap: 0.25rem;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.wn-harbor-item .wn-fav-btn--action {
+  margin-top: 0.15rem;
+  background: var(--wn-harbor-accent);
+  color: #111;
 }
 
 .wn-harbor-item__title {

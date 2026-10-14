@@ -224,7 +224,8 @@ body.wn-theme-lumiere .wn-menu-shell {
   display: none !important;
 }
 
-.wn-theme-lumiere .wn-fav-btn {
+/* Solo fav en tarjeta/lista — nunca el chrome del modal (.wn-media-chrome) */
+.wn-theme-lumiere .wn-fav-btn:not(.wn-media-chrome) {
   background: #38342b;
   border: 1px solid color-mix(in srgb, var(--wn-primary) 30%, transparent);
   color: rgba(242, 202, 80, 0.75);
@@ -232,12 +233,12 @@ body.wn-theme-lumiere .wn-menu-shell {
   transition: background 0.15s, color 0.15s, border-color 0.15s, transform 0.1s;
 }
 
-.wn-theme-lumiere .wn-fav-btn:active {
+.wn-theme-lumiere .wn-fav-btn:not(.wn-media-chrome):active {
   transform: scale(0.94);
 }
 
-.wn-theme-lumiere .wn-fav-btn.is-favorited,
-.wn-theme-lumiere .wn-fav-btn[aria-pressed='true'] {
+.wn-theme-lumiere .wn-fav-btn:not(.wn-media-chrome).is-favorited,
+.wn-theme-lumiere .wn-fav-btn:not(.wn-media-chrome)[aria-pressed='true'] {
   color: var(--wn-primary);
   background: color-mix(in srgb, var(--wn-primary) 12%, #38342b);
   border-color: color-mix(in srgb, var(--wn-primary) 55%, transparent);

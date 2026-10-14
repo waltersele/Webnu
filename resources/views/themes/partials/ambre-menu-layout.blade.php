@@ -91,12 +91,15 @@
                         @endif
                         @include('themes.partials.menu-product-allergens', ['product' => $slide])
                     </div>
-                    <button type="button"
-                            class="wn-ambre-spotlight__cta"
-                            data-toggle="modal"
-                            data-target="#wnDish{{ $slide->id }}">
-                        Ver plato
-                    </button>
+                    <div class="wn-ambre-spotlight__actions">
+                        @include('themes.partials.menu-fav-button', ['product' => $slide, 'favClass' => 'wn-fav-btn--action'])
+                        <button type="button"
+                                class="wn-ambre-spotlight__cta"
+                                data-toggle="modal"
+                                data-target="#wnDish{{ $slide->id }}">
+                            Ver plato
+                        </button>
+                    </div>
                 </article>
             @endforeach
             @if($spotlightSlides->count() > 1)

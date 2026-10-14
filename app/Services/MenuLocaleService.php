@@ -58,14 +58,18 @@ class MenuLocaleService
         ];
     }
 
-    public function uiLabel(string $key, string $locale): string
+    public function uiLabel(string $key, string $locale, array $replace = []): string
     {
         $labels = config('menu_locales.ui.' . $locale, []);
-        if (! empty($labels[$key])) {
-            return $labels[$key];
+        $label = ! empty($labels[$key])
+            ? $labels[$key]
+            : config('menu_locales.ui.es.' . $key, $key);
+
+        foreach ($replace as $search => $value) {
+            $label = str_replace(':' . $search, (string) $value, $label);
         }
 
-        return config('menu_locales.ui.es.' . $key, $key);
+        return $label;
     }
 
     public function allergenLabel(string $slug, string $locale): string

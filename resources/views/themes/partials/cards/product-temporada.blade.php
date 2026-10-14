@@ -1,4 +1,7 @@
-<article class="wn-card-temporada wn-modern-card--interactive">
+<article class="wn-card-temporada wn-dish-card"
+         data-product-id="{{ $product->id }}"
+         data-target="#wnDish{{ $product->id }}"
+         tabindex="0">
     <div class="wn-card-temporada__media">
         @include('themes.partials.menu-product-media', ['product' => $product])
         @if(!empty($product->highlight))
@@ -8,7 +11,10 @@
         @endif
     </div>
     <div class="wn-card-temporada__body">
-        <h3 class="wn-card-temporada__title">{{ $product->name }}</h3>
+        <div class="wn-card-temporada__head">
+            <h3 class="wn-card-temporada__title">{{ $product->name }}</h3>
+            @include('themes.partials.menu-fav-button', ['product' => $product, 'favClass' => 'wn-fav-btn--action'])
+        </div>
         @if($product->description)
             <p class="wn-card-temporada__desc">{{ $product->description }}</p>
         @endif
@@ -17,9 +23,6 @@
             @include('themes.partials.menu-product-allergens', ['product' => $product])
         </div>
     </div>
-    <button type="button" class="wn-card-temporada__detail" data-toggle="modal" data-target="#wnDish{{ $product->id }}" aria-label="Ver detalle">
-        @include('themes.partials.icons.svg-chevron-right')
-    </button>
 </article>
 
 @include('themes.partials.modern-product-detail-modal', ['product' => $product])

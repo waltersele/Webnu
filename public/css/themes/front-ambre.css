@@ -253,17 +253,6 @@ body.wn-ambre--light .wn-ambre-spotlight__cta {
   border: 0;
 }
 
-.wn-ambre-card__hit {
-  display: block;
-  width: 100%;
-  padding: 0;
-  border: 0;
-  background: transparent;
-  color: inherit;
-  text-align: left;
-  cursor: pointer;
-}
-
 .wn-ambre-card__media {
   position: relative;
   aspect-ratio: 1;
@@ -303,7 +292,25 @@ body.wn-ambre--light .wn-ambre-spotlight__cta {
 }
 
 .wn-ambre-card__meta {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.4rem;
   padding: 0.15rem 0.1rem 0;
+}
+
+.wn-ambre-card__meta-text {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.wn-ambre-card .wn-fav-btn--action {
+  width: 1.85rem;
+  height: 1.85rem;
+  min-width: 36px;
+  min-height: 36px;
+  background: var(--wn-ambre-accent);
+  color: #111;
 }
 
 .wn-ambre-card__title {

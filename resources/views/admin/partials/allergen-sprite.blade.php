@@ -29,7 +29,7 @@
             <path fill="currentColor" d="M12 3C8.5 3 6 6 6 10s2.5 7 6 7 6-3 6-7-2.5-7-6-7zm0 2c2.4 0 4 2.2 4 5s-1.6 5-4 5-4-2.2-4-5 1.6-5 4-5zm0 2c-1.2 0-2 1.3-2 3s.8 3 2 3 2-1.3 2-3-.8-3-2-3z"/>
         </symbol>
         <symbol id="allergen-apio" viewBox="0 0 24 24">
-            <path fill="currentColor" d="M12 2v4M10 6h4M11 6v14h2V6M9 10h6M9 14h6M12 20v2"/>
+            <path fill="currentColor" d="M11 2h2v4h2.5a1 1 0 010 2H13v3h3a1 1 0 010 2h-3v3h2.5a1 1 0 010 2H13v4h-2v-4H8.5a1 1 0 010-2H11v-3H8a1 1 0 010-2h3V8H8.5a1 1 0 010-2H11V2z"/>
         </symbol>
         <symbol id="allergen-mostaza" viewBox="0 0 24 24">
             <path fill="currentColor" d="M9 4h6v3H9V4zm1 5h4l-1 11H11L10 9zm2-7a2 2 0 110 4 2 2 0 010-4z"/>

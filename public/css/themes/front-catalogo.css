@@ -85,6 +85,7 @@ body.wn-theme-catalogo {
 
 /* Tarjeta catálogo */
 .wn-card-catalogo {
+  position: relative;
   display: flex;
   align-items: stretch;
   gap: 0;
@@ -96,6 +97,14 @@ body.wn-theme-catalogo {
   border: 1px solid rgba(0, 0, 0, 0.05);
   cursor: pointer;
   min-height: 108px;
+}
+
+.wn-card-catalogo .wn-fav-btn--action {
+  position: absolute;
+  right: 0.55rem;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
 }
 
 .wn-card-catalogo__media {

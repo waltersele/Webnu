@@ -7,7 +7,10 @@
         ? $menuLocaleService->uiLabel('featured', $menuLocale ?? 'es')
         : 'Destacado';
 @endphp
-<article class="wn-deck-card">
+<article class="wn-deck-card wn-dish-card"
+         data-product-id="{{ $product->id }}"
+         data-target="#wnDish{{ $product->id }}"
+         tabindex="0">
     <div class="wn-deck-card__media">
         @if($img)
             <img src="{{ $img }}" alt="" class="wn-deck-card__img" loading="lazy">
@@ -32,13 +35,7 @@
             @else
                 <span></span>
             @endif
-            <button type="button"
-                    class="wn-deck-card__cta"
-                    data-toggle="modal"
-                    data-target="#wnDish{{ $product->id }}"
-                    aria-label="Ver detalle de {{ $product->name }}">
-                <span aria-hidden="true">+</span>
-            </button>
+            @include('themes.partials.menu-fav-button', ['product' => $product, 'favClass' => 'wn-fav-btn--action'])
         </div>
     </div>
 </article>

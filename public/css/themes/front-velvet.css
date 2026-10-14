@@ -242,17 +242,17 @@ body.wn-theme-velvet {
 }
 
 
-.wn-theme-velvet .wn-fav-btn {
+.wn-theme-velvet .wn-fav-btn:not(.wn-media-chrome) {
   background: color-mix(in srgb, var(--wn-primary) 8%, var(--wn-surface));
   border: 1px solid color-mix(in srgb, var(--wn-primary) 18%, transparent);
 }
 
-.wn-theme-velvet .wn-modern-card--no-media .wn-fav-btn {
+.wn-theme-velvet .wn-modern-card--no-media .wn-fav-btn:not(.wn-media-chrome) {
   background: var(--wn-surface);
 }
 
-.wn-theme-velvet .wn-fav-btn.is-favorited,
-.wn-theme-velvet .wn-fav-btn[aria-pressed='true'] {
+.wn-theme-velvet .wn-fav-btn:not(.wn-media-chrome).is-favorited,
+.wn-theme-velvet .wn-fav-btn:not(.wn-media-chrome)[aria-pressed='true'] {
   color: var(--wn-primary);
   background: color-mix(in srgb, var(--wn-primary) 12%, #fff);
   border-color: color-mix(in srgb, var(--wn-primary) 35%, transparent);

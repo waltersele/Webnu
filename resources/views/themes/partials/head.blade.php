@@ -34,6 +34,7 @@
 
     <link rel="icon" type="image/png" href="{{ \App\PlatformSetting::brandUrl('favicon') }}" />
 
+
 </head>
 
 @php
@@ -45,4 +46,5 @@
     }
 @endphp
 <body class="{{ $__bodyClasses }}"@if($__surfaceMode) data-surface-mode="{{ $__surfaceMode }}"@endif>
+@include('themes.partials.allergen-sprite')
 

@@ -28,6 +28,8 @@ Hay **15 plantillas** QR registradas (ver mapa §14). Plantillas retiradas en co
 
 **Harbor:** carta clásica centrada, tabs de categoría, tipografía editorial (`harbor-menu-layout`). `surface_mode` dark/light.
 
+**Lista:** carta restaurante en listado sin fotos (`lista-menu-layout`): nombre ··· precio + favorito; clic en fila abre modal. `surface_mode` dark/light.
+
 ---
 
 ## 2. Arquitectura obligatoria
@@ -46,6 +48,7 @@ Toda plantilla QR debe usar el shell compartido. **Prohibido** layouts propios s
 | Logo | `App\Services\LogoColorAnalyzer` | Variante chip en servidor |
 | CSS base | `public/css/themes/front-menu-ui.css`, `front-menu-hero.css`, `front-modern.css` | Tokens y estructura |
 | CSS tema | `public/css/themes/front-{template}.css` | **Solo** acentos color/tipografía |
+| Chrome modal | `theme-modal-overrides` → `.wn-media-chrome` | Fav + cerrar sobre foto: pastilla bloqueada (no tocar en tema) |
 | Variables | `resources/views/themes/partials/theme-vars.blade.php` | Tokens `--wn-*` |
 | Vista raíz | `resources/views/themes/{template}.blade.php` | Solo `@include modern-menu-layout` + `variant` + `cardLayout` |
 

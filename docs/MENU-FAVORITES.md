@@ -34,15 +34,26 @@ En **Personalizar** → **Lista de favoritos** (solo cartas digitales): activar/
 
 ## Front
 
-- Partial: `resources/views/themes/partials/menu-favorites.blade.php`
+- Partial barra: `resources/views/themes/partials/menu-favorites.blade.php`
+- Partial botón: `resources/views/themes/partials/menu-fav-button.blade.php`
 - JS: `public/js/webnu-menu-favorites.js`
-- CSS: `public/css/themes/front-menu-ui.css` (clases `wn-favorites-*`, `wn-fav-btn`) + overrides por plantilla (p. ej. `front-lumiere.css`)
-- Textos UI: `config/menu_locales.php` → `ui.{locale}.favorites_*` (incl. `favorites_hint`)
+- Textos UI: `config/menu_locales.php` → `ui.{locale}.favorites_*`
+
+### Roles de botón (obligatorio)
+
+| Clase | Dónde | Look |
+|-------|--------|------|
+| `wn-fav-btn--action` | Footer/lista de card (donde iba el `+`) | Círculo con acento del tema |
+| `wn-fav-btn--modal` + `wn-media-chrome` | Overlay del modal sobre foto/vídeo | **Misma pastilla negra semitransparente que la X** |
+
+El chrome del modal (`wn-media-chrome`) está **bloqueado** en `theme-modal-overrides.blade.php` (carga después de `front-{template}.css`). Los temas **no** deben sobrescribirlo.
+
+Si un tema estiliza `.wn-fav-btn`, debe usar `:not(.wn-media-chrome)` (ver `front-lumiere.css`, `front-velvet.css`, etc.).
 
 ## Alcance v1
 
-- Cartas digitales con `modern-menu-layout` (no PDF, no `menus-combined`).
-- Estilos base con variables del tema (`--wn-bg`, `--wn-surface`, `--wn-primary`); pulido por plantilla en CSS propio.
+- Cartas digitales modernas / galería (no PDF, no `menus-combined`).
+- Acentos de fav en card: sí en `front-{template}.css`. Chrome sobre media: no.
 
 ## Verificación manual
 

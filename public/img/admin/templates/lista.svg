@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="280" height="420" viewBox="0 0 280 420">
+  <rect width="280" height="420" fill="#f7f2e8"/>
+  <circle cx="140" cy="42" r="18" fill="none" stroke="#1a3a5c" stroke-width="2"/>
+  <rect x="88" y="70" width="104" height="12" rx="2" fill="#1a3a5c"/>
+  <text x="100" y="120" fill="#1a3a5c" font-family="Georgia, serif" font-size="36" font-style="italic">Menu</text>
+  <rect x="70" y="140" width="40" height="8" rx="2" fill="#c4783a"/>
+  <rect x="70" y="152" width="40" height="2" fill="#c4783a"/>
+  <rect x="120" y="140" width="40" height="8" rx="2" fill="#1a3a5c"/>
+  <rect x="170" y="140" width="40" height="8" rx="2" fill="#1a3a5c"/>
+  <line x1="70" y1="186" x2="100" y2="186" stroke="#c4783a"/>
+  <text x="110" y="190" fill="#1a3a5c" font-family="Arial, sans-serif" font-size="12" font-weight="700">Appetizers</text>
+  <line x1="180" y1="186" x2="210" y2="186" stroke="#c4783a"/>
+  <text x="78" y="230" fill="#c4783a" font-family="Georgia, serif" font-size="16">Fish Soup</text>
+  <rect x="70" y="240" width="140" height="8" rx="2" fill="#4a5f75"/>
+  <text x="100" y="268" fill="#1a3a5c" font-family="Arial, sans-serif" font-size="12" font-weight="700">150g | 10.99�</text>
+  <text x="70" y="310" fill="#c4783a" font-family="Georgia, serif" font-size="16">Caesar Salad</text>
+  <rect x="60" y="320" width="160" height="8" rx="2" fill="#4a5f75"/>
+  <text x="100" y="348" fill="#1a3a5c" font-family="Arial, sans-serif" font-size="12" font-weight="700">200g | 12.99�</text>
+</svg>

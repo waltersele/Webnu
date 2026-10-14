@@ -3,7 +3,10 @@
         || ! empty($product->display_video ?? $product->video);
 @endphp
 
-<article class="wn-card-overlay wn-modern-card--interactive{{ $hasMenuMedia ? '' : ' wn-card-overlay--text-only' }}" data-product-id="{{ $product->id }}">
+<article class="wn-card-overlay wn-dish-card{{ $hasMenuMedia ? '' : ' wn-card-overlay--text-only' }}"
+         data-product-id="{{ $product->id }}"
+         data-target="#wnDish{{ $product->id }}"
+         tabindex="0">
     @if($hasMenuMedia)
         <div class="wn-card-overlay__media">
             @include('themes.partials.menu-product-media', ['product' => $product])
@@ -24,9 +27,9 @@
                 @include('themes.partials.menu-product-allergens', ['product' => $product])
             </div>
         </div>
-        <button type="button" class="wn-card-overlay__open" data-toggle="modal" data-target="#wnDish{{ $product->id }}" aria-label="Ver detalle">
-            @include('themes.partials.icons.svg-expand')
-        </button>
+        <div class="wn-card-overlay__actions">
+            @include('themes.partials.menu-fav-button', ['product' => $product, 'favClass' => 'wn-fav-btn--action'])
+        </div>
     @else
         <div class="wn-card-overlay__body">
             <div class="wn-card-overlay__head">
@@ -38,9 +41,7 @@
                     @endif
                     <h3 class="wn-card-overlay__title">{{ $product->name }}</h3>
                 </div>
-                <button type="button" class="wn-card-overlay__open wn-card-overlay__open--inline" data-toggle="modal" data-target="#wnDish{{ $product->id }}" aria-label="Ver detalle">
-                    @include('themes.partials.icons.svg-chevron-right')
-                </button>
+                @include('themes.partials.menu-fav-button', ['product' => $product, 'favClass' => 'wn-fav-btn--action'])
             </div>
             @if($product->description)
                 <p class="wn-card-overlay__desc">{{ $product->description }}</p>

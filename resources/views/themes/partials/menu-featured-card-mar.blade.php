@@ -32,14 +32,7 @@
                     </div>
                     @if(!empty($favoritesEnabled))
                         <div class="wn-modern-card__fav-slot">
-                            <button type="button"
-                                    class="wn-fav-btn"
-                                    data-fav-toggle
-                                    data-product-id="{{ $product->id }}"
-                                    aria-pressed="false"
-                                    aria-label="{{ config('menu_locales.ui.' . ($menuLocale ?? 'es') . '.favorites_add', 'Añadir a favoritos') }}">
-                                @include('themes.partials.icons.svg-heart')
-                            </button>
+                            @include('themes.partials.menu-fav-button', ['product' => $product])
                         </div>
                     @endif
                 </div>

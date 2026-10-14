@@ -7,12 +7,12 @@
 <div class="modal fade wn-dish-modal" id="wnDish{{ $product->id }}" tabindex="-1" role="dialog" aria-labelledby="wnDishLabel{{ $product->id }}" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" role="document">
         <div class="modal-content wn-dish-modal__content">
-            <button type="button" class="wn-dish-modal__close" data-dismiss="modal" aria-label="Cerrar">
+            <button type="button" class="wn-dish-modal__close wn-media-chrome" data-dismiss="modal" aria-label="Cerrar">
                 @include('themes.partials.icons.svg-times')
             </button>
             @if(!empty($favoritesEnabled))
                 <button type="button"
-                        class="wn-fav-btn wn-fav-btn--modal"
+                        class="wn-fav-btn wn-fav-btn--modal wn-media-chrome"
                         data-fav-toggle
                         data-product-id="{{ $product->id }}"
                         aria-pressed="false"
@@ -51,7 +51,7 @@
                 @endif
 
                 @include('themes.partials.product-prices', ['product' => $product])
-                @include('themes.partials.menu-product-allergens', ['product' => $product])
+                @include('themes.partials.menu-product-allergens', ['product' => $product, 'showAllergenLabels' => true])
             </div>
         </div>
     </div>

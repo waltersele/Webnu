@@ -81,15 +81,18 @@ $(function () {
         openDishModal(target);
     });
 
-    $('.wn-modern-card--interactive, .wn-card-overlay, .wn-card-temporada, .wn-card-catalogo').on('click', function (e) {
-        if ($(e.target).closest('.wn-fav-btn, [data-fav-toggle], .modal, a[href]:not([data-target])').length) {
+    $(document).on('click', '.wn-dish-card, .wn-modern-card--interactive, .wn-card-overlay, .wn-card-temporada, .wn-card-catalogo', function (e) {
+        if ($(e.target).closest('.wn-fav-btn, [data-fav-toggle], .modal, a[href]:not([data-target]), button[data-ambre-prev], button[data-ambre-next], button[data-ambre-dot], button[data-swipe-dot]').length) {
             return;
         }
-        var $trigger = $(this).find('[data-target^="#wnDish"]').not('.wn-card-reel__open').first();
-        if (!$trigger.length) {
-            $trigger = $(this).find('[data-target^="#wnDish"]').first();
+        var target = $(this).attr('data-target') || null;
+        if (!target) {
+            var $trigger = $(this).find('[data-target^="#wnDish"]').not('.wn-card-reel__open').first();
+            if (!$trigger.length) {
+                $trigger = $(this).find('[data-target^="#wnDish"]').first();
+            }
+            target = $trigger.length ? $trigger.attr('data-target') : null;
         }
-        var target = $trigger.length ? $trigger.attr('data-target') : null;
         if (!target) {
             var productId = $(this).data('product-id');
             if (productId) {
@@ -97,6 +100,17 @@ $(function () {
             }
         }
         openDishModal(target);
+    });
+
+    $(document).on('keydown', '.wn-dish-card', function (e) {
+        if (e.key !== 'Enter' && e.key !== ' ') {
+            return;
+        }
+        if ($(e.target).closest('.wn-fav-btn, [data-fav-toggle]').length) {
+            return;
+        }
+        e.preventDefault();
+        $(this).trigger('click');
     });
 
     if ('IntersectionObserver' in window && $nav.length) {

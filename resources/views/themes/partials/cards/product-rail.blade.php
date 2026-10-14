@@ -3,34 +3,32 @@
     $img = $product->image ? url('img/' . ltrim($product->image, '/')) : null;
     $desc = $product->description ? \Illuminate\Support\Str::limit(strip_tags($product->description), 100) : null;
 @endphp
-<article class="wn-rail-item">
-    <button type="button"
-            class="wn-rail-item__hit"
-            data-toggle="modal"
-            data-target="#wnDish{{ $product->id }}"
-            aria-label="Ver detalle de {{ $product->name }}">
-        <span class="wn-rail-item__thumb">
-            @if($img)
-                <img src="{{ $img }}" alt="" loading="lazy">
-            @else
-                <span class="wn-rail-item__placeholder" aria-hidden="true">{{ mb_substr($product->name, 0, 1) }}</span>
+<article class="wn-rail-item wn-dish-card"
+         data-product-id="{{ $product->id }}"
+         data-target="#wnDish{{ $product->id }}"
+         tabindex="0">
+    <span class="wn-rail-item__thumb">
+        @if($img)
+            <img src="{{ $img }}" alt="" loading="lazy">
+        @else
+            <span class="wn-rail-item__placeholder" aria-hidden="true">{{ mb_substr($product->name, 0, 1) }}</span>
+        @endif
+    </span>
+    <span class="wn-rail-item__body">
+        <span class="wn-rail-item__row">
+            <span class="wn-rail-item__title">{{ $product->name }}</span>
+            @if($priceLabel)
+                <span class="wn-rail-item__price">{{ $priceLabel }}</span>
             @endif
+            @include('themes.partials.menu-fav-button', ['product' => $product, 'favClass' => 'wn-fav-btn--action'])
         </span>
-        <span class="wn-rail-item__body">
-            <span class="wn-rail-item__row">
-                <span class="wn-rail-item__title">{{ $product->name }}</span>
-                @if($priceLabel)
-                    <span class="wn-rail-item__price">{{ $priceLabel }}</span>
-                @endif
-            </span>
-            @if($desc)
-                <span class="wn-rail-item__desc">{{ $desc }}</span>
-            @endif
-            <span class="wn-rail-item__allergens">
-                @include('themes.partials.menu-product-allergens', ['product' => $product])
-            </span>
+        @if($desc)
+            <span class="wn-rail-item__desc">{{ $desc }}</span>
+        @endif
+        <span class="wn-rail-item__allergens">
+            @include('themes.partials.menu-product-allergens', ['product' => $product])
         </span>
-    </button>
+    </span>
 </article>
 
 @include('themes.partials.modern-product-detail-modal', ['product' => $product])

@@ -164,7 +164,7 @@ body.wn-theme-saffron .wn-menu-shell {
   border: 1px solid color-mix(in srgb, var(--wn-primary) 32%, transparent);
 }
 
-.wn-theme-saffron .wn-fav-btn {
+.wn-theme-saffron .wn-fav-btn:not(.wn-media-chrome) {
   min-width: 44px;
   min-height: 44px;
   color: var(--wn-primary);

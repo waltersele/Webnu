@@ -5,7 +5,9 @@ namespace App\Services\Demo;
 use App\Allergen;
 use App\Company;
 use App\Product;
+use App\ProductTranslation;
 use App\Section;
+use App\SectionTranslation;
 use App\Services\AllergenCatalogService;
 use App\User;
 use Illuminate\Support\Facades\DB;
@@ -173,8 +175,60 @@ class DemoMenuSeeder
                 $sectionOrders[$dish['section']] = $order + 1;
             }
 
+            if (($config['slug'] ?? '') === 'demo') {
+                $this->seedDemoTranslations($sections);
+            }
+
             return $company;
         });
+    }
+
+    /**
+     * @param array<string, Section> $sections
+     */
+    protected function seedDemoTranslations(array $sections): void
+    {
+        $catalog = new DemoTranslationCatalog();
+        $sectionMap = $catalog->sections();
+        $productMap = $catalog->products();
+        $locales = $catalog->locales();
+
+        foreach ($sections as $name => $section) {
+            $map = $sectionMap[$name] ?? null;
+            if (! $map) {
+                continue;
+            }
+            foreach ($locales as $locale) {
+                if (empty($map[$locale])) {
+                    continue;
+                }
+                SectionTranslation::updateOrCreate(
+                    ['section_id' => $section->id, 'locale' => $locale],
+                    ['name' => $map[$locale], 'source' => SectionTranslation::SOURCE_AI]
+                );
+            }
+        }
+
+        $products = Product::whereIn('section_id', collect($sections)->pluck('id'))->get();
+        foreach ($products as $product) {
+            $map = $productMap[$product->name] ?? null;
+            if (! $map) {
+                continue;
+            }
+            foreach ($locales as $locale) {
+                if (empty($map[$locale]['name'])) {
+                    continue;
+                }
+                ProductTranslation::updateOrCreate(
+                    ['product_id' => $product->id, 'locale' => $locale],
+                    [
+                        'name' => $map[$locale]['name'],
+                        'description' => $map[$locale]['description'] ?? null,
+                        'source' => ProductTranslation::SOURCE_AI,
+                    ]
+                );
+            }
+        }
     }
 
     protected function resolveVideoPath(?string $key): ?string

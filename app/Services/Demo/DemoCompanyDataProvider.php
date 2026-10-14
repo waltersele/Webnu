@@ -38,7 +38,8 @@ class DemoCompanyDataProvider
             'background_header' => 'demo/demo-header.jpg',
             'logo' => 'demo/demo-logo.jpg',
             'theme_settings' => null,
-            'enabled_locales' => ['en'],
+            'enabled_locales' => ['en', 'ru'],
+            'default_locale' => 'es',
             'sections' => ['Entrantes' => 0, 'Principales' => 1, 'Postres' => 2],
             'dishes' => [
                 ['section' => 'Entrantes', 'name' => 'Gazpacho andaluz', 'description' => 'Tomate pera, pepino, pimiento y aceite de oliva virgen extra de la finca.', 'price' => '7.50', 'image' => 'brasa-gazpacho.jpg', 'allergens' => ['Apio', 'Sulfitos'], 'highlight' => 'featured', 'video' => null],
