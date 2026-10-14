@@ -105,36 +105,43 @@ return [
         'recommended' => 'Featured',
         'try_demo' => 'View demo',
         'more_title' => 'And many more in your account',
-        'more_desc' => 'Japanese, fast food, seafood, fine dining, grill, cocktail bar… The catalogue grows every season.',
+        'more_desc' => 'Fewer templates, clearly differentiated: readable, stable on mobile and TV.',
         'cta' => 'Create my menu',
         'showcase' => [
             'pasion' => [
                 'label' => 'Pasión',
                 'description' => 'Clear, warm traditional menu — ideal for classic restaurants.',
             ],
+            'lumiere' => [
+                'label' => 'Lumiere',
+                'description' => 'Fine dining feel: warm charcoal, gold accents and premium cards.',
+            ],
             'nocturne' => [
                 'label' => 'Nocturne',
                 'description' => 'Dark mode, large photos and elegant type for bars.',
-            ],
-            'otaku' => [
-                'label' => 'Otaku',
-                'description' => 'Neon on black: ramen, street food and venues with personality.',
             ],
         ],
     ],
 
     'demos' => [
         'badge' => 'Live demos',
-        'title' => 'More than :count templates for your venue',
-        'subtitle' => 'Pick a style (restaurant, bar, cocktail bar, delivery…), open a demo on your phone and change colours, fonts and logo on the fly.',
+        'title' => ':count clear templates for your venue',
+        'subtitle' => 'Pick a distinct style, open it on your phone and customise colours, fonts and logo.',
         'cta' => 'View live menu',
         'items' => [
             [
                 'title' => 'Classic restaurant',
                 'subtitle' => 'La Brasa del Puerto',
-                'desc' => 'Mediterranean menu with the Basic template. Includes English: detects browser language when guests scan.',
-                'badge' => 'Basic',
+                'desc' => 'Mediterranean menu with the Pasión template. Includes English: detects browser language when guests scan.',
+                'badge' => 'Pasión',
                 'tags' => ['ES + EN', 'Reels', 'QR'],
+            ],
+            [
+                'title' => 'Fine dining',
+                'subtitle' => 'Lumiere',
+                'desc' => 'Flagship template with full-bleed hero and premium cards. Ideal for chef-led kitchens.',
+                'badge' => 'Lumiere',
+                'tags' => ['Premium', 'QR', 'TV'],
             ],
             [
                 'title' => 'Cocktail bar',
@@ -142,13 +149,6 @@ return [
                 'desc' => 'Full-width drinks with integrated reels. Nocturne template for bars and cocktail lounges.',
                 'badge' => 'Nocturne',
                 'tags' => ['Full width', 'Dark', 'Reels'],
-            ],
-            [
-                'title' => 'Ramen & Asian',
-                'subtitle' => 'Fuego Otaku',
-                'desc' => 'Neon orange, bold type and dishes with video. Otaku template for venues with personality.',
-                'badge' => 'Otaku',
-                'tags' => ['Neon', 'Reels', 'Dark'],
             ],
         ],
     ],

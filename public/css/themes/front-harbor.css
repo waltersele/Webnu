@@ -1,0 +1,202 @@
+/* Harbor � carta cl�sica centrada, tabs de categor�a */
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,500;1,600&family=Inter:wght@400;500;600;700&display=swap');
+
+body.wn-theme-harbor {
+  --wn-harbor-ink: var(--wn-primary, #1a3a5c);
+  --wn-harbor-accent: var(--wn-accent, #c4783a);
+  --wn-font-heading: 'Cormorant Garamond', Georgia, serif;
+  --wn-font-body: 'Inter', system-ui, sans-serif;
+  background: var(--wn-bg);
+  color: var(--wn-text);
+}
+
+body.wn-theme-harbor .wn-harbor {
+  max-width: 480px;
+  margin: 0 auto;
+  min-height: 100vh;
+  padding: 0 0 2.5rem;
+  background:
+    radial-gradient(ellipse at top, color-mix(in srgb, var(--wn-harbor-accent) 8%, transparent), transparent 55%),
+    var(--wn-bg);
+  position: relative;
+}
+
+body.wn-theme-harbor .wn-harbor::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.07;
+  background-image:
+    radial-gradient(circle at 12% 22%, var(--wn-harbor-ink) 1.2px, transparent 1.3px),
+    radial-gradient(circle at 88% 18%, var(--wn-harbor-accent) 1px, transparent 1.1px),
+    radial-gradient(circle at 78% 72%, var(--wn-harbor-ink) 1px, transparent 1.1px);
+  background-size: 140px 160px, 180px 200px, 160px 180px;
+}
+
+.wn-harbor-brand,
+.wn-harbor-nav,
+.wn-menu-main--harbor,
+.wn-modern-footer--harbor {
+  position: relative;
+  z-index: 1;
+}
+
+.wn-harbor-brand {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 1.4rem 1rem 0.5rem;
+}
+
+.wn-harbor-brand__logo {
+  width: 64px;
+  height: 64px;
+  object-fit: contain;
+  border-radius: 50%;
+  border: 2px solid color-mix(in srgb, var(--wn-harbor-ink) 35%, transparent);
+  padding: 0.25rem;
+  background: var(--wn-surface);
+}
+
+.wn-harbor-brand__name {
+  margin: 0.55rem 0 0;
+  font-family: var(--wn-font-heading);
+  font-size: 1.45rem;
+  font-weight: 700;
+  color: var(--wn-harbor-ink);
+}
+
+.wn-harbor-brand__menu {
+  margin: 0.35rem 0 0;
+  font-family: var(--wn-font-heading);
+  font-size: clamp(2.4rem, 10vw, 3.2rem);
+  font-style: italic;
+  font-weight: 500;
+  color: var(--wn-harbor-ink);
+  line-height: 1;
+}
+
+.wn-harbor-nav {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  background: color-mix(in srgb, var(--wn-bg) 90%, transparent);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  padding: 0.55rem 0 0.4rem;
+}
+
+.wn-harbor-nav__track {
+  display: flex;
+  justify-content: center;
+  gap: 1.25rem;
+  overflow-x: auto;
+  padding: 0 1rem;
+  scrollbar-width: none;
+}
+
+.wn-harbor-nav__track::-webkit-scrollbar { display: none; }
+
+.wn-harbor-nav__chip {
+  flex: 0 0 auto;
+  font-family: var(--wn-font-body);
+  font-size: 0.88rem;
+  font-weight: 600;
+  text-decoration: none;
+  color: var(--wn-harbor-ink);
+  padding: 0.2rem 0;
+  border-bottom: 2px solid transparent;
+}
+
+.wn-harbor-nav__chip.is-active,
+.wn-harbor-nav__chip:hover {
+  color: var(--wn-harbor-accent);
+  border-bottom-color: var(--wn-harbor-accent);
+}
+
+.wn-menu-main--harbor {
+  padding: 0.85rem 1.25rem 0;
+}
+
+.wn-harbor-section {
+  margin: 0 0 1.85rem;
+  scroll-margin-top: 3.5rem;
+}
+
+.wn-harbor-section__title {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  margin: 0 0 1.1rem;
+  font-family: var(--wn-font-body);
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--wn-harbor-ink);
+  text-align: center;
+}
+
+.wn-harbor-section__rule {
+  flex: 1 1 auto;
+  max-width: 72px;
+  height: 1px;
+  background: var(--wn-harbor-accent);
+}
+
+.wn-harbor-item__hit {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  padding: 0.85rem 0.5rem;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  text-align: center;
+  cursor: pointer;
+  gap: 0.25rem;
+}
+
+.wn-harbor-item__title {
+  font-family: var(--wn-font-heading);
+  font-size: 1.35rem;
+  font-weight: 600;
+  color: var(--wn-harbor-accent);
+  line-height: 1.15;
+}
+
+.wn-harbor-item__desc {
+  font-size: 0.78rem;
+  line-height: 1.4;
+  color: var(--wn-text-muted);
+  max-width: 28rem;
+}
+
+.wn-harbor-item__meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: 0.15rem;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--wn-harbor-ink);
+}
+
+.wn-harbor-item__sep {
+  opacity: 0.55;
+}
+
+.wn-harbor-item__allergens .wn-allergens {
+  margin: 0.25rem 0 0;
+  justify-content: center;
+}
+
+.wn-modern-footer--harbor {
+  margin-top: 1rem;
+  padding: 1.5rem 1rem;
+  text-align: center;
+  border-top: 1px solid color-mix(in srgb, var(--wn-harbor-ink) 15%, transparent);
+  color: var(--wn-text-muted);
+}

@@ -44,11 +44,23 @@ class AllergenCatalogService
 
     public static function slugFromAllergen(Allergen $allergen): ?string
     {
-        if (!$allergen->image) {
-            return null;
+        if ($allergen->image) {
+            return pathinfo($allergen->image, PATHINFO_FILENAME) ?: null;
         }
 
-        return pathinfo($allergen->image, PATHINFO_FILENAME);
+        $needle = Str::slug($allergen->name);
+        $catalog = config('allergens.catalog', []);
+        if ($needle !== '' && isset($catalog[$needle])) {
+            return $needle;
+        }
+
+        foreach ($catalog as $slug => $item) {
+            if (Str::lower($item['name'] ?? '') === Str::lower($allergen->name)) {
+                return $slug;
+            }
+        }
+
+        return $needle !== '' ? $needle : null;
     }
 
     /**

@@ -63,7 +63,7 @@ class TvpikController extends Controller
             ->get()
             ->keyBy('tvpik_screen_id');
 
-        $templates = config('tvpik_templates.templates', []);
+        $templates = app(\App\Services\Tv\TvTemplateRegistry::class)->galleryTemplates();
         $menus = $menuSync->companiesPayload($user->id);
 
         $companies = $user->companies()->orderBy('name')->get();

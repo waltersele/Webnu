@@ -14,6 +14,20 @@ El cliente personaliza **colores, fuentes, logo, banner y textos**. La **estruct
 
 Hay **15 plantillas** QR registradas (ver mapa §14). Plantillas retiradas en consolidación 2026-05: `basic`, `bistro`, `oriental`, `visual`, `atelier` (empresas migradas automáticamente). La clave `velvet` se **reintrodujo** en 2026-05 con diseño «Velvet Bloom» (las empresas migradas previamente de `velvet` → `lumiere` no vuelven solas).
 
+**Galería 2026-10 (soft-retire):** altas nuevas ven `pasion`, `lumiere`, `nocturne`, `ambre`, `swipe`, `rail`, `grid`, `deck`, `harbor`, `temporada`, `catalogo`, `mar` (`gallery: true` en `config/company_templates.php`). `japo` y `asador` son **legacy-en-uso** (ocultas a nuevos, render obligatorio). El resto queda fuera de galería pero resoluble para demos. Catálogo: `App\Services\CompanyTemplatesCatalog`. Pack TV: modos `carta` / `destacado` + `?orient=landscape|portrait`.
+
+**Ambre:** layout propio (`ambre-menu-layout`), rejilla 2×2 + spotlight. `theme_settings.surface_mode` = `dark`|`light` (estudio: Fondo oscuro/claro).
+
+**Swipe:** layout propio (`swipe-menu-layout`): marca + acciones (mapa/tel), secciones en vertical y **carrusel horizontal** de platos por categoría. Mismo `surface_mode` dark/light. El botón «+» abre el modal de detalle (no carrito).
+
+**Rail:** rail de categorías + lista vertical con foto circular (`rail-menu-layout`). `surface_mode` dark/light.
+
+**Grid:** pills + promo swipe opcional + rejilla 2 columnas (`grid-menu-layout`). `surface_mode` dark/light.
+
+**Deck:** carta grande deslizable por sección (dots) + lista compacta (`deck-menu-layout`). `surface_mode` dark/light.
+
+**Harbor:** carta clásica centrada, tabs de categoría, tipografía editorial (`harbor-menu-layout`). `surface_mode` dark/light.
+
 ---
 
 ## 2. Arquitectura obligatoria

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Concerns;
 
 use App\Company;
+use App\Services\CompanyTemplatesCatalog;
 use App\Services\UserPlanService;
 
 trait BuildsCompanyStudioPayload
@@ -17,7 +18,9 @@ trait BuildsCompanyStudioPayload
     protected function studioPayload(Company $company, UserPlanService $plans): array
     {
         $user = auth()->user();
-        $templates = config('company_templates.templates', []);
+        $catalog = app(CompanyTemplatesCatalog::class);
+        $currentTemplate = $company->template ?: 'pasion';
+        $templates = $catalog->forGallery($currentTemplate);
         $templateLabels = collect($templates)->mapWithKeys(function ($meta, $key) {
             return [$key => $meta['label'] ?? $key];
         })->all();

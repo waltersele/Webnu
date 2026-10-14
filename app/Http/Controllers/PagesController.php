@@ -127,7 +127,7 @@ class PagesController extends Controller
                     $q->orderBy('position');
                 }, 'sections.items' => function ($q) {
                     $q->orderBy('position');
-                }, 'sections.items.product'])
+                }, 'sections.items.product.allergens'])
                 ->get();
 
             $showWebnuBadge = $company->user
@@ -360,7 +360,7 @@ class PagesController extends Controller
                 $q->orderBy('position');
             }, 'sections.items' => function ($q) {
                 $q->orderBy('position');
-            }, 'sections.items.product'])
+            }, 'sections.items.product.allergens'])
             ->first();
 
         if (! $menu) {

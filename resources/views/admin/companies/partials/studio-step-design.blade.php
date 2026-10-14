@@ -25,14 +25,36 @@
                 </div>
             </div>
 
+            @php
+                $supportsSurfaceMode = ! empty(($templates[$currentTemplate]['surface_mode'] ?? false));
+                $surfaceModeValue = old('theme_surface_mode', $themeSettings['surface_mode'] ?? 'dark');
+                if (! in_array($surfaceModeValue, ['dark', 'light'], true)) {
+                    $surfaceModeValue = 'dark';
+                }
+                $surfaceModePalettes = config('company_templates.surface_modes.' . $currentTemplate, []);
+            @endphp
+            <div class="mb-3 {{ $supportsSurfaceMode ? '' : 'd-none' }}" id="wn-surface-mode-wrap"
+                 data-surface-modes='@json($surfaceModePalettes)'>
+                <p class="small fw-semibold text-body-secondary mb-2">Fondo de la carta</p>
+                <div class="btn-group" role="group" aria-label="Fondo claro u oscuro">
+                    <input type="radio" class="btn-check" name="theme_surface_mode" id="theme_surface_mode_dark" value="dark" autocomplete="off" {{ $surfaceModeValue === 'dark' ? 'checked' : '' }}>
+                    <label class="btn btn-sm btn-outline-secondary" for="theme_surface_mode_dark">Oscuro</label>
+                    <input type="radio" class="btn-check" name="theme_surface_mode" id="theme_surface_mode_light" value="light" autocomplete="off" {{ $surfaceModeValue === 'light' ? 'checked' : '' }}>
+                    <label class="btn btn-sm btn-outline-secondary" for="theme_surface_mode_light">Claro</label>
+                </div>
+                <p class="text-muted small mb-0 mt-1">Ambre y Swipe admiten fondo negro o blanco; el acento se mantiene.</p>
+            </div>
+
             <p class="small fw-semibold text-body-secondary mb-2">Paletas rápidas</p>
             <div class="wn-preset-chips mb-3" id="wn-preset-chips">
                 @foreach($templatePresets as $presetName => $presetColors)
                     <button type="button"
                         class="btn btn-sm btn-outline-secondary wn-preset-btn {{ $loop->first ? 'active' : '' }}"
                         data-colors='@json($presetColors)'>
-                        @foreach(array_slice($presetColors, 0, 3) as $hex)
-                            <span class="wn-preset-btn__dot" style="background: {{ $hex }}"></span>
+                        @foreach(array_slice(array_values(array_filter($presetColors, 'is_string')), 0, 3) as $hex)
+                            @if(is_string($hex) && str_starts_with($hex, '#'))
+                                <span class="wn-preset-btn__dot" style="background: {{ $hex }}"></span>
+                            @endif
                         @endforeach
                         {{ $presetName }}
                     </button>

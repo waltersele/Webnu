@@ -134,6 +134,7 @@
             previewUrl: @json($previewUrl),
             activeStep: @json($activeStep),
             themePresets: @json($themePresets),
+            surfaceModes: @json(config('company_templates.surface_modes', [])),
             templateLabels: @json($templateLabels),
             heroRatios: @json($heroRatios ?? []),
             headerCropUrl: @json($headerCropUrl ?? null),

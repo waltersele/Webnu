@@ -37,7 +37,7 @@ class OnboardingController extends Controller
         }
 
         $templateAccess = $plans->templateAccessForUser($user);
-        $templates = collect(config('company_templates.templates', []));
+        $templates = collect(app(\App\Services\CompanyTemplatesCatalog::class)->forOnboarding());
         $templatePreviewUrls = $this->templatePreviewUrls();
         $themePresets = config('company_templates.presets', []);
         $slugService = app(CompanySlugService::class);

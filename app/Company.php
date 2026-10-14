@@ -152,10 +152,20 @@ class Company extends Model
         $defaults = config('company_templates.defaults.' . $template, config('company_templates.defaults.pasion', []));
         $fontDefaults = config('company_templates.font_defaults', []);
         $saved = is_array($this->theme_settings) ? $this->theme_settings : [];
-
-        return array_merge($defaults, $fontDefaults, array_filter($saved, function ($value) {
+        $saved = array_filter($saved, function ($value) {
             return $value !== null && $value !== '';
-        }));
+        });
+
+        $mode = $saved['surface_mode'] ?? ($defaults['surface_mode'] ?? null);
+        $modePalette = [];
+        if (is_string($mode) && in_array($mode, ['dark', 'light'], true)) {
+            $modePalette = config('company_templates.surface_modes.' . $template . '.' . $mode, []);
+            if (! is_array($modePalette)) {
+                $modePalette = [];
+            }
+        }
+
+        return array_merge($defaults, $fontDefaults, $modePalette, $saved);
     }
 
     public function themeFontFamily(string $role): string

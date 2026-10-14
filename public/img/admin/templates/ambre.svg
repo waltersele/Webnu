@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="280" height="420" viewBox="0 0 280 420">
+  <rect width="280" height="420" fill="#0a0a0a"/>
+  <rect x="16" y="16" width="70" height="18" rx="2" fill="#f5b800" opacity="0.35"/>
+  <rect x="96" y="16" width="52" height="18" rx="2" fill="#ffffff" opacity="0.9"/>
+  <rect x="158" y="16" width="52" height="18" rx="2" fill="#ffffff" opacity="0.25"/>
+  <text x="140" y="78" text-anchor="middle" fill="#f5b800" font-family="Arial Black, sans-serif" font-size="28">12,50</text>
+  <text x="140" y="130" text-anchor="middle" fill="#ffffff" font-family="Arial Black, sans-serif" font-size="42">AMBRE</text>
+  <circle cx="140" cy="210" r="62" fill="#121212"/>
+  <circle cx="140" cy="210" r="48" fill="#2a2114"/>
+  <rect x="24" y="290" width="110" height="100" rx="8" fill="#121212" stroke="#f5b800" stroke-width="2"/>
+  <rect x="146" y="290" width="110" height="100" rx="8" fill="#121212"/>
+  <rect x="34" y="368" width="70" height="8" rx="2" fill="#ffffff" opacity="0.8"/>
+  <rect x="34" y="380" width="40" height="6" rx="2" fill="#f5b800"/>
+  <rect x="156" y="368" width="70" height="8" rx="2" fill="#ffffff" opacity="0.8"/>
+  <rect x="156" y="380" width="40" height="6" rx="2" fill="#f5b800"/>
+</svg>

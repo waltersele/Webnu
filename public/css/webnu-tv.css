@@ -1881,3 +1881,92 @@ html.wn-tv-player-active body {
   font-size: clamp(0.85rem, 1.5vw, 1.05rem);
 }
 
+
+/* —— Pack identity + orientation (QR skin → TV H/V) —— */
+.wn-tv--orient-portrait .wn-tv__frame {
+  padding: 3.5vh 5vw;
+}
+
+.wn-tv--orient-portrait .wn-tv-header {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.75rem;
+  margin-bottom: 2.5vh;
+}
+
+.wn-tv--orient-portrait .wn-tv-header__logo {
+  height: 8vh;
+  max-height: 72px;
+}
+
+.wn-tv--orient-portrait .wn-tv-header__name {
+  font-size: clamp(1.35rem, 5.5vw, 2.1rem);
+}
+
+.wn-tv--orient-portrait .wn-tv-header__mode {
+  margin-left: 0;
+}
+
+.wn-tv--orient-portrait .wn-tv-menu__section-title {
+  font-size: clamp(1.2rem, 4.5vw, 1.75rem);
+  margin-bottom: 1.5vh;
+}
+
+.wn-tv--orient-portrait .wn-tv-menu__list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2vh;
+  font-size: clamp(0.95rem, 3.2vw, 1.25rem);
+}
+
+.wn-tv--orient-portrait .wn-tv-menu__item,
+.wn-tv--orient-portrait .wn-tv-item {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.35rem 1rem;
+  padding: 0.85vh 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--wn-tv-text-muted) 25%, transparent);
+}
+
+.wn-tv--orient-portrait .wn-tv-spotlight,
+.wn-tv--orient-portrait .wn-tv-featured {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 2vh;
+}
+
+.wn-tv--orient-portrait .wn-tv-spotlight__media,
+.wn-tv--orient-portrait .wn-tv-featured__media {
+  width: 100%;
+  max-height: 42vh;
+  border-radius: 18px;
+  overflow: hidden;
+}
+
+.wn-tv--orient-portrait .wn-tv-spotlight__title,
+.wn-tv--orient-portrait .wn-tv-featured__title {
+  font-size: clamp(1.6rem, 6vw, 2.4rem);
+}
+
+/* Skin densidades legibles por pack QR */
+.wn-tv--skin-nocturne,
+.wn-tv--skin-maison {
+  --wn-tv-scrim: rgba(0, 0, 0, 0.45);
+  --wn-tv-scrim-strong: rgba(0, 0, 0, 0.72);
+}
+
+.wn-tv--skin-catalogo .wn-tv-menu__list {
+  font-size: clamp(0.95rem, 1.6vw, 1.2rem);
+  letter-spacing: 0.01em;
+}
+
+.wn-tv--skin-temporada .wn-tv-menu__section-title,
+.wn-tv--skin-pasion .wn-tv-menu__section-title {
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.wn-tv--skin-mar .wn-tv-header__name {
+  font-family: var(--wn-tv-font-display, Georgia, serif);
+}

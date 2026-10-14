@@ -6,17 +6,45 @@ class TvTemplateRegistry
 {
     public function defaultLayout(): string
     {
-        return (string) config('tvpik_templates.default', 'menu');
+        return (string) config('tvpik_templates.default', 'carta');
     }
 
     public function allowedLayouts(): array
     {
-        return config('tvpik_templates.layouts', ['menu']);
+        return config('tvpik_templates.layouts', ['carta', 'menu']);
     }
 
     public function templates(): array
     {
         return config('tvpik_templates.templates', []);
+    }
+
+    /**
+     * Plantillas visibles en el picker admin (pack modes + galería).
+     *
+     * @return array<string, array<string, mixed>>
+     */
+    public function galleryTemplates(): array
+    {
+        $out = [];
+        foreach ($this->templates() as $key => $tpl) {
+            if (! is_array($tpl)) {
+                continue;
+            }
+            $inGallery = array_key_exists('gallery', $tpl) ? (bool) $tpl['gallery'] : true;
+            if ($inGallery || ! empty($tpl['pack_mode'])) {
+                $out[$key] = $tpl;
+            }
+        }
+
+        uasort($out, function ($a, $b) {
+            $ap = ! empty($a['pack_mode']) ? 0 : 1;
+            $bp = ! empty($b['pack_mode']) ? 0 : 1;
+
+            return $ap <=> $bp;
+        });
+
+        return $out;
     }
 
     public function template(string $key): ?array
@@ -36,6 +64,18 @@ class TvTemplateRegistry
         }
 
         return $layout;
+    }
+
+    public function resolveOrientation(?string $orientation): string
+    {
+        $orientation = $orientation ?: (string) config('tvpik_templates.default_orientation', 'landscape');
+        $allowed = config('tvpik_templates.orientations', ['landscape', 'portrait']);
+
+        if (! in_array($orientation, $allowed, true)) {
+            return (string) config('tvpik_templates.default_orientation', 'landscape');
+        }
+
+        return $orientation;
     }
 
     public function viewForLayout(string $layout): string

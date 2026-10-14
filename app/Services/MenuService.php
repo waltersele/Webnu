@@ -254,6 +254,16 @@ class MenuService
             }
         }
 
+        $surfaceMode = $request->query('theme_surface_mode');
+        if (is_string($surfaceMode) && in_array($surfaceMode, ['dark', 'light'], true)) {
+            $overrides['surface_mode'] = $surfaceMode;
+            $tpl = $company->template ?: 'pasion';
+            $modePalette = config('company_templates.surface_modes.' . $tpl . '.' . $surfaceMode, []);
+            if (is_array($modePalette) && $modePalette !== []) {
+                $overrides = array_merge($modePalette, $overrides);
+            }
+        }
+
         if ($overrides !== []) {
             $company->theme_settings = array_merge(
                 $company->resolvedThemeSettings(),

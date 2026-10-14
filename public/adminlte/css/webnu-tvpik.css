@@ -420,6 +420,13 @@
     border-radius: 0.5rem;
     overflow: hidden;
     border: 1px solid rgba(67, 89, 113, 0.15);
+    margin-inline: auto;
+    transition: aspect-ratio 160ms ease, max-width 160ms ease;
+}
+
+.wn-tvpik-preview__frame.is-portrait {
+    aspect-ratio: 9 / 16;
+    max-width: min(360px, 100%);
 }
 
 .wn-tvpik-preview__iframe {

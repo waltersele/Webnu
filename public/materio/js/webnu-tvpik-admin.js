@@ -37,7 +37,7 @@
             el: tools,
             adminBase: tools.getAttribute('data-player-admin') || '',
             tvRoot: tools.getAttribute('data-tv-root') || '',
-            defaultTemplate: tools.getAttribute('data-default-template') || 'menu',
+            defaultTemplate: tools.getAttribute('data-default-template') || 'carta',
             layouts: layouts,
             labels: labels,
             companySel: document.getElementById('wn-player-company'),
@@ -71,10 +71,13 @@
         var opt = tools.companySel && tools.companySel.options[tools.companySel.selectedIndex];
         var slug = opt && opt.getAttribute('data-slug');
         var tpl = templateKey || getSelectedTemplateKey(tools);
-        var layout = tools.layouts[tpl] || tpl || 'menu';
+        var layout = tools.layouts[tpl] || tpl || 'carta';
         if (!slug) return { slug: '', preview: '', player: '' };
 
         var query = mode === 'preview' ? 'preview=1' : 'player=1';
+        var orientEl = document.getElementById('wn-tvpik-orient');
+        var orient = (orientEl && orientEl.value) || 'landscape';
+        query += '&orient=' + encodeURIComponent(orient);
         var base = tools.tvRoot.replace(/\/$/, '') + '/' + slug + '/' + layout + '?' + query;
         var mid = tools.menuSel && tools.menuSel.value;
         if (mid) {
@@ -140,6 +143,16 @@
 
         tools.companySel && tools.companySel.addEventListener('change', onContextChange);
         tools.menuSel && tools.menuSel.addEventListener('change', onContextChange);
+        var orientSel = document.getElementById('wn-tvpik-orient');
+        if (orientSel) {
+            orientSel.addEventListener('change', function () {
+                var frame = document.querySelector('[data-tvpik-orient-frame]');
+                if (frame) {
+                    frame.classList.toggle('is-portrait', orientSel.value === 'portrait');
+                }
+                onContextChange();
+            });
+        }
 
         filterPlayerMenus();
         syncGalleryContext();

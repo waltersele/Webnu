@@ -306,7 +306,11 @@ body.wn-theme-catalogo .wn-menu-nav--catalogo.is-pinned {
   color: var(--wn-text-muted);
 }
 
-/* Alérgenos solo texto (sin pictogramas) en todas las plantillas */
+/* Pictogramas UE + etiqueta corta */
+.wn-allergens__item {
+  border-color: color-mix(in srgb, var(--wn-allergen-color, currentColor) 35%, rgba(0, 0, 0, 0.08));
+}
+
 .wn-allergens--text-only .wn-allergens__item--text-only {
   padding: 0.18rem 0.55rem;
   border-radius: 2px;

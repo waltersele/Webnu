@@ -36,5 +36,13 @@
 
 </head>
 
-<body class="wn-theme-{{ $company->template }}">
+@php
+    $__themeResolved = $company->resolvedThemeSettings();
+    $__surfaceMode = $__themeResolved['surface_mode'] ?? null;
+    $__bodyClasses = 'wn-theme-' . $company->template;
+    if (in_array($__surfaceMode, ['dark', 'light'], true)) {
+        $__bodyClasses .= ' wn-' . $company->template . '--' . $__surfaceMode;
+    }
+@endphp
+<body class="{{ $__bodyClasses }}"@if($__surfaceMode) data-surface-mode="{{ $__surfaceMode }}"@endif>
 

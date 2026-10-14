@@ -1,4 +1,8 @@
 <link rel="stylesheet" href="{{ asset('css/themes/front-suspended-overlay.css') }}">
+<script>
+    document.documentElement.classList.add('wn-is-suspended');
+    document.body && document.body.classList.add('wn-is-suspended');
+</script>
 <div class="wn-suspended-overlay" role="dialog" aria-modal="true" aria-labelledby="wn-suspended-title">
     <div class="wn-suspended-overlay__inner">
         <img class="wn-suspended-overlay__logo" src="{{ \App\PlatformSetting::brandUrl('logo_white') }}" alt="Webnu" decoding="async">

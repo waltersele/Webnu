@@ -1,0 +1,356 @@
+/* Ambre � bold tipogr�fico, rejilla 2�2, modo dark/light */
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Montserrat:wght@400;500;600;700&display=swap');
+
+body.wn-theme-ambre {
+  --wn-ambre-accent: var(--wn-accent, #f5b800);
+  --wn-ambre-radius: 999px;
+  --wn-font-heading: 'Bebas Neue', Impact, sans-serif;
+  --wn-font-body: 'Montserrat', system-ui, sans-serif;
+  background: var(--wn-bg);
+  color: var(--wn-text);
+}
+
+body.wn-theme-ambre .wn-ambre {
+  max-width: 480px;
+  margin: 0 auto;
+  min-height: 100vh;
+  padding-bottom: 2.5rem;
+  background: var(--wn-bg);
+}
+
+/* Nav categor�as */
+.wn-ambre-nav {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  background: color-mix(in srgb, var(--wn-bg) 92%, transparent);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid color-mix(in srgb, var(--wn-text) 10%, transparent);
+  padding: 0.65rem 0;
+}
+
+.wn-ambre-nav__track {
+  display: flex;
+  gap: 1.1rem;
+  overflow-x: auto;
+  padding: 0 1rem;
+  scrollbar-width: none;
+}
+
+.wn-ambre-nav__track::-webkit-scrollbar { display: none; }
+
+.wn-ambre-nav__chip {
+  flex: 0 0 auto;
+  font-family: var(--wn-font-body);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: var(--wn-text-muted);
+  padding: 0.35rem 0;
+  border-bottom: 2px solid transparent;
+}
+
+.wn-ambre-nav__chip.is-active,
+.wn-ambre-nav__chip:hover {
+  color: var(--wn-text);
+  border-bottom-color: var(--wn-ambre-accent);
+}
+
+/* Spotlight / plato estrella */
+.wn-ambre-spotlight {
+  padding: 1.25rem 1rem 0.5rem;
+  text-align: center;
+}
+
+.wn-ambre-spotlight__price {
+  margin: 0;
+  font-family: var(--wn-font-heading);
+  font-size: clamp(2.4rem, 10vw, 3.25rem);
+  line-height: 1;
+  letter-spacing: 0.02em;
+  color: var(--wn-ambre-accent);
+}
+
+.wn-ambre-spotlight__eyebrow {
+  margin: 0.15rem 0 0;
+  font-size: 0.7rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--wn-text-muted);
+}
+
+.wn-ambre-spotlight__title {
+  margin: 0.35rem 0 0.75rem;
+  font-family: var(--wn-font-heading);
+  font-size: clamp(3.2rem, 14vw, 4.75rem);
+  line-height: 0.9;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--wn-text);
+  word-break: break-word;
+}
+
+.wn-ambre-spotlight__media {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1rem;
+  max-width: 340px;
+}
+
+.wn-ambre-spotlight__img {
+  width: min(78vw, 300px);
+  height: min(78vw, 300px);
+  object-fit: contain;
+  display: block;
+  filter: drop-shadow(0 18px 28px rgba(0, 0, 0, 0.35));
+}
+
+.wn-ambre-spotlight__img--empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--wn-surface);
+  border-radius: 50%;
+  font-family: var(--wn-font-heading);
+  font-size: 4rem;
+  color: var(--wn-text-muted);
+}
+
+.wn-ambre-spotlight__arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 2.25rem;
+  height: 2.25rem;
+  border: 0;
+  border-radius: 50%;
+  background: var(--wn-ambre-accent);
+  color: #0a0a0a;
+  font-size: 1.35rem;
+  line-height: 1;
+  cursor: pointer;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+}
+
+.wn-ambre-spotlight__arrow--prev { left: 0; }
+.wn-ambre-spotlight__arrow--next { right: 0; }
+
+body.wn-ambre--light .wn-ambre-spotlight__arrow {
+  color: #fff;
+}
+
+.wn-ambre-spotlight__copy {
+  text-align: left;
+  max-width: 340px;
+  margin: 0 auto 1rem;
+}
+
+.wn-ambre-spotlight__subtitle {
+  margin: 0 0 0.4rem;
+  font-family: var(--wn-font-body);
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--wn-ambre-accent);
+}
+
+.wn-ambre-spotlight__desc {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.45;
+  color: var(--wn-text);
+}
+
+.wn-ambre-spotlight__copy .wn-allergens {
+  margin-top: 0.65rem;
+}
+
+.wn-ambre-spotlight__cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: min(280px, 86vw);
+  padding: 0.9rem 1.75rem;
+  border: 0;
+  border-radius: var(--wn-ambre-radius);
+  background: var(--wn-ambre-accent);
+  color: #0a0a0a;
+  font-family: var(--wn-font-body);
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  cursor: pointer;
+  margin-bottom: 0.5rem;
+}
+
+body.wn-ambre--light .wn-ambre-spotlight__cta {
+  color: #fff;
+}
+
+/* Secci�n + grid */
+.wn-menu-main--ambre {
+  padding: 1.25rem 1rem 0;
+}
+
+.wn-ambre-section-head {
+  margin: 0 0 1rem;
+  text-align: left;
+}
+
+.wn-ambre-section-head__title {
+  margin: 0;
+  font-family: var(--wn-font-heading);
+  font-size: clamp(2.6rem, 11vw, 3.5rem);
+  line-height: 0.95;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--wn-text);
+}
+
+.wn-ambre-section-head__house {
+  margin: 0.1rem 0 0;
+  font-family: var(--wn-font-body);
+  font-size: 0.95rem;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--wn-text-muted);
+}
+
+.wn-ambre-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.1rem 0.85rem;
+  margin-bottom: 2rem;
+}
+
+.wn-ambre-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  background: transparent;
+  border: 0;
+}
+
+.wn-ambre-card__hit {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.wn-ambre-card__media {
+  position: relative;
+  aspect-ratio: 1;
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--wn-surface);
+  border: 1px solid transparent;
+}
+
+.wn-ambre-card.is-featured .wn-ambre-card__media {
+  border-color: var(--wn-ambre-accent);
+}
+
+.wn-ambre-card__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.wn-ambre-card__placeholder {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--wn-font-heading);
+  font-size: 2.5rem;
+  color: var(--wn-text-muted);
+}
+
+.wn-ambre-card__badge {
+  position: absolute;
+  top: 0.4rem;
+  left: 0.4rem;
+  z-index: 1;
+}
+
+.wn-ambre-card__meta {
+  padding: 0.15rem 0.1rem 0;
+}
+
+.wn-ambre-card__title {
+  margin: 0;
+  font-family: var(--wn-font-body);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--wn-text);
+  line-height: 1.25;
+}
+
+.wn-ambre-card__price {
+  margin: 0.15rem 0 0;
+  font-family: var(--wn-font-body);
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--wn-ambre-accent);
+}
+
+.wn-ambre-card__allergens .wn-allergens {
+  margin: 0;
+}
+
+.wn-ambre-card__allergens .wn-allergens__item {
+  font-size: 0.55rem;
+  padding: 0.1rem 0.35rem;
+}
+
+/* Footer Ambre */
+.wn-modern-footer--ambre {
+  margin-top: 1rem;
+  padding: 1.5rem 1rem;
+  text-align: center;
+  border-top: 1px solid color-mix(in srgb, var(--wn-text) 12%, transparent);
+  color: var(--wn-text-muted);
+}
+
+.wn-modern-footer--ambre a {
+  color: var(--wn-text);
+}
+
+/* Language switcher: compact bottom-right feel on ambre */
+body.wn-theme-ambre .wn-lang-switch {
+  z-index: 50;
+}
+
+@media (min-width: 480px) {
+  body.wn-theme-ambre .wn-ambre {
+    max-width: 420px;
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--wn-text) 8%, transparent);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wn-ambre-spotlight__arrow {
+    transition: none;
+  }
+}

@@ -684,8 +684,13 @@ class UserPlanService
         return in_array($templateKey, $this->freeTemplateKeys(), true);
     }
 
-    public function assertCanUseTemplate(User $user, string $templateKey): void
+    public function assertCanUseTemplate(User $user, string $templateKey, ?string $currentTemplate = null): void
     {
+        // Legacy / plantilla ya asignada: no forzar upgrade ni migración.
+        if ($currentTemplate !== null && $templateKey === $currentTemplate) {
+            return;
+        }
+
         if ($this->canUseTemplate($user, $templateKey)) {
             return;
         }
@@ -702,15 +707,15 @@ class UserPlanService
      */
     public function templateAccessForUser(User $user): array
     {
-        $all = array_keys(config('company_templates.templates', []));
+        $selectable = app(CompanyTemplatesCatalog::class)->galleryKeys();
         $allowed = $this->hasAllTemplates($user)
-            ? $all
-            : $this->freeTemplateKeys();
+            ? $selectable
+            : array_values(array_intersect($this->freeTemplateKeys(), $selectable));
 
         return [
             'can_use_all' => $this->hasAllTemplates($user),
             'allowed_keys' => $allowed,
-            'locked_keys' => array_values(array_diff($all, $allowed)),
+            'locked_keys' => array_values(array_diff($selectable, $allowed)),
         ];
     }
 

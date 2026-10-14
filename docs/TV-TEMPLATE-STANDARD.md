@@ -10,7 +10,7 @@ Relacionado: [MENU-TEMPLATE-STANDARD.md](MENU-TEMPLATE-STANDARD.md) · [TVPIK-IN
 
 Pantallas TV **legibles a distancia**, **16:9**, con identidad de marca coherente con la carta QR. El restaurante personaliza colores y fuentes en **Mi carta → Personalización**; las plantillas TV deben **consumir esos tokens**, no ignorarlos.
 
-Hay **15 plantillas TV** registradas en `config/tvpik_templates.php`.
+Hay plantillas TV registradas en `config/tvpik_templates.php`. **Galería pack (2026-10):** modos recomendados `carta` y `destacado` (mismas vistas que menu/spotlight). Orientación vía `?orient=landscape|portrait` (clases `wn-tv--orient-*` + `wn-tv--skin-{templateQR}`). Layouts antiguos siguen resolubles; fuera de picker si `gallery: false`.
 
 ---
 

@@ -81,11 +81,7 @@ trait PreparesLandingPage
 
     protected function landingTemplateCatalogCount(): int
     {
-        $templates = config('company_templates.templates', []);
-
-        return count(array_filter($templates, function ($meta) {
-            return is_array($meta) && ! empty($meta['label']);
-        }));
+        return count(app(\App\Services\CompanyTemplatesCatalog::class)->forOnboarding());
     }
 
     /** @return list<string> */

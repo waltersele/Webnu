@@ -4,9 +4,10 @@
     $themeSettings = method_exists($company, 'resolvedThemeSettings') ? $company->resolvedThemeSettings() : [];
     $accent = $themeSettings['accent'] ?? $themeSettings['primary'] ?? '#004ac6';
     $hubUrl = $ownerSlug ? route('public.owner.hub', ['ownerSlug' => $ownerSlug]) : null;
+    $pageLocale = $company->default_locale ?? 'es';
 @endphp
 <!DOCTYPE html>
-<html lang="es">
+<html lang="{{ $pageLocale }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -14,15 +15,21 @@
     <meta name="description" content="Carta de menús de {{ $brandName }}.">
     <link rel="icon" type="image/png" href="{{ \App\PlatformSetting::brandUrl('favicon') }}" />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ asset('css/themes/front-menu-ui.css') }}">
     <style>
         :root {
             --wn-menu-accent: {{ $accent }};
-            --wn-menu-bg: #f7f7f9;
-            --wn-menu-card: #ffffff;
-            --wn-menu-text: #0f172a;
-            --wn-menu-muted: #64748b;
+            --wn-menu-bg: {{ $themeSettings['background'] ?? '#f7f7f9' }};
+            --wn-menu-card: {{ $themeSettings['surface'] ?? '#ffffff' }};
+            --wn-menu-text: {{ $themeSettings['text'] ?? '#0f172a' }};
+            --wn-menu-muted: {{ $themeSettings['text_muted'] ?? '#64748b' }};
             --wn-menu-border: #e5e7eb;
+            --wn-text-muted: var(--wn-menu-muted);
+            --wn-bg: var(--wn-menu-bg);
         }
+        .wn-pmenu-item__allergens { margin-top: 4px; }
+        .wn-pmenu-item__allergens .wn-allergens { margin: 0; }
+        .wn-pmenu-item__allergens .wn-allergens__item { font-size: 0.625rem; }
         * { box-sizing: border-box; }
         html, body {
             margin: 0; padding: 0;
@@ -291,7 +298,8 @@
                                                 $img = $item->imageUrl();
                                                 $name = $item->displayName();
                                                 $price = $item->displayPrice();
-                                                $desc = optional($item->product)->description;
+                                                $product = $item->product;
+                                                $desc = optional($product)->description;
                                             @endphp
                                             <li class="wn-pmenu-item">
                                                 <div class="wn-pmenu-item__media">
@@ -304,6 +312,14 @@
                                                 <div class="wn-pmenu-item__body">
                                                     <p class="wn-pmenu-item__name">{{ $name }}</p>
                                                     @if($desc)<p class="wn-pmenu-item__desc">{{ $desc }}</p>@endif
+                                                    @if($product && $product->relationLoaded('allergens') && $product->allergens->count())
+                                                        <div class="wn-pmenu-item__allergens">
+                                                            @include('themes.partials.menu-product-allergens', [
+                                                                'product' => $product,
+                                                                'menuLocale' => $pageLocale,
+                                                            ])
+                                                        </div>
+                                                    @endif
                                                 </div>
                                                 @if($price)<span class="wn-pmenu-item__price">{{ $price }}</span>@endif
                                             </li>

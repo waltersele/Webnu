@@ -788,6 +788,7 @@ $(function(){
             previewUrl: @json($previewUrl),
             activeStep: 'design',
             themePresets: @json($themePresets),
+            surfaceModes: @json(config('company_templates.surface_modes', [])),
             templateLabels: @json($templateLabels),
             steps: ['design'],
             logoUrl: @json($company->logo ? '/img/' . $company->logo : null),

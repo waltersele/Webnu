@@ -13,13 +13,9 @@
             <p class="wn-card-temporada__desc">{{ $product->description }}</p>
         @endif
         @include('themes.partials.product-prices', ['product' => $product])
-        @if($product->allergens->count())
-            <div class="wn-card-temporada__tags">
-                @foreach ($product->allergens as $allergen)
-                    <span class="wn-diet-tag">{{ $allergen->name }}</span>
-                @endforeach
-            </div>
-        @endif
+        <div class="wn-card-temporada__tags">
+            @include('themes.partials.menu-product-allergens', ['product' => $product])
+        </div>
     </div>
     <button type="button" class="wn-card-temporada__detail" data-toggle="modal" data-target="#wnDish{{ $product->id }}" aria-label="Ver detalle">
         @include('themes.partials.icons.svg-chevron-right')

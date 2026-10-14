@@ -105,36 +105,43 @@ return [
         'recommended' => 'Destacada',
         'try_demo' => 'Ver demo',
         'more_title' => 'Y muchas más en tu cuenta',
-        'more_desc' => 'Japonés, fast food, marisquería, fine dining, asador, coctelería… El catálogo crece cada temporada.',
+        'more_desc' => 'Pocas plantillas, bien diferenciadas: claras, legibles y estables en móvil y TV.',
         'cta' => 'Crear mi carta',
         'showcase' => [
             'pasion' => [
                 'label' => 'Pasión',
                 'description' => 'Carta clara y tradicional, ideal para restaurantes clásicos.',
             ],
+            'lumiere' => [
+                'label' => 'Lumiere',
+                'description' => 'Gastronomía de autor: carbón cálido, oro y tarjetas premium.',
+            ],
             'nocturne' => [
                 'label' => 'Nocturno',
                 'description' => 'Modo oscuro, fotos grandes y tipografía elegante para bares.',
-            ],
-            'otaku' => [
-                'label' => 'Otaku',
-                'description' => 'Estilo neón sobre negro: ramen, street food y locales con personalidad.',
             ],
         ],
     ],
 
     'demos' => [
         'badge' => 'En vivo',
-        'title' => 'Más de :count plantillas para tu local',
-        'subtitle' => 'Elige estilo (restaurante, bar, coctelería, delivery…), abre una demo en tu móvil y cambia colores, tipografías y logo al instante.',
+        'title' => ':count plantillas claras para tu local',
+        'subtitle' => 'Elige un estilo diferenciado, ábrelo en el móvil y personaliza colores, tipografías y logo.',
         'cta' => 'Ver carta en vivo',
         'items' => [
             [
                 'title' => 'Restaurante clásico',
                 'subtitle' => 'La Brasa del Puerto',
-                'desc' => 'Carta mediterránea con plantilla Básica. Incluye inglés: detecta el idioma del navegador al escanear.',
-                'badge' => 'Básica',
+                'desc' => 'Carta mediterránea con plantilla Pasión. Incluye inglés: detecta el idioma del navegador al escanear.',
+                'badge' => 'Pasión',
                 'tags' => ['ES + EN', 'Reels', 'QR'],
+            ],
+            [
+                'title' => 'Gastronomía',
+                'subtitle' => 'Lumiere',
+                'desc' => 'Plantilla flagship con hero a sangre y tarjetas premium. Ideal para cocina de autor.',
+                'badge' => 'Lumiere',
+                'tags' => ['Premium', 'QR', 'TV'],
             ],
             [
                 'title' => 'Coctelería',
@@ -142,13 +149,6 @@ return [
                 'desc' => 'Copas a ancho completo con reels integrados. Plantilla Nocturno para bares y cocktail bars.',
                 'badge' => 'Nocturno',
                 'tags' => ['100 % ancho', 'Oscuro', 'Reels'],
-            ],
-            [
-                'title' => 'Ramen & asiático',
-                'subtitle' => 'Fuego Otaku',
-                'desc' => 'Naranja neón, tipografía bold y platos con vídeo. Plantilla Otaku para locales con personalidad.',
-                'badge' => 'Otaku',
-                'tags' => ['Neón', 'Reels', 'Oscuro'],
             ],
         ],
     ],

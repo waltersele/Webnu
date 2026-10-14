@@ -41,9 +41,10 @@ class TvMenuController extends Controller
 
         $registry = app(TvTemplateRegistry::class);
         $layout = $registry->resolveLayout($layout);
+        $orientation = $registry->resolveOrientation($request->query('orient', $request->query('orientation')));
 
         $locale = $menuService->resolveMenuLocale($request, $company);
-        $data = $presenter->present($company, $layout, $menuService, $locale);
+        $data = $presenter->present($company, $layout, $menuService, $locale, $orientation);
         $data = $this->withSuspendedOverlayFlag($data, $showSuspendedOverlay);
 
         $viewName = $registry->viewForLayout($layout);

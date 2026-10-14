@@ -28,7 +28,7 @@
                              data-tv-root="{{ url('/tv') }}"
                              data-layouts='@json($playerLayoutMap)'
                              data-template-labels='@json($templateLabels)'
-                             data-default-template="menu"
+                             data-default-template="carta"
                              data-selected-template="menu">
                             <div class="wn-tvpik-player-field">
                                 <label class="form-label small text-muted mb-1" for="wn-player-company">Seleccionar carta</label>

@@ -27,6 +27,17 @@ class CompanyThemeService
             }
         }
 
+        $mode = $request->input('theme_surface_mode');
+        if (is_string($mode) && in_array($mode, ['dark', 'light'], true)) {
+            $normalized['surface_mode'] = $mode;
+            $template = $this->resolveTemplate($request->input('template'));
+            $modePalette = config('company_templates.surface_modes.' . $template . '.' . $mode, []);
+            if (is_array($modePalette) && $modePalette !== []) {
+                // Colores del modo como base; los hex del request (ya en $normalized) ganan.
+                $normalized = array_merge($modePalette, $normalized);
+            }
+        }
+
         return $normalized;
     }
 

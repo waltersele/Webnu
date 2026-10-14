@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="{{ asset('css/webnu-tv.css') }}">
     @include('tv.partials.theme-vars')
 </head>
-<body class="wn-tv wn-tv--{{ $layout }}{{ !empty($isPreview) ? ' wn-tv--preview' : '' }}{{ !empty($isPlayerMode) ? ' wn-tv--player' : '' }}{{ empty($showHeader) ? ' wn-tv--no-header' : '' }}">
+<body class="wn-tv wn-tv--{{ $layout }} wn-tv--orient-{{ $orientation ?? 'landscape' }} wn-tv--skin-{{ $tvSkin ?? 'pasion' }}{{ !empty($isPreview) ? ' wn-tv--preview' : '' }}{{ !empty($isPlayerMode) ? ' wn-tv--player' : '' }}{{ empty($showHeader) ? ' wn-tv--no-header' : '' }}">
     @include('tv.partials.background')
     <div class="wn-tv__frame">
         @include('tv.partials.header')

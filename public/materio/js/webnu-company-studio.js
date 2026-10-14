@@ -52,6 +52,11 @@
       }
     });
 
+    var surfaceMode = $('input[name="theme_surface_mode"]:checked').val();
+    if (surfaceMode === 'dark' || surfaceMode === 'light') {
+      params.set('theme_surface_mode', surfaceMode);
+    }
+
     return base + '?' + params.toString();
   }
 
@@ -101,6 +106,7 @@
       $(this).addClass('is-selected');
       $(this).append('<span class="wn-template-card__check"><i class="ri-check-line"></i></span>');
       updatePresetChips(key);
+      updateSurfaceModeUi(key);
       var presets = cfg.themePresets[key] || {};
       var first = Object.keys(presets)[0];
       if (first) {
@@ -109,6 +115,28 @@
       }
       debouncedRefreshPreview();
     });
+  }
+
+  function updateSurfaceModeUi(templateKey) {
+    var $wrap = $('#wn-surface-mode-wrap');
+    if (!$wrap.length) {
+      return;
+    }
+    var modes = cfg.surfaceModes && cfg.surfaceModes[templateKey]
+      ? cfg.surfaceModes[templateKey]
+      : null;
+    if (!modes && $wrap.attr('data-surface-modes')) {
+      try {
+        modes = JSON.parse($wrap.attr('data-surface-modes'));
+      } catch (e) {
+        modes = null;
+      }
+    }
+    var hasModes = modes && (modes.dark || modes.light);
+    $wrap.toggleClass('d-none', !hasModes);
+    if (hasModes) {
+      $wrap.attr('data-surface-modes', JSON.stringify(modes));
+    }
   }
 
   function updatePresetChips(templateKey) {
@@ -135,15 +163,38 @@
       return;
     }
     Object.keys(colors).forEach(function (key) {
-      var hex = colors[key];
-      $('#theme_' + key).val(hex);
+      var value = colors[key];
+      if (key === 'surface_mode' && (value === 'dark' || value === 'light')) {
+        $('#theme_surface_mode_' + value).prop('checked', true);
+        return;
+      }
+      if (typeof value !== 'string' || !/^#[0-9A-Fa-f]{6}$/.test(value)) {
+        return;
+      }
+      $('#theme_' + key).val(value);
       var picker = document.getElementById('theme_' + key + '_picker');
       if (picker) {
-        picker.value = hex;
+        picker.value = value;
         syncColorSwatch(picker);
       }
     });
     if (reload !== false) {
+      debouncedRefreshPreview();
+    }
+  }
+
+  function applySurfaceModePalette(mode) {
+    var $wrap = $('#wn-surface-mode-wrap');
+    var modes = null;
+    try {
+      modes = JSON.parse($wrap.attr('data-surface-modes') || '{}');
+    } catch (e) {
+      modes = {};
+    }
+    var palette = modes && modes[mode] ? modes[mode] : null;
+    if (palette) {
+      applyPreset(Object.assign({ surface_mode: mode }, palette), true);
+    } else {
       debouncedRefreshPreview();
     }
   }
@@ -156,6 +207,13 @@
       var colors = raw ? JSON.parse(raw) : null;
       applyPreset(colors);
     });
+  }
+
+  function bindSurfaceMode() {
+    $(document).on('change', 'input[name="theme_surface_mode"]', function () {
+      applySurfaceModePalette(this.value);
+    });
+    updateSurfaceModeUi($('#company-template').val());
   }
 
   function syncColorSwatch(pickerEl) {
@@ -610,6 +668,7 @@
 
     bindTemplatePicker();
     bindPresets();
+    bindSurfaceMode();
     bindColorSync();
     bindFontSelects();
     initBrandUploads();

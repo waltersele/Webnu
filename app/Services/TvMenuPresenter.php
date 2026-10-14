@@ -10,8 +10,13 @@ use Illuminate\Support\Collection;
 
 class TvMenuPresenter
 {
-    public function present(Company $company, string $layout, MenuService $menuService, string $locale): array
-    {
+    public function present(
+        Company $company,
+        string $layout,
+        MenuService $menuService,
+        string $locale,
+        ?string $orientation = null
+    ): array {
         $sections = $menuService->sectionsForCompany($company, $locale)
             ->filter(function ($section) {
                 return (bool) $section->enabled;
@@ -41,7 +46,10 @@ class TvMenuPresenter
 
         $themeTokens = $this->themeTokens($company);
         $registry = app(TvTemplateRegistry::class);
+        $catalog = app(CompanyTemplatesCatalog::class);
         $templateMeta = $registry->templateByLayout($layout) ?? [];
+        $orientation = $registry->resolveOrientation($orientation);
+        $tvSkin = $catalog->tvSkinKey($company->template ?: 'pasion');
 
         $isPlayerMode = request()->boolean('player');
         $menuSync = app(MenuSyncService::class);
@@ -52,6 +60,8 @@ class TvMenuPresenter
         return [
             'company' => $company,
             'layout' => $layout,
+            'orientation' => $orientation,
+            'tvSkin' => $tvSkin,
             'templateMeta' => $templateMeta,
             'rotateSeconds' => $registry->rotateSeconds($layout),
             'showHeader' => $registry->showHeader($layout),

@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="280" height="420" viewBox="0 0 280 420">
+  <rect width="280" height="420" fill="#0d0d0d"/>
+  <circle cx="140" cy="36" r="16" fill="#f5c400"/>
+  <rect x="90" y="58" width="100" height="14" rx="3" fill="#f5c400"/>
+  <rect x="110" y="80" width="28" height="22" rx="6" fill="#f5c400"/>
+  <rect x="146" y="80" width="28" height="22" rx="6" fill="#f5c400"/>
+  <text x="24" y="130" fill="#f5c400" font-family="Arial Black, sans-serif" font-size="22">MENU</text>
+  <text x="24" y="162" fill="#f5c400" font-family="Arial, sans-serif" font-size="12" font-weight="700">BURGERS</text>
+  <rect x="24" y="172" width="150" height="150" rx="14" fill="#1a1a1a"/>
+  <rect x="36" y="184" width="126" height="70" rx="8" fill="#2a2a2a"/>
+  <rect x="36" y="266" width="90" height="10" rx="3" fill="#f5c400"/>
+  <rect x="36" y="282" width="110" height="8" rx="3" fill="#ffffff" opacity="0.35"/>
+  <rect x="36" y="300" width="48" height="12" rx="3" fill="#ffffff"/>
+  <circle cx="154" cy="306" r="12" fill="#f5c400"/>
+  <rect x="186" y="172" width="150" height="150" rx="14" fill="#1a1a1a"/>
+  <text x="24" y="360" fill="#f5c400" font-family="Arial, sans-serif" font-size="12" font-weight="700">FRIES</text>
+  <rect x="24" y="368" width="150" height="36" rx="10" fill="#1a1a1a"/>
+  <rect x="186" y="368" width="70" height="36" rx="10" fill="#1a1a1a"/>
+</svg>

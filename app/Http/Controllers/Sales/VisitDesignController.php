@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Sales;
 
 use App\Company;
 use App\Http\Controllers\Controller;
+use App\Services\CompanyTemplatesCatalog;
 use App\Services\CompanyThemeService;
 use App\Services\Sales\SalesLeadService;
 use Illuminate\Http\Request;
@@ -22,7 +23,8 @@ class VisitDesignController extends Controller
                 ->withErrors(['present' => 'Importa la carta antes de presentarla.']);
         }
 
-        $templateList = config('company_templates.templates', []);
+        $catalog = app(CompanyTemplatesCatalog::class);
+        $templateList = $catalog->forGallery($visit->template ?: 'pasion');
         $presets = config('company_templates.presets', []);
         $colorKeys = $themes->presentColorKeys();
         $resolved = $visit->resolvedThemeSettings();

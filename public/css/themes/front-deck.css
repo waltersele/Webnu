@@ -1,0 +1,318 @@
+/* Deck � carta grande swipe + lista compacta */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Montserrat:wght@600;700;800&display=swap');
+
+body.wn-theme-deck {
+  --wn-deck-accent: var(--wn-accent, #8b3a2a);
+  --wn-font-heading: 'Montserrat', system-ui, sans-serif;
+  --wn-font-body: 'Inter', system-ui, sans-serif;
+  background: var(--wn-bg);
+  color: var(--wn-text);
+}
+
+body.wn-theme-deck .wn-deck {
+  max-width: 480px;
+  margin: 0 auto;
+  min-height: 100vh;
+  padding: 0 0 2.5rem;
+  background: var(--wn-bg);
+  overflow-x: hidden;
+}
+
+.wn-deck-brand {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 1.2rem 1rem 0.5rem;
+  gap: 0.3rem;
+}
+
+.wn-deck-brand__logo {
+  width: 52px;
+  height: 52px;
+  object-fit: contain;
+  border-radius: 12px;
+}
+
+.wn-deck-brand__name {
+  margin: 0;
+  font-family: var(--wn-font-heading);
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--wn-text);
+}
+
+.wn-deck-brand__tagline {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--wn-text-muted);
+}
+
+.wn-deck-nav {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  background: color-mix(in srgb, var(--wn-bg) 92%, transparent);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  padding: 0.5rem 0;
+}
+
+.wn-deck-nav__track {
+  display: flex;
+  gap: 0.55rem;
+  overflow-x: auto;
+  padding: 0 1rem;
+  scrollbar-width: none;
+}
+
+.wn-deck-nav__track::-webkit-scrollbar { display: none; }
+
+.wn-deck-nav__chip {
+  flex: 0 0 auto;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-decoration: none;
+  color: var(--wn-text);
+  padding: 0.45rem 0.95rem;
+  border-radius: 999px;
+  background: var(--wn-surface);
+  border: 1px solid color-mix(in srgb, var(--wn-text) 10%, transparent);
+}
+
+.wn-deck-nav__chip.is-active,
+.wn-deck-nav__chip:hover {
+  color: #fff;
+  background: var(--wn-deck-accent);
+  border-color: var(--wn-deck-accent);
+}
+
+.wn-menu-main--deck {
+  padding: 0.35rem 0 0;
+}
+
+.wn-deck-section {
+  margin: 0 0 1.75rem;
+  scroll-margin-top: 3.75rem;
+}
+
+.wn-deck-section__title {
+  margin: 0 1rem 0.75rem;
+  font-family: var(--wn-font-heading);
+  font-size: 1.05rem;
+  font-weight: 800;
+}
+
+.wn-deck-carousel {
+  margin-bottom: 0.85rem;
+}
+
+.wn-deck-carousel__track {
+  display: flex;
+  gap: 0.85rem;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  padding: 0 1rem 0.35rem;
+  scrollbar-width: none;
+  touch-action: pan-x;
+}
+
+.wn-deck-carousel__track::-webkit-scrollbar { display: none; }
+
+.wn-deck-card {
+  flex: 0 0 min(86vw, 340px);
+  scroll-snap-align: center;
+  background: var(--wn-surface);
+  border-radius: 22px;
+  overflow: hidden;
+  box-shadow: 0 8px 24px color-mix(in srgb, var(--wn-text) 10%, transparent);
+}
+
+.wn-deck-card__media {
+  position: relative;
+  aspect-ratio: 16 / 11;
+  background: color-mix(in srgb, var(--wn-bg) 50%, var(--wn-surface));
+}
+
+.wn-deck-card__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.wn-deck-card__placeholder {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: var(--wn-text-muted);
+}
+
+.wn-deck-card__badge {
+  position: absolute;
+  top: 0.7rem;
+  left: 0.7rem;
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 0.28rem 0.55rem;
+  border-radius: 999px;
+  background: var(--wn-deck-accent);
+  color: #fff;
+}
+
+.wn-deck-card__body {
+  padding: 0.95rem 1rem 1.05rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.wn-deck-card__title {
+  margin: 0;
+  font-family: var(--wn-font-heading);
+  font-size: 1.05rem;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.wn-deck-card__desc {
+  margin: 0;
+  font-size: 0.8rem;
+  line-height: 1.4;
+  color: var(--wn-text-muted);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.wn-deck-card__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 0.35rem;
+}
+
+.wn-deck-card__price {
+  font-size: 1.1rem;
+  font-weight: 800;
+}
+
+.wn-deck-card__cta {
+  width: 2.35rem;
+  height: 2.35rem;
+  border: 0;
+  border-radius: 50%;
+  background: var(--wn-deck-accent);
+  color: #fff;
+  font-size: 1.1rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.wn-deck-dots {
+  display: flex;
+  justify-content: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0 0.15rem;
+}
+
+.wn-deck-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--wn-text) 22%, transparent);
+}
+
+.wn-deck-dot.is-active {
+  background: var(--wn-deck-accent);
+  width: 16px;
+  border-radius: 999px;
+}
+
+.wn-deck-list {
+  list-style: none;
+  margin: 0;
+  padding: 0 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.wn-deck-list__hit {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  width: 100%;
+  padding: 0.55rem 0.65rem;
+  border: 0;
+  border-radius: 14px;
+  background: var(--wn-surface);
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.wn-deck-list__thumb {
+  flex: 0 0 48px;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: color-mix(in srgb, var(--wn-bg) 50%, var(--wn-surface));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  color: var(--wn-text-muted);
+}
+
+.wn-deck-list__thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.wn-deck-list__body {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+.wn-deck-list__name {
+  font-weight: 700;
+  font-size: 0.88rem;
+}
+
+.wn-deck-list__desc {
+  font-size: 0.72rem;
+  color: var(--wn-text-muted);
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.wn-deck-list__price {
+  flex-shrink: 0;
+  font-weight: 800;
+  color: var(--wn-deck-accent);
+  font-size: 0.9rem;
+}
+
+.wn-modern-footer--deck {
+  margin-top: 1rem;
+  padding: 1.5rem 1rem;
+  text-align: center;
+  border-top: 1px solid color-mix(in srgb, var(--wn-text) 10%, transparent);
+  color: var(--wn-text-muted);
+}

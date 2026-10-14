@@ -87,8 +87,8 @@ return [
         'templates' => [
             'price_tier' => 'pro',
             'title' => 'Más plantillas de carta',
-            'body' => 'Cinco diseños en Free; desbloquea temáticas completas para pizza, marisquería, brunch y más.',
-            'perks' => ['Estilos listos para publicar', 'Vista previa en vivo'],
+            'body' => 'Cuatro diseños claros en Free; con Pro desbloqueas Ambre, Swipe, Temporada y más.',
+            'perks' => ['Estilos diferenciados y estables', 'Vista previa en vivo'],
             'cta' => 'Ver plantillas con Pro',
         ],
         'menu_scan' => [

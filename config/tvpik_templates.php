@@ -2,9 +2,17 @@
 
 return [
 
-    'default' => 'menu',
+    'default' => 'carta',
+
+    /*
+    | Orientaciones soportadas por pack identidad (QR → TV).
+    | landscape = 16:9, portrait = 9:16 (tótems / paneles verticales).
+    */
+    'orientations' => ['landscape', 'portrait'],
+    'default_orientation' => 'landscape',
 
     'layouts' => [
+        'carta', 'destacado',
         'menu', 'spotlight', 'featured', 'video', 'daily', 'hero', 'tapas',
         'menu_video', 'menu_banner',
         'cinema', 'sommelier', 'degustacion', 'signature', 'lounge', 'marquee',
@@ -31,6 +39,38 @@ return [
     ],
 
     'templates' => [
+        'carta' => [
+            'key' => 'carta',
+            'label' => 'Carta',
+            'description' => 'Modo pack: secciones y precios. Misma identidad que tu plantilla QR (H y V).',
+            'category' => 'restaurant',
+            'layout' => 'carta',
+            'view' => 'tv.templates.menu',
+            'duration_hint' => 'Rotación automática de secciones',
+            'rotate_seconds' => 12,
+            'show_header' => true,
+            'icon' => 'ti-layout-grid',
+            'thumbnail' => 'img/tvpik/previews/menu.svg',
+            'pack_mode' => true,
+            'gallery' => true,
+            'orientations' => ['landscape', 'portrait'],
+        ],
+        'destacado' => [
+            'key' => 'destacado',
+            'label' => 'Destacado',
+            'description' => 'Modo pack: plato o carrusel destacado. Misma identidad que tu plantilla QR (H y V).',
+            'category' => 'restaurant',
+            'layout' => 'destacado',
+            'view' => 'tv.templates.spotlight',
+            'duration_hint' => 'Ideal para entrada o cartelería principal',
+            'rotate_seconds' => 0,
+            'show_header' => true,
+            'icon' => 'ti-star',
+            'thumbnail' => 'img/tvpik/previews/spotlight.svg',
+            'pack_mode' => true,
+            'gallery' => true,
+            'orientations' => ['landscape', 'portrait'],
+        ],
         'menu' => [
             'key' => 'menu',
             'label' => 'Carta completa',
@@ -43,6 +83,7 @@ return [
             'show_header' => true,
             'icon' => 'ti-layout-grid',
             'thumbnail' => 'img/tvpik/previews/menu.svg',
+            'gallery' => false,
         ],
         'spotlight' => [
             'key' => 'spotlight',
@@ -56,6 +97,7 @@ return [
             'show_header' => true,
             'icon' => 'ti-star',
             'thumbnail' => 'img/tvpik/previews/spotlight.svg',
+            'gallery' => false,
         ],
         'featured' => [
             'key' => 'featured',
@@ -69,6 +111,7 @@ return [
             'show_header' => true,
             'icon' => 'ti-photo',
             'thumbnail' => 'img/tvpik/previews/featured.svg',
+            'gallery' => false,
         ],
         'video' => [
             'key' => 'video',
@@ -82,6 +125,7 @@ return [
             'show_header' => false,
             'icon' => 'ti-player-play',
             'thumbnail' => 'img/tvpik/previews/video.svg',
+            'gallery' => false,
         ],
         'menu_video' => [
             'key' => 'menu_video',
@@ -95,6 +139,7 @@ return [
             'show_header' => true,
             'icon' => 'ti-layout-sidebar-right',
             'thumbnail' => 'img/tvpik/previews/menu.svg',
+            'gallery' => false,
         ],
         'menu_banner' => [
             'key' => 'menu_banner',
@@ -108,6 +153,7 @@ return [
             'show_header' => true,
             'icon' => 'ti-layout-rows',
             'thumbnail' => 'img/tvpik/previews/video.svg',
+            'gallery' => false,
         ],
         'daily' => [
             'key' => 'daily',
@@ -122,6 +168,7 @@ return [
             'icon' => 'ti-bowl-spoon',
             'thumbnail' => 'img/tvpik/previews/daily.svg',
             'supports_menu_selector' => true,
+            'gallery' => false,
         ],
         'hero' => [
             'key' => 'hero',
@@ -135,6 +182,7 @@ return [
             'show_header' => false,
             'icon' => 'ti-photo-filled',
             'thumbnail' => 'img/tvpik/previews/hero.svg',
+            'gallery' => false,
         ],
         'tapas' => [
             'key' => 'tapas',
@@ -148,6 +196,7 @@ return [
             'show_header' => true,
             'icon' => 'ti-grid-dots',
             'thumbnail' => 'img/tvpik/previews/tapas.svg',
+            'gallery' => false,
         ],
         'cinema' => [
             'key' => 'cinema',
@@ -162,6 +211,7 @@ return [
             'icon' => 'ti-movie',
             'thumbnail' => 'img/tvpik/previews/cinema.svg',
             'premium' => true,
+            'gallery' => false,
         ],
         'sommelier' => [
             'key' => 'sommelier',
@@ -176,6 +226,7 @@ return [
             'icon' => 'ti-glass-full',
             'thumbnail' => 'img/tvpik/previews/sommelier.svg',
             'premium' => true,
+            'gallery' => false,
         ],
         'degustacion' => [
             'key' => 'degustacion',
@@ -191,6 +242,7 @@ return [
             'thumbnail' => 'img/tvpik/previews/degustacion.svg',
             'supports_menu_selector' => true,
             'premium' => true,
+            'gallery' => false,
         ],
         'signature' => [
             'key' => 'signature',
@@ -205,6 +257,7 @@ return [
             'icon' => 'ti-signature',
             'thumbnail' => 'img/tvpik/previews/signature.svg',
             'premium' => true,
+            'gallery' => false,
         ],
         'lounge' => [
             'key' => 'lounge',
@@ -219,6 +272,7 @@ return [
             'icon' => 'ti-armchair',
             'thumbnail' => 'img/tvpik/previews/lounge.svg',
             'premium' => true,
+            'gallery' => false,
         ],
         'marquee' => [
             'key' => 'marquee',
@@ -233,6 +287,7 @@ return [
             'icon' => 'ti-layout-rows',
             'thumbnail' => 'img/tvpik/previews/marquee.svg',
             'premium' => true,
+            'gallery' => false,
         ],
     ],
 
