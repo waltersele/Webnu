@@ -133,6 +133,7 @@ body.wn-swipe--light .wn-swipe-nav__chip:hover {
   overflow-y: hidden;
   -webkit-overflow-scrolling: touch;
   scroll-snap-type: x mandatory;
+  scroll-padding-left: 1rem;
   scrollbar-width: none;
   -ms-overflow-style: none;
   padding: 0 1rem 0.15rem;
