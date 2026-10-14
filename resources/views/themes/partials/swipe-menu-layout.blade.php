@@ -3,22 +3,6 @@
     $locale = $menuLocale ?? 'es';
     $ui = $menuLocaleService ?? null;
     $menuLabel = $ui ? $ui->uiLabel('menu', $locale) : 'Carta';
-    $locationLabel = $ui ? $ui->uiLabel('location', $locale) : 'Ubicación';
-    $phoneLabel = $ui ? $ui->uiLabel('phone', $locale) : 'Teléfono';
-    $mapsUrl = null;
-    if ($company->address || $company->city) {
-        $mapsQuery = trim(implode(', ', array_filter([
-            $company->address,
-            $company->postal_code,
-            $company->city,
-            $company->province,
-            $company->country,
-        ])));
-        if ($mapsQuery !== '') {
-            $mapsUrl = 'https://maps.google.com/?q=' . rawurlencode($mapsQuery);
-        }
-    }
-    $phone = $company->phone ?: $company->mobile_phone;
 @endphp
 
 <div class="wn-menu-shell wn-menu-shell--swipe wn-swipe">
@@ -31,20 +15,6 @@
         <h1 class="wn-swipe-brand__name">{{ $company->name }}</h1>
         @if($company->chef_name && $company->chef_name !== $company->name)
             <p class="wn-swipe-brand__chef">{{ $company->chef_name }}</p>
-        @endif
-        @if($mapsUrl || $phone)
-            <div class="wn-swipe-brand__actions">
-                @if($mapsUrl)
-                    <a class="wn-swipe-action" href="{{ $mapsUrl }}" target="_blank" rel="noopener" aria-label="{{ $locationLabel }}">
-                        @include('themes.partials.icons.svg-map-pin')
-                    </a>
-                @endif
-                @if($phone)
-                    <a class="wn-swipe-action" href="tel:{{ $phone }}" aria-label="{{ $phoneLabel }}">
-                        @include('themes.partials.icons.svg-phone')
-                    </a>
-                @endif
-            </div>
         @endif
     </header>
 

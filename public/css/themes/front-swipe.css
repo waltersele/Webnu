@@ -52,36 +52,6 @@ body.wn-theme-swipe .wn-swipe {
   color: var(--wn-text-muted);
 }
 
-.wn-swipe-brand__actions {
-  display: flex;
-  gap: 0.65rem;
-  margin-top: 0.55rem;
-}
-
-.wn-swipe-action {
-  width: 2.6rem;
-  height: 2.6rem;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 12px;
-  background: var(--wn-swipe-accent);
-  color: #111;
-  text-decoration: none;
-}
-
-body.wn-swipe--light .wn-swipe-action {
-  color: #fff;
-}
-
-.wn-swipe-action svg,
-.wn-swipe-action .wn-svg-icon {
-  width: 1.15rem;
-  height: 1.15rem;
-  display: block;
-  margin: 0 auto;
-}
-
 .wn-swipe-menu-label {
   margin: 1rem 1rem 0.35rem;
   font-family: var(--wn-font-heading);

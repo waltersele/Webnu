@@ -1,5 +1,17 @@
 @php
     $variant = $variant ?? 'lumiere';
+    $mapsQuery = trim(implode(', ', array_filter([
+        $company->address,
+        $company->postal_code,
+        $company->city,
+        $company->province,
+        $company->country,
+    ])));
+    $mapsUrl = $mapsQuery !== '' ? 'https://maps.google.com/?q=' . rawurlencode($mapsQuery) : null;
+    $addressLabel = trim(implode(', ', array_filter([
+        $company->address,
+        $company->city,
+    ])));
 @endphp
 
 <footer class="wn-modern-footer wn-modern-footer--{{ $variant }}" id="footer">
@@ -16,8 +28,14 @@
     @if($company->schedule)
         <p class="wn-modern-footer__meta">@include('themes.partials.icons.svg-clock') {{ $company->schedule }}</p>
     @endif
-    @if($company->address)
-        <p class="wn-modern-footer__meta">@include('themes.partials.icons.svg-map-pin') {{ $company->address }}@if($company->city), {{ $company->city }}@endif</p>
+    @if($addressLabel !== '')
+        <p class="wn-modern-footer__meta">
+            @if($mapsUrl)
+                <a href="{{ $mapsUrl }}" target="_blank" rel="noopener">@include('themes.partials.icons.svg-map-pin') {{ $addressLabel }}</a>
+            @else
+                @include('themes.partials.icons.svg-map-pin') {{ $addressLabel }}
+            @endif
+        </p>
     @endif
     @if($company->comments)
         <p class="wn-modern-footer__meta wn-modern-footer__about">{{ $company->comments }}</p>
