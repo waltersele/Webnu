@@ -37,9 +37,7 @@
             <div class="wn-grid-promo__track">
                 @foreach($promoSlides as $promo)
                     @php
-                        $promoPrice = $promo->price_unit
-                            ? ($promo->price_unit . ' �')
-                            : ($promo->price_portion ? ($promo->price_portion . ' �') : null);
+                        $promoPrice = app(\App\Services\MenuPriceFormatter::class)->format($promo);
                         $promoImg = url('img/' . ltrim($promo->image, '/'));
                     @endphp
                     <article class="wn-grid-promo__card">
@@ -63,7 +61,7 @@
         </div>
     @endif
 
-    <p class="wn-grid-menu-label">Nuestro men�</p>
+    <p class="wn-grid-menu-label">{{ isset($menuLocaleService) ? $menuLocaleService->uiLabel('menu', $menuLocale ?? 'es') : 'Carta' }}</p>
 
     <nav class="wn-grid-nav" id="sticker" aria-label="Secciones">
         <div class="wn-grid-nav__track">

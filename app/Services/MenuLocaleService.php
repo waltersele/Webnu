@@ -19,7 +19,14 @@ class MenuLocaleService
             }
         }
 
-        if (! $request->has('lang') && ! $request->boolean('studio_preview') && ! $request->boolean('sales_demo')) {
+        // Demos y previews: respetar el idioma de la carta, no el del navegador.
+        $slug = (string) ($company->slug ?? '');
+        $isDemoOrPreview = str_starts_with($slug, 'demo')
+            || $request->boolean('studio_preview')
+            || $request->boolean('sales_demo')
+            || $request->boolean('onb_preview');
+
+        if (! $request->has('lang') && ! $isDemoOrPreview) {
             $preferred = $this->preferredLocaleFromRequest($request, $allowed);
             if ($preferred) {
                 return $preferred;

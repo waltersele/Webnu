@@ -144,6 +144,16 @@ body.wn-theme-ambre .wn-ambre {
 .wn-ambre-spotlight__arrow--prev { left: 0; }
 .wn-ambre-spotlight__arrow--next { right: 0; }
 
+.wn-ambre-spotlight__arrow span {
+  display: block;
+  line-height: 1;
+  transform: translateY(-0.05em);
+}
+
+.wn-ambre-spotlight .wn-carousel-dots {
+  margin-top: 0.85rem;
+}
+
 body.wn-ambre--light .wn-ambre-spotlight__arrow {
   color: #fff;
 }

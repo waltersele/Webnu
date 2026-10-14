@@ -50,9 +50,7 @@
                 <ul class="wn-deck-list">
                     @foreach ($section->products as $product)
                         @php
-                            $listPrice = $product->price_unit
-                                ? ($product->price_unit . ' �')
-                                : ($product->price_portion ? ($product->price_portion . ' �') : null);
+                            $listPrice = app(\App\Services\MenuPriceFormatter::class)->format($product);
                             $listImg = $product->image ? url('img/' . ltrim($product->image, '/')) : null;
                         @endphp
                         <li class="wn-deck-list__item">

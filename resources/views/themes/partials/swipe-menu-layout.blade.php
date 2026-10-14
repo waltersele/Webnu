@@ -1,5 +1,10 @@
 @php
     $variant = 'swipe';
+    $locale = $menuLocale ?? 'es';
+    $ui = $menuLocaleService ?? null;
+    $menuLabel = $ui ? $ui->uiLabel('menu', $locale) : 'Carta';
+    $locationLabel = $ui ? $ui->uiLabel('location', $locale) : 'Ubicación';
+    $phoneLabel = $ui ? $ui->uiLabel('phone', $locale) : 'Teléfono';
     $mapsUrl = null;
     if ($company->address || $company->city) {
         $mapsQuery = trim(implode(', ', array_filter([
@@ -30,12 +35,12 @@
         @if($mapsUrl || $phone)
             <div class="wn-swipe-brand__actions">
                 @if($mapsUrl)
-                    <a class="wn-swipe-action" href="{{ $mapsUrl }}" target="_blank" rel="noopener" aria-label="Ubicacion">
+                    <a class="wn-swipe-action" href="{{ $mapsUrl }}" target="_blank" rel="noopener" aria-label="{{ $locationLabel }}">
                         @include('themes.partials.icons.svg-map-pin')
                     </a>
                 @endif
                 @if($phone)
-                    <a class="wn-swipe-action" href="tel:{{ $phone }}" aria-label="Telefono">
+                    <a class="wn-swipe-action" href="tel:{{ $phone }}" aria-label="{{ $phoneLabel }}">
                         @include('themes.partials.icons.svg-phone')
                     </a>
                 @endif
@@ -45,7 +50,7 @@
 
     @include('themes.partials.daily-highlights')
 
-    <p class="wn-swipe-menu-label">Menu</p>
+    <p class="wn-swipe-menu-label">{{ $menuLabel }}</p>
 
     <nav class="wn-swipe-nav" id="sticker" aria-label="Secciones">
         <div class="wn-swipe-nav__track">
@@ -68,6 +73,18 @@
                         @endforeach
                     </div>
                 </div>
+                @if($section->products->count() > 1)
+                    <div class="wn-carousel-dots" data-swipe-dots role="tablist" aria-label="{{ $section->name }}">
+                        @foreach ($section->products as $dotIndex => $dotProduct)
+                            <button type="button"
+                                    class="wn-carousel-dots__dot {{ $dotIndex === 0 ? 'is-active' : '' }}"
+                                    data-swipe-dot="{{ $dotIndex }}"
+                                    role="tab"
+                                    aria-selected="{{ $dotIndex === 0 ? 'true' : 'false' }}"
+                                    aria-label="{{ $dotProduct->name }}"></button>
+                        @endforeach
+                    </div>
+                @endif
             </section>
         @endforeach
     </main>

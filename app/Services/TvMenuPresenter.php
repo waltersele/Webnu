@@ -217,19 +217,6 @@ class TvMenuPresenter
 
     public function formatPrice($product): ?string
     {
-        if ($product->weight_sale && $product->price_unit) {
-            return number_format((float) $product->price_unit, 2, ',', '.') . ' €'
-                . ($product->weight_unit_label ? ' / ' . $product->weight_unit_label : '');
-        }
-
-        if ($product->individual_sale && $product->price_portion) {
-            return number_format((float) $product->price_portion, 2, ',', '.') . ' €';
-        }
-
-        if ($product->price_unit) {
-            return number_format((float) $product->price_unit, 2, ',', '.') . ' €';
-        }
-
-        return null;
+        return app(MenuPriceFormatter::class)->format($product);
     }
 }

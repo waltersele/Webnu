@@ -48,12 +48,13 @@
         <section class="wn-ambre-spotlight" data-ambre-spotlight aria-roledescription="carrusel" aria-label="Platos destacados">
             @foreach($spotlightSlides as $slideIndex => $slide)
                 @php
-                    $priceLabel = $slide->price_unit
-                        ? ($slide->price_unit . ' �')
-                        : ($slide->price_portion ? ($slide->price_portion . ' �') : null);
+                    $priceLabel = app(\App\Services\MenuPriceFormatter::class)->format($slide);
                     $img = $slide->image
                         ? url('img/' . ltrim($slide->image, '/'))
                         : null;
+                    $featuredLabel = isset($menuLocaleService)
+                        ? $menuLocaleService->uiLabel('featured', $menuLocale ?? 'es')
+                        : 'Destacado';
                 @endphp
                 <article class="wn-ambre-spotlight__slide {{ $slideIndex === 0 ? 'is-active' : '' }}"
                          data-ambre-slide
@@ -62,7 +63,7 @@
                     @if($priceLabel)
                         <p class="wn-ambre-spotlight__price">{{ $priceLabel }}</p>
                         @if(($slide->highlight ?? '') === 'featured')
-                            <p class="wn-ambre-spotlight__eyebrow">Destacado</p>
+                            <p class="wn-ambre-spotlight__eyebrow">{{ $featuredLabel }}</p>
                         @endif
                     @endif
                     <h1 class="wn-ambre-spotlight__title">{{ $slide->name }}</h1>
@@ -98,6 +99,18 @@
                     </button>
                 </article>
             @endforeach
+            @if($spotlightSlides->count() > 1)
+                <div class="wn-carousel-dots" data-ambre-dots role="tablist" aria-label="Indicadores">
+                    @foreach($spotlightSlides as $dotIndex => $dotSlide)
+                        <button type="button"
+                                class="wn-carousel-dots__dot {{ $dotIndex === 0 ? 'is-active' : '' }}"
+                                data-ambre-dot="{{ $dotIndex }}"
+                                role="tab"
+                                aria-selected="{{ $dotIndex === 0 ? 'true' : 'false' }}"
+                                aria-label="Plato {{ $dotIndex + 1 }} de {{ $spotlightSlides->count() }}"></button>
+                    @endforeach
+                </div>
+            @endif
         </section>
     @endif
 

@@ -1,4 +1,4 @@
-/* Swipe � categorias verticales, platos en carrusel horizontal */
+/* Swipe: categorías verticales, platos en carrusel horizontal */
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800&display=swap');
 
 body.wn-theme-swipe {
@@ -74,9 +74,12 @@ body.wn-swipe--light .wn-swipe-action {
   color: #fff;
 }
 
-.wn-swipe-action svg {
+.wn-swipe-action svg,
+.wn-swipe-action .wn-svg-icon {
   width: 1.15rem;
   height: 1.15rem;
+  display: block;
+  margin: 0 auto;
 }
 
 .wn-swipe-menu-label {
@@ -160,10 +163,13 @@ body.wn-swipe--light .wn-swipe-nav__chip:hover {
   overflow-y: hidden;
   -webkit-overflow-scrolling: touch;
   scroll-snap-type: x mandatory;
-  scrollbar-width: thin;
-  padding: 0 1rem 0.35rem;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  padding: 0 1rem 0.15rem;
   touch-action: pan-x;
 }
+
+.wn-swipe-rail::-webkit-scrollbar { display: none; }
 
 .wn-swipe-rail__track {
   display: flex;
@@ -249,6 +255,20 @@ body.wn-swipe--light .wn-swipe-nav__chip:hover {
 .wn-swipe-card__allergens .wn-allergens__item {
   font-size: 0.55rem;
   padding: 0.1rem 0.35rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.25rem;
+}
+
+.wn-swipe-card__allergens .wn-allergens__icon {
+  width: 14px !important;
+  height: 14px !important;
+  display: block !important;
+}
+
+.wn-swipe-section .wn-carousel-dots {
+  margin: 0.35rem 1rem 0;
 }
 
 .wn-swipe-card__footer {

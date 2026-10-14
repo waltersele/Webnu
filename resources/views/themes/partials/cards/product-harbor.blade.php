@@ -1,7 +1,5 @@
 @php
-    $priceLabel = $product->price_unit
-        ? ($product->price_unit . ' �')
-        : ($product->price_portion ? ($product->price_portion . ' �') : null);
+    $priceLabel = app(\App\Services\MenuPriceFormatter::class)->format($product);
     $desc = $product->description ? \Illuminate\Support\Str::limit(strip_tags($product->description), 120) : null;
     $portion = $product->portion ?? $product->weight ?? null;
 @endphp

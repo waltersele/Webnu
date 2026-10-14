@@ -1,10 +1,11 @@
 @php
-    $priceLabel = $product->price_unit
-        ? ($product->price_unit . ' �')
-        : ($product->price_portion ? ($product->price_portion . ' �') : null);
+    $priceLabel = app(\App\Services\MenuPriceFormatter::class)->format($product);
     $img = $product->image ? url('img/' . ltrim($product->image, '/')) : null;
     $desc = $product->description ? \Illuminate\Support\Str::limit(strip_tags($product->description), 110) : null;
     $isFeatured = in_array($product->highlight ?? '', ['featured', 'bestseller'], true);
+    $featuredLabel = isset($menuLocaleService)
+        ? $menuLocaleService->uiLabel('featured', $menuLocale ?? 'es')
+        : 'Destacado';
 @endphp
 <article class="wn-deck-card">
     <div class="wn-deck-card__media">
@@ -14,7 +15,7 @@
             <span class="wn-deck-card__placeholder" aria-hidden="true">{{ mb_substr($product->name, 0, 1) }}</span>
         @endif
         @if($isFeatured)
-            <span class="wn-deck-card__badge">Selecci�n</span>
+            <span class="wn-deck-card__badge">{{ $featuredLabel }}</span>
         @endif
     </div>
     <div class="wn-deck-card__body">
@@ -36,7 +37,7 @@
                     data-toggle="modal"
                     data-target="#wnDish{{ $product->id }}"
                     aria-label="Ver detalle de {{ $product->name }}">
-                <span aria-hidden="true">?</span>
+                <span aria-hidden="true">+</span>
             </button>
         </div>
     </div>

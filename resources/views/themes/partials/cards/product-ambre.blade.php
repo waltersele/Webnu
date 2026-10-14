@@ -1,10 +1,5 @@
 @php
-    $priceLabel = $product->price_unit
-        ? ($product->price_unit . ' EUR')
-        : ($product->price_portion ? ($product->price_portion . ' EUR') : null);
-    if ($priceLabel) {
-        $priceLabel = str_replace(' EUR', ' �', $priceLabel);
-    }
+    $priceLabel = app(\App\Services\MenuPriceFormatter::class)->format($product);
     $img = $product->image ? url('img/' . ltrim($product->image, '/')) : null;
     $isFeatured = in_array($product->highlight ?? '', ['featured', 'bestseller'], true);
 @endphp
