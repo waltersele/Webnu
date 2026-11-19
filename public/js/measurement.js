@@ -1,7 +1,7 @@
 (function () {
   'use strict';
 
-  var CONSENT_VERSION = 1;
+  var CONSENT_VERSION = 2;
   var COOKIE_MAX_AGE = 34128000; // 13 months
   var googleBootstrapped = false;
   var marketingLoaded = false;
@@ -116,6 +116,7 @@
     if (!raw) return null;
 
     // Legacy webnu: plain 'accepted' / 'rejected'
+    // 'rejected' → re-prompt with the new mandatory-analytics banner
     if (raw === 'accepted') {
       return {
         v: CONSENT_VERSION,
@@ -123,28 +124,33 @@
         analytics: true,
         marketing: false,
         updatedAt: new Date().toISOString(),
+        _migrated: true,
       };
     }
     if (raw === 'rejected') {
-      return {
-        v: CONSENT_VERSION,
-        necessary: true,
-        analytics: false,
-        marketing: false,
-        updatedAt: new Date().toISOString(),
-      };
+      return null;
     }
 
     try {
       var data = typeof raw === 'string' ? JSON.parse(raw) : raw;
       if (!data || typeof data !== 'object') return null;
-      if (data.v !== CONSENT_VERSION) return null;
+
+      var version = Number(data.v) || 0;
+      var hadAnalytics = Boolean(data.analytics);
+      var marketing = Boolean(data.marketing);
+
+      // Older decisions that denied analytics must see the new banner.
+      if (version !== CONSENT_VERSION && !hadAnalytics) {
+        return null;
+      }
+
       return {
         v: CONSENT_VERSION,
         necessary: true,
-        analytics: Boolean(data.analytics),
-        marketing: Boolean(data.marketing),
+        analytics: true,
+        marketing: marketing,
         updatedAt: data.updatedAt || new Date().toISOString(),
+        _migrated: version !== CONSENT_VERSION || !hadAnalytics,
       };
     } catch (e) {
       return null;
@@ -154,13 +160,22 @@
   function readConsent(brand) {
     var key = storageKey(brand);
     var fromCookie = parseConsentPayload(readCookie(cookieName(brand)), brand);
-    if (fromCookie) return fromCookie;
+    if (fromCookie) {
+      if (fromCookie._migrated) {
+        delete fromCookie._migrated;
+        writeConsent(brand, fromCookie);
+      } else {
+        delete fromCookie._migrated;
+      }
+      return fromCookie;
+    }
 
     try {
       var raw = localStorage.getItem(key);
       var fromLs = parseConsentPayload(raw, brand);
       if (fromLs) {
-        // Promote legacy LS → cookie
+        delete fromLs._migrated;
+        // Promote legacy LS → cookie (and migrate to current version)
         writeConsent(brand, fromLs);
         return fromLs;
       }
@@ -175,7 +190,7 @@
     var payload = JSON.stringify({
       v: CONSENT_VERSION,
       necessary: true,
-      analytics: Boolean(consent.analytics),
+      analytics: true,
       marketing: Boolean(consent.marketing),
       updatedAt: consent.updatedAt || new Date().toISOString(),
     });
@@ -498,7 +513,7 @@
         ? '<label class="cookie-banner__option">' +
           '<input type="checkbox" id="' +
           analyticsId +
-          '" />' +
+          '" checked disabled />' +
           '<span>' +
           escapeHtml(labels.analytics || 'Analítica') +
           '</span></label>'
@@ -515,13 +530,19 @@
       '</div>' +
       '<div class="cookie-banner__actions">' +
       '<button type="button" class="cookie-banner__btn cookie-banner__btn--ghost" data-action="reject">' +
-      escapeHtml(labels.reject || 'Rechazar') +
+      escapeHtml(labels.reject || (showMarketing ? 'Rechazar opcionales' : 'Entendido')) +
       '</button>' +
-      '<button type="button" class="cookie-banner__btn cookie-banner__btn--ghost" data-action="save">' +
-      escapeHtml(labels.save || 'Guardar selección') +
-      '</button>' +
+      (showMarketing
+        ? '<button type="button" class="cookie-banner__btn cookie-banner__btn--ghost" data-action="save">' +
+          escapeHtml(labels.save || 'Guardar selección') +
+          '</button>'
+        : '') +
       '<button type="button" class="cookie-banner__btn cookie-banner__btn--primary" data-action="accept">' +
-      escapeHtml(labels.acceptAll || labels.accept || 'Aceptar todas') +
+      escapeHtml(
+        showMarketing
+          ? labels.acceptAll || labels.accept || 'Aceptar todas'
+          : labels.accept || 'Aceptar'
+      ) +
       '</button>' +
       '</div>' +
       '<p class="cookie-banner__legal">' +
@@ -533,14 +554,13 @@
 
     document.body.appendChild(banner);
 
-    var analyticsInput = banner.querySelector('#' + analyticsId);
     var marketingInput = banner.querySelector('#' + marketingId);
 
-    function persistAndClose(analytics, marketing) {
+    function persistAndClose(marketing) {
       var consent = {
         v: CONSENT_VERSION,
         necessary: true,
-        analytics: Boolean(analytics),
+        analytics: true,
         marketing: Boolean(marketing),
         updatedAt: new Date().toISOString(),
       };
@@ -550,25 +570,17 @@
     }
 
     banner.querySelector('[data-action="accept"]').addEventListener('click', function () {
-      persistAndClose(showAnalytics, showMarketing);
+      persistAndClose(showMarketing);
     });
 
     banner.querySelector('[data-action="reject"]').addEventListener('click', function () {
-      persistAndClose(false, false);
+      persistAndClose(false);
     });
 
-    banner.querySelector('[data-action="save"]').addEventListener('click', function () {
-      var analytics = analyticsInput ? analyticsInput.checked : false;
-      var marketing = marketingInput ? marketingInput.checked : false;
-      persistAndClose(analytics, marketing);
-    });
-
-    if (analyticsInput && marketingInput) {
-      analyticsInput.addEventListener('change', function () {
-        if (!analyticsInput.checked) marketingInput.checked = false;
-      });
-      marketingInput.addEventListener('change', function () {
-        if (marketingInput.checked) analyticsInput.checked = true;
+    var saveBtn = banner.querySelector('[data-action="save"]');
+    if (saveBtn) {
+      saveBtn.addEventListener('click', function () {
+        persistAndClose(marketingInput ? marketingInput.checked : false);
       });
     }
 
@@ -592,6 +604,7 @@
     function guardedTrack(name, params) {
       var consent = readConsent(config.brand);
       if (!consent) return;
+      // Analytics is mandatory once a decision exists; marketing may still be off.
       if (!consent.analytics && !consent.marketing) return;
       trackEvent(name, params);
     }

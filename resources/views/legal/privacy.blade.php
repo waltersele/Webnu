@@ -21,7 +21,7 @@
         <li>Datos de registro: nombre, email, teléfono y datos de facturación si contratas un plan de pago.</li>
         <li>Datos de uso del panel: cartas, menús, imágenes y contenido que subes a la plataforma.</li>
         <li>Datos técnicos: logs de servidor, dirección IP y cookies estrictamente necesarias para el funcionamiento.</li>
-        <li>Datos analíticos (solo si aceptas cookies en la landing): navegación agregada mediante Google Analytics u herramientas similares.</li>
+        <li>Datos analíticos en la web pública: navegación agregada mediante Google Analytics u herramientas similares (necesarios para medir y mejorar el servicio).</li>
     </ul>
 
     <h2>Finalidad</h2>
@@ -29,7 +29,7 @@
         <li>Prestar el servicio de carta digital y funcionalidades asociadas.</li>
         <li>Gestionar suscripciones y pagos a través de Stripe.</li>
         <li>Atender solicitudes de contacto y soporte.</li>
-        <li>Mejorar el producto mediante analítica agregada (con consentimiento).</li>
+        <li>Mejorar el producto mediante analítica agregada.</li>
     </ul>
 
     <h2>Conservación</h2>
@@ -53,7 +53,8 @@
 
     <h2>Cookies</h2>
     <p>
-        Las cookies técnicas son necesarias para la sesión y seguridad. Las cookies de analítica solo se activan
-        si las aceptas en el banner de la web pública.
+        Las cookies técnicas y de analítica son necesarias para el funcionamiento, la seguridad y la medición
+        de la web pública. Las cookies de marketing son opcionales y puedes rechazarlas en el banner o en
+        «Gestionar cookies».
     </p>
 @endsection
