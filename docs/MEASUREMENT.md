@@ -7,7 +7,7 @@ Loader compartido: `public/js/measurement.js` (idéntico al de Shoow). Consent M
 | Capa | Qué | Consentimiento |
 |------|-----|----------------|
 | **1 — Exempt** | Plausible (script + API vía `/stats/...`) | No requiere banner; sin cookies de identificación |
-| **2 — Google Consent Mode** | gtag o GTM; analítica **obligatoria** tras decisión del banner | `loadGoogleBeforeConsent: true` carga el script en denied hasta interactuar; tras cualquier decisión del banner, `analytics_storage` queda granted |
+| **2 — Google Consent Mode** | gtag o GTM; analítica **obligatoria** tras decisión del banner | Snippet **estático** en `measurement-head` (detección GA4/Tag Assistant) + Consent Mode default denied; tras cualquier decisión del banner, `analytics_storage` granted |
 | **3 — Marketing** | Meta Pixel, LinkedIn Insight | Única categoría rechazable; solo si `marketing === true` |
 
 **Nota GTM / Ads:** si en el futuro se usa un contenedor GTM con etiquetas de Google Ads, deben exigir `ad_storage` granted. No disparar Ads solo con consentimiento de analítica.

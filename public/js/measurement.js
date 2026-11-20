@@ -410,12 +410,47 @@
     });
   }
 
+  function googleAlreadyInDom(consented) {
+    if (consented.gtmId) {
+      return Boolean(
+        document.querySelector('script[src*="googletagmanager.com/gtm.js"]') ||
+          document.getElementById((configBrandHint() || 'webnu') + '-gtm-script')
+      );
+    }
+    if (consented.gtagId) {
+      return Boolean(
+        document.querySelector(
+          'script[src*="googletagmanager.com/gtag/js?id=' + encodeURIComponent(consented.gtagId) + '"]'
+        ) || document.querySelector('script[src*="googletagmanager.com/gtag/js"]')
+      );
+    }
+    return false;
+  }
+
+  function configBrandHint() {
+    try {
+      var node =
+        document.getElementById('webnu-measurement-config') ||
+        document.getElementById('shoow-measurement-config');
+      if (!node) return null;
+      var parsed = JSON.parse(node.textContent || '{}');
+      return parsed.brand || null;
+    } catch (e) {
+      return null;
+    }
+  }
+
   function bootstrapGoogle(config) {
     var consented = config.consented;
     if (!hasGoogleTools(consented) || googleBootstrapped) {
       return Promise.resolve();
     }
     googleBootstrapped = true;
+    // Snippet estático en <head> (detección GA4): no volver a inyectar.
+    if (googleAlreadyInDom(consented)) {
+      ensureGtag();
+      return Promise.resolve();
+    }
     setConsentDefault();
     if (consented.gtmId) {
       return loadGtm(consented.gtmId, config.brand);

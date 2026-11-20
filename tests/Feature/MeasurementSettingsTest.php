@@ -64,6 +64,8 @@ class MeasurementSettingsTest extends TestCase
             ->assertSee('measurement.js', false)
             ->assertSee('measurement-consent.css', false)
             ->assertSee('G-DK3YFNSMWX', false)
+            ->assertSee('googletagmanager.com/gtag/js?id=G-DK3YFNSMWX', false)
+            ->assertSee("gtag('consent', 'default'", false)
             ->assertSee('data-manage-cookies', false);
     }
 
