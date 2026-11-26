@@ -83,7 +83,7 @@
 
   function readCookie(name) {
     try {
-      var parts = (';cookie || '').split(';');
+      var parts = (document.cookie || '').split(';');
       for (var i = 0; i < parts.length; i++) {
         var part = parts[i].trim();
         if (part.indexOf(name + '=') === 0) {

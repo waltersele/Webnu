@@ -1,4 +1,3 @@
-<?php
 /**
  * First-party analytics beacon (no third-party cookies).
  * Counts pageviews / CTA clicks for the platform analytics panel.
