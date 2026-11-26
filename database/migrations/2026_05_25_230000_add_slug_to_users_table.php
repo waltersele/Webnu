@@ -18,16 +18,11 @@ class AddSlugToUsersTable extends Migration
 
         $this->backfill();
 
-        // Make slug not null + unique. We do this in a second step so
-        // existing legacy environments without doctrine/dbal don't blow up.
-        try {
-            Schema::table('users', function (Blueprint $table) {
-                $table->string('slug', 120)->nullable(false)->change();
-            });
-        } catch (\Throwable $e) {
-            // doctrine/dbal not available: best-effort, the column stays nullable
-            // but is populated. A future migration with dbal can tighten it.
-        }
+        // La columna se queda nullable a proposito. En Laravel 10 sin doctrine/dbal el
+        // ->nullable(false)->change() fallaba en silencio (try/catch), asi que el esquema
+        // real en produccion y en tests siempre fue nullable y la app crea usuarios sin slug
+        // (se genera despues, ver User::resolveSlug). Laravel 11 hace el change() de forma
+        // nativa y lo dejaria NOT NULL, rompiendo el alta de usuarios.
 
         try {
             Schema::table('users', function (Blueprint $table) {
