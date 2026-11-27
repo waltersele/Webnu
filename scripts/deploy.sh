@@ -21,7 +21,9 @@
 #
 # El SITE_ROOT es, por defecto, la carpeta que contiene scripts/ (el propio sitio).
 #
-# Configuración por sitio: $SITE_ROOT/.deploy.env (bash; se excluye del rsync). Ejemplo staging:
+# Configuración por sitio: $SITE_ROOT/.deploy.env (solo líneas CLAVE=valor con claves permitidas:
+# REPO_ROOT REPO_BRANCH REPO_REMOTE STATE_FILE LOG_FILE BACKUP_DIR PHP_BIN COMPOSER_BIN
+# SMOKE_MENU_PATH SMOKE_AUTH; no se ejecuta con source; se excluye del rsync). Ejemplo staging:
 #   REPO_ROOT=$HOME/webnu-staging
 #   REPO_BRANCH=l13/paso-3-laravel-13
 #   STATE_FILE=$HOME/.webnu-staging-last-deploy-sha
@@ -30,7 +32,7 @@
 # Las variables del entorno tienen prioridad sobre .deploy.env.
 #
 # Variables (sobreescribibles):
-#   SITE_ROOT    sitio live (def. carpeta padre de scripts/)
+#   SITE_ROOT    NO exportarlo: es siempre la carpeta padre de scripts/ (si el entorno trae otro, aborta)
 #   REPO_ROOT    clon git de origen (def. $HOME/webnu-deploy)
 #   REPO_BRANCH  rama a desplegar (def. main)
 #   DEPLOY_REF   SHA o tag exacto a desplegar en lugar de $REPO_REMOTE/$REPO_BRANCH
@@ -40,14 +42,15 @@
 #   LOG_FILE     histórico (def. $SITE_ROOT/storage/backups/deploys.log)
 #   BACKUP_DIR   dumps de BD, snapshots vendor-<SHA>.tar.gz y deploy-<fecha>.out
 #   SMOKE_MENU_PATH, SMOKE_AUTH   ver arriba
-#   SKIP_SCRIPT_CHECK=1           no exigir que este script coincida con el del repo
+#   SKIP_SCRIPT_CHECK=1           no exigir que este script coincida con el del destino (en producción: solo con TTY)
+#   ALLOW_CUSTOM=1                permitir en producción un REPO_ROOT/STATE_FILE/rama no estándar
 #
 # Seguridad: si SITE_ROOT no es $HOME/public_html/webnu.es y STATE_FILE o REPO_ROOT siguen en
 # los valores de producción, el script ABORTA (evita que un comando de staging toque producción).
 #
 # IMPORTANTE: rsync excluye scripts/, así que ESTE fichero NO se actualiza solo en el
-# servidor; el script aborta si difiere del del repo. Tras cambiarlo, cópialo a mano:
-#   cp $REPO_ROOT/scripts/deploy.sh $SITE_ROOT/scripts/deploy.sh && chmod +x $SITE_ROOT/scripts/deploy.sh
+# servidor; el script aborta si difiere del del commit destino. Actualízalo a mano (el clon aún no está en ese commit):
+#   git -C $REPO_ROOT show <SHA-destino>:scripts/deploy.sh > $SITE_ROOT/scripts/deploy.sh && chmod +x $SITE_ROOT/scripts/deploy.sh
 #
 # Si el deploy falla una vez empezada la sincronización, el sitio se queda EN MANTENIMIENTO
 # (no se reabre a medias): ejecuta --rollback y revisa el dump de BD indicado en pantalla.
@@ -99,28 +102,74 @@ while [[ $# -gt 0 ]]; do
 done
 
 # ---------- Configuración --------------------------------------------------- #
-SITE_ROOT="${SITE_ROOT:-$(cd "$SCRIPT_DIR/.." && pwd -P)}"
+PROD_SITE_ROOT="$HOME/public_html/webnu.es"
+PROD_REPO_ROOT="$HOME/webnu-deploy"
+PROD_STATE_FILE="$HOME/.webnu-last-deploy-sha"
 
-# .deploy.env aporta valores por sitio; lo que venga del entorno manda sobre el fichero.
-CONFIG_VARS=(REPO_ROOT REPO_REMOTE REPO_BRANCH DEPLOY_REF PHP_BIN COMPOSER_BIN STATE_FILE LOG_FILE BACKUP_DIR SMOKE_MENU_PATH SMOKE_AUTH)
+# Avisa de variables de deploy exportadas en el entorno (típico error: sobras de staging).
+_envset=()
+for _v in SITE_ROOT REPO_ROOT REPO_REMOTE REPO_BRANCH DEPLOY_REF STATE_FILE LOG_FILE BACKUP_DIR \
+          PHP_BIN COMPOSER_BIN SMOKE_MENU_PATH SMOKE_AUTH SKIP_SCRIPT_CHECK ROLLBACK_TO ALLOW_CUSTOM; do
+    if [[ -n "${!_v+x}" ]]; then
+        if [[ "$_v" == "SMOKE_AUTH" ]]; then _envset+=("$_v=***"); else _envset+=("$_v=${!_v}"); fi
+    fi
+done
+if [[ ${#_envset[@]} -gt 0 ]]; then
+    warn "Variables de deploy presentes en el entorno (mandan sobre .deploy.env): ${_envset[*]}"
+fi
+
+# SITE_ROOT = carpeta que contiene scripts/. Un SITE_ROOT del entorno que no coincida, aborta.
+SITE_FROM_SCRIPT="$(cd "$SCRIPT_DIR/.." && pwd -P)"
+if [[ -n "${SITE_ROOT:-}" && "$(canon "$SITE_ROOT")" != "$SITE_FROM_SCRIPT" ]]; then
+    die "SITE_ROOT=$SITE_ROOT (entorno) no coincide con la carpeta de este script ($SITE_FROM_SCRIPT). Lanza el script de DENTRO del sitio que quieres desplegar y no exportes SITE_ROOT. Aborto sin tocar nada."
+fi
+SITE_ROOT="$SITE_FROM_SCRIPT"
+
+# .deploy.env: NO se ejecuta con source. Solo líneas CLAVE=valor con claves de la lista blanca.
+# $HOME y ~ se expanden; cualquier otro $ o ` se rechaza (usa comillas simples para valores literales).
+DEPLOY_ENV_ALLOWED=" REPO_ROOT REPO_BRANCH REPO_REMOTE STATE_FILE LOG_FILE BACKUP_DIR PHP_BIN COMPOSER_BIN SMOKE_MENU_PATH SMOKE_AUTH "
+load_deploy_env() {
+    local file="$1" line key val n=0 literal
+    while IFS= read -r line || [[ -n "$line" ]]; do
+        n=$((n + 1))
+        line="${line%$'\r'}"
+        [[ -z "${line//[[:space:]]/}" || "$line" =~ ^[[:space:]]*# ]] && continue
+        if [[ "$line" =~ ^[[:space:]]*([A-Za-z_][A-Za-z0-9_]*)=(.*)$ ]]; then
+            key="${BASH_REMATCH[1]}"; val="${BASH_REMATCH[2]}"
+        else
+            warn ".deploy.env:$n ignorada (no es CLAVE=valor)"
+            continue
+        fi
+        if [[ "$DEPLOY_ENV_ALLOWED" != *" $key "* ]]; then
+            warn ".deploy.env:$n clave no permitida '$key': ignorada (solo ${DEPLOY_ENV_ALLOWED})"
+            continue
+        fi
+        literal=0
+        if [[ "$val" =~ ^\'(.*)\'$ ]]; then
+            val="${BASH_REMATCH[1]}"; literal=1
+        elif [[ "$val" =~ ^\"(.*)\"$ ]]; then
+            val="${BASH_REMATCH[1]}"
+        fi
+        if [[ $literal -eq 0 ]]; then
+            val="${val//\$\{HOME\}/$HOME}"
+            val="${val//\$HOME/$HOME}"
+            [[ "$val" == "~/"* ]] && val="$HOME/${val:2}"
+            if [[ "$val" == *'$'* || "$val" == *'`'* ]]; then
+                warn ".deploy.env:$n '$key' contiene una expansión no permitida: ignorada"
+                continue
+            fi
+        fi
+        # El entorno manda sobre el fichero.
+        if [[ -n "${!key+x}" ]]; then continue; fi
+        printf -v "$key" '%s' "$val"
+    done < "$file"
+}
 if [[ -f "$SITE_ROOT/.deploy.env" ]]; then
-    _saved=()
-    for _v in "${CONFIG_VARS[@]}"; do
-        if [[ -n "${!_v+x}" ]]; then _saved+=("$_v=${!_v}"); fi
-    done
-    # shellcheck disable=SC1091
-    source "$SITE_ROOT/.deploy.env"
-    for _kv in ${_saved[@]+"${_saved[@]}"}; do
-        printf -v "${_kv%%=*}" '%s' "${_kv#*=}"
-    done
+    load_deploy_env "$SITE_ROOT/.deploy.env"
     DEPLOY_ENV_LOADED=1
 else
     DEPLOY_ENV_LOADED=0
 fi
-
-PROD_SITE_ROOT="$HOME/public_html/webnu.es"
-PROD_REPO_ROOT="$HOME/webnu-deploy"
-PROD_STATE_FILE="$HOME/.webnu-last-deploy-sha"
 
 REPO_ROOT="${REPO_ROOT:-$PROD_REPO_ROOT}"
 REPO_REMOTE="${REPO_REMOTE:-origin}"
@@ -134,12 +183,25 @@ BACKUP_DIR="${BACKUP_DIR:-$SITE_ROOT/storage/backups}"
 SMOKE_MENU_PATH="${SMOKE_MENU_PATH:-}"   # p. ej. /carta/demo (opcional)
 SMOKE_AUTH="${SMOKE_AUTH:-}"             # usuario:contraseña (staging con Directory Privacy)
 ROLLBACK_TO="${ROLLBACK_TO:-}"
+ALLOW_CUSTOM="${ALLOW_CUSTOM:-0}"
 VENDOR_SNAPSHOTS_KEEP=3                  # instantáneas vendor-<SHA>.tar.gz que se conservan
 
-# Freno anti-accidentes: un sitio que no es producción no puede usar el estado/repo de producción.
-if [[ "$(canon "$SITE_ROOT")" != "$(canon "$PROD_SITE_ROOT")" ]]; then
+# Freno anti-accidentes en AMBOS sentidos.
+IS_PROD_SITE=0
+[[ "$SITE_ROOT" == "$(canon "$PROD_SITE_ROOT")" ]] && IS_PROD_SITE=1
+if [[ $IS_PROD_SITE -eq 0 ]]; then
+    # Un sitio que no es producción no puede usar el estado/repo de producción.
     if [[ "$STATE_FILE" == "$PROD_STATE_FILE" || "$(canon "$REPO_ROOT")" == "$(canon "$PROD_REPO_ROOT")" ]]; then
         die "SITE_ROOT=$SITE_ROOT no es producción ($PROD_SITE_ROOT) pero STATE_FILE o REPO_ROOT apuntan a los de PRODUCCIÓN. Crea $SITE_ROOT/.deploy.env con REPO_ROOT, REPO_BRANCH y STATE_FILE propios (ver docs/STAGING.md). Aborto sin tocar nada."
+    fi
+else
+    # Producción solo con REPO_ROOT, STATE_FILE y rama main (o un DEPLOY_REF) de producción.
+    if [[ "$(canon "$REPO_ROOT")" != "$(canon "$PROD_REPO_ROOT")" || "$STATE_FILE" != "$PROD_STATE_FILE" \
+          || ( -z "$DEPLOY_REF" && "$REPO_BRANCH" != "main" ) ]]; then
+        if [[ "$ALLOW_CUSTOM" != "1" ]]; then
+            die "SITE_ROOT es PRODUCCIÓN pero REPO_ROOT=$REPO_ROOT, STATE_FILE=$STATE_FILE o REPO_BRANCH=$REPO_BRANCH (DEPLOY_REF='${DEPLOY_REF}') no son los de producción (REPO_ROOT=$PROD_REPO_ROOT, STATE_FILE=$PROD_STATE_FILE, rama main o DEPLOY_REF). ¿Variables de staging en el entorno? Si es intencional: ALLOW_CUSTOM=1. Aborto sin tocar nada."
+        fi
+        warn "ALLOW_CUSTOM=1: configuración no estándar en PRODUCCIÓN."
     fi
 fi
 
@@ -214,7 +276,7 @@ read_sha() {
 
 # Valor de una clave de $SITE_ROOT/.env sin comillas ni CR (vacío si no existe).
 env_get() {
-    grep -E "^$1=" "$SITE_ROOT/.env" 2>/dev/null | head -1 | cut -d= -f2- | tr -d "\"'\r" || true
+    awk -v k="$1" 'index($0, k "=") == 1 { sub(/^[^=]*=/, ""); print; exit }' "$SITE_ROOT/.env" 2>/dev/null | tr -d "\"'\r" || true
 }
 
 is_down() {
@@ -301,7 +363,7 @@ resolve_composer_invocation() {
 # podría resolver otro php): se antepone su directorio al PATH.
 composer_in() {
     local dir="$1"; shift
-    local phpdir; phpdir="$(dirname "$PHP_BIN")"
+    local phpdir; phpdir="$(dirname "$(command -v "$PHP_BIN" 2>/dev/null || echo "$PHP_BIN")")"
     if [[ $DRY_RUN -eq 1 ]]; then
         dry_say "(cd $dir && $COMPOSER_BIN $*)"
         return 0
@@ -331,7 +393,7 @@ live_laravel_version() {
         echo ""
         return
     fi
-    grep -E "const VERSION = '" "$f" | head -1 | sed -E "s/.*'([^']+)'.*/\1/" || echo ""
+    sed -n -E "/const VERSION = '/{s/.*'([^']+)'.*/\1/p;q}" "$f" || echo ""
 }
 
 # Major (primer número) de una versión: "13.44.1" → 13, "v10.48.0" → 10
@@ -462,7 +524,7 @@ snapshot_vendor() {
             rm -f "$tmp"
             die "No se pudo crear la instantánea de vendor/ ($snap). No se ha tocado nada."
         fi
-        if ! tar -tzf "$tmp" 2>/dev/null | grep -qx 'vendor/autoload.php'; then
+        if ! tar -tzf "$tmp" vendor/autoload.php >/dev/null 2>&1; then
             rm -f "$tmp"
             die "La instantánea creada no es válida (falta vendor/autoload.php o el tar está corrupto). No se ha tocado nada."
         fi
@@ -573,6 +635,8 @@ confirm_target() {
     app_url="$(env_get APP_URL)"
     say "SITE_ROOT : $SITE_ROOT"
     say "APP_URL   : ${app_url:-<no definida>}"
+    say "REPO_ROOT : $REPO_ROOT   (${DEPLOY_REF:+ref $DEPLOY_REF}${DEPLOY_REF:-rama $REPO_REMOTE/$REPO_BRANCH})"
+    say "STATE_FILE: $STATE_FILE"
     say "$label: en vivo ${live:0:7} → destino ${target:0:7}"
     [[ $DRY_RUN -eq 1 || $ASSUME_YES -eq 1 ]] && return 0
     if [[ $IS_TTY -ne 1 ]]; then
@@ -718,8 +782,22 @@ if [[ $DRY_RUN -eq 0 ]]; then
 else
     OUT_FILE="/tmp/deploy-dry-$STAMP.out"
 fi
-exec > >(tee -a "$OUT_FILE") 2>&1
+exec > >(tee -ia "$OUT_FILE") 2>&1
 say "Salida guardada en $OUT_FILE"
+
+# Limpia directorios temporales huérfanos de ejecuciones anteriores (PID ya inexistente).
+for _d in "$SITE_ROOT"/.vendor-new-* "$SITE_ROOT"/.vendor-restore-*; do
+    [[ -d "$_d" ]] || continue
+    _pid="${_d##*-}"
+    if [[ "$_pid" =~ ^[0-9]+$ ]] && ! kill -0 "$_pid" 2>/dev/null; then
+        if [[ $DRY_RUN -eq 1 ]]; then
+            dry_say "rm -rf $_d (huérfano)"
+        else
+            warn "Eliminando temporal huérfano $_d"
+            rm -rf "$_d"
+        fi
+    fi
+done
 
 # ---------- ROLLBACK ------------------------------------------------------- #
 if [[ $ROLLBACK -eq 1 ]]; then
@@ -756,7 +834,7 @@ if [[ $ROLLBACK -eq 1 ]]; then
     EXPECTED_MAJOR="$(lock_laravel_major "$PREV_LOCK")"
     printf "\n${C_YELLOW}!! ATENCIÓN: el rollback NO restaura la base de datos.${C_RESET}\n"
     echo "   Las migraciones nuevas NO se revierten solas: el código antiguo correrá contra el esquema nuevo."
-    LAST_DUMP="$(ls -1t "$BACKUP_DIR"/db-*.sql.gz 2>/dev/null | head -1 || true)"
+    LAST_DUMP="$(ls -1t "$BACKUP_DIR"/db-*.sql.gz 2>/dev/null | sed -n 1p || true)"
     echo "   Último dump de BD: ${LAST_DUMP:-ninguno en $BACKUP_DIR}"
     echo
 
@@ -810,7 +888,7 @@ if [[ $ROLLBACK -eq 1 ]]; then
         cp -f "$STAGE/composer.json" "$SITE_ROOT/composer.json" 2>/dev/null || true
         cp -f "$STAGE/composer.lock" "$SITE_ROOT/composer.lock" 2>/dev/null || true
         if [[ $VENDOR_FROM_SNAPSHOT -eq 0 ]]; then
-            composer_in "$SITE_ROOT" dump-autoload --optimize --no-scripts --no-interaction
+            composer_in "$SITE_ROOT" dump-autoload --optimize --no-dev --no-scripts --no-interaction
         fi
         assert_laravel_matches_lock
     else
@@ -859,15 +937,22 @@ else
     NEW_SHA="$(git rev-parse --verify "$REPO_REMOTE/$REPO_BRANCH^{commit}" 2>/dev/null)" || die "No existe $REPO_REMOTE/$REPO_BRANCH en $REPO_ROOT"
 fi
 
-# El deploy.sh del servidor debe ser el del repo (rsync excluye scripts/).
-if [[ "${SKIP_SCRIPT_CHECK:-0}" != "1" ]]; then
-    if git cat-file -e "$NEW_SHA:scripts/deploy.sh" 2>/dev/null; then
-        if ! git show "$NEW_SHA:scripts/deploy.sh" | cmp -s - "$SCRIPT_PATH"; then
-            die "Este deploy.sh difiere del de ${NEW_SHA:0:7}: copia el deploy.sh nuevo (cp $REPO_ROOT/scripts/deploy.sh $SITE_ROOT/scripts/deploy.sh tras actualizar el clon) o usa SKIP_SCRIPT_CHECK=1."
+# El deploy.sh del servidor debe ser el del destino (rsync excluye scripts/).
+if git cat-file -e "$NEW_SHA:scripts/deploy.sh" 2>/dev/null; then
+    if ! git show "$NEW_SHA:scripts/deploy.sh" | cmp -s - "$SCRIPT_PATH"; then
+        if [[ "${SKIP_SCRIPT_CHECK:-0}" = "1" ]]; then
+            if [[ $IS_PROD_SITE -eq 1 ]]; then
+                [[ $IS_TTY -eq 1 && $DRY_RUN -eq 0 ]] || die "SKIP_SCRIPT_CHECK en PRODUCCIÓN solo se admite con confirmación por TTY."
+                read -r -p "SKIP_SCRIPT_CHECK en PRODUCCIÓN: escribe SALTAR para continuar: " _ans
+                [[ "$_ans" == "SALTAR" ]] || die "Confirmación incorrecta. Aborto sin tocar nada."
+            fi
+            warn "SKIP_SCRIPT_CHECK: se despliega con un deploy.sh distinto al de ${NEW_SHA:0:7} (si el destino es anterior, podrías sobrescribir public/index.php con una versión vieja)."
+        else
+            die "Este deploy.sh difiere del de ${NEW_SHA:0:7}. Actualízalo desde el commit de destino (el clon aún no está en ese commit): git -C \"$REPO_ROOT\" show \"$NEW_SHA:scripts/deploy.sh\" > \"$SCRIPT_PATH\" && chmod +x \"$SCRIPT_PATH\" . Si el destino es anterior al deploy.sh nuevo NO uses SKIP_SCRIPT_CHECK: despliega un ref que ya lo contenga (ver docs/STAGING.md §8)."
         fi
-    else
-        warn "El destino no contiene scripts/deploy.sh; no se puede comparar."
     fi
+else
+    warn "El destino no contiene scripts/deploy.sh; no se puede comparar."
 fi
 
 PREV_SHA_RAW="$(read_sha "$STATE_FILE")"
@@ -1061,13 +1146,13 @@ if should_sync_vendor; then
         cmp -s "$STAGE/composer.lock" "$SITE_ROOT/composer.lock" || die "composer.lock del sitio no coincide con el de ${NEW_SHA:0:7} tras el rsync."
         swap_vendor "$STAGE"
         # El classmap optimizado se generó fuera del sitio (sin app/): se regenera aquí.
-        composer_in "$SITE_ROOT" dump-autoload --optimize --no-scripts --no-interaction
+        composer_in "$SITE_ROOT" dump-autoload --optimize --no-dev --no-scripts --no-interaction
         assert_autoload_has_app
         assert_laravel_matches_lock
     fi
 else
     say "Regenerando autoload (composer dump-autoload)"
-    composer_in "$SITE_ROOT" dump-autoload --no-scripts --optimize --no-interaction --ignore-platform-reqs
+    composer_in "$SITE_ROOT" dump-autoload --no-scripts --optimize --no-dev --no-interaction --ignore-platform-reqs
 fi
 
 say "Re-descubriendo paquetes"
@@ -1115,7 +1200,7 @@ if [[ $DRY_RUN -eq 0 ]]; then
         write_atomic "$STATE_FILE.prev" "$PREV_SHA"
     fi
     write_atomic "$STATE_FILE" "$NEW_SHA"
-    rm -f "$STATE_FILE.pending"
+    rm -f "$STATE_FILE.pending" "$STATE_FILE.rollback-target"
     log_line "DEPLOY $PREV_SHA → $NEW_SHA  msg=\"${COMMIT_MSG%%$'\n'*}\""
 fi
 

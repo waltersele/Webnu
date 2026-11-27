@@ -6,6 +6,8 @@ Guía paso a paso para validar un cambio grande (p. ej. el salto Laravel 10 → 
 
 > Lanza siempre `deploy.sh` dentro de `screen` o `tmux`: si se corta el SSH a mitad, el sitio queda en mantenimiento.
 
+> **Orden de trabajo (resumen).** R1 = la rama `deploy/version-agnostic` mergeada en `main` (L10 + script nuevo + `public/index.php`). Las ramas L13 se rebasan sobre R1 (o se crea `release/l13` = R1 + los 3 saltos). En staging se despliega primero R1 (línea base L10) y después `release/l13`. Producción recibe primero R1 y, validado staging, el **mismo SHA** de `release/l13`. Detalle en §8.
+
 ## 1. Subdominio y PHP
 
 1. cPanel → **Domains** → crear `staging.webnu.es`. **Document root:** `public_html/staging.webnu.es/public` (igual que producción, que apunta a `.../webnu.es/public`).
@@ -46,6 +48,8 @@ UPDATE users SET tvpik_api_token=NULL, tvpik_connected_at=NULL, tvpik_org_id=NUL
 DELETE FROM tvpik_screen_links;
 ```
 
+   Compatibilidad: `VALUES(col)` en `ON DUPLICATE KEY UPDATE` funciona en MySQL y MariaDB; en MySQL 8.0.20+ está marcada como obsoleta y solo emite un aviso. `docs/deploy.md` solo documenta «MySQL/MariaDB» sin versión; si tu servidor es MySQL 8.0.20+ y quieres evitar el aviso puedes usar `INSERT … AS new … UPDATE value=new.value`, pero **MariaDB no lo admite**.
+
    Las tablas y columnas están comprobadas contra las migraciones del repo: `users.tvpik_api_token`, `tvpik_connected_at`, `tvpik_org_id` (migración `2026_05_21_160000_add_tvpik_integration_tables`), `users.stripe_id` (Cashier), tabla `tvpik_screen_links`, y las claves de `platform_settings` de `PlatformSettingsController`, `PlatformSetting::$encryptedKeys`, `config/billing.php` (`stripe_price_*`, `stripe_product_*`) y `MeasurementSettingsService`.
 
 4. **Verificación (obligatoria).** Revisa a mano lo que queda y borra cualquier cosa que parezca un secreto, una URL de producción o un ID de Stripe/TVPik:
@@ -56,7 +60,7 @@ SELECT COUNT(*) FROM tvpik_screen_links;                                  -- 0
 SELECT COUNT(*) FROM users WHERE stripe_id IS NOT NULL OR tvpik_api_token IS NOT NULL;  -- 0
 ```
 
-5. **`APP_KEY`:** genera una **nueva** para staging (`php artisan key:generate`). Los valores cifrados que pudieran quedar del dump ya no se leerán y no hacen falta (los secretos están borrados). No copies la clave de producción.
+5. **`APP_KEY`:** genera una **nueva** para staging **antes del primer deploy** (aún no hay `vendor/`, así que no uses `artisan key:generate`) y pégala en el `.env`: `php -r "echo 'base64:'.base64_encode(random_bytes(32)).PHP_EOL;"`. Los valores cifrados que pudieran quedar del dump ya no se leerán y no hacen falta (los secretos están borrados). No copies la clave de producción.
 6. Los usuarios ya no tienen `stripe_id`: el checkout de test crea clientes nuevos en Stripe test.
 
 ## 3. Clonar el repo y preparar el sitio
@@ -72,8 +76,10 @@ mkdir -p $S/scripts $S/bootstrap/cache $S/storage/{logs,backups,framework/{sessi
 chmod -R 775 $S/storage $S/bootstrap/cache
 
 # El script del servidor NO se actualiza solo (rsync excluye scripts/) y el deploy
-# aborta si difiere del del repo: cópialo a mano cada vez que cambie
-cp ~/webnu-staging/scripts/deploy.sh $S/scripts/deploy.sh && chmod +x $S/scripts/deploy.sh
+# aborta si difiere del del commit destino. Extráelo del commit R1 (el clon todavía no
+# está en ese commit, no lo copies del árbol de trabajo):
+git -C ~/webnu-staging fetch origin
+git -C ~/webnu-staging show <SHA-R1>:scripts/deploy.sh > $S/scripts/deploy.sh && chmod +x $S/scripts/deploy.sh
 ```
 
 `$HOME/webnu-staging` es el **clon** (`REPO_ROOT`); el sitio vivo (`SITE_ROOT`) es `~/public_html/staging.webnu.es`. Tras el primer deploy (cuando ya exista `vendor/`), enlaza el almacenamiento público: `php artisan storage:link`.
@@ -95,7 +101,7 @@ Créalo **en el servidor** (`nano ~/public_html/staging.webnu.es/.env`) partiend
 | `APP_ENV` | `staging` |
 | `APP_DEBUG` | `false` |
 | `APP_URL` | `https://staging.webnu.es` (con `https`) |
-| `APP_KEY` | nueva (`php artisan key:generate`), nunca la de producción |
+| `APP_KEY` | nueva (`php -r "echo 'base64:'.base64_encode(random_bytes(32)).PHP_EOL;"`), nunca la de producción |
 | `DB_HOST`, `DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD` | los de la BD **nueva** de staging (`DB_HOST` es obligatorio: el backup lo lee) |
 | `MAIL_MAILER` | `log` (no se envía nada; los correos quedan en `storage/logs`) |
 | `QUEUE_CONNECTION` | `sync` |
@@ -134,7 +140,7 @@ Créalo **en el servidor** (`nano ~/public_html/staging.webnu.es/.env`) partiend
 
 ## 8. Desplegar en staging
 
-El script toma como `SITE_ROOT` la carpeta que contiene `scripts/` y **aborta** si el sitio no es producción y `STATE_FILE`/`REPO_ROOT` siguen apuntando a los de producción. Por eso la configuración de staging va en un fichero del propio sitio, `.deploy.env` (se excluye del rsync), no en exports sueltos:
+El script toma como `SITE_ROOT` la carpeta que contiene `scripts/` (si exportas un `SITE_ROOT` distinto, aborta) y **aborta** si el sitio no es producción y `STATE_FILE`/`REPO_ROOT` siguen apuntando a los de producción (y, a la inversa, si el sitio es producción con valores que no son los de producción, salvo `ALLOW_CUSTOM=1`). La configuración de staging va en un fichero del propio sitio, `.deploy.env` (se excluye del rsync). **No se ejecuta con `source`**: solo se leen líneas `CLAVE=valor` con claves permitidas (`REPO_ROOT`, `REPO_BRANCH`, `REPO_REMOTE`, `STATE_FILE`, `LOG_FILE`, `BACKUP_DIR`, `PHP_BIN`, `COMPOSER_BIN`, `SMOKE_MENU_PATH`, `SMOKE_AUTH`); cualquier otra clave se avisa y se ignora. Solo se expanden `$HOME` y `~`; usa comillas simples para valores literales (p. ej. una clave con `$`).
 
 ```bash
 cat > ~/public_html/staging.webnu.es/.deploy.env <<'EOF'
@@ -142,28 +148,38 @@ REPO_ROOT=$HOME/webnu-staging
 REPO_BRANCH=main
 STATE_FILE=$HOME/.webnu-staging-last-deploy-sha
 SMOKE_MENU_PATH=/carta/demo
-SMOKE_AUTH=usuario:clave
+SMOKE_AUTH='usuario:clave'
 EOF
 chmod 600 ~/public_html/staging.webnu.es/.deploy.env
 ```
 
-(`SMOKE_AUTH` es el usuario/clave de Directory Privacy; así no queda en el historial de la shell. `SMOKE_MENU_PATH` debe ser una carta pública que exista en el dump.) Lo que pases por entorno manda sobre el fichero.
+(`SMOKE_AUTH` es el usuario/clave de Directory Privacy; así no queda en el historial de la shell. `SMOKE_MENU_PATH` debe ser una carta pública que exista en el dump.) Lo que exportes en el entorno manda sobre el fichero, y el script avisa al arrancar de las variables de deploy que encuentre; por eso, **antes de cada deploy**:
 
-Orden recomendado (así el ensayo de rollback tiene una línea base L10):
+```bash
+env | grep -E 'SITE_ROOT|REPO_|STATE_FILE|DEPLOY_REF|SKIP_'    # no debe salir nada que no esperes
+```
+
+### Orden de despliegue (R1 y `release/l13`)
+
+1. **R1** = `deploy/version-agnostic` mergeada en `main`: Laravel 10 + `scripts/deploy.sh` nuevo + `public/index.php` con el chequeo de mantenimiento.
+2. Las ramas L13 se **rebasan sobre R1**, o se crea una rama `release/l13` = R1 + los 3 saltos. Así el `deploy.sh` y el `index.php` de R1 viajan también en L13.
+3. En staging, línea base y después L13, siempre por SHA exacto:
 
 ```bash
 screen -S deploy          # o tmux
 cd ~/public_html/staging.webnu.es
-./scripts/deploy.sh --dry-run                       # revisa antes: SITE_ROOT, APP_URL y SHAs
-# a) Línea base: producción actual (L10)
-./scripts/deploy.sh --full-rsync
-# b) Lo que queremos validar (L13)
-REPO_BRANCH=l13/paso-3-laravel-13 ./scripts/deploy.sh --full-rsync
+DEPLOY_REF=<SHA de R1> ./scripts/deploy.sh --dry-run
+DEPLOY_REF=<SHA de R1> ./scripts/deploy.sh --full-rsync            # línea base L10
+DEPLOY_REF=<SHA de release/l13> ./scripts/deploy.sh --full-rsync   # lo que queremos validar
 ```
 
-Con TTY, el script muestra `SITE_ROOT`, `APP_URL` y «en vivo X → destino Y» y pide escribir el host de `APP_URL`; `--yes` se salta la confirmación. Al terminar ejecuta el smoke test (`/`, `/login`, `/register` y `SMOKE_MENU_PATH`); si algo no da 200 (o el sitio sigue en mantenimiento) sale con código 3 y avisa en rojo. Si el deploy falla a medias, el sitio queda en mantenimiento: ver [deploy.md](./deploy.md#rollback-rápido). La salida completa queda en `storage/backups/deploy-<fecha>.out`.
+4. **Producción** recibe primero R1 (con `public/index.php` y `deploy.sh` nuevos) y, una vez validado staging, el **MISMO SHA** de `release/l13` (`DEPLOY_REF=<sha> ./scripts/deploy.sh`), no una rama que pueda haberse movido.
 
-> **Prerrequisito para producción:** el `public/index.php` de este repo sirve la página de mantenimiento pre-renderizada **antes** de cargar `vendor/`. Ese cambio debe estar en producción **antes** de desplegar L13 (despliega primero un release solo con él). Si no, durante el deploy el modo mantenimiento dependería de un `vendor/` a medias.
+> **No uses `SKIP_SCRIPT_CHECK=1` para saltarte el aviso de «deploy.sh difiere».** Ocurre cuando el destino es anterior al `deploy.sh` nuevo (p. ej. una rama L13 sin rebasar sobre R1): desplegarla sobrescribiría `public/index.php` con la versión vieja, sin el chequeo de mantenimiento, justo en el deploy más delicado. Despliega un ref que ya contenga R1. Si el script del servidor está desactualizado, actualízalo con `git -C <REPO_ROOT> show <SHA>:scripts/deploy.sh > scripts/deploy.sh` (el mensaje del script ya lo indica). En producción, `SKIP_SCRIPT_CHECK` solo se admite con TTY y confirmación escrita.
+
+Con TTY, el script muestra `SITE_ROOT`, `APP_URL`, `REPO_ROOT`, rama o ref, `STATE_FILE` y «en vivo X → destino Y», y pide escribir el host de `APP_URL`; `--yes` se salta la confirmación. En el primer deploy (aún sin `vendor/`) no intenta `artisan down`. Al terminar ejecuta el smoke test (`/`, `/login`, `/register` y `SMOKE_MENU_PATH`); si algo no da 200 (o el sitio sigue en mantenimiento) sale con código 3 y avisa en rojo. Si el deploy falla a medias, el sitio queda en mantenimiento: ver [deploy.md](./deploy.md#rollback-rápido). La salida completa queda en `storage/backups/deploy-<fecha>.out`.
+
+> **Prerrequisito para producción:** el `public/index.php` de R1 sirve la página de mantenimiento pre-renderizada **antes** de cargar `vendor/`. Debe estar en producción **antes** que L13 (por eso R1 va primero). Si no, durante el deploy el modo mantenimiento dependería de un `vendor/` a medias.
 
 ## 9. Checklist de validación
 
@@ -198,12 +214,21 @@ cd ~/public_html/staging.webnu.es
 ./scripts/deploy.sh --rollback
 ```
 
-Muestra «en vivo X → destino Y» (el destino sale de `.pending`/`.prev`, no de una heurística; `ROLLBACK_TO=<sha>` tiene prioridad), valida la instantánea antes de tocar nada, y después restaura `vendor/`, `composer.json` y `composer.lock` desde `storage/backups/vendor-<SHA>.tar.gz` (si no existe, hace `composer install` con el lock de ese SHA en un directorio temporal), comprueba que el major de Laravel coincide con el lock, regenera cachés, ejecuta `webnu:deploy-check` y el smoke test. **No restaura la BD** y las migraciones nuevas **no se revierten solas**. Si el rollback se interrumpe, relánzalo: reutiliza el destino guardado.
+Muestra «en vivo X → destino Y» (el destino sale de `.rollback-target`/`.pending`/`.prev`, no de una heurística; `ROLLBACK_TO=<sha>` tiene prioridad), valida la instantánea antes de tocar nada, y después restaura `vendor/`, `composer.json` y `composer.lock` desde `storage/backups/vendor-<SHA>.tar.gz` (si no existe, hace `composer install` con el lock de ese SHA en un directorio temporal), comprueba que el major de Laravel coincide con el lock, regenera cachés, ejecuta `webnu:deploy-check` y el smoke test. **No restaura la BD** y las migraciones nuevas **no se revierten solas**. Si el rollback se interrumpe, relánzalo: reutiliza el destino guardado.
 
 Comprueba:
 
 - [ ] Salida: `Laravel VERSION=10.x … coincide con composer.lock` y smoke test en verde.
 - [ ] Login y una carta pública funcionan **con el esquema de BD ya migrado a L13**. Si no, ensaya también el rescate de BD (comando en deploy.md).
-- [ ] Vuelve a desplegar L13 y comprueba que sigue sano.
+- [ ] Vuelve a desplegar `release/l13` (`DEPLOY_REF=<sha>`) y comprueba que sigue sano.
 
-Para llevar a producción exactamente lo validado, usa el SHA probado: `DEPLOY_REF=<sha> ./scripts/deploy.sh` (en producción, con backup propio, `--dry-run` previo y ventana de bajo uso).
+Para llevar a producción exactamente lo validado: `DEPLOY_REF=<sha de release/l13> ./scripts/deploy.sh` (con backup propio, `--dry-run` previo y ventana de bajo uso).
+
+## 11. Ensayos de fallo a propósito (antes de producción)
+
+Provoca estos fallos **en staging** para ver que el script se comporta como se espera y que sabes recuperarte:
+
+- [ ] **`composer install` roto:** crea una rama de prueba basada en `release/l13` con un `composer.lock` corrupto (p. ej. quitando una llave del JSON) y despliégala con `DEPLOY_REF`. Esperado: falla al preparar `vendor/` **sin tocar el sitio**, que sigue arriba con L13; no queda `.vendor-new-*`.
+- [ ] **`migrate` fallido:** rama de prueba con una migración que lance una excepción. Esperado: el sitio **queda en mantenimiento** con el banner rojo, existe `~/.webnu-staging-last-deploy-sha.pending` y `--rollback` vuelve al último SHA bueno.
+- [ ] **Rollback interrumpido y relanzado:** durante `--rollback` corta el proceso (Ctrl+C o cierra el SSH, de ahí `screen`/`tmux`) tras el `git reset`; relanza `--rollback` y comprueba que muestra «rollback anterior interrumpido (.rollback-target)» y llega al mismo destino.
+- [ ] Tras cada ensayo, deja staging sano (rollback o redeploy) y confirma smoke test en verde.
