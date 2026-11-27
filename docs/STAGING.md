@@ -2,7 +2,9 @@
 
 Guía paso a paso para validar un cambio grande (p. ej. el salto Laravel 10 → 13) en un subdominio de cPanel **antes** de tocar producción. Complementa [deploy.md](./deploy.md) y [MIGRACION-PRODUCCION.md](./MIGRACION-PRODUCCION.md); no las sustituye.
 
-> Regla de oro: staging **nunca** debe poder escribir en producción ni enviar correos o cobros reales. Los pasos 4, 6 y 7 existen por eso. No saltes ninguno.
+> Regla de oro: staging **nunca** debe poder escribir en producción, enviar correos o cobros reales, ni tocar las pantallas (TVs) de los clientes. Los pasos 2, 5 y 7 existen por eso. No saltes ninguno.
+
+> Lanza siempre `deploy.sh` dentro de `screen` o `tmux`: si se corta el SSH a mitad, el sitio queda en mantenimiento.
 
 ## 1. Subdominio y PHP
 
@@ -13,40 +15,55 @@ Guía paso a paso para validar un cambio grande (p. ej. el salto Laravel 10 → 
 ## 2. Base de datos nueva con el dump de producción
 
 1. cPanel → **MySQL Databases**: crear BD y usuario nuevos (p. ej. `wwwwebnu_stg` / `wwwwebnu_stgu`) y asignar todos los privilegios. **No reutilices la BD ni el usuario de producción.**
-2. Dump de producción (o el último de `storage/backups/db-*.sql.gz`) y carga en la BD nueva:
+2. Dump de producción (solo lectura sobre prod) y carga en la BD nueva. **Borra el dump al terminar**: contiene datos reales de clientes.
 
 ```bash
-# En el servidor (ajusta los datos de PRODUCCIÓN; solo lectura sobre prod)
 mysqldump --single-transaction --quick -u PROD_USER -p PROD_DB | gzip > ~/staging-dump.sql.gz
 gunzip -c ~/staging-dump.sql.gz | mysql -u STG_USER -p STG_DB
+shred -u ~/staging-dump.sql.gz 2>/dev/null || rm -f ~/staging-dump.sql.gz
 ```
 
-3. **Neutralizar la configuración de plataforma del dump.** La tabla `platform_settings` tiene prioridad sobre el `.env` y guarda correo SMTP, Stripe, Gemini, etc. Si no la limpias, staging puede enviar correos reales o usar Stripe live aunque pongas `MAIL_MAILER=log`:
+3. **Neutralizar secretos e integraciones del dump.** La tabla `platform_settings` tiene prioridad sobre el `.env` y guarda SMTP, Stripe, Gemini, TVPik, analítica… Si no la limpias, staging puede enviar correos reales, cobrar con Stripe live o hablar con las TVs de los clientes aunque el `.env` diga otra cosa. Ejecuta **todo** esto en la BD de **staging** (compruébalo dos veces: nunca en producción):
 
 ```sql
-UPDATE platform_settings SET value = NULL WHERE `key` IN (
+DELETE FROM platform_settings WHERE `key` IN (
   'mail_host','mail_port','mail_username','mail_password','mail_encryption',
-  'stripe_key','stripe_secret','stripe_webhook_secret',
-  'gemini_api_key','google_client_id','google_client_secret',
-  'content_connector_secret','pre_alta_ingest_key','tvpik_app_key','digital_signage_app_key',
-  'gtag_measurement_id','gtm_container_id','clarity_project_id','meta_pixel_id','linkedin_partner_id'
-);
-INSERT INTO platform_settings (`key`,`value`) VALUES ('mail_mailer','log')
-  ON DUPLICATE KEY UPDATE `value`='log';
-UPDATE platform_settings SET value='0' WHERE `key`='measurement_enabled';
+  'stripe_key','stripe_secret','stripe_webhook_secret','gemini_api_key',
+  'google_client_id','google_client_secret','google_redirect_uri','google_site_verification',
+  'content_connector_secret','pre_alta_ingest_key',
+  'tvpik_api_url','tvpik_web_url','tvpik_app_key','digital_signage_app_key',
+  'gtag_measurement_id','gtm_container_id','clarity_project_id','meta_pixel_id','linkedin_partner_id',
+  'plausible_domain','plausible_upstream_url'
+) OR `key` LIKE 'stripe\_price\_%' OR `key` LIKE 'stripe\_product\_%';
+
+INSERT INTO platform_settings (`key`,`value`,created_at,updated_at) VALUES
+  ('mail_mailer','log',NOW(),NOW()),
+  ('measurement_enabled','0',NOW(),NOW()),
+  ('tvpik_stub_screens','1',NOW(),NOW())
+ON DUPLICATE KEY UPDATE `value`=VALUES(`value`);
+
+UPDATE users SET tvpik_api_token=NULL, tvpik_connected_at=NULL, tvpik_org_id=NULL, stripe_id=NULL;
+DELETE FROM tvpik_screen_links;
 ```
 
-   (Si alguna columna `created_at/updated_at` es obligatoria en el `INSERT`, añádela con `NOW()`.) Revisa después con `SELECT `key`, value IS NOT NULL FROM platform_settings;`.
+   Las tablas y columnas están comprobadas contra las migraciones del repo: `users.tvpik_api_token`, `tvpik_connected_at`, `tvpik_org_id` (migración `2026_05_21_160000_add_tvpik_integration_tables`), `users.stripe_id` (Cashier), tabla `tvpik_screen_links`, y las claves de `platform_settings` de `PlatformSettingsController`, `PlatformSetting::$encryptedKeys`, `config/billing.php` (`stripe_price_*`, `stripe_product_*`) y `MeasurementSettingsService`.
 
-4. **`APP_KEY`:** los valores cifrados del dump solo se descifran con la `APP_KEY` de producción. Si copias esa clave a staging (necesario para que `platform_settings` y las sesiones del dump sean legibles), tras el paso anterior ya no queda ningún secreto real dentro. Si prefieres una clave nueva, los valores cifrados no se leerán (da igual: los has puesto a NULL) y tendrás que volver a introducir lo que necesites.
-5. Los usuarios del dump tienen `stripe_id` de **live**. Con claves test, Stripe no los conoce. Para probar el checkout usa una cuenta nueva creada en staging (o `UPDATE users SET stripe_id = NULL` en staging).
+4. **Verificación (obligatoria).** Revisa a mano lo que queda y borra cualquier cosa que parezca un secreto, una URL de producción o un ID de Stripe/TVPik:
+
+```sql
+SELECT `key` FROM platform_settings;
+SELECT COUNT(*) FROM tvpik_screen_links;                                  -- 0
+SELECT COUNT(*) FROM users WHERE stripe_id IS NOT NULL OR tvpik_api_token IS NOT NULL;  -- 0
+```
+
+5. **`APP_KEY`:** genera una **nueva** para staging (`php artisan key:generate`). Los valores cifrados que pudieran quedar del dump ya no se leerán y no hacen falta (los secretos están borrados). No copies la clave de producción.
+6. Los usuarios ya no tienen `stripe_id`: el checkout de test crea clientes nuevos en Stripe test.
 
 ## 3. Clonar el repo y preparar el sitio
 
 ```bash
 ssh wwwwebnu@webnu.es
 cd ~
-# Clon del repo (mismo token que en deploy.md si es privado)
 git clone https://USER:ghp_TOKEN@github.com/waltersele/Webnu.git webnu-staging
 
 # Directorios que el rsync no crea (están excluidos)
@@ -54,19 +71,18 @@ S=~/public_html/staging.webnu.es
 mkdir -p $S/scripts $S/bootstrap/cache $S/storage/{logs,backups,framework/{sessions,cache,views}}
 chmod -R 775 $S/storage $S/bootstrap/cache
 
-# El script del servidor NO se actualiza solo (rsync excluye scripts/): cópialo a mano
-# cada vez que cambie en el repo
+# El script del servidor NO se actualiza solo (rsync excluye scripts/) y el deploy
+# aborta si difiere del del repo: cópialo a mano cada vez que cambie
 cp ~/webnu-staging/scripts/deploy.sh $S/scripts/deploy.sh && chmod +x $S/scripts/deploy.sh
 ```
 
-`$HOME/webnu-staging` es el **clon** (`REPO_ROOT`); el sitio vivo (`SITE_ROOT`) es `~/public_html/staging.webnu.es`.
+`$HOME/webnu-staging` es el **clon** (`REPO_ROOT`); el sitio vivo (`SITE_ROOT`) es `~/public_html/staging.webnu.es`. Tras el primer deploy (cuando ya exista `vendor/`), enlaza el almacenamiento público: `php artisan storage:link`.
 
 ## 4. Copiar `public/img` de producción
 
 Las fotos y logos están en `public/img/` (no van en git ni en el deploy):
 
 ```bash
-mkdir -p ~/public_html/staging.webnu.es/public
 cp -a ~/public_html/webnu.es/public/img ~/public_html/staging.webnu.es/public/img
 ```
 
@@ -78,17 +94,19 @@ Créalo **en el servidor** (`nano ~/public_html/staging.webnu.es/.env`) partiend
 |---|---|
 | `APP_ENV` | `staging` |
 | `APP_DEBUG` | `false` |
-| `APP_URL` | `https://staging.webnu.es` (con `https`, ver Troubleshooting de deploy.md) |
-| `APP_KEY` | la de producción si quieres leer datos cifrados del dump (ver 2.4), o `php artisan key:generate` |
+| `APP_URL` | `https://staging.webnu.es` (con `https`) |
+| `APP_KEY` | nueva (`php artisan key:generate`), nunca la de producción |
 | `DB_HOST`, `DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD` | los de la BD **nueva** de staging (`DB_HOST` es obligatorio: el backup lo lee) |
 | `MAIL_MAILER` | `log` (no se envía nada; los correos quedan en `storage/logs`) |
 | `QUEUE_CONNECTION` | `sync` |
 | `STRIPE_KEY`, `STRIPE_SECRET` | claves **test** (`pk_test_…`, `sk_test_…`) |
 | `STRIPE_WEBHOOK_SECRET` | el `whsec_…` del endpoint de **test** (ver paso 9) |
 | `STRIPE_PRICE_*` | IDs de precio **test** (los de live no existen en test) |
+| `TVPIK_API_URL` | **vacío** (nunca la URL real de TVPik) |
+| `TVPIK_STUB_SCREENS` | `true` |
 | `SESSION_DOMAIN` | vacío, o `staging.webnu.es`. Nunca `.webnu.es` (compartiría cookies con producción) |
-| `PLAUSIBLE_DOMAIN`, `GTAG_MEASUREMENT_ID`, `GTM_CONTAINER_ID`, `CLARITY_PROJECT_ID`, `META_PIXEL_ID`, `LINKEDIN_PARTNER_ID` | vacíos; `MEASUREMENT_ENABLED=false` |
-| `GEMINI_API_KEY` | opcional; solo si vas a probar traducción/escaneo (usa una clave de pruebas) |
+| `PLAUSIBLE_DOMAIN` | **vacío**; también vacíos `GTAG_MEASUREMENT_ID`, `GTM_CONTAINER_ID`, `CLARITY_PROJECT_ID`, `META_PIXEL_ID`, `LINKEDIN_PARTNER_ID`; `MEASUREMENT_ENABLED=false` |
+| `GEMINI_API_KEY` | opcional; solo si vas a probar traducción/escaneo (clave de pruebas) |
 | `SUPER_ADMIN_EMAILS` | tu correo |
 
 ## 6. Bloquear indexación y acceso
@@ -116,27 +134,36 @@ Créalo **en el servidor** (`nano ~/public_html/staging.webnu.es/.env`) partiend
 
 ## 8. Desplegar en staging
 
-Variables importantes: **`STATE_FILE` debe ser distinto del de producción** (por defecto es `~/.webnu-last-deploy-sha`, compartido). `LOG_FILE` y `BACKUP_DIR` salen de `SITE_ROOT`.
+El script toma como `SITE_ROOT` la carpeta que contiene `scripts/` y **aborta** si el sitio no es producción y `STATE_FILE`/`REPO_ROOT` siguen apuntando a los de producción. Por eso la configuración de staging va en un fichero del propio sitio, `.deploy.env` (se excluye del rsync), no en exports sueltos:
+
+```bash
+cat > ~/public_html/staging.webnu.es/.deploy.env <<'EOF'
+REPO_ROOT=$HOME/webnu-staging
+REPO_BRANCH=main
+STATE_FILE=$HOME/.webnu-staging-last-deploy-sha
+SMOKE_MENU_PATH=/carta/demo
+SMOKE_AUTH=usuario:clave
+EOF
+chmod 600 ~/public_html/staging.webnu.es/.deploy.env
+```
+
+(`SMOKE_AUTH` es el usuario/clave de Directory Privacy; así no queda en el historial de la shell. `SMOKE_MENU_PATH` debe ser una carta pública que exista en el dump.) Lo que pases por entorno manda sobre el fichero.
 
 Orden recomendado (así el ensayo de rollback tiene una línea base L10):
 
 ```bash
+screen -S deploy          # o tmux
 cd ~/public_html/staging.webnu.es
-
-export SITE_ROOT=$HOME/public_html/staging.webnu.es
-export REPO_ROOT=$HOME/webnu-staging
-export STATE_FILE=$HOME/.webnu-staging-last-deploy-sha
-export SMOKE_AUTH='usuario:clave'        # el de Directory Privacy
-export SMOKE_MENU_PATH=/carta/demo       # una carta pública que exista en el dump
-
+./scripts/deploy.sh --dry-run                       # revisa antes: SITE_ROOT, APP_URL y SHAs
 # a) Línea base: producción actual (L10)
-REPO_BRANCH=main ./scripts/deploy.sh --full-rsync
-
+./scripts/deploy.sh --full-rsync
 # b) Lo que queremos validar (L13)
 REPO_BRANCH=l13/paso-3-laravel-13 ./scripts/deploy.sh --full-rsync
 ```
 
-Si dudas, añade `--dry-run` para ver qué haría sin tocar nada. Al terminar ejecuta el smoke test (`/`, `/login`, `/register` y `SMOKE_MENU_PATH`); si algo no da 200 sale con código 3 y avisa en rojo (no hace rollback solo). Si el deploy falla a medias el sitio queda en mantenimiento: ver [deploy.md](./deploy.md#rollback-rápido).
+Con TTY, el script muestra `SITE_ROOT`, `APP_URL` y «en vivo X → destino Y» y pide escribir el host de `APP_URL`; `--yes` se salta la confirmación. Al terminar ejecuta el smoke test (`/`, `/login`, `/register` y `SMOKE_MENU_PATH`); si algo no da 200 (o el sitio sigue en mantenimiento) sale con código 3 y avisa en rojo. Si el deploy falla a medias, el sitio queda en mantenimiento: ver [deploy.md](./deploy.md#rollback-rápido). La salida completa queda en `storage/backups/deploy-<fecha>.out`.
+
+> **Prerrequisito para producción:** el `public/index.php` de este repo sirve la página de mantenimiento pre-renderizada **antes** de cargar `vendor/`. Ese cambio debe estar en producción **antes** de desplegar L13 (despliega primero un release solo con él). Si no, durante el deploy el modo mantenimiento dependería de un `vendor/` a medias.
 
 ## 9. Checklist de validación
 
@@ -146,7 +173,7 @@ php artisan webnu:deploy-check
 php artisan webnu:audit-public-menus --base=https://staging.webnu.es
 ```
 
-`audit-public-menus` acepta `--base=` (por defecto `APP_URL`), `--csv=`, `--legacy` y `--timeout=`. **No uses `--legacy` en staging** (esos redirects apuntan a `https://webnu.es`). Con Directory Privacy activa dará 401: desactívala un momento o pásale la URL con credenciales (`--base=https://usuario:clave@staging.webnu.es`; si Guzzle no las aplica, desactiva la protección).
+`audit-public-menus` acepta `--base=` (por defecto `APP_URL`), `--csv=`, `--legacy` y `--timeout=`. **No uses `--legacy` en staging** (esos redirects apuntan a `https://webnu.es`). Con Directory Privacy activa dará 401: desactívala un momento o pásale la URL con credenciales (si Guzzle no las aplica, desactiva la protección).
 
 - [ ] `webnu:deploy-check` sin errores críticos.
 - [ ] `webnu:audit-public-menus`: todas las cartas en 200.
@@ -156,10 +183,10 @@ php artisan webnu:audit-public-menus --base=https://staging.webnu.es
 - [ ] QR y PDF de la carta (la URL del QR es `https://staging.webnu.es/carta/...`).
 - [ ] Traducción con Gemini (si configuraste clave).
 - [ ] Subida de foto de plato y de logo (permisos de `public/img`).
-- [ ] Checkout de Stripe en modo test con tarjeta `4242 4242 4242 4242`, con una cuenta nueva (ver 2.5).
-- [ ] Webhook de test: crea el endpoint `https://staging.webnu.es/stripe/webhook` en Stripe (modo test) y copia su `whsec_…` al `.env`; con Directory Privacy desactivada, lanza el evento desde el dashboard o con `stripe trigger checkout.session.completed`, y confirma 200 en el dashboard de Stripe y el efecto en la BD. Vuelve a activar la protección.
+- [ ] Checkout de Stripe en modo test con tarjeta `4242 4242 4242 4242` (los usuarios del dump no tienen `stripe_id`; se crean en Stripe test).
+- [ ] Webhook de test: crea el endpoint `https://staging.webnu.es/stripe/webhook` en Stripe (modo test) y copia su `whsec_…` al `.env`; con Directory Privacy desactivada, lanza el evento desde el dashboard o con `stripe trigger checkout.session.completed`, y confirma 200 en el dashboard y el efecto en la BD. Vuelve a activar la protección.
 - [ ] Panel admin / plataforma (`/admin`, Plataforma → Configuración) carga sin errores.
-- [ ] TVPik (conexión `integrations/tvpik/connect` y pantalla de pricing) si está activo en el dump.
+- [ ] TVPik **solo en modo stub** (`TVPIK_STUB_SCREENS=true`, sin URL real): pantallas simuladas y pricing. **No** pruebes «connect» real contra TVPik: tocaría las TVs de clientes reales.
 - [ ] `tail -n 100 storage/logs/laravel.log`: sin errores nuevos respecto a producción.
 
 ## 10. Ensayo del rollback (obligatorio antes de producción)
@@ -171,13 +198,12 @@ cd ~/public_html/staging.webnu.es
 ./scripts/deploy.sh --rollback
 ```
 
-Esto vuelve al SHA anterior, restaura `vendor/`, `composer.json` y `composer.lock` desde `storage/backups/vendor-<SHA>.tar.gz` (si no existe, hace `composer install` con el lock de ese SHA), comprueba que el major de Laravel coincide con el lock y regenera cachés. **No restaura la BD** y las migraciones nuevas **no se revierten solas**.
+Muestra «en vivo X → destino Y» (el destino sale de `.pending`/`.prev`, no de una heurística; `ROLLBACK_TO=<sha>` tiene prioridad), valida la instantánea antes de tocar nada, y después restaura `vendor/`, `composer.json` y `composer.lock` desde `storage/backups/vendor-<SHA>.tar.gz` (si no existe, hace `composer install` con el lock de ese SHA en un directorio temporal), comprueba que el major de Laravel coincide con el lock, regenera cachés, ejecuta `webnu:deploy-check` y el smoke test. **No restaura la BD** y las migraciones nuevas **no se revierten solas**. Si el rollback se interrumpe, relánzalo: reutiliza el destino guardado.
 
 Comprueba:
 
-- [ ] Salida: `Laravel VERSION=10.x … coincide con composer.lock`.
-- [ ] `curl -u usuario:clave -I https://staging.webnu.es/`, `/login`, `/register` → 200.
-- [ ] Login y una carta pública funcionan **con el esquema de BD ya migrado a L13**. Si no, ensaya también el rescate de BD: restaurar `storage/backups/db-*.sql.gz` (comando en deploy.md).
-- [ ] Vuelve a desplegar L13 (`REPO_BRANCH=l13/paso-3-laravel-13 ./scripts/deploy.sh`) y comprueba que sigue sano.
+- [ ] Salida: `Laravel VERSION=10.x … coincide con composer.lock` y smoke test en verde.
+- [ ] Login y una carta pública funcionan **con el esquema de BD ya migrado a L13**. Si no, ensaya también el rescate de BD (comando en deploy.md).
+- [ ] Vuelve a desplegar L13 y comprueba que sigue sano.
 
-Solo cuando todo lo anterior esté en verde, repite el mismo orden en producción (backup propio, `--dry-run`, ventana de bajo uso).
+Para llevar a producción exactamente lo validado, usa el SHA probado: `DEPLOY_REF=<sha> ./scripts/deploy.sh` (en producción, con backup propio, `--dry-run` previo y ventana de bajo uso).

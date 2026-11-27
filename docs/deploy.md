@@ -77,10 +77,11 @@ git commit -m "feat: cambios"
 git push origin main
 ```
 
-Conéctate por SSH al servidor y lanza el script:
+Conéctate por SSH al servidor y lanza el script **dentro de `screen` o `tmux`** (si se corta el SSH a mitad, el sitio queda en mantenimiento):
 
 ```bash
 ssh wwwwebnu@webnu.es
+screen -S deploy
 cd /home/wwwwebnu/public_html/webnu.es
 ./scripts/deploy.sh
 ```
@@ -89,24 +90,28 @@ El script hace:
 
 1. `git fetch + reset --hard origin/main` en `~/webnu-deploy/`.
 2. Calcula la lista de **archivos cambiados** entre el SHA anterior y el nuevo (sin transferir el repo completo).
-3. Modo mantenimiento (`artisan down`).
+3. Prepara `vendor/` nuevo en un directorio temporal (`composer install` fuera del sitio en vivo; si falla, aborta sin tocar nada) y entra en mantenimiento (`artisan down --render="errors::503" --retry=60`; si `down` falla y el sitio no queda en mantenimiento, aborta).
 4. Backup MySQL automático en `storage/backups/db-YYYYMMDD-HHMM.sql.gz` e instantánea de `vendor/`, `composer.json` y `composer.lock` en `storage/backups/vendor-<SHA previo>.tar.gz` (se conservan las 3 últimas; las usa `--rollback`).
-5. `rsync` solo de los ficheros cambiados, excluyendo `.env`, `public/img/`, `storage/`, etc.
+5. Escribe `~/.webnu-last-deploy-sha.pending` y hace `rsync` solo de los ficheros cambiados, excluyendo `.env`, `public/img/`, `storage/`, etc.
 6. Limpia `bootstrap/cache/{services,packages,config}.php`.
-7. En PHP 8.x: `composer install --no-dev` (instala/actualiza `vendor/`) y comprueba que el major de Laravel instalado coincide con el de `composer.lock` (vale para Laravel 10, 13…). En stacks legacy, hace `composer dump-autoload`.
+7. En PHP 8.x: intercambia `vendor/` por el preparado (`mv`), `composer dump-autoload --optimize` (classmap con `App\`) y comprueba que el major de Laravel instalado coincide con el de `composer.lock` (vale para Laravel 10, 13…). En stacks legacy, hace `composer dump-autoload`.
 8. `php artisan package:discover`.
 9. `php artisan migrate --force`.
 10. Si el commit incluye `database/seeds/ProductionDemoSeeder.php` ⇒ lo ejecuta.
 11. Si el commit incluye `app/Console/Commands/SeedDemosCommand.php` ⇒ ejecuta `webnu:seed-demos`.
 12. `view:clear` + `config:cache`.
 13. `php artisan webnu:deploy-check` (salud del entorno; errores críticos detienen el deploy).
-14. Guarda el nuevo SHA en `~/.webnu-last-deploy-sha` y registra el deploy en `storage/backups/deploys.log`.
-15. `artisan up`.
+14. Guarda el SHA anterior (`.prev`) y el nuevo (`~/.webnu-last-deploy-sha`), ambos de forma atómica, borra `.pending` y registra el deploy en `storage/backups/deploys.log`.
+15. `artisan up` (siempre, si existe `storage/framework/down`).
 16. Smoke test con `curl` contra `APP_URL` (de `.env`): `/`, `/login`, `/register` y, si defines `SMOKE_MENU_PATH` (p. ej. `/carta/demo`), esa carta. Si alguno no da 200 avisa en rojo y sale con código 3, **sin rollback automático** (`SMOKE_AUTH=usuario:clave` si el sitio tiene contraseña).
 
 **Si algo falla:** antes del `rsync` el sitio vuelve a `up` (no se ha tocado nada). Desde el `rsync` en adelante **el sitio se queda en mantenimiento** y el script imprime cómo recuperarlo (`--rollback` y la ruta del dump de BD); nunca reabre un sitio a medias.
 
-> El script se puede reutilizar para otros entornos con variables de entorno (`SITE_ROOT`, `REPO_ROOT`, `REPO_BRANCH`, `STATE_FILE`, `LOG_FILE`, `BACKUP_DIR`). Ver cabecera de `scripts/deploy.sh` y [STAGING.md](./STAGING.md). Como `rsync` excluye `scripts/`, **`deploy.sh` del servidor no se actualiza solo**: cópialo a mano cuando cambie.
+> `SITE_ROOT` es la carpeta que contiene `scripts/`. Otros entornos se configuran con `$SITE_ROOT/.deploy.env` o variables de entorno (`REPO_ROOT`, `REPO_BRANCH`, `STATE_FILE`, `LOG_FILE`, `BACKUP_DIR`); si el sitio no es producción y `STATE_FILE`/`REPO_ROOT` siguen en los de producción, el script **aborta**. Con TTY pide escribir el host de `APP_URL` (`--yes` lo omite). `DEPLOY_REF=<sha|tag>` despliega un SHA exacto (p. ej. el validado en staging). Ver la cabecera de `scripts/deploy.sh` y [STAGING.md](./STAGING.md).
+>
+> Como `rsync` excluye `scripts/`, **`deploy.sh` del servidor no se actualiza solo**: el script aborta si difiere del del repo; cópialo a mano cuando cambie. La salida de cada ejecución queda en `storage/backups/deploy-<fecha>.out`.
+>
+> **Antes de L13:** `public/index.php` debe servir `storage/framework/maintenance.php` antes de cargar `vendor/` (ya incluido en el repo). Ese cambio tiene que llegar a producción **antes** que L13, en un release aparte, para que el modo mantenimiento no dependa de un `vendor/` a medias.
 
 > Checklist completo de go-live: [PRODUCT-LAUNCH-CHECKLIST.md](./PRODUCT-LAUNCH-CHECKLIST.md).
 
@@ -181,7 +186,7 @@ cd /home/wwwwebnu/public_html/webnu.es
 ./scripts/deploy.sh --rollback
 ```
 
-Esto revierte el código al SHA anterior (si el último deploy falló, al último SHA bueno de `~/.webnu-last-deploy-sha`; si terminó bien, al guardado en `~/.webnu-last-deploy-sha.prev`; o a uno concreto con `ROLLBACK_TO=<sha>`) y **restaura `vendor/`, `composer.json` y `composer.lock`** desde `storage/backups/vendor-<SHA>.tar.gz` (si no existe, hace `composer install --no-dev` con el lock de ese SHA). Después comprueba que el major de Laravel coincide con el lock y regenera cachés. **La BD no se restaura automáticamente** porque las migraciones pueden ser destructivas y no siempre tienen `down()` correcto. Las migraciones nuevas **no se revierten solas**: el código antiguo correrá contra el esquema nuevo. Si el problema fue una migración, restaura el dump manualmente:
+Esto revierte el código al SHA destino (no hay heurística: `ROLLBACK_TO=<sha>` manda; si existe `~/.webnu-last-deploy-sha.rollback-target` por un rollback interrumpido, ese; si existe `.pending` —deploy fallido—, el último SHA bueno de `~/.webnu-last-deploy-sha`; si no, el de `.prev`), mostrando «en vivo X → destino Y» y pidiendo confirmación con TTY. Valida la instantánea antes de tocar nada y **restaura `vendor/`, `composer.json` y `composer.lock`** desde `storage/backups/vendor-<SHA>.tar.gz` (si no existe, hace `composer install --no-dev` con el lock de ese SHA). Después comprueba que el major de Laravel coincide con el lock, regenera cachés (`cache:clear`, `config:cache`), ejecuta `webnu:deploy-check` y el smoke test. **La BD no se restaura automáticamente** porque las migraciones pueden ser destructivas y no siempre tienen `down()` correcto. Las migraciones nuevas **no se revierten solas**: el código antiguo correrá contra el esquema nuevo. Si el problema fue una migración, restaura el dump manualmente:
 
 ```bash
 gunzip -c storage/backups/db-YYYYMMDD-HHMM.sql.gz \
