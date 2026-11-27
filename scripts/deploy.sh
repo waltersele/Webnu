@@ -577,9 +577,12 @@ snapshot_vendor() {
         mv -f "$tmp" "$snap"
         ok "Instantánea de vendor/ en $snap ($(du -h "$snap" | cut -f1))"
     fi
+    # Sin sustitución de procesos <(...): en algunos hosting cPanel (CageFS) /dev/fd no existe.
+    local old_list
+    old_list="$(ls -1t "$BACKUP_DIR"/vendor-*.tar.gz 2>/dev/null | tail -n +"$((VENDOR_SNAPSHOTS_KEEP + 1))")" || old_list=""
     while IFS= read -r old; do
         [[ -n "$old" ]] && rm -f "$old"
-    done < <(ls -1t "$BACKUP_DIR"/vendor-*.tar.gz 2>/dev/null | tail -n +"$((VENDOR_SNAPSHOTS_KEEP + 1))")
+    done <<< "$old_list"
     return 0
 }
 
@@ -828,7 +831,13 @@ if [[ $DRY_RUN -eq 0 ]]; then
 else
     OUT_FILE="/tmp/deploy-dry-$STAMP.out"
 fi
-exec > >(tee -ia "$OUT_FILE") 2>&1
+# Duplicar la salida con una FIFO en vez de `exec > >(tee ...)`: la sustitución de procesos
+# necesita /dev/fd, que no existe en algunos hosting cPanel (CageFS) y abortaba el deploy.
+OUT_FIFO="$(mktemp -u "${TMPDIR:-/tmp}/deploy-out.XXXXXX")" || die "No se pudo crear el nombre de la FIFO de salida."
+mkfifo -m 600 "$OUT_FIFO" || die "No se pudo crear la FIFO de salida ($OUT_FIFO)."
+tee -ia "$OUT_FILE" < "$OUT_FIFO" &
+exec > "$OUT_FIFO" 2>&1
+rm -f "$OUT_FIFO"
 say "Salida guardada en $OUT_FILE"
 
 # Limpia directorios temporales huérfanos de ejecuciones anteriores (PID ya inexistente).
