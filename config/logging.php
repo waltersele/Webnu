@@ -35,6 +35,13 @@ return [
     */
 
     'channels' => [
+        // Auditoría de borrado de cuentas (quién, cuándo y qué). Nunca rotar/borrar sin copia.
+        'account_deletions' => [
+            'driver' => 'single',
+            'path' => storage_path('logs/account-deletions.log'),
+            'level' => 'info',
+        ],
+
         'stack' => [
             'driver' => 'stack',
             'channels' => ['single'],

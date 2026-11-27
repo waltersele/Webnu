@@ -52,4 +52,10 @@ return [
         'STRIPE_DASHBOARD_CUSTOMER_URL',
         'https://dashboard.stripe.com/test/customers'
     ),
+
+    /*
+    | Carpeta donde se guarda la copia (JSON) de cada usuario ANTES de borrarlo.
+    | Está fuera de public/ y git la ignora (storage/app/.gitignore).
+    */
+    'deleted_users_path' => env('DELETED_USERS_PATH', storage_path('app/deleted-users')),
 ];
