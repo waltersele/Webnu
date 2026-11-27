@@ -44,3 +44,4 @@ composer.lock.bak
 !/storage/migration-inventory/.gitkeep
 /bootstrap/cache/*
 !/bootstrap/cache/.gitignore
+.phpunit.cache

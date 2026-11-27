@@ -9,6 +9,8 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Hash;
 use Mockery;
+use PHPUnit\Framework\Attributes\PreserveGlobalState;
+use PHPUnit\Framework\Attributes\RunInSeparateProcess;
 use Tests\TestCase;
 
 class PlatformGeminiSettingsTest extends TestCase
@@ -39,6 +41,12 @@ class PlatformGeminiSettingsTest extends TestCase
             ->assertSee('guardada', false);
     }
 
+    // Mockery 'alias:' exige que la clase no este cargada. Desde Laravel 12 el contenedor
+    // respeta los parametros nullable (?Client $client = null) de GeminiMenuTranslationProvider,
+    // que entonces llama a GeminiMenuScanProvider::httpClientOptions() y carga la clase en
+    // tests anteriores (p. ej. OnboardingTest). Proceso aparte para aislar el alias.
+    #[RunInSeparateProcess]
+    #[PreserveGlobalState(false)]
     public function test_probar_conexion_ok_guarda_api_key_del_formulario(): void
     {
         $admin = $this->superAdmin();
