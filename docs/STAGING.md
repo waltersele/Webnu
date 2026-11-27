@@ -80,6 +80,7 @@ chmod -R 775 $S/storage $S/bootstrap/cache
 # está en ese commit, no lo copies del árbol de trabajo):
 git -C ~/webnu-staging fetch origin
 git -C ~/webnu-staging show <SHA-R1>:scripts/deploy.sh > $S/scripts/deploy.sh && chmod +x $S/scripts/deploy.sh
+# (equivale a hacerlo desde la raíz del sitio: cd $S)
 ```
 
 `$HOME/webnu-staging` es el **clon** (`REPO_ROOT`); el sitio vivo (`SITE_ROOT`) es `~/public_html/staging.webnu.es`. Tras el primer deploy (cuando ya exista `vendor/`), enlaza el almacenamiento público: `php artisan storage:link`.
@@ -140,7 +141,7 @@ Créalo **en el servidor** (`nano ~/public_html/staging.webnu.es/.env`) partiend
 
 ## 8. Desplegar en staging
 
-El script toma como `SITE_ROOT` la carpeta que contiene `scripts/` (si exportas un `SITE_ROOT` distinto, aborta) y **aborta** si el sitio no es producción y `STATE_FILE`/`REPO_ROOT` siguen apuntando a los de producción (y, a la inversa, si el sitio es producción con valores que no son los de producción, salvo `ALLOW_CUSTOM=1`). La configuración de staging va en un fichero del propio sitio, `.deploy.env` (se excluye del rsync). **No se ejecuta con `source`**: solo se leen líneas `CLAVE=valor` con claves permitidas (`REPO_ROOT`, `REPO_BRANCH`, `REPO_REMOTE`, `STATE_FILE`, `LOG_FILE`, `BACKUP_DIR`, `PHP_BIN`, `COMPOSER_BIN`, `SMOKE_MENU_PATH`, `SMOKE_AUTH`); cualquier otra clave se avisa y se ignora. Solo se expanden `$HOME` y `~`; usa comillas simples para valores literales (p. ej. una clave con `$`).
+El script toma como `SITE_ROOT` la carpeta que contiene `scripts/` (si exportas un `SITE_ROOT` distinto, aborta) y **aborta** si el sitio no es producción y `STATE_FILE`/`REPO_ROOT` siguen apuntando a los de producción (y, a la inversa, si el sitio es producción con valores que no son los de producción, salvo `ALLOW_CUSTOM=1`). La configuración de staging va en un fichero del propio sitio, `.deploy.env` (se excluye del rsync). **No se ejecuta con `source`**: solo se leen líneas `CLAVE=valor` con claves permitidas (`REPO_ROOT`, `REPO_BRANCH`, `REPO_REMOTE`, `STATE_FILE`, `LOG_FILE`, `BACKUP_DIR`, `PHP_BIN`, `COMPOSER_BIN`, `SMOKE_MENU_PATH`, `SMOKE_AUTH`); cualquier otra clave se avisa y se ignora. Solo se expanden `$HOME` y `~`; los valores (salvo `SMOKE_AUTH`) solo admiten `A-Za-z0-9 _ . / : @ ~ + = -` (sin espacios, `;`, `$`, comillas…), se recortan los espacios de los extremos y, si una clave se repite, se avisa y vale la última. Usa comillas simples para un `SMOKE_AUTH` con `$`. Un sitio que no es producción tampoco puede apuntar `BACKUP_DIR`, `LOG_FILE`, `STATE_FILE` ni `REPO_ROOT` dentro del sitio de producción.
 
 ```bash
 cat > ~/public_html/staging.webnu.es/.deploy.env <<'EOF'
@@ -162,7 +163,7 @@ env | grep -E 'SITE_ROOT|REPO_|STATE_FILE|DEPLOY_REF|SKIP_'    # no debe salir n
 ### Orden de despliegue (R1 y `release/l13`)
 
 1. **R1** = `deploy/version-agnostic` mergeada en `main`: Laravel 10 + `scripts/deploy.sh` nuevo + `public/index.php` con el chequeo de mantenimiento.
-2. Las ramas L13 se **rebasan sobre R1**, o se crea una rama `release/l13` = R1 + los 3 saltos. Así el `deploy.sh` y el `index.php` de R1 viajan también en L13.
+2. Las ramas L13 se **rebasan sobre R1**, o se crea una rama `release/l13` = R1 + los 3 saltos. Así el `deploy.sh` y el `index.php` de R1 viajan también en L13. Los PRs #2, #3 y #4 (L13) se **rebasan o se retargetean sobre R1 antes de mergearlos en `main`**: así el SHA que acaba en `main` y en producción es exactamente el que se validó en staging como `release/l13`, sin commits de merge ni cambios intermedios.
 3. En staging, línea base y después L13, siempre por SHA exacto:
 
 ```bash

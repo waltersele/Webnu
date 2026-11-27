@@ -69,6 +69,19 @@ die()  { printf "${C_RED}✗${C_RESET} %s\n" "$*" >&2; exit 1; }
 
 canon() { ( cd "$1" 2>/dev/null && pwd -P ) || echo "$1"; }
 
+# Ruta canónica de un fichero/directorio aunque no exista: resuelve //, /./, .. y symlinks.
+canon_path() {
+    local p="$1" r
+    if r="$(readlink -m -- "$p" 2>/dev/null)" && [[ -n "$r" ]]; then
+        echo "$r"
+    else
+        echo "$(canon "$(dirname "$p")")/$(basename "$p")"
+    fi
+}
+
+# return 0 si $1 es $2 o está dentro de $2 (ambas ya canónicas).
+path_within() { [[ "$1" == "$2" || "$1" == "$2"/* ]]; }
+
 # ---------- Flags ----------------------------------------------------------- #
 DRY_RUN=0
 ROLLBACK=0
@@ -128,8 +141,15 @@ SITE_ROOT="$SITE_FROM_SCRIPT"
 # .deploy.env: NO se ejecuta con source. Solo líneas CLAVE=valor con claves de la lista blanca.
 # $HOME y ~ se expanden; cualquier otro $ o ` se rechaza (usa comillas simples para valores literales).
 DEPLOY_ENV_ALLOWED=" REPO_ROOT REPO_BRANCH REPO_REMOTE STATE_FILE LOG_FILE BACKUP_DIR PHP_BIN COMPOSER_BIN SMOKE_MENU_PATH SMOKE_AUTH "
+# Caracteres admitidos en los valores (salvo SMOKE_AUTH): sin espacios, ni ; | & $ ` comillas, etc.
+DEPLOY_ENV_SAFE_RE='^[A-Za-z0-9_./:@~+=-]*$'
 load_deploy_env() {
-    local file="$1" line key val n=0 literal
+    local file="$1" line key val n=0 literal k preset=" "
+    declare -A seen=()
+    # Claves que ya vienen del entorno: el entorno manda sobre el fichero.
+    for k in $DEPLOY_ENV_ALLOWED; do
+        [[ -n "${!k+x}" ]] && preset+="$k "
+    done
     while IFS= read -r line || [[ -n "$line" ]]; do
         n=$((n + 1))
         line="${line%$'\r'}"
@@ -144,6 +164,9 @@ load_deploy_env() {
             warn ".deploy.env:$n clave no permitida '$key': ignorada (solo ${DEPLOY_ENV_ALLOWED})"
             continue
         fi
+        # Espacios iniciales/finales fuera de comillas.
+        val="${val#"${val%%[![:space:]]*}"}"
+        val="${val%"${val##*[![:space:]]}"}"
         literal=0
         if [[ "$val" =~ ^\'(.*)\'$ ]]; then
             val="${BASH_REMATCH[1]}"; literal=1
@@ -154,13 +177,20 @@ load_deploy_env() {
             val="${val//\$\{HOME\}/$HOME}"
             val="${val//\$HOME/$HOME}"
             [[ "$val" == "~/"* ]] && val="$HOME/${val:2}"
-            if [[ "$val" == *'$'* || "$val" == *'`'* ]]; then
-                warn ".deploy.env:$n '$key' contiene una expansión no permitida: ignorada"
-                continue
-            fi
         fi
-        # El entorno manda sobre el fichero.
-        if [[ -n "${!key+x}" ]]; then continue; fi
+        if [[ "$key" != "SMOKE_AUTH" && ! "$val" =~ $DEPLOY_ENV_SAFE_RE ]]; then
+            warn ".deploy.env:$n '$key' tiene caracteres no permitidos (solo A-Za-z0-9 _ . / : @ ~ + = -; sin espacios ni ; \$ \` comillas): ignorada"
+            continue
+        fi
+        if [[ "$key" == "SMOKE_AUTH" && $literal -eq 0 && ( "$val" == *'$'* || "$val" == *'`'* ) ]]; then
+            warn ".deploy.env:$n 'SMOKE_AUTH' con \$ o \` debe ir entre comillas simples: ignorada"
+            continue
+        fi
+        if [[ -n "${seen[$key]:-}" ]]; then
+            warn ".deploy.env:$n clave duplicada '$key' (antes en la línea ${seen[$key]}): se aplica la última"
+        fi
+        seen[$key]="$n"
+        [[ "$preset" == *" $key "* ]] && continue
         printf -v "$key" '%s' "$val"
     done < "$file"
 }
@@ -186,20 +216,34 @@ ROLLBACK_TO="${ROLLBACK_TO:-}"
 ALLOW_CUSTOM="${ALLOW_CUSTOM:-0}"
 VENDOR_SNAPSHOTS_KEEP=3                  # instantáneas vendor-<SHA>.tar.gz que se conservan
 
-# Freno anti-accidentes en AMBOS sentidos.
+# Freno anti-accidentes en AMBOS sentidos (comparando rutas canónicas).
+PROD_SITE_CANON="$(canon "$PROD_SITE_ROOT")"
+PROD_REPO_CANON="$(canon_path "$PROD_REPO_ROOT")"
+PROD_STATE_CANON="$(canon_path "$PROD_STATE_FILE")"
+STATE_CANON="$(canon_path "$STATE_FILE")"
+REPO_CANON="$(canon_path "$REPO_ROOT")"
+BACKUP_CANON="$(canon_path "$BACKUP_DIR")"
+LOG_CANON="$(canon_path "$LOG_FILE")"
 IS_PROD_SITE=0
-[[ "$SITE_ROOT" == "$(canon "$PROD_SITE_ROOT")" ]] && IS_PROD_SITE=1
+[[ "$SITE_ROOT" == "$PROD_SITE_CANON" ]] && IS_PROD_SITE=1
 if [[ $IS_PROD_SITE -eq 0 ]]; then
-    # Un sitio que no es producción no puede usar el estado/repo de producción.
-    if [[ "$STATE_FILE" == "$PROD_STATE_FILE" || "$(canon "$REPO_ROOT")" == "$(canon "$PROD_REPO_ROOT")" ]]; then
+    # Un sitio que no es producción no puede usar estado, repo ni rutas de producción.
+    if [[ "$STATE_CANON" == "$PROD_STATE_CANON" || "$REPO_CANON" == "$PROD_REPO_CANON" ]]; then
         die "SITE_ROOT=$SITE_ROOT no es producción ($PROD_SITE_ROOT) pero STATE_FILE o REPO_ROOT apuntan a los de PRODUCCIÓN. Crea $SITE_ROOT/.deploy.env con REPO_ROOT, REPO_BRANCH y STATE_FILE propios (ver docs/STAGING.md). Aborto sin tocar nada."
     fi
+    if path_within "$BACKUP_CANON" "$PROD_SITE_CANON" || path_within "$LOG_CANON" "$PROD_SITE_CANON" \
+       || path_within "$STATE_CANON" "$PROD_SITE_CANON" || path_within "$REPO_CANON" "$PROD_SITE_CANON"; then
+        die "SITE_ROOT=$SITE_ROOT no es producción pero BACKUP_DIR ($BACKUP_CANON), LOG_FILE ($LOG_CANON), STATE_FILE o REPO_ROOT están dentro del sitio de PRODUCCIÓN ($PROD_SITE_CANON). Aborto sin tocar nada."
+    fi
 else
-    # Producción solo con REPO_ROOT, STATE_FILE y rama main (o un DEPLOY_REF) de producción.
-    if [[ "$(canon "$REPO_ROOT")" != "$(canon "$PROD_REPO_ROOT")" || "$STATE_FILE" != "$PROD_STATE_FILE" \
+    # Producción solo con REPO_ROOT, STATE_FILE, BACKUP_DIR, LOG_FILE, remoto origin y rama main (o un DEPLOY_REF).
+    if [[ "$REPO_CANON" != "$PROD_REPO_CANON" || "$STATE_CANON" != "$PROD_STATE_CANON" \
+          || "$BACKUP_CANON" != "$(canon_path "$SITE_ROOT/storage/backups")" \
+          || "$LOG_CANON" != "$(canon_path "$SITE_ROOT/storage/backups/deploys.log")" \
+          || "$REPO_REMOTE" != "origin" \
           || ( -z "$DEPLOY_REF" && "$REPO_BRANCH" != "main" ) ]]; then
         if [[ "$ALLOW_CUSTOM" != "1" ]]; then
-            die "SITE_ROOT es PRODUCCIÓN pero REPO_ROOT=$REPO_ROOT, STATE_FILE=$STATE_FILE o REPO_BRANCH=$REPO_BRANCH (DEPLOY_REF='${DEPLOY_REF}') no son los de producción (REPO_ROOT=$PROD_REPO_ROOT, STATE_FILE=$PROD_STATE_FILE, rama main o DEPLOY_REF). ¿Variables de staging en el entorno? Si es intencional: ALLOW_CUSTOM=1. Aborto sin tocar nada."
+            die "SITE_ROOT es PRODUCCIÓN pero REPO_ROOT=$REPO_ROOT, STATE_FILE=$STATE_FILE, BACKUP_DIR=$BACKUP_DIR, LOG_FILE=$LOG_FILE, REPO_REMOTE=$REPO_REMOTE o REPO_BRANCH=$REPO_BRANCH (DEPLOY_REF='${DEPLOY_REF}') no son los de producción (REPO_ROOT=$PROD_REPO_ROOT, STATE_FILE=$PROD_STATE_FILE, BACKUP_DIR/LOG_FILE por defecto bajo el sitio, remoto origin, rama main o DEPLOY_REF). ¿Variables de staging en el entorno? Si es intencional: ALLOW_CUSTOM=1. Aborto sin tocar nada."
         fi
         warn "ALLOW_CUSTOM=1: configuración no estándar en PRODUCCIÓN."
     fi
@@ -244,11 +288,13 @@ dry_say() {
     fi
 }
 
+# Ejecuta un comando directamente (sin eval, args entre comillas). En dry-run solo lo imprime.
 run() {
     if [[ $DRY_RUN -eq 1 ]]; then
-        dry_say "$*"
+        local out; out="$(printf '%q ' "$@")"
+        dry_say "${out% }"
     else
-        eval "$@"
+        "$@"
     fi
 }
 
@@ -260,7 +306,7 @@ log_line() {
 }
 
 artisan() {
-    run "$PHP_BIN $SITE_ROOT/artisan $*"
+    run "$PHP_BIN" "$SITE_ROOT/artisan" "$@"
 }
 
 # Escritura atómica (tmp + mv) de un valor en un fichero de estado.
@@ -873,7 +919,7 @@ if [[ $ROLLBACK -eq 1 ]]; then
         DEPLOY_TOUCHED=1
         write_atomic "$STATE_FILE.rollback-target" "$PREV"
     fi
-    run "cd $REPO_ROOT && git reset --hard $PREV"
+    run git -C "$REPO_ROOT" reset --hard "$PREV"
     if [[ $DRY_RUN -eq 1 ]]; then
         RB_SRC="$(mktemp -d)"; TMP_PATHS+=("$RB_SRC")
         git archive "$PREV" | tar -x -C "$RB_SRC"
@@ -881,7 +927,7 @@ if [[ $ROLLBACK -eq 1 ]]; then
         RB_SRC="$REPO_ROOT"
     fi
     do_rsync "$RB_SRC/" "$SITE_ROOT/"
-    run "rm -f $SITE_ROOT/bootstrap/cache/services.php $SITE_ROOT/bootstrap/cache/packages.php $SITE_ROOT/bootstrap/cache/config.php"
+    run rm -f "$SITE_ROOT/bootstrap/cache/services.php" "$SITE_ROOT/bootstrap/cache/packages.php" "$SITE_ROOT/bootstrap/cache/config.php"
 
     if [[ $DRY_RUN -eq 0 ]]; then
         swap_vendor "$STAGE"
@@ -895,12 +941,12 @@ if [[ $ROLLBACK -eq 1 ]]; then
         dry_say "intercambiar vendor/ (mv), dump-autoload si se reinstaló, comprobar versión"
     fi
 
-    artisan "package:discover"
-    artisan "view:clear"
-    artisan "cache:clear"
-    artisan "config:cache"
+    artisan package:discover
+    artisan view:clear
+    artisan cache:clear
+    artisan config:cache
     say "Comprobando salud tras el rollback"
-    artisan "webnu:deploy-check"
+    artisan webnu:deploy-check
 
     if [[ $DRY_RUN -eq 0 ]]; then
         rm -f "$STATE_FILE.prev" "$STATE_FILE.pending"
@@ -1136,7 +1182,7 @@ COMMIT_MSG="$(git log -1 --pretty=%B "$NEW_SHA" 2>/dev/null || echo "")"
 
 # ---------- vendor, autoload y caches -------------------------------------- #
 say "Limpiando bootstrap cache"
-run "rm -f $SITE_ROOT/bootstrap/cache/services.php $SITE_ROOT/bootstrap/cache/packages.php $SITE_ROOT/bootstrap/cache/config.php"
+run rm -f "$SITE_ROOT/bootstrap/cache/services.php" "$SITE_ROOT/bootstrap/cache/packages.php" "$SITE_ROOT/bootstrap/cache/config.php"
 
 if should_sync_vendor; then
     if [[ $DRY_RUN -eq 1 ]]; then
@@ -1156,12 +1202,12 @@ else
 fi
 
 say "Re-descubriendo paquetes"
-artisan "package:discover"
+artisan package:discover
 
 # ---------- Migraciones ---------------------------------------------------- #
 if [[ $SKIP_MIGRATE -eq 0 ]]; then
     say "Aplicando migraciones"
-    artisan "migrate --force"
+    artisan migrate --force
 else
     warn "Migraciones omitidas (--skip-migrate)"
 fi
@@ -1171,7 +1217,7 @@ if [[ -n "$NEW_FILES_LIST" && -f "$NEW_FILES_LIST" ]]; then
     for seeder in "${PROD_SAFE_SEEDERS[@]}"; do
         if grep -qE "database/seeds?/${seeder}\.php$" "$NEW_FILES_LIST"; then
             say "Seeder nuevo detectado: $seeder"
-            artisan "db:seed --class=$seeder --force"
+            artisan db:seed --class="$seeder" --force
         fi
     done
 fi
@@ -1180,18 +1226,18 @@ fi
 if [[ -n "$NEW_FILES_LIST" && -f "$NEW_FILES_LIST" ]]; then
     if grep -qE "app/Console/Commands/SeedDemosCommand\.php$" "$NEW_FILES_LIST"; then
         say "Comando webnu:seed-demos detectado, asegurando cartas demo"
-        artisan "webnu:seed-demos || true"
+        artisan webnu:seed-demos || true
     fi
 fi
 
 # ---------- Caches Laravel ------------------------------------------------- #
 say "Refrescando cachés"
-artisan "view:clear"
-artisan "config:cache"
+artisan view:clear
+artisan config:cache
 # route:cache se omite a propósito: si hay closures en routes/web.php fallaría.
 
 say "Comprobando salud del despliegue"
-artisan "webnu:deploy-check"
+artisan webnu:deploy-check
 
 # ---------- Cierre --------------------------------------------------------- #
 if [[ $DRY_RUN -eq 0 ]]; then
