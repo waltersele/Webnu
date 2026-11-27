@@ -35,6 +35,12 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
+        // El modelo de usuario es App\User (no App\Models\User, el valor por defecto de Cashier).
+        // Sin esto, Cashier::findBillable() (webhooks de Stripe) y otras utilidades fallan.
+        if (method_exists(Cashier::class, 'useCustomerModel')) {
+            Cashier::useCustomerModel(\App\User::class);
+        }
+
         if (method_exists(Cashier::class, 'useSubscriptionModel')) {
             Cashier::useSubscriptionModel(\App\Subscription::class);
         }
