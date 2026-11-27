@@ -11,6 +11,21 @@ define('LARAVEL_START', microtime(true));
 
 /*
 |--------------------------------------------------------------------------
+| Check If The Application Is Under Maintenance
+|--------------------------------------------------------------------------
+|
+| Si `artisan down --render=...` dejó la página pre-renderizada, se sirve
+| ANTES de cargar vendor/. Así el modo mantenimiento funciona aunque vendor/
+| esté a medias durante un despliegue o un rollback.
+|
+*/
+
+if (file_exists($maintenance = __DIR__.'/../storage/framework/maintenance.php')) {
+    require $maintenance;
+}
+
+/*
+|--------------------------------------------------------------------------
 | Register The Auto Loader
 |--------------------------------------------------------------------------
 |
